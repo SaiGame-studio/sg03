@@ -1,0 +1,7 @@
+/* Import shared design tokens from SaiGame */
+@import url("../../../SaiGame/UI/Common/Variables.uss");
+
+/* Login-specific: fixed card width */
+.card {
+    width: 380px;
+}
