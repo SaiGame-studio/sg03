@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <!-- Main Quest — "Coming Soon" content, included into QuestPanel's QuestContentArea -->
+    <ui:VisualElement class="quest-coming-soon">
+        <ui:Label text="⚔" class="quest-coming-soon__icon" />
+        <ui:Label text="Main Quest" class="quest-coming-soon__title" />
+        <ui:Label text="COMING SOON" class="quest-coming-soon__badge" />
+        <ui:Label text="The main story quests are currently in development.&#10;Prepare yourself for the adventure ahead!" class="quest-coming-soon__desc" />
+    </ui:VisualElement>
+
+</ui:UXML>

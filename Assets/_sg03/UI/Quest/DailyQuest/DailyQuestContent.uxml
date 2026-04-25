@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <!-- Daily Quest — "Coming Soon" content, included into QuestPanel's QuestContentArea -->
+    <ui:VisualElement class="quest-coming-soon">
+        <ui:Label text="📅" class="quest-coming-soon__icon" />
+        <ui:Label text="Daily Quest" class="quest-coming-soon__title" />
+        <ui:Label text="COMING SOON" class="quest-coming-soon__badge" />
+        <ui:Label text="Daily challenges and rewards are being prepared.&#10;Check back later for exciting quests!" class="quest-coming-soon__desc" />
+    </ui:VisualElement>
+
+</ui:UXML>

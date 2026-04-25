@@ -1,0 +1,116 @@
+@import url("../../../SaiGame/UI/Common/Variables.uss");
+
+/* ============================================================
+   Quest panel root — fills ContentArea, row layout
+   ============================================================ */
+.quest-panel-root {
+    flex: 1;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================================
+   Left sidebar navigation
+   ============================================================ */
+.quest-sidebar {
+    width: 200px;
+    min-width: 200px;
+    background-color: rgba(14, 18, 32, 1);
+    border-right-width: 1px;
+    border-color: rgba(80, 100, 160, 0.25);
+    flex-direction: column;
+    padding: 24px 12px;
+}
+
+.quest-sidebar__title {
+    font-size: 15px;
+    color: rgb(200, 210, 255);
+    -unity-font-style: bold;
+    margin-bottom: 16px;
+    padding: 0 8px;
+    letter-spacing: 1px;
+}
+
+.quest-nav-btn {
+    padding: 12px 16px;
+    border-width: 0;
+    border-radius: 8px;
+    background-color: transparent;
+    color: rgb(150, 160, 200);
+    font-size: 13px;
+    margin-bottom: 4px;
+    -unity-text-align: middle-left;
+    transition-duration: 0.12s;
+}
+
+.quest-nav-btn:hover {
+    background-color: rgba(80, 100, 160, 0.25);
+    color: rgb(200, 215, 255);
+}
+
+.quest-nav-btn--active {
+    background-color: rgba(60, 110, 230, 0.25);
+    color: rgb(110, 160, 255);
+    -unity-font-style: bold;
+}
+
+/* ============================================================
+   Main content area
+   ============================================================ */
+.quest-content-area {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+/* ============================================================
+   Coming-Soon card (shared by DailyQuest & MainQuest content)
+   ============================================================ */
+.quest-coming-soon {
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(22, 26, 40, 1);
+    border-radius: 16px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.35);
+    padding: 48px 56px;
+}
+
+.quest-coming-soon__icon {
+    font-size: 48px;
+    -unity-text-align: middle-center;
+    margin-bottom: 16px;
+}
+
+.quest-coming-soon__title {
+    font-size: 22px;
+    color: rgb(220, 228, 255);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+}
+
+.quest-coming-soon__badge {
+    font-size: 13px;
+    color: rgb(110, 160, 255);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    background-color: rgba(60, 110, 230, 0.2);
+    border-radius: 20px;
+    border-width: 1px;
+    border-color: rgba(80, 130, 255, 0.45);
+    padding: 4px 18px;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.quest-coming-soon__desc {
+    font-size: 13px;
+    color: rgb(140, 155, 195);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    max-width: 340px;
+}
