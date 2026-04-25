@@ -8,51 +8,125 @@
     flex-direction: row;
     width: 100%;
     height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 
 /* ============================================================
    Left sidebar navigation
    ============================================================ */
 .quest-sidebar {
-    width: 200px;
-    min-width: 200px;
-    background-color: rgba(14, 18, 32, 1);
+    width: 220px;
+    min-width: 220px;
+    background-color: rgba(12, 16, 28, 1);
     border-right-width: 1px;
-    border-color: rgba(80, 100, 160, 0.25);
+    border-color: rgba(80, 100, 160, 0.2);
     flex-direction: column;
-    padding: 24px 12px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 0;
+    padding-right: 0;
 }
 
-.quest-sidebar__title {
-    font-size: 15px;
-    color: rgb(200, 210, 255);
+/* ---- Section header ---- */
+.quest-sidebar__header {
+    flex-direction: row;
+    align-items: center;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 20px;
+    padding-right: 16px;
+    margin-bottom: 8px;
+}
+
+.quest-sidebar__header-icon {
+    font-size: 16px;
+    color: rgb(110, 160, 255);
+    margin-right: 10px;
+    -unity-text-align: middle-center;
+    width: 20px;
+}
+
+.quest-sidebar__header-label {
+    font-size: 14px;
+    color: rgb(180, 195, 240);
     -unity-font-style: bold;
-    margin-bottom: 16px;
-    padding: 0 8px;
     letter-spacing: 1px;
+    -unity-text-align: middle-left;
 }
 
+/* ---- Thin separator under the header ---- */
+.quest-sidebar__divider {
+    height: 1px;
+    background-color: rgba(80, 100, 160, 0.2);
+    margin-top: 4px;
+    margin-bottom: 8px;
+    margin-left: 16px;
+    margin-right: 16px;
+}
+
+/* ---- Nav items ---- */
 .quest-nav-btn {
-    padding: 12px 16px;
-    border-width: 0;
-    border-radius: 8px;
+    flex-direction: row;
+    align-items: center;
+    padding-top: 11px;
+    padding-bottom: 11px;
+    padding-left: 20px;
+    padding-right: 16px;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-right-width: 0;
+    border-left-width: 3px;
+    border-left-color: transparent;
+    border-radius: 0;
     background-color: transparent;
     color: rgb(150, 160, 200);
     font-size: 13px;
-    margin-bottom: 4px;
-    -unity-text-align: middle-left;
-    transition-duration: 0.12s;
+    margin-bottom: 2px;
+    transition-duration: 0.1s;
 }
 
 .quest-nav-btn:hover {
-    background-color: rgba(80, 100, 160, 0.25);
-    color: rgb(200, 215, 255);
+    background-color: rgba(80, 100, 160, 0.18);
+    color: rgb(210, 220, 255);
+    border-left-color: rgba(80, 100, 160, 0.5);
 }
 
+.quest-nav-btn:hover .quest-nav-btn__icon,
+.quest-nav-btn:hover .quest-nav-btn__label {
+    color: rgb(210, 220, 255);
+}
+
+/* Active: accent left border + tinted background */
 .quest-nav-btn--active {
-    background-color: rgba(60, 110, 230, 0.25);
-    color: rgb(110, 160, 255);
+    background-color: rgba(60, 110, 230, 0.18);
+    color: rgb(130, 175, 255);
     -unity-font-style: bold;
+    border-left-color: rgb(90, 150, 255);
+}
+
+.quest-nav-btn--active .quest-nav-btn__icon,
+.quest-nav-btn--active .quest-nav-btn__label {
+    color: rgb(130, 175, 255);
+    -unity-font-style: bold;
+}
+
+.quest-nav-btn__icon {
+    font-size: 15px;
+    -unity-text-align: middle-center;
+    width: 22px;
+    margin-right: 10px;
+    color: rgb(150, 160, 200);
+}
+
+.quest-nav-btn__label {
+    -unity-text-align: middle-left;
+    color: rgb(150, 160, 200);
+    font-size: 13px;
+    flex: 1;
 }
 
 /* ============================================================

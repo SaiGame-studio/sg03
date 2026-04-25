@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using SaiGame.Services;
 using SaiGame.UI;
+using SG03.UI.Components;
 
 namespace SG03.UI
 {
@@ -115,12 +116,9 @@ namespace SG03.UI
         private Button questTab;
         private Button profileTab;
 
-        // Quest submenu
-        private VisualElement questTabWrapper;
-        private VisualElement questSubmenu;
-        private Button dailyQuestMenuBtn;
-        private Button mainQuestMenuBtn;
-        private IVisualElementScheduledItem hideSubmenuSchedule;
+        // Quest popup menu
+        private PopupMenu questMenu;
+        private QuestType? activeQuestType;
 
         // Bottom buttons
         private Button btnPlay;
@@ -164,27 +162,16 @@ namespace SG03.UI
             this.shopTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.shopTab));
             this.profileTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.profileTab));
 
-            // Quest tab wrapper — hover shows submenu, click toggles it
-            this.questTabWrapper   = root.Q("QuestTabWrapper");
-            this.questSubmenu      = root.Q("QuestSubmenu");
-            this.dailyQuestMenuBtn = root.Q<Button>("DailyQuestMenuBtn");
-            this.mainQuestMenuBtn  = root.Q<Button>("MainQuestMenuBtn");
+            // Quest tab — PopupMenu handles all hover/click/close logic
+            this.questMenu = new PopupMenu(root);
 
             if (this.questTab != null)
             {
-                this.questTab.RegisterCallback<MouseEnterEvent>(_ => this.ShowQuestSubmenu());
-                this.questTab.RegisterCallback<MouseLeaveEvent>(_ => this.ScheduleHideSubmenu());
-                this.questTab.RegisterCallback<ClickEvent>(_ => this.ToggleQuestSubmenu());
+                this.questTab.RegisterCallback<MouseEnterEvent>(_ =>
+                    this.questMenu.Show(this.questTab, this.GetQuestMenuItems()));
+                this.questTab.RegisterCallback<ClickEvent>(_ =>
+                    this.questMenu.Toggle(this.questTab, this.GetQuestMenuItems()));
             }
-
-            if (this.questSubmenu != null)
-            {
-                this.questSubmenu.RegisterCallback<MouseEnterEvent>(_ => this.CancelScheduledHide());
-                this.questSubmenu.RegisterCallback<MouseLeaveEvent>(_ => this.HideQuestSubmenu());
-            }
-
-            this.dailyQuestMenuBtn?.RegisterCallback<ClickEvent>(_ => this.OnQuestMenuItemClicked(QuestType.Daily));
-            this.mainQuestMenuBtn?.RegisterCallback<ClickEvent>(_ =>  this.OnQuestMenuItemClicked(QuestType.Main));
 
             // Bottom buttons
             this.btnPlay      = root.Q<Button>("BtnPlay");
@@ -235,65 +222,34 @@ namespace SG03.UI
         }
 
         // ------------------------------------------------------------------
-        //  Quest submenu show / hide
+        //  Quest popup menu items
         // ------------------------------------------------------------------
-        private void ShowQuestSubmenu()
+
+        /// <summary>
+        /// Build the quest menu item list with up-to-date IsActive states.
+        /// Called every time Show/Toggle is invoked so the active highlight
+        /// always reflects the currently-loaded quest type.
+        /// </summary>
+        private PopupMenuItem[] GetQuestMenuItems() => new[]
         {
-            this.CancelScheduledHide();
-            this.questSubmenu?.RemoveFromClassList("quest-submenu--hidden");
-        }
+            new PopupMenuItem
+            {
+                Label    = "Daily Quest",
+                IsActive = this.activeQuestType == QuestType.Daily,
+                OnClick  = () => this.OnQuestMenuItemClicked(QuestType.Daily),
+            },
+            new PopupMenuItem
+            {
+                Label    = "Main Quest",
+                IsActive = this.activeQuestType == QuestType.Main,
+                OnClick  = () => this.OnQuestMenuItemClicked(QuestType.Main),
+            },
+        };
 
-        private void HideQuestSubmenu()
-        {
-            this.CancelScheduledHide();
-            this.questSubmenu?.AddToClassList("quest-submenu--hidden");
-        }
-
-        private void ToggleQuestSubmenu()
-        {
-            if (this.questSubmenu == null) return;
-
-            if (this.questSubmenu.ClassListContains("quest-submenu--hidden"))
-                this.ShowQuestSubmenu();
-            else
-                this.HideQuestSubmenu();
-        }
-
-        // Delay hiding to allow mouse to travel from the tab button into the submenu.
-        private void ScheduleHideSubmenu()
-        {
-            this.CancelScheduledHide();
-
-            if (this.questSubmenu == null) return;
-
-            this.hideSubmenuSchedule = this.questSubmenu.schedule
-                .Execute(this.HideQuestSubmenu);
-            this.hideSubmenuSchedule.ExecuteLater(80);
-        }
-
-        private void CancelScheduledHide()
-        {
-            this.hideSubmenuSchedule?.Pause();
-            this.hideSubmenuSchedule = null;
-        }
-
-        // ------------------------------------------------------------------
-        //  Quest submenu item clicked → load quest panel
-        // ------------------------------------------------------------------
         private void OnQuestMenuItemClicked(QuestType type)
         {
-            this.HideQuestSubmenu();
+            this.activeQuestType = type;
             this.OnTopTabClicked(this.questTab);
-
-            // Update submenu item active highlight
-            this.dailyQuestMenuBtn?.RemoveFromClassList("quest-submenu__item--active");
-            this.mainQuestMenuBtn?.RemoveFromClassList("quest-submenu__item--active");
-
-            if (type == QuestType.Daily)
-                this.dailyQuestMenuBtn?.AddToClassList("quest-submenu__item--active");
-            else
-                this.mainQuestMenuBtn?.AddToClassList("quest-submenu__item--active");
-
             this.LoadQuestPanel(type);
         }
 
@@ -303,6 +259,14 @@ namespace SG03.UI
 
             this.contentArea.Clear();
             TemplateContainer panelRoot = this.questPanelAsset.Instantiate();
+
+            // TemplateContainer must stretch to fill ContentArea entirely.
+            panelRoot.style.flexGrow   = 1;
+            panelRoot.style.flexShrink = 1;
+            panelRoot.style.width      = new StyleLength(new Length(100, LengthUnit.Percent));
+            panelRoot.style.height     = new StyleLength(new Length(100, LengthUnit.Percent));
+            panelRoot.style.alignSelf  = Align.Stretch;
+
             this.contentArea.Add(panelRoot);
 
             var questPanel = new QuestPanelUI(

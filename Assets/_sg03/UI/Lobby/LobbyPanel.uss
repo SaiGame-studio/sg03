@@ -73,58 +73,6 @@
 }
 
 /* ============================================================
-   Quest tab wrapper & dropdown submenu
-   ============================================================ */
-
-/* Wrapper keeps overflow visible so the submenu can spill below */
-.lobby-tab-wrapper {
-    position: relative;
-    overflow: visible;
-    align-items: flex-start;
-    flex-direction: column;
-}
-
-.quest-submenu {
-    position: absolute;
-    top: 40px;
-    left: 0;
-    min-width: 160px;
-    background-color: rgba(16, 20, 36, 1);
-    border-width: 1px;
-    border-color: rgba(80, 100, 160, 0.45);
-    border-radius: 0 0 10px 10px;
-    border-top-width: 0;
-    flex-direction: column;
-    padding: 6px 0;
-}
-
-.quest-submenu--hidden {
-    display: none;
-}
-
-.quest-submenu__item {
-    padding: 10px 18px;
-    border-width: 0;
-    border-radius: 0;
-    background-color: transparent;
-    color: rgb(150, 160, 200);
-    font-size: 13px;
-    -unity-text-align: middle-left;
-    transition-duration: 0.12s;
-}
-
-.quest-submenu__item:hover {
-    background-color: rgba(80, 100, 160, 0.25);
-    color: rgb(200, 215, 255);
-}
-
-.quest-submenu__item--active {
-    background-color: rgba(60, 110, 230, 0.2);
-    color: rgb(110, 160, 255);
-    -unity-font-style: bold;
-}
-
-/* ============================================================
    Content area
    ============================================================ */
 .lobby-content {

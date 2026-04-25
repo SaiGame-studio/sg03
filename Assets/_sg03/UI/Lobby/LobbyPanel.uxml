@@ -5,6 +5,7 @@
          editor-extension-mode="False">
 
     <Style src="LobbyPanel.uss" />
+    <Style src="../Components/PopupMenu.uss" />
 
     <!-- Full-screen root -->
     <ui:VisualElement name="LobbyRoot" class="lobby-root">
@@ -15,16 +16,7 @@
             <ui:VisualElement name="TopMenuTabs" class="lobby-top-menu__tabs">
                 <ui:Button name="HomeTab"    text="Home"    class="lobby-tab lobby-tab--active" />
                 <ui:Button name="ShopTab"    text="Shop"    class="lobby-tab" />
-
-                <!-- Quest tab with hover/click submenu -->
-                <ui:VisualElement name="QuestTabWrapper" class="lobby-tab-wrapper">
-                    <ui:Button name="QuestTab" text="Quest" class="lobby-tab" />
-                    <ui:VisualElement name="QuestSubmenu" class="quest-submenu quest-submenu--hidden">
-                        <ui:Button name="DailyQuestMenuBtn" text="Daily Quest" class="quest-submenu__item" />
-                        <ui:Button name="MainQuestMenuBtn"  text="Main Quest"  class="quest-submenu__item" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
+                <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab" />
                 <ui:Button name="ProfileTab" text="Profile" class="lobby-tab" />
             </ui:VisualElement>
             <ui:Label name="PlayerNameLabel" text="" class="lobby-top-menu__player-name" />
