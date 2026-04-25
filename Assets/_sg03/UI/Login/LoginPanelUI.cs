@@ -16,6 +16,7 @@ namespace SG03.UI
         [SerializeField] private SaiAuth saiAuth;
 
         [Header("Settings")]
+        [SerializeField] private string nextScenes = "1-lobby";
         [SerializeField] private bool autoLoadCredentials = true;
 
         private TextField usernameField;
@@ -106,7 +107,7 @@ namespace SG03.UI
 
         private void HandleLoginSuccess(LoginResponse response)
         {
-            SceneManager.LoadScene("1-desk-mana");
+            SceneManager.LoadScene(this.nextScenes);
         }
 
         private void HandleLoginFailure(string error)
