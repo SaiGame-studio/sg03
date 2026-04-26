@@ -136,6 +136,31 @@
     margin-bottom: 6px;
 }
 
+/* Spacer that pushes bottom content to the bottom of the quest card */
+.dq-quest-item__spacer {
+    flex: 1;
+}
+
+/* Bottom section: claim button + status label, aligned to bottom */
+.dq-quest-item__bottom {
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 4px;
+}
+
+.dq-quest-item__claim-btn {
+    font-size: 10px;
+    color: rgb(20, 20, 30);
+    background-color: rgb(255, 210, 60);
+    border-color: rgba(220, 170, 20, 0.9);
+    border-width: 1px;
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-bottom: 4px;
+    -unity-font-style: bold;
+    cursor: link;
+}
+
 .dq-quest-item__name {
     font-size: 11px;
     color: rgb(200, 215, 255);

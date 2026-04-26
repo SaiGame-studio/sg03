@@ -15,6 +15,7 @@ namespace SG03.UI
         private readonly VisualElement weekGrid;
         private readonly VisualElement emptyState;
         private QuestList[] lists;
+        private bool hasCheckedOnOpen;
 
         // Vietnamese weekday names (Monday=2 … Saturday=7, Sunday=CN)
         private static readonly string[] DayNames = { "CN", "2", "3", "4", "5", "6", "7" };
@@ -110,6 +111,47 @@ namespace SG03.UI
                 byDate.TryGetValue(key, out List<DailyQuestEntryData> entries);
                 this.weekGrid.Add(this.BuildDayCard(day, i == 0, entries));
             }
+
+            if (!this.hasCheckedOnOpen)
+            {
+                this.hasCheckedOnOpen = true;
+                this.CheckInProgressTodayQuests();
+            }
+        }
+
+        // Calls CheckQuest for every today in_progress quest once per UI open.
+        // On success, refreshes the owning QuestList so status is up to date.
+        private void CheckInProgressTodayQuests()
+        {
+            if (SaiServer.Instance?.QuestProgressor == null) return;
+
+            string todayKey = DateTime.Today.ToString("yyyy-MM-dd");
+
+            foreach (QuestList list in this.lists)
+            {
+                if (list?.Entries == null) continue;
+
+                foreach (DailyQuestEntryData entry in list.Entries)
+                {
+                    if (entry.status != "in_progress") continue;
+
+                    string raw = entry.assignment?.assigned_date;
+                    if (string.IsNullOrEmpty(raw)) continue;
+
+                    string date = raw.Length >= 10 ? raw.Substring(0, 10) : raw;
+                    if (date != todayKey) continue;
+
+                    string questId = entry.quest?.id;
+                    if (string.IsNullOrEmpty(questId)) continue;
+
+                    QuestList ownerList = list;
+                    SaiServer.Instance.QuestProgressor.CheckQuest(
+                        questId,
+                        onSuccess: _ => ownerList.Refresh(),
+                        onError: err => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] CheckQuest failed ({questId}): {err}")
+                    );
+                }
+            }
         }
 
         private VisualElement BuildDayCard(DateTime day, bool isToday, List<DailyQuestEntryData> entries)
@@ -167,16 +209,66 @@ namespace SG03.UI
             if (entry.rewards != null && entry.rewards.Length > 0)
                 item.Add(this.BuildRewardRow(entry.rewards));
 
+            // Spacer pushes bottom content to the bottom of the card.
+            VisualElement spacer = new VisualElement();
+            spacer.AddToClassList("dq-quest-item__spacer");
+            item.Add(spacer);
+
+            // Bottom section: claim button (if completed) then status label.
+            VisualElement bottom = new VisualElement();
+            bottom.AddToClassList("dq-quest-item__bottom");
+
+            if (entry.status == "completed")
+            {
+                string questId = entry.quest?.id;
+                QuestList ownerList = this.FindOwnerList(questId);
+
+                Button claimBtn = new Button();
+                claimBtn.text = "Claim";
+                claimBtn.AddToClassList("dq-quest-item__claim-btn");
+                claimBtn.clicked += () =>
+                {
+                    if (string.IsNullOrEmpty(questId)) return;
+                    if (SaiServer.Instance?.QuestProgressor == null) return;
+                    claimBtn.SetEnabled(false);
+                    SaiServer.Instance.QuestProgressor.ClaimQuest(
+                        questId,
+                        onSuccess: _ => ownerList?.Refresh(),
+                        onError: err =>
+                        {
+                            claimBtn.SetEnabled(true);
+                            UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] ClaimQuest failed ({questId}): {err}");
+                        }
+                    );
+                };
+                bottom.Add(claimBtn);
+            }
+
             string statusText = this.StatusLabel(entry.status);
             if (!string.IsNullOrEmpty(statusText))
             {
                 Label statusLabel = new Label(statusText);
                 statusLabel.AddToClassList("dq-quest-item__status");
                 statusLabel.AddToClassList(this.StatusClass(entry.status));
-                item.Add(statusLabel);
+                bottom.Add(statusLabel);
             }
 
+            item.Add(bottom);
             return item;
+        }
+
+        private QuestList FindOwnerList(string questId)
+        {
+            if (string.IsNullOrEmpty(questId)) return null;
+            foreach (QuestList list in this.lists)
+            {
+                if (list?.Entries == null) continue;
+                foreach (DailyQuestEntryData entry in list.Entries)
+                {
+                    if (entry.quest?.id == questId) return list;
+                }
+            }
+            return null;
         }
 
         private VisualElement BuildRewardRow(DailyRewardData[] rewards)

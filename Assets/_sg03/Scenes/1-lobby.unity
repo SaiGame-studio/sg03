@@ -286,6 +286,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 701451424}
+  - {fileID: 1313731243}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &410087039
@@ -460,7 +461,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 555ac40ce1e53564f8046a39311cc70e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.Quest.QuestDailyManager
-  saiServer: {fileID: 1967044023}
   pools: []
   questLists:
   - {fileID: 734468704}
@@ -770,6 +770,7 @@ GameObject:
   m_Component:
   - component: {fileID: 734468703}
   - component: {fileID: 734468704}
+  - component: {fileID: 734468705}
   m_Layer: 0
   m_Name: daily_quests
   m_TagString: Untagged
@@ -809,6 +810,19 @@ MonoBehaviour:
   refreshMode: 0
   daysAhead: 6
   entries: []
+--- !u!114 &734468705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734468702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 168c07b3dd9c0d042b2f729942deb5ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.Quest.DailyQuestAutoStarter
+  questList: {fileID: 734468704}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -932,6 +946,56 @@ MonoBehaviour:
   questPanelAsset: {fileID: 9197481963319205126, guid: 003455c36b27e684a9832fe9f7f26a32, type: 3}
   dailyQuestContentAsset: {fileID: 9197481963319205126, guid: 7d1d9c63c33078e4eab9684cc0ad09ef, type: 3}
   mainQuestContentAsset: {fileID: 9197481963319205126, guid: 920d223dc2287d142b7286b6918e6e68, type: 3}
+--- !u!1 &1313731242
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1313731243}
+  - component: {fileID: 1313731244}
+  m_Layer: 0
+  m_Name: ProfileManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1313731243
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313731242}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 331941082}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1313731244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313731242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bab3ad61bdde64946b52205303e0d7ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.ProfileManager
+  progressId: 
+  userId: 
+  level: 0
+  experience: 0
+  gold: 0
+  gameData: 
 --- !u!114 &1967044023 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
