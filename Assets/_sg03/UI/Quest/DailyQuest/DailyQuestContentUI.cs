@@ -8,11 +8,13 @@ namespace SG03.UI
 {
     // Binds DailyQuestContent.uxml to live data from QuestDailyManager.
     // Displays a 7-day week grid starting from today.
-    // If QuestList has no data, calls Refresh() first then renders.
+    // Re-renders automatically whenever any QuestList fires OnDataUpdated
+    // (e.g. after auto-start + refresh).
     public class DailyQuestContentUI
     {
         private readonly VisualElement weekGrid;
         private readonly VisualElement emptyState;
+        private QuestList[] lists;
 
         // Vietnamese weekday names (Monday=2 … Saturday=7, Sunday=CN)
         private static readonly string[] DayNames = { "CN", "2", "3", "4", "5", "6", "7" };
@@ -25,35 +27,32 @@ namespace SG03.UI
             QuestDailyManager manager = UnityEngine.Object.FindFirstObjectByType<QuestDailyManager>(UnityEngine.FindObjectsInactive.Include);
             if (manager == null) { this.ShowEmpty(); return; }
 
-            QuestList[] lists = manager.QuestLists;
-            if (lists == null || lists.Length == 0) { this.ShowEmpty(); return; }
+            this.lists = manager.QuestLists;
+            if (this.lists == null || this.lists.Length == 0) { this.ShowEmpty(); return; }
 
+            // Subscribe permanently — re-render on every future data update.
+            foreach (QuestList list in this.lists)
+            {
+                if (list == null) continue;
+                list.OnDataUpdated += this.OnAnyListUpdated;
+            }
+
+            // If some lists have no data yet, refresh them; otherwise render now.
             int pendingCount = 0;
-            foreach (QuestList list in lists)
+            foreach (QuestList list in this.lists)
             {
                 if (!list.HasData) pendingCount++;
             }
 
-            if (pendingCount == 0) { this.Render(lists); return; }
+            if (pendingCount == 0) { this.Render(); return; }
 
-            int completedCount = 0;
-            foreach (QuestList list in lists)
+            foreach (QuestList list in this.lists)
             {
-                if (list.HasData) continue;
-
-                QuestList captured = list;
-                Action onUpdated = null;
-                onUpdated = () =>
-                {
-                    captured.OnDataUpdated -= onUpdated;
-                    completedCount++;
-                    if (completedCount >= pendingCount)
-                        this.Render(lists);
-                };
-                captured.OnDataUpdated += onUpdated;
-                captured.Refresh();
+                if (!list.HasData) list.Refresh();
             }
         }
+
+        private void OnAnyListUpdated() => this.Render();
 
         private void ShowEmpty()
         {
@@ -63,7 +62,7 @@ namespace SG03.UI
                 this.weekGrid.style.display = DisplayStyle.None;
         }
 
-        private void Render(QuestList[] lists)
+        private void Render()
         {
             if (this.weekGrid == null) return;
 
@@ -72,7 +71,7 @@ namespace SG03.UI
                 new Dictionary<string, List<DailyQuestEntryData>>();
 
             int totalLoaded = 0;
-            foreach (QuestList list in lists)
+            foreach (QuestList list in this.lists)
             {
                 if (list?.Entries == null) continue;
                 foreach (DailyQuestEntryData entry in list.Entries)
@@ -131,13 +130,6 @@ namespace SG03.UI
             dateLabel.AddToClassList("dq-day-card__date");
             header.Add(dateLabel);
 
-            if (isToday)
-            {
-                Label todayBadge = new Label("HÔM NAY");
-                todayBadge.AddToClassList("dq-day-card__today-badge");
-                header.Add(todayBadge);
-            }
-
             card.Add(header);
 
             // Quest list
@@ -172,22 +164,52 @@ namespace SG03.UI
             nameLabel.AddToClassList("dq-quest-item__name");
             item.Add(nameLabel);
 
-            Label statusLabel = new Label(this.StatusLabel(entry.status));
-            statusLabel.AddToClassList("dq-quest-item__status");
-            statusLabel.AddToClassList(this.StatusClass(entry.status));
-            item.Add(statusLabel);
+            if (entry.rewards != null && entry.rewards.Length > 0)
+                item.Add(this.BuildRewardRow(entry.rewards));
+
+            string statusText = this.StatusLabel(entry.status);
+            if (!string.IsNullOrEmpty(statusText))
+            {
+                Label statusLabel = new Label(statusText);
+                statusLabel.AddToClassList("dq-quest-item__status");
+                statusLabel.AddToClassList(this.StatusClass(entry.status));
+                item.Add(statusLabel);
+            }
 
             return item;
+        }
+
+        private VisualElement BuildRewardRow(DailyRewardData[] rewards)
+        {
+            VisualElement row = new VisualElement();
+            row.AddToClassList("dq-quest-item__rewards");
+
+            foreach (DailyRewardData reward in rewards)
+            {
+                string itemName = reward.item_definition?.name
+                               ?? reward.item_definition?.item_code
+                               ?? reward.item_definition_id ?? "?";
+
+                string qty = reward.quantity_min == reward.quantity_max
+                    ? reward.quantity_min.ToString()
+                    : $"{reward.quantity_min}–{reward.quantity_max}";
+
+                Label chip = new Label($"{itemName}: {qty}");
+                chip.AddToClassList("dq-reward-chip");
+                row.Add(chip);
+            }
+
+            return row;
         }
 
         private string StatusLabel(string status)
         {
             switch (status)
             {
-                case "in_progress": return "▶ Đang làm";
-                case "completed":   return "✓ Hoàn thành";
-                case "claimed":     return "★ Đã nhận";
-                default:            return "Mới";
+                case "in_progress": return "▶ In Progress";
+                case "completed":   return "✓ Completed";
+                case "claimed":     return "★ Claimed";
+                default:            return string.Empty;
             }
         }
 

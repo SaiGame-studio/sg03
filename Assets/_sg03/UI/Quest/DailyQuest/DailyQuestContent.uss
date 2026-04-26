@@ -125,6 +125,7 @@
 }
 
 .dq-quest-item {
+    flex: 1;
     flex-direction: column;
     align-items: stretch;
     background-color: rgba(30, 36, 58, 0.6);
@@ -175,6 +176,26 @@
     color: rgb(110, 165, 255);
     background-color: rgba(30, 70, 180, 0.25);
     border-color: rgba(80, 140, 255, 0.4);
+}
+
+/* ---- Rewards row ---- */
+.dq-quest-item__rewards {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 5px;
+}
+
+.dq-reward-chip {
+    font-size: 9px;
+    color: rgb(230, 200, 100);
+    background-color: rgba(80, 60, 0, 0.35);
+    border-color: rgba(180, 140, 30, 0.45);
+    border-width: 1px;
+    border-radius: 5px;
+    padding: 1px 6px;
+    margin-right: 4px;
+    margin-bottom: 2px;
+    -unity-font-style: bold;
 }
 
 /* No-quest placeholder */

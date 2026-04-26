@@ -21,6 +21,10 @@
 - **Never** use `[ContextMenu]` to expose buttons.
 - Always create Inspector buttons via a dedicated `[CustomEditor]` script.
 
+## Code Comments Language
+- All code comments (inline, block, and XML doc comments) must be written in **English**.
+- Do **not** write comments in Vietnamese or any other language unless the user explicitly requests a translation task.
+
 ## Control Flow
 - **Never** nest `if` statements. Always prefer early return (guard clauses) to reduce nesting.
 - Handle invalid/edge cases first and return early, keeping the happy path at the lowest indentation level.
