@@ -5,8 +5,9 @@ namespace SG03.Quest
 {
     // Abstract base for all quest pool managers (Daily, Main, etc.).
     //
-    // Owns the saiServer reference and the QuestList children.
+    // Owns the QuestList children.
     // Concrete subclasses implement Subscribe/Unsubscribe and GetPools.
+    // Access SaiServer via SaiServer.Instance.
     //
     // Scene hierarchy pattern:
     //   QuestDailyManager  (extends QuestPoolManager)
@@ -15,9 +16,6 @@ namespace SG03.Quest
     public abstract class QuestPoolManager : SaiBehaviour
     {
         [Header("── QuestPoolManager ──────────────────")]
-        [SerializeField] protected SaiServer saiServer;
-
-        [Space(4)]
         [SerializeField] protected DailyQuestPoolData[] pools;
 
         [Space(4)]
@@ -28,15 +26,7 @@ namespace SG03.Quest
         protected override void LoadComponents()
         {
             base.LoadComponents();
-            this.LoadSaiServer();
             this.LoadQuestLists();
-        }
-
-        private void LoadSaiServer()
-        {
-            if (this.saiServer != null) return;
-            this.saiServer = SaiServer.Instance;
-            Debug.LogWarning(transform.name + ": LoadSaiServer", gameObject);
         }
 
         private void LoadQuestLists()

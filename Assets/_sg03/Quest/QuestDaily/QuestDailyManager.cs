@@ -11,34 +11,30 @@ namespace SG03.Quest
 
         protected override void Subscribe()
         {
-            if (this.saiServer == null) return;
+            if (SaiServer.Instance == null) return;
+            if (SaiServer.Instance.DailyQuest == null) return;
 
-            if (this.saiServer.DailyQuest != null)
-            {
-                this.saiServer.DailyQuest.OnGetPoolsSuccess       += this.OnPoolsReceived;
-                this.saiServer.DailyQuest.OnGetTodayQuestsSuccess += this.OnTodayQuestsReceived;
-            }
+            SaiServer.Instance.DailyQuest.OnGetPoolsSuccess       += this.OnPoolsReceived;
+            SaiServer.Instance.DailyQuest.OnGetTodayQuestsSuccess += this.OnTodayQuestsReceived;
         }
 
         protected override void Unsubscribe()
         {
-            if (this.saiServer == null) return;
+            if (SaiServer.Instance == null) return;
+            if (SaiServer.Instance.DailyQuest == null) return;
 
-            if (this.saiServer.DailyQuest != null)
-            {
-                this.saiServer.DailyQuest.OnGetPoolsSuccess       -= this.OnPoolsReceived;
-                this.saiServer.DailyQuest.OnGetTodayQuestsSuccess -= this.OnTodayQuestsReceived;
-            }
+            SaiServer.Instance.DailyQuest.OnGetPoolsSuccess       -= this.OnPoolsReceived;
+            SaiServer.Instance.DailyQuest.OnGetTodayQuestsSuccess -= this.OnTodayQuestsReceived;
         }
 
         public override void GetPools()
         {
-            if (this.saiServer?.DailyQuest == null)
+            if (SaiServer.Instance?.DailyQuest == null)
             {
                 Debug.LogWarning(transform.name + ": DailyQuest not found on SaiServer.", gameObject);
                 return;
             }
-            this.saiServer.DailyQuest.GetPools();
+            SaiServer.Instance.DailyQuest.GetPools();
         }
 
         public override void RefreshList(
@@ -48,13 +44,13 @@ namespace SG03.Quest
             System.Action<DailyQuestEntryData[]> onSuccess,
             System.Action<string> onError = null)
         {
-            if (this.saiServer?.DailyQuest == null)
+            if (SaiServer.Instance?.DailyQuest == null)
             {
                 onError?.Invoke(transform.name + ": DailyQuest not found on SaiServer.");
                 return;
             }
 
-            this.saiServer.DailyQuest.GetPools(
+            SaiServer.Instance.DailyQuest.GetPools(
                 onSuccess: poolsResponse =>
                 {
                     if (poolsResponse?.pools == null)
@@ -77,7 +73,7 @@ namespace SG03.Quest
 
                     if (mode == QuestRefreshMode.TodayOnly)
                     {
-                        this.saiServer.DailyQuest.GetTodayQuests(
+                        SaiServer.Instance.DailyQuest.GetTodayQuests(
                             dqPoolId:  found.id,
                             onSuccess: r => onSuccess?.Invoke(r?.entries),
                             onError:   onError
@@ -85,7 +81,7 @@ namespace SG03.Quest
                     }
                     else
                     {
-                        this.saiServer.DailyQuest.AssignAhead(
+                        SaiServer.Instance.DailyQuest.AssignAhead(
                             dqPoolId:  found.id,
                             daysAhead: daysAhead,
                             onSuccess: r =>
