@@ -2,9 +2,6 @@ using UnityEngine.UIElements;
 
 namespace SG03.UI
 {
-    // Which sub-section of the Quest panel is active.
-    public enum QuestType { Daily, Main }
-
     // Manages the shared QuestPanel layout.
     // Instantiated by LobbyPanelUI; receives the panel root and the two
     // content VisualTreeAssets (DailyQuestContent / MainQuestContent).
