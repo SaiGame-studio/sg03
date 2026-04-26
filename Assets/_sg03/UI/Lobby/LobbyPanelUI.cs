@@ -170,7 +170,7 @@ namespace SG03.UI
                 this.questTab.RegisterCallback<MouseEnterEvent>(_ =>
                     this.questMenu.Show(this.questTab, this.GetQuestMenuItems()));
                 this.questTab.RegisterCallback<ClickEvent>(_ =>
-                    this.questMenu.Toggle(this.questTab, this.GetQuestMenuItems()));
+                    this.questMenu.Show(this.questTab, this.GetQuestMenuItems()));
             }
 
             // Bottom buttons
@@ -194,6 +194,12 @@ namespace SG03.UI
 
             // Content area
             this.contentArea = root.Q("ContentArea");
+
+            // Enforce 16:9 aspect ratio with letterbox/pillarbox
+            VisualElement lobbyRoot     = root.Q("LobbyRoot");
+            VisualElement lobbyViewport = root.Q("LobbyViewport");
+            if (lobbyRoot != null && lobbyViewport != null)
+                new LobbyAspectRatioKeeper(lobbyRoot, lobbyViewport);
         }
 
         private void OnLoginSuccess(LoginResponse _) => this.RefreshPlayerName();

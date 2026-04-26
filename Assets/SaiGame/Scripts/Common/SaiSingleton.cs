@@ -12,7 +12,7 @@ namespace SaiGame.Services
             {
                 if (_instance == null)
                 {
-                    _instance = Object.FindObjectOfType<T>(true);
+                    _instance = Object.FindFirstObjectByType<T>(FindObjectsInactive.Include);
                     if (_instance == null && Application.isPlaying)
                     {
                         Debug.LogError("Singleton instance has not been created yet!");

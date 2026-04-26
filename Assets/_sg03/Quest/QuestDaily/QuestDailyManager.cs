@@ -7,6 +7,12 @@ namespace SG03.Quest
     // to matching QuestList children.
     public class QuestDailyManager : QuestPoolManager
     {
+        // ── Public data access ────────────────────────────────────────────
+
+        // Today's quest entries from the server response.
+        public DailyQuestEntryData[] DailyQuests =>
+            SaiServer.Instance?.DailyQuest?.CurrentTodayQuestResponse?.entries;
+
         // ── Abstract implementations ──────────────────────────────────────
 
         protected override void Subscribe()

@@ -21,6 +21,9 @@ namespace SG03.Quest
         [Space(4)]
         [SerializeField] protected QuestList[] questLists;
 
+        // Read-only access for UI binding.
+        public QuestList[] QuestLists => this.questLists;
+
         // ── LoadComponents ────────────────────────────────────────────────
 
         protected override void LoadComponents()

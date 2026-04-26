@@ -50,8 +50,17 @@ namespace SG03.UI
                 ? this.dailyQuestAsset
                 : this.mainQuestAsset;
 
-            if (asset != null)
-                this.contentArea.Add(asset.Instantiate());
+            if (asset == null) return;
+
+            TemplateContainer content = asset.Instantiate();
+            content.style.flexGrow   = 1;
+            content.style.flexShrink = 1;
+            content.style.alignSelf  = Align.Stretch;
+            content.style.width      = new StyleLength(new Length(100, LengthUnit.Percent));
+            this.contentArea.Add(content);
+
+            if (type == QuestType.Daily)
+                new DailyQuestContentUI(content);
         }
     }
 }

@@ -4,13 +4,20 @@
 /* ============================================================
    Lobby root — full screen, column layout
    ============================================================ */
+/* Full-screen background — shows letterbox/pillarbox bars */
 .lobby-root {
     flex: 1;
-    flex-direction: column;
     width: 100%;
     height: 100%;
     position: absolute;
     left: 0; top: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 1);
+}
+
+/* 16:9 viewport — absolute position and size set at runtime by LobbyAspectRatioKeeper */
+.lobby-viewport {
+    flex-direction: column;
+    overflow: hidden;
     background-color: rgba(10, 12, 20, 0.97);
 }
 
