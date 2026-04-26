@@ -21,6 +21,9 @@ namespace SG03.UI
         [SerializeField] private VisualTreeAsset dailyQuestContentAsset;
         [SerializeField] private VisualTreeAsset mainQuestContentAsset;
 
+        [Header("Mailbox Panel Assets")]
+        [SerializeField] private VisualTreeAsset mailboxContentAsset;
+
         // Provides access to every SaiServer service (Auth, GamerProgress, Shop, …).
         protected SaiServer Server => this.saiServer;
 
@@ -34,6 +37,7 @@ namespace SG03.UI
             this.LoadQuestPanelAsset();
             this.LoadDailyQuestContentAsset();
             this.LoadMainQuestContentAsset();
+            this.LoadMailboxContentAsset();
         }
 
         private void LoadSaiServer()
@@ -110,6 +114,16 @@ namespace SG03.UI
 #endif
         }
 
+        private void LoadMailboxContentAsset()
+        {
+            if (this.mailboxContentAsset != null) return;
+#if UNITY_EDITOR
+            this.mailboxContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/_sg03/UI/Mailbox/MailboxContent.uxml");
+            Debug.LogWarning(transform.name + ": LoadMailboxContentAsset", gameObject);
+#endif
+        }
+
         // Top tabs
         private Button homeTab;
         private Button shopTab;
@@ -123,7 +137,7 @@ namespace SG03.UI
         // Bottom buttons
         private Button btnPlay;
         private Button btnInventory;
-        private Button btnFriends;
+        private Button btnMailbox;
         private Button btnSettings;
 
         // Player name label (top-right of TopMenu)
@@ -176,12 +190,12 @@ namespace SG03.UI
             // Bottom buttons
             this.btnPlay      = root.Q<Button>("BtnPlay");
             this.btnInventory = root.Q<Button>("BtnInventory");
-            this.btnFriends   = root.Q<Button>("BtnFriends");
+            this.btnMailbox   = root.Q<Button>("BtnMailbox");
             this.btnSettings  = root.Q<Button>("BtnSettings");
 
             this.btnPlay?.RegisterCallback<ClickEvent>(_ => this.OnPlayClicked());
             this.btnInventory?.RegisterCallback<ClickEvent>(_ => this.OnInventoryClicked());
-            this.btnFriends?.RegisterCallback<ClickEvent>(_ => this.OnFriendsClicked());
+            this.btnMailbox?.RegisterCallback<ClickEvent>(_ => this.OnMailboxClicked());
             this.btnSettings?.RegisterCallback<ClickEvent>(_ => this.OnSettingsClicked());
 
             // Player name (top-right)
@@ -288,8 +302,23 @@ namespace SG03.UI
         // ------------------------------------------------------------------
         protected virtual void OnPlayClicked()      { }
         protected virtual void OnInventoryClicked() { }
-        protected virtual void OnFriendsClicked()   { }
         protected virtual void OnSettingsClicked()  { }
+
+        protected virtual void OnMailboxClicked()
+        {
+            if (this.contentArea == null || this.mailboxContentAsset == null) return;
+
+            this.contentArea.Clear();
+            TemplateContainer content = this.mailboxContentAsset.Instantiate();
+            content.style.flexGrow   = 1;
+            content.style.flexShrink = 1;
+            content.style.width      = new StyleLength(new Length(100, LengthUnit.Percent));
+            content.style.height     = new StyleLength(new Length(100, LengthUnit.Percent));
+            content.style.alignSelf  = Align.Stretch;
+            this.contentArea.Add(content);
+
+            new MailboxContentUI(content);
+        }
 
         protected virtual void OnDestroy()
         {
