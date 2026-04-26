@@ -20,3 +20,12 @@
 ## Unity Inspector Buttons
 - **Never** use `[ContextMenu]` to expose buttons.
 - Always create Inspector buttons via a dedicated `[CustomEditor]` script.
+
+## Control Flow
+- **Never** nest `if` statements. Always prefer early return (guard clauses) to reduce nesting.
+- Handle invalid/edge cases first and return early, keeping the happy path at the lowest indentation level.
+
+## Response Summary
+- After completing every request, always end the response with a summary section titled **"Tổng kết"**.
+- Use bullet points to list everything that was done.
+- Follow with a second list titled **"Quy tắc đã tuân theo"** that explicitly names each rule from these guidelines that was applied during the task.
