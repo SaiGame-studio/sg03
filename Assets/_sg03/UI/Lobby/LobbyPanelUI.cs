@@ -24,6 +24,9 @@ namespace SG03.UI
         [Header("Mailbox Panel Assets")]
         [SerializeField] private VisualTreeAsset mailboxContentAsset;
 
+        [Header("Inventory Panel Assets")]
+        [SerializeField] private VisualTreeAsset inventoryContentAsset;
+
         // Provides access to every SaiServer service (Auth, GamerProgress, Shop, …).
         protected SaiServer Server => this.saiServer;
 
@@ -38,6 +41,7 @@ namespace SG03.UI
             this.LoadDailyQuestContentAsset();
             this.LoadMainQuestContentAsset();
             this.LoadMailboxContentAsset();
+            this.LoadInventoryContentAsset();
         }
 
         private void LoadSaiServer()
@@ -121,6 +125,16 @@ namespace SG03.UI
             this.mailboxContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Mailbox/MailboxContent.uxml");
             Debug.LogWarning(transform.name + ": LoadMailboxContentAsset", gameObject);
+#endif
+        }
+
+        private void LoadInventoryContentAsset()
+        {
+            if (this.inventoryContentAsset != null) return;
+#if UNITY_EDITOR
+            this.inventoryContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/_sg03/UI/Inventory/InventoryContent.uxml");
+            Debug.LogWarning(transform.name + ": LoadInventoryContentAsset", gameObject);
 #endif
         }
 
@@ -301,7 +315,21 @@ namespace SG03.UI
         //  Bottom button handlers — override in subclass or extend here
         // ------------------------------------------------------------------
         protected virtual void OnPlayClicked()      { }
-        protected virtual void OnInventoryClicked() { }
+        protected virtual void OnInventoryClicked()
+        {
+            if (this.contentArea == null || this.inventoryContentAsset == null) return;
+
+            this.contentArea.Clear();
+            TemplateContainer content = this.inventoryContentAsset.Instantiate();
+            content.style.flexGrow   = 1;
+            content.style.flexShrink = 1;
+            content.style.width      = new StyleLength(new Length(100, LengthUnit.Percent));
+            content.style.height     = new StyleLength(new Length(100, LengthUnit.Percent));
+            content.style.alignSelf  = Align.Stretch;
+            this.contentArea.Add(content);
+
+            new InventoryContentUI(content);
+        }
         protected virtual void OnSettingsClicked()  { }
 
         protected virtual void OnMailboxClicked()

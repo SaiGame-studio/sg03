@@ -1,0 +1,250 @@
+@import url("../../../SaiGame/UI/Common/Variables.uss");
+
+/* ============================================================
+   Inventory content root — fills ContentArea
+   ============================================================ */
+.inv-root {
+    flex: 1;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(10, 12, 20, 0.97);
+}
+
+/* ============================================================
+   Header bar
+   ============================================================ */
+.inv-header {
+    flex-direction: row;
+    align-items: center;
+    height: 52px;
+    min-height: 52px;
+    padding: 0 24px;
+    background-color: rgba(16, 20, 36, 1);
+    border-bottom-width: 1px;
+    border-color: rgba(80, 100, 160, 0.35);
+}
+
+.inv-header__title {
+    flex: 1;
+    font-size: 15px;
+    color: rgb(200, 210, 255);
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.inv-header__refresh-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.4);
+    background-color: rgba(40, 50, 80, 0.6);
+    color: rgb(150, 160, 200);
+    font-size: 12px;
+    transition-duration: 0.1s;
+}
+
+.inv-header__refresh-btn:hover {
+    background-color: rgba(60, 80, 130, 0.7);
+    color: rgb(200, 215, 255);
+}
+
+/* ============================================================
+   Category filter bar
+   ============================================================ */
+.inv-category-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 8px 16px 0 16px;
+    background-color: rgba(14, 17, 30, 1);
+    border-bottom-width: 1px;
+    border-color: rgba(80, 100, 160, 0.2);
+}
+
+.inv-category-tab {
+    padding: 6px 16px;
+    margin-right: 6px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.3);
+    background-color: rgba(30, 36, 60, 0.6);
+    color: rgb(130, 145, 185);
+    font-size: 11px;
+    transition-duration: 0.1s;
+}
+
+.inv-category-tab:hover {
+    background-color: rgba(50, 65, 110, 0.7);
+    color: rgb(180, 195, 240);
+}
+
+.inv-category-tab--active {
+    background-color: rgba(60, 100, 220, 0.7);
+    border-color: rgba(100, 140, 255, 0.6);
+    color: rgb(220, 230, 255);
+    -unity-font-style: bold;
+}
+
+/* ============================================================
+   State views — loading and empty
+   ============================================================ */
+.inv-state {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.inv-state__icon {
+    font-size: 40px;
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+}
+
+.inv-state__label {
+    font-size: 14px;
+    color: rgb(130, 145, 185);
+    -unity-text-align: middle-center;
+}
+
+/* ============================================================
+   Item grid (ScrollView content)
+   ============================================================ */
+.inv-grid {
+    flex: 1;
+    padding: 16px;
+}
+
+/* ============================================================
+   Item card
+   ============================================================ */
+.inv-item-card {
+    width: 140px;
+    min-height: 160px;
+    flex-direction: column;
+    background-color: rgba(22, 26, 40, 1);
+    border-radius: 10px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.25);
+    padding: 12px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+/* Rarity left border accent */
+.inv-item-card--common {
+    border-left-width: 3px;
+    border-left-color: rgba(160, 165, 180, 0.8);
+}
+
+.inv-item-card--uncommon {
+    border-left-width: 3px;
+    border-left-color: rgba(80, 200, 100, 0.8);
+}
+
+.inv-item-card--rare {
+    border-left-width: 3px;
+    border-left-color: rgba(60, 130, 240, 0.9);
+}
+
+.inv-item-card--epic {
+    border-left-width: 3px;
+    border-left-color: rgba(160, 80, 240, 0.9);
+}
+
+.inv-item-card--legendary {
+    border-left-width: 3px;
+    border-left-color: rgba(240, 160, 30, 0.9);
+}
+
+/* Quantity badge — top-right overlay */
+.inv-item-card__qty-row {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-bottom: 6px;
+}
+
+.inv-item-card__qty {
+    font-size: 11px;
+    color: rgb(200, 215, 255);
+    background-color: rgba(40, 50, 90, 0.8);
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+/* Item name */
+.inv-item-card__name {
+    font-size: 12px;
+    color: rgb(210, 220, 255);
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 6px;
+    flex: 1;
+}
+
+/* Rarity badge */
+.inv-item-card__rarity {
+    font-size: 10px;
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin-bottom: 5px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    align-self: flex-start;
+}
+
+.inv-item-card__rarity--common {
+    color: rgb(180, 185, 200);
+    background-color: rgba(80, 85, 100, 0.4);
+}
+
+.inv-item-card__rarity--uncommon {
+    color: rgb(100, 220, 130);
+    background-color: rgba(30, 80, 40, 0.5);
+}
+
+.inv-item-card__rarity--rare {
+    color: rgb(100, 160, 255);
+    background-color: rgba(20, 50, 120, 0.5);
+}
+
+.inv-item-card__rarity--epic {
+    color: rgb(190, 120, 255);
+    background-color: rgba(70, 20, 120, 0.5);
+}
+
+.inv-item-card__rarity--legendary {
+    color: rgb(255, 185, 50);
+    background-color: rgba(100, 60, 0, 0.5);
+}
+
+/* Category chip */
+.inv-item-card__category {
+    font-size: 10px;
+    color: rgb(120, 140, 190);
+    background-color: rgba(30, 38, 65, 0.6);
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin-bottom: 5px;
+    align-self: flex-start;
+}
+
+/* Level label */
+.inv-item-card__level {
+    font-size: 11px;
+    color: rgb(160, 175, 215);
+    margin-bottom: 2px;
+}
+
+/* Date label */
+.inv-item-card__date {
+    font-size: 10px;
+    color: rgb(90, 105, 145);
+    margin-top: 4px;
+}
