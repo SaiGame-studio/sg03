@@ -108,5 +108,20 @@ namespace SG03.UI
 
             this.itemPreset.GetPreset(presetId, onSuccess, onError);
         }
+
+        public void RemoveItemFromDesk(
+            string presetId,
+            int slotIndex,
+            Action<PresetData> onSuccess,
+            Action<string> onError)
+        {
+            if (this.itemPreset == null)
+            {
+                onError?.Invoke("ItemPreset service not available.");
+                return;
+            }
+
+            this.itemPreset.RemoveItemFromPreset(presetId, slotIndex, onSuccess, onError);
+        }
     }
 }

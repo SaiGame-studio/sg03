@@ -45,7 +45,10 @@
             <ui:VisualElement class="desk-detail-body">
 
                 <ui:VisualElement class="desk-detail-left">
-                    <ui:Label text="Slots" class="desk-detail-section-title" />
+                    <ui:VisualElement class="desk-detail-section-header">
+                        <ui:Label text="Slots" class="desk-detail-section-title" />
+                        <ui:Label name="SlotCountLabel" text="" class="desk-detail-slot-count" />
+                    </ui:VisualElement>
                     <ui:ScrollView name="SlotGrid" class="desk-slot-grid" />
                 </ui:VisualElement>
 
@@ -59,6 +62,20 @@
 
             <ui:VisualElement name="FlyLayer" class="desk-fly-layer" />
 
+        </ui:VisualElement>
+
+        <ui:VisualElement name="CardViewerOverlay" class="desk-card-viewer desk-card-viewer--hidden">
+            <ui:VisualElement name="CardViewerBackdrop" class="desk-card-viewer__backdrop" />
+            <ui:VisualElement class="desk-card-viewer__stage">
+                <ui:VisualElement class="desk-card-viewer__card">
+                    <ui:Label name="CardViewerIcon" text="🃏" class="desk-card-viewer__card-icon" />
+                    <ui:Label name="CardViewerName" text="" class="desk-card-viewer__card-name" />
+                    <ui:Label name="CardViewerRarity" text="" class="desk-card-viewer__card-rarity" />
+                    <ui:Label name="CardViewerCategory" text="" class="desk-card-viewer__card-category" />
+                    <ui:Label name="CardViewerQty" text="" class="desk-card-viewer__card-qty" />
+                </ui:VisualElement>
+                <ui:Button name="CardViewerCloseBtn" text="✕  Close" class="desk-card-viewer__close-btn" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

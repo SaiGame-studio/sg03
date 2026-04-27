@@ -12,11 +12,17 @@ namespace SG03.UI
     {
         private readonly VisualElement detailPanel;
         private readonly Label detailTitle;
+        private readonly Label slotCountLabel;
         private readonly Button backBtn;
         private readonly ScrollView slotGrid;
         private readonly TextField inventorySearch;
         private readonly ScrollView inventoryList;
         private readonly VisualElement flyLayer;
+        private readonly VisualElement cardViewerOverlay;
+        private readonly Label cardViewerName;
+        private readonly Label cardViewerRarity;
+        private readonly Label cardViewerCategory;
+        private readonly Label cardViewerQty;
         private readonly DeskList deskList;
 
         private PresetData currentDesk;
@@ -30,17 +36,31 @@ namespace SG03.UI
             this.deskList        = deskList;
             this.detailPanel     = deskRoot.Q("DetailPanel");
             this.detailTitle     = deskRoot.Q<Label>("DetailTitle");
+            this.slotCountLabel  = deskRoot.Q<Label>("SlotCountLabel");
             this.slotGrid        = deskRoot.Q<ScrollView>("SlotGrid");
             this.backBtn         = deskRoot.Q<Button>("BackBtn");
             this.inventorySearch = deskRoot.Q<TextField>("InventorySearch");
             this.inventoryList   = deskRoot.Q<ScrollView>("InventoryList");
             this.flyLayer        = deskRoot.Q("FlyLayer");
+            this.cardViewerOverlay  = deskRoot.Q("CardViewerOverlay");
+            this.cardViewerName     = deskRoot.Q<Label>("CardViewerName");
+            this.cardViewerRarity   = deskRoot.Q<Label>("CardViewerRarity");
+            this.cardViewerCategory = deskRoot.Q<Label>("CardViewerCategory");
+            this.cardViewerQty      = deskRoot.Q<Label>("CardViewerQty");
 
             if (this.flyLayer != null)
                 this.flyLayer.pickingMode = PickingMode.Ignore;
 
             if (this.backBtn != null)
                 this.backBtn.RegisterCallback<ClickEvent>(_ => this.OnBackRequested?.Invoke());
+
+            Button closeBtn = deskRoot.Q<Button>("CardViewerCloseBtn");
+            if (closeBtn != null)
+                closeBtn.RegisterCallback<ClickEvent>(_ => this.HideCardViewer());
+
+            VisualElement backdrop = deskRoot.Q("CardViewerBackdrop");
+            if (backdrop != null)
+                backdrop.RegisterCallback<ClickEvent>(_ => this.HideCardViewer());
 
             if (this.inventorySearch != null)
                 this.inventorySearch.RegisterValueChangedCallback(e =>
@@ -105,6 +125,17 @@ namespace SG03.UI
             this.slotGrid.contentContainer.style.flexWrap      = Wrap.Wrap;
 
             int maxSlots = desk.max_slots > 0 ? desk.max_slots : 1;
+
+            int filledSlots = 0;
+            if (desk.slots != null)
+            {
+                foreach (PresetSlotData slot in desk.slots)
+                    filledSlots++;
+            }
+
+            if (this.slotCountLabel != null)
+                this.slotCountLabel.text = $"{filledSlots}/{maxSlots}";
+
             for (int i = 0; i < maxSlots; i++)
                 this.slotGrid.Add(this.BuildSlotTile(desk, i));
         }
@@ -125,7 +156,7 @@ namespace SG03.UI
 
             if (filled)
             {
-                this.BuildFilledContent(tile, itemId);
+                this.BuildFilledContent(tile, desk, slotIndex, itemId);
                 return tile;
             }
 
@@ -136,14 +167,16 @@ namespace SG03.UI
             return tile;
         }
 
-        private void BuildFilledContent(VisualElement tile, string itemId)
+        private void BuildFilledContent(VisualElement tile, PresetData desk, int slotIndex, string itemId)
         {
+            InventoryItemData foundItem = null;
             string name = TrimId(itemId);
             foreach (InventoryItemData item in this.allInventoryItems)
             {
                 if (item.id != itemId) continue;
                 string n = item.definition?.name;
                 if (!string.IsNullOrEmpty(n)) name = n;
+                foundItem = item;
                 break;
             }
 
@@ -154,6 +187,37 @@ namespace SG03.UI
             Label itemName = new Label(name);
             itemName.AddToClassList("desk-slot__item-name");
             tile.Add(itemName);
+
+            VisualElement actions = new VisualElement();
+            actions.AddToClassList("desk-slot__actions");
+
+            Button viewBtn = new Button();
+            viewBtn.text = "👁";
+            viewBtn.AddToClassList("desk-slot__btn");
+            viewBtn.AddToClassList("desk-slot__btn--view");
+            InventoryItemData capturedItem = foundItem;
+            string capturedId = itemId;
+            viewBtn.RegisterCallback<ClickEvent>(e =>
+            {
+                e.StopPropagation();
+                this.ShowCardViewer(capturedItem, capturedId);
+            });
+            actions.Add(viewBtn);
+
+            Button removeBtn = new Button();
+            removeBtn.text = "✕";
+            removeBtn.AddToClassList("desk-slot__btn");
+            removeBtn.AddToClassList("desk-slot__btn--remove");
+            PresetData capturedDesk = desk;
+            int capturedSlot = slotIndex;
+            removeBtn.RegisterCallback<ClickEvent>(e =>
+            {
+                e.StopPropagation();
+                this.OnRemoveFromDesk(capturedDesk, capturedSlot);
+            });
+            actions.Add(removeBtn);
+
+            tile.Add(actions);
         }
 
         // ── Inventory list ────────────────────────────────────────────────────
@@ -281,6 +345,43 @@ namespace SG03.UI
         }
 
         // ── Interaction ───────────────────────────────────────────────────────
+
+        private void ShowCardViewer(InventoryItemData item, string itemId)
+        {
+            if (this.cardViewerOverlay == null) return;
+
+            string name     = item?.definition?.name ?? TrimId(itemId);
+            string rarity   = (item?.definition?.rarity ?? string.Empty).ToUpperInvariant();
+            string category = item?.definition?.category ?? string.Empty;
+            int    qty      = item?.quantity ?? 1;
+
+            if (this.cardViewerName != null)     this.cardViewerName.text     = name;
+            if (this.cardViewerRarity != null)   this.cardViewerRarity.text   = rarity;
+            if (this.cardViewerCategory != null) this.cardViewerCategory.text = category;
+            if (this.cardViewerQty != null)      this.cardViewerQty.text      = $"Qty: {qty}";
+
+            this.cardViewerOverlay.RemoveFromClassList("desk-card-viewer--hidden");
+        }
+
+        private void HideCardViewer()
+        {
+            this.cardViewerOverlay?.AddToClassList("desk-card-viewer--hidden");
+        }
+
+        private void OnRemoveFromDesk(PresetData desk, int slotIndex)
+        {
+            this.deskList.RemoveItemFromDesk(
+                presetId:  desk.id,
+                slotIndex: slotIndex,
+                onSuccess: updatedDesk =>
+                {
+                    this.currentDesk = updatedDesk;
+                    this.RenderSlots(updatedDesk);
+                    this.RenderInventory();
+                },
+                onError: _ => { }
+            );
+        }
 
         private void OnInventoryItemClicked(CardStack stack, VisualElement sourceElement)
         {
