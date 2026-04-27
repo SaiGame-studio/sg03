@@ -4,13 +4,25 @@
 /* ============================================================
    Lobby root — full screen, column layout
    ============================================================ */
+/* Full-screen background — shows letterbox/pillarbox bars */
 .lobby-root {
     flex: 1;
-    flex-direction: column;
     width: 100%;
     height: 100%;
     position: absolute;
     left: 0; top: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 1);
+}
+
+/* 16:9 viewport — absolute position and size set at runtime by LobbyAspectRatioKeeper */
+/* flex: 1 + height: 100% ensures the column has an explicit height before the keeper fires,
+   so BottomMenu always stays at the bottom even when ContentArea is empty. */
+.lobby-viewport {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
     background-color: rgba(10, 12, 20, 0.97);
 }
 
@@ -50,7 +62,6 @@
     color: rgb(150, 160, 200);
     font-size: 13px;
     margin-right: 4px;
-    cursor: link;
     transition-duration: 0.12s;
 }
 
@@ -106,7 +117,6 @@
     background-color: transparent;
     color: rgb(150, 160, 200);
     font-size: 13px;
-    cursor: link;
     transition-duration: 0.12s;
     -unity-text-align: middle-center;
 }
@@ -124,4 +134,15 @@
 
 .lobby-bottom-btn--primary:hover {
     background-color: rgba(80, 130, 255, 1);
+}
+
+/* ============================================================
+   Immersive mode — reveal 3D scene behind the lobby
+   ============================================================ */
+.lobby-root--immersive {
+    background-color: transparent;
+}
+
+.lobby-viewport--immersive {
+    background-color: transparent;
 }

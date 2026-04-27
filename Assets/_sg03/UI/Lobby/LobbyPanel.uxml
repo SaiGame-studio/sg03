@@ -5,31 +5,37 @@
          editor-extension-mode="False">
 
     <Style src="LobbyPanel.uss" />
+    <Style src="../Components/PopupMenu.uss" />
 
-    <!-- Full-screen root -->
+    <!-- Full-screen root — fills the panel, shows letterbox/pillarbox bars -->
     <ui:VisualElement name="LobbyRoot" class="lobby-root">
 
-        <!-- Top menu bar -->
-        <ui:VisualElement name="TopMenu" class="lobby-top-menu">
-            <ui:Label name="AppTitle" text="SaiGame" class="lobby-top-menu__title" />
-            <ui:VisualElement name="TopMenuTabs" class="lobby-top-menu__tabs">
-                <ui:Button name="HomeTab"    text="Home"    class="lobby-tab lobby-tab--active" />
-                <ui:Button name="ShopTab"    text="Shop"    class="lobby-tab" />
-                <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab" />
-                <ui:Button name="ProfileTab" text="Profile" class="lobby-tab" />
+        <!-- 16:9 viewport — sized at runtime by LobbyAspectRatioKeeper -->
+        <ui:VisualElement name="LobbyViewport" class="lobby-viewport">
+
+            <!-- Top menu bar -->
+            <ui:VisualElement name="TopMenu" class="lobby-top-menu">
+                <ui:Label name="AppTitle" text="SaiGame" class="lobby-top-menu__title" />
+                <ui:VisualElement name="TopMenuTabs" class="lobby-top-menu__tabs">
+                    <ui:Button name="HomeTab"    text="Home"    class="lobby-tab lobby-tab--active" />
+                    <ui:Button name="ShopTab"    text="Shop"    class="lobby-tab" />
+                    <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab" />
+                </ui:VisualElement>
+                <ui:Label name="PlayerNameLabel" text="👤 Guest" class="lobby-top-menu__player-name" />
             </ui:VisualElement>
-            <ui:Label name="PlayerNameLabel" text="" class="lobby-top-menu__player-name" />
-        </ui:VisualElement>
 
-        <!-- Content area (expands to fill remaining space) -->
-        <ui:VisualElement name="ContentArea" class="lobby-content" />
+            <!-- Content area (expands to fill remaining space) -->
+            <ui:VisualElement name="ContentArea" class="lobby-content" />
 
-        <!-- Bottom navigation bar -->
-        <ui:VisualElement name="BottomMenu" class="lobby-bottom-menu">
-            <ui:Button name="BtnPlay"      text="▶  Play"      class="lobby-bottom-btn lobby-bottom-btn--primary" />
-            <ui:Button name="BtnInventory" text="🎒 Inventory" class="lobby-bottom-btn" />
-            <ui:Button name="BtnFriends"   text="👥 Friends"   class="lobby-bottom-btn" />
-            <ui:Button name="BtnSettings"  text="⚙  Settings"  class="lobby-bottom-btn" />
+            <!-- Bottom navigation bar -->
+            <ui:VisualElement name="BottomMenu" class="lobby-bottom-menu">
+                <ui:Button name="BtnProfile"   text="👤 Profile"   class="lobby-bottom-btn" />
+                <ui:Button name="BtnDesk"      text="🃏 Desk"      class="lobby-bottom-btn" />
+                <ui:Button name="BtnInventory" text="🎒 Inventory" class="lobby-bottom-btn" />
+                <ui:Button name="BtnMailbox"   text="📬 Mailbox"   class="lobby-bottom-btn" />
+                <ui:Button name="BtnPlay"      text="▶  Play"      class="lobby-bottom-btn lobby-bottom-btn--primary" />
+            </ui:VisualElement>
+
         </ui:VisualElement>
 
     </ui:VisualElement>

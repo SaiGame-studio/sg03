@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="QuestPanel.uss" />
+
+    <!-- Shared Quest panel layout: left sidebar + main content area -->
+    <ui:VisualElement name="QuestPanelRoot" class="quest-panel-root">
+
+        <!-- Left sidebar navigation -->
+        <ui:VisualElement name="QuestSidebar" class="quest-sidebar">
+
+            <!-- Section header -->
+            <ui:VisualElement class="quest-sidebar__header">
+                <ui:Label text="⚔" class="quest-sidebar__header-icon" />
+                <ui:Label text="Quest" class="quest-sidebar__header-label" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="quest-sidebar__divider" />
+
+            <!-- Nav items -->
+            <ui:Button name="DailyQuestNavBtn" class="quest-nav-btn quest-nav-btn--active">
+                <ui:Label text="📅" class="quest-nav-btn__icon" />
+                <ui:Label text="Daily Quest" class="quest-nav-btn__label" />
+            </ui:Button>
+            <ui:Button name="MainQuestNavBtn" class="quest-nav-btn">
+                <ui:Label text="🗺" class="quest-nav-btn__icon" />
+                <ui:Label text="Main Quest" class="quest-nav-btn__label" />
+            </ui:Button>
+
+        </ui:VisualElement>
+
+        <!-- Main content area — populated at runtime from DailyQuest/ or MainQuest/ -->
+        <ui:VisualElement name="QuestContentArea" class="quest-content-area" />
+
+    </ui:VisualElement>
+
+</ui:UXML>

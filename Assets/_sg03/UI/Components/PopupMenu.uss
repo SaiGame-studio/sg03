@@ -1,0 +1,59 @@
+/* ============================================================
+   PopupMenu component styles
+   Imported by any panel that uses PopupMenu.cs
+   ============================================================ */
+
+/* Container — rendered at root level, never clipped */
+.popup-menu {
+    position: absolute;
+    flex-direction: column;
+    min-width: 160px;
+
+    background-color: rgba(16, 20, 36, 0.98);
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.5);
+    border-radius: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+
+    /* Elevate above all panel content */
+    /* (Unity UI Toolkit uses document order for z-ordering;
+       PopupMenu.Show() adds the container last → it renders on top) */
+}
+
+/* Each menu item button */
+.popup-menu__item {
+    padding: 10px 18px;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-radius: 0;
+    background-color: transparent;
+    color: rgb(160, 170, 210);
+    font-size: 13px;
+    -unity-text-align: middle-left;
+    transition-duration: 0.1s;
+}
+
+.popup-menu__item:hover {
+    background-color: rgba(80, 100, 160, 0.3);
+    color: rgb(210, 220, 255);
+}
+
+/* Active / currently-selected item */
+.popup-menu__item--active {
+    background-color: rgba(60, 110, 230, 0.2);
+    color: rgb(110, 160, 255);
+    -unity-font-style: bold;
+}
+
+/* Optional thin divider — add a VisualElement with this class between groups */
+.popup-menu__separator {
+    height: 1px;
+    background-color: rgba(80, 100, 160, 0.3);
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 10px;
+    margin-right: 10px;
+}

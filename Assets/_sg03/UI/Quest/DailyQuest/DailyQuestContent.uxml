@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="DailyQuestContent.uss" />
+
+    <!-- Daily Quest — 7-day week grid, populated at runtime -->
+    <ui:VisualElement class="dq-content">
+
+        <!-- Header -->
+        <ui:VisualElement class="dq-header">
+            <ui:Label text="📅 Daily Quest" class="dq-header__title" />
+        </ui:VisualElement>
+
+        <!-- 7-day grid (populated at runtime) -->
+        <ui:VisualElement name="WeekGrid" class="dq-week-grid" />
+
+        <!-- Empty state (shown when no entries) -->
+        <ui:VisualElement name="EmptyState" class="dq-empty">
+            <ui:Label text="📭" class="dq-empty__icon" />
+            <ui:Label text="No daily quests loaded." class="dq-empty__label" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

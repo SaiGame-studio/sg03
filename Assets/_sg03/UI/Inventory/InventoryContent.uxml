@@ -1,0 +1,38 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="InventoryContent.uss" />
+
+    <!-- Inventory content — header + category filter + scrollable item grid -->
+    <ui:VisualElement name="InventoryRoot" class="inv-root">
+
+        <!-- Header bar -->
+        <ui:VisualElement class="inv-header">
+            <ui:Label text="🎒 Inventory" class="inv-header__title" />
+            <ui:Button name="RefreshBtn" text="↻ Refresh" class="inv-header__refresh-btn" />
+        </ui:VisualElement>
+
+        <!-- Category filter tabs (populated at runtime) -->
+        <ui:VisualElement name="CategoryBar" class="inv-category-bar" />
+
+        <!-- Loading state -->
+        <ui:VisualElement name="LoadingState" class="inv-state">
+            <ui:Label text="⏳" class="inv-state__icon" />
+            <ui:Label text="Loading inventory…" class="inv-state__label" />
+        </ui:VisualElement>
+
+        <!-- Empty state (no items) -->
+        <ui:VisualElement name="EmptyState" class="inv-state">
+            <ui:Label text="📦" class="inv-state__icon" />
+            <ui:Label text="No items found" class="inv-state__label" />
+        </ui:VisualElement>
+
+        <!-- Scrollable item grid (populated at runtime) -->
+        <ui:ScrollView name="ItemGrid" class="inv-grid" />
+
+    </ui:VisualElement>
+
+</ui:UXML>

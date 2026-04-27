@@ -1,0 +1,84 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="DeskContent.uss" />
+
+    <ui:VisualElement name="DeskRoot" class="desk-root">
+
+        <ui:VisualElement name="ListPanel" class="desk-panel">
+
+            <ui:VisualElement class="desk-header">
+                <ui:Label text="🃏 My Desks" class="desk-header__title" />
+                <ui:Button name="NewDeskBtn" text="+ New Desk" class="desk-header__new-btn" />
+                <ui:Button name="RefreshBtn" text="&#x21BB; Refresh" class="desk-header__refresh-btn" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="CreateForm" class="desk-create-form">
+                <ui:TextField name="DeskNameField" label="" placeholder-text="Desk name (optional)" class="desk-create-form__input" />
+                <ui:Button name="ConfirmCreateBtn" text="Create" class="desk-create-form__confirm-btn" />
+                <ui:Button name="CancelCreateBtn" text="Cancel" class="desk-create-form__cancel-btn" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="LoadingState" class="desk-state">
+                <ui:Label text="&#x23F3;" class="desk-state__icon" />
+                <ui:Label text="Loading desks..." class="desk-state__label" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="EmptyState" class="desk-state">
+                <ui:Label text="🃏" class="desk-state__icon" />
+            </ui:VisualElement>
+
+            <ui:ScrollView name="DeskList" class="desk-list" />
+
+        </ui:VisualElement>
+
+        <ui:VisualElement name="DetailPanel" class="desk-panel desk-panel--hidden">
+
+            <ui:VisualElement class="desk-header">
+                <ui:Button name="BackBtn" text="&#x2190; Back" class="desk-header__back-btn" />
+                <ui:Label name="DetailTitle" text="Desk" class="desk-header__title" />
+                <ui:Button name="ToggleBgBtn" text="&#x1F441; Hide BG" class="desk-header__toggle-bg-btn" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="desk-detail-body">
+
+                <ui:VisualElement class="desk-detail-left">
+                    <ui:VisualElement class="desk-detail-section-header">
+                        <ui:Label text="Slots" class="desk-detail-section-title" />
+                        <ui:Label name="SlotCountLabel" text="" class="desk-detail-slot-count" />
+                    </ui:VisualElement>
+                    <ui:ScrollView name="SlotGrid" class="desk-slot-grid" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="desk-detail-right">
+                    <ui:Label text="Inventory" class="desk-detail-section-title" />
+                    <ui:TextField name="InventorySearch" label="" placeholder-text="Search items..." class="desk-inventory-search" />
+                    <ui:ScrollView name="InventoryList" class="desk-inventory-list" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <ui:VisualElement name="FlyLayer" class="desk-fly-layer" />
+
+        </ui:VisualElement>
+
+        <ui:VisualElement name="CardViewerOverlay" class="desk-card-viewer desk-card-viewer--hidden">
+            <ui:VisualElement name="CardViewerBackdrop" class="desk-card-viewer__backdrop" />
+            <ui:VisualElement class="desk-card-viewer__stage">
+                <ui:VisualElement class="desk-card-viewer__card">
+                    <ui:Label name="CardViewerIcon" text="🃏" class="desk-card-viewer__card-icon" />
+                    <ui:Label name="CardViewerName" text="" class="desk-card-viewer__card-name" />
+                    <ui:Label name="CardViewerRarity" text="" class="desk-card-viewer__card-rarity" />
+                    <ui:Label name="CardViewerCategory" text="" class="desk-card-viewer__card-category" />
+                    <ui:Label name="CardViewerQty" text="" class="desk-card-viewer__card-qty" />
+                </ui:VisualElement>
+                <ui:Button name="CardViewerCloseBtn" text="✕  Close" class="desk-card-viewer__close-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

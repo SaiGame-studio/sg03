@@ -1,0 +1,174 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using SaiGame.Services;
+using UnityEngine;
+
+namespace SG03
+{
+    /// <summary>
+    /// Manages the Card3DReview GameObject used to display card information.
+    ///
+    /// Flow:
+    ///   1. User selects a card → call ShowCardAsync("Cards/CardData_Warrior").
+    ///   2. Manager finds the scene object named "Card3DReview" automatically via LoadComponents.
+    ///   3. CardLoader loads the CardData from Addressables and applies textures.
+    ///   4. Call HideCard() to deactivate the view and release the Addressables handle.
+    ///
+    /// Setup:
+    ///   - Place a GameObject named "Card3DReview" in the scene (with Card3D + CardLoader).
+    ///   - On the CardLoader set "Load On Start" = false so the manager controls loading.
+    /// </summary>
+    [AddComponentMenu("SG03/Card/Card Data Manager")]
+    public class CardDataManager : SaiBehaviour
+    {
+        public static CardDataManager Instance { get; private set; }
+
+        [Header("Card 3D Review")]
+        [SerializeField] private Card3D     card3DReview;
+        [SerializeField] private CardLoader card3DLoader;
+
+        [Header("Card Catalog")]
+        [Tooltip("Addressable addresses of all CardData assets (e.g. \"Cards/CardData_azure_blade\"). Populated automatically via Reset.")]
+        [SerializeField] private List<string> cardAddresses = new();
+
+        public IReadOnlyList<string> CardAddresses => cardAddresses;
+
+        // ─── SaiBehaviour lifecycle ───────────────────────────────────────────────
+
+        protected override void LoadComponents()
+        {
+            base.LoadComponents();
+            this.RegisterSingleton();
+            this.LoadCard3DReview();
+        }
+
+        protected virtual void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
+        private void RegisterSingleton()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+        }
+
+        private void LoadCard3DReview()
+        {
+            if (this.card3DReview != null) return;
+
+            GameObject go = GameObject.Find("Card3DReview");
+            if (go == null) return;
+
+            this.card3DReview = go.GetComponent<Card3D>();
+            this.card3DLoader = go.GetComponent<CardLoader>();
+        }
+
+        // ─── Public API ───────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Shows the card view for the given Addressable address.
+        /// Instantiates the prefab on the first call; subsequent calls reuse the
+        /// same instance and just swap the loaded CardData.
+        /// </summary>
+        public async Task ShowCardAsync(string cardAddress)
+        {
+            if (string.IsNullOrEmpty(cardAddress))
+            {
+                Debug.LogWarning("[CardDataManager] cardAddress is empty.", this);
+                return;
+            }
+
+            EnsureCardInstance();
+
+            if (card3DReview == null) return;
+
+            card3DReview.gameObject.SetActive(true);
+
+            CardData data = await card3DLoader.LoadAsync(cardAddress);
+            if (data == null) return;
+
+            card3DReview.SetCardData(data);
+        }
+
+        /// <summary>
+        /// Shows the card view for the given short asset name (e.g. "azure_blade").
+        /// The full Addressable address is resolved automatically using the prefix
+        /// configured on <see cref="CardLoader"/> (default: "Cards/CardData_").
+        /// </summary>
+        public async Task ShowCardByNameAsync(string cardName)
+        {
+            if (string.IsNullOrEmpty(cardName))
+            {
+                Debug.LogWarning("[CardDataManager] cardName is empty.", this);
+                return;
+            }
+
+            EnsureCardInstance();
+
+            if (card3DReview == null) return;
+
+            card3DReview.gameObject.SetActive(true);
+
+            CardData data = await card3DLoader.LoadByNameAsync(cardName);
+            if (data == null) return;
+
+            card3DReview.SetCardData(data);
+        }
+
+        /// <summary>
+        /// Hides the card view and releases the Addressables handle for the CardData.
+        /// </summary>
+        public void HideCard()
+        {
+            if (card3DReview == null) return;
+
+            card3DLoader.ReleaseHandle();
+            card3DReview.gameObject.SetActive(false);
+        }
+
+        // ─── Private helpers ──────────────────────────────────────────────────────
+
+        private void EnsureCardInstance()
+        {
+            if (card3DReview != null) return;
+            Debug.LogError("[CardDataManager] Card3DReview not found in scene. " +
+                           "Place a GameObject named \"Card3DReview\" with Card3D + CardLoader.", this);
+        }
+
+#if UNITY_EDITOR
+        private void Reset()
+        {
+            cardAddresses.Clear();
+
+            string[] guids = UnityEditor.AssetDatabase.FindAssets(
+                "t:CardData",
+                new[] { "Assets/_sg03/Card/Data" });
+
+            var settings = UnityEditor.AddressableAssets
+                .AddressableAssetSettingsDefaultObject.Settings;
+
+            if (settings == null)
+            {
+                Debug.LogWarning("[CardDataManager] Addressable settings not found.", this);
+                return;
+            }
+
+            foreach (string guid in guids)
+            {
+                UnityEditor.AddressableAssets.Settings.AddressableAssetEntry entry =
+                    settings.FindAssetEntry(guid);
+
+                if (entry == null) continue;
+
+                cardAddresses.Add(entry.address);
+            }
+        }
+#endif
+    }
+}
