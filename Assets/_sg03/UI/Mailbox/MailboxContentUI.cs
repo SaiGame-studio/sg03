@@ -187,14 +187,56 @@ namespace SG03.UI
             row.AddToClassList("mb-attachments");
 
             foreach (MailBoxAttachment att in attachments)
-            {
-                string label = string.IsNullOrEmpty(att.definition_id) ? att.type ?? "?" : att.definition_id;
-                Label chip = new Label($"🎁 {label} x{att.quantity}");
-                chip.AddToClassList("mb-attachment-chip");
-                row.Add(chip);
-            }
+                row.Add(this.BuildAttachmentChip(att));
 
             return row;
+        }
+
+        private VisualElement BuildAttachmentChip(MailBoxAttachment att)
+        {
+            ItemDefinitionData def = att.item_definition;
+
+            string displayName = def?.name
+                              ?? att.definition_id
+                              ?? att.type
+                              ?? "?";
+
+            string rarity   = def?.rarity   ?? string.Empty;
+            string category = def?.category ?? string.Empty;
+
+            VisualElement chip = new VisualElement();
+            chip.AddToClassList("mb-attachment-chip");
+            if (!string.IsNullOrEmpty(rarity))
+                chip.AddToClassList($"mb-attachment-chip--{rarity.ToLower()}");
+
+            Label nameLabel = new Label($"🎁 {displayName} x{att.quantity}");
+            nameLabel.AddToClassList("mb-attachment-chip__name");
+            chip.Add(nameLabel);
+
+            if (!string.IsNullOrEmpty(rarity) || !string.IsNullOrEmpty(category))
+            {
+                VisualElement meta = new VisualElement();
+                meta.AddToClassList("mb-attachment-chip__meta");
+
+                if (!string.IsNullOrEmpty(rarity))
+                {
+                    Label rarityLabel = new Label(rarity);
+                    rarityLabel.AddToClassList("mb-attachment-chip__rarity");
+                    rarityLabel.AddToClassList($"mb-attachment-chip__rarity--{rarity.ToLower()}");
+                    meta.Add(rarityLabel);
+                }
+
+                if (!string.IsNullOrEmpty(category))
+                {
+                    Label catLabel = new Label(category);
+                    catLabel.AddToClassList("mb-attachment-chip__category");
+                    meta.Add(catLabel);
+                }
+
+                chip.Add(meta);
+            }
+
+            return chip;
         }
 
         private string FormatDate(string isoDate)
