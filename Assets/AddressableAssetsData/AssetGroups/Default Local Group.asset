@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 23f565229de3a5e479ee3849d00fd09c
   m_SerializeEntries:
+  - m_GUID: 6afd6f7305243ca49b6994795e032089
+    m_Address: Assets/_sg03/Card/Data/hellscythe.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fec84290bc9f9f24f9ece1d96e52b213
     m_Address: Assets/_sg03/Card/Data/azure_blade.asset
     m_ReadOnly: 0

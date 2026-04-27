@@ -49,6 +49,15 @@ namespace SG03
             GetComponent<Card3D>().SetCardData(data);
         }
 
+        /// <summary>
+        /// Loads the CardData and applies it to the sibling Card3D immediately.
+        /// Callable from Editor buttons or runtime code.
+        /// </summary>
+        public async System.Threading.Tasks.Task LoadAndApply()
+        {
+            await LoadAndApplyAsync();
+        }
+
         private void OnDestroy() => ReleaseHandle();
 
         // ─── Public API ───────────────────────────────────────────────────────────

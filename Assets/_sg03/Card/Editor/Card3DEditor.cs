@@ -18,6 +18,9 @@ namespace SG03
             if (GUILayout.Button("Setup Card Structure"))
                 SetupCardStructure(card);
 
+            if (GUILayout.Button("Setup Materials"))
+                SetupMaterials(card);
+
             if (GUILayout.Button("Apply Size"))
             {
                 Undo.RecordObject(card.transform, "Apply Card Size");
@@ -86,9 +89,80 @@ namespace SG03
             so.FindProperty("backRenderer").objectReferenceValue       = backGO.GetComponent<Renderer>();
             so.ApplyModifiedProperties();
 
+            AutoFillCardDefaults(so);
+
             card.ApplySize();
+            SetupMaterials(card);
+            card.ApplyDefaults();
 
             Undo.CollapseUndoOperations(undoGroup);
+        }
+
+        // Assigns the first CardDefaults asset found in the project to the cardDefaults
+        // field on Card3D if it is not already set.
+        private static void AutoFillCardDefaults(SerializedObject so)
+        {
+            SerializedProperty prop = so.FindProperty("cardDefaults");
+            if (prop.objectReferenceValue != null) return;
+
+            string[] guids = AssetDatabase.FindAssets("t:CardDefaults");
+            if (guids.Length == 0) return;
+
+            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+            prop.objectReferenceValue = AssetDatabase.LoadAssetAtPath<CardDefaults>(path);
+            so.ApplyModifiedProperties();
+        }
+
+        // Assigns a one-sided transparent material (URP Unlit, Cull Back) to each quad
+        // renderer so alpha channels work correctly and quads are invisible from behind.
+        private static void SetupMaterials(Card3D card)
+        {
+            SerializedObject so = new SerializedObject(card);
+            AssignNewMaterial(so.FindProperty("frontFrameRenderer"), "Card_Frame");
+            AssignNewMaterial(so.FindProperty("characterRenderer"),  "Card_Character");
+            AssignNewMaterial(so.FindProperty("backRenderer"),       "Card_Back");
+            so.ApplyModifiedProperties();
+
+            EditorUtility.SetDirty(card);
+        }
+
+        private static void AssignNewMaterial(SerializedProperty rendererProp, string matName)
+        {
+            if (rendererProp.objectReferenceValue is not Renderer r) return;
+
+            Material mat = CreateCardMaterial(matName);
+            Undo.RegisterCreatedObjectUndo(mat, "Create " + matName);
+            Undo.RecordObject(r, "Assign Material " + matName);
+            r.sharedMaterial = mat;
+        }
+
+        // Creates a transparent, one-sided (Cull Back) material using URP Unlit.
+        // Falls back to Sprites/Default if URP Unlit is unavailable.
+        private static Material CreateCardMaterial(string matName)
+        {
+            Shader urpUnlit = Shader.Find("Universal Render Pipeline/Unlit");
+            if (urpUnlit == null)
+            {
+                Material fallback = new Material(Shader.Find("Sprites/Default"));
+                fallback.name = matName;
+                return fallback;
+            }
+
+            Material mat = new Material(urpUnlit);
+            mat.name = matName;
+
+            mat.SetFloat("_Surface",      1f);  // Transparent
+            mat.SetFloat("_Blend",        0f);  // Alpha
+            mat.SetFloat("_Cull",         2f);  // Back
+            mat.SetFloat("_ZWrite",       0f);
+            mat.SetFloat("_SrcBlend",     5f);  // SrcAlpha
+            mat.SetFloat("_DstBlend",    10f);  // OneMinusSrcAlpha
+            mat.SetFloat("_SrcBlendAlpha", 1f); // One
+            mat.SetFloat("_DstBlendAlpha", 0f); // Zero
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+
+            return mat;
         }
 
         private static Transform GetOrCreateChild(Transform parent, string childName)
