@@ -27,6 +27,9 @@ namespace SG03.UI
         [Header("Inventory Panel Assets")]
         [SerializeField] private VisualTreeAsset inventoryContentAsset;
 
+        [Header("Desk Panel Assets")]
+        [SerializeField] private VisualTreeAsset deskContentAsset;
+
         // Provides access to every SaiServer service (Auth, GamerProgress, Shop, …).
         protected SaiServer Server => this.saiServer;
 
@@ -42,6 +45,7 @@ namespace SG03.UI
             this.LoadMainQuestContentAsset();
             this.LoadMailboxContentAsset();
             this.LoadInventoryContentAsset();
+            this.LoadDeskContentAsset();
         }
 
         private void LoadSaiServer()
@@ -138,11 +142,20 @@ namespace SG03.UI
 #endif
         }
 
+        private void LoadDeskContentAsset()
+        {
+            if (this.deskContentAsset != null) return;
+#if UNITY_EDITOR
+            this.deskContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/_sg03/UI/Desk/DeskContent.uxml");
+            Debug.LogWarning(transform.name + ": LoadDeskContentAsset", gameObject);
+#endif
+        }
+
         // Top tabs
         private Button homeTab;
         private Button shopTab;
         private Button questTab;
-        private Button profileTab;
 
         // Quest popup menu
         private PopupMenu questMenu;
@@ -150,9 +163,10 @@ namespace SG03.UI
 
         // Bottom buttons
         private Button btnPlay;
+        private Button btnProfile;
+        private Button btnDesk;
         private Button btnInventory;
         private Button btnMailbox;
-        private Button btnSettings;
 
         // Player name label (top-right of TopMenu)
         private Label playerNameLabel;
@@ -184,11 +198,8 @@ namespace SG03.UI
             this.homeTab    = root.Q<Button>("HomeTab");
             this.shopTab    = root.Q<Button>("ShopTab");
             this.questTab   = root.Q<Button>("QuestTab");
-            this.profileTab = root.Q<Button>("ProfileTab");
-
             this.homeTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.homeTab));
             this.shopTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.shopTab));
-            this.profileTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.profileTab));
 
             // Quest tab — PopupMenu handles all hover/click/close logic
             this.questMenu = new PopupMenu(root);
@@ -203,14 +214,16 @@ namespace SG03.UI
 
             // Bottom buttons
             this.btnPlay      = root.Q<Button>("BtnPlay");
+            this.btnProfile   = root.Q<Button>("BtnProfile");
+            this.btnDesk      = root.Q<Button>("BtnDesk");
             this.btnInventory = root.Q<Button>("BtnInventory");
             this.btnMailbox   = root.Q<Button>("BtnMailbox");
-            this.btnSettings  = root.Q<Button>("BtnSettings");
 
             this.btnPlay?.RegisterCallback<ClickEvent>(_ => this.OnPlayClicked());
+            this.btnProfile?.RegisterCallback<ClickEvent>(_ => this.OnProfileClicked());
+            this.btnDesk?.RegisterCallback<ClickEvent>(_ => this.OnDeskClicked());
             this.btnInventory?.RegisterCallback<ClickEvent>(_ => this.OnInventoryClicked());
             this.btnMailbox?.RegisterCallback<ClickEvent>(_ => this.OnMailboxClicked());
-            this.btnSettings?.RegisterCallback<ClickEvent>(_ => this.OnSettingsClicked());
 
             // Player name (top-right)
             this.playerNameLabel = root.Q<Label>("PlayerNameLabel");
@@ -238,7 +251,7 @@ namespace SG03.UI
             UserData user = this.saiServer != null ? this.saiServer.CurrentUser : null;
             string name = user?.display_name;
             if (string.IsNullOrEmpty(name)) name = user?.username;
-            this.playerNameLabel.text = string.IsNullOrEmpty(name) ? string.Empty : $"👤 {name}";
+            this.playerNameLabel.text = string.IsNullOrEmpty(name) ? "👤 Guest" : $"👤 {name}";
         }
 
         // ------------------------------------------------------------------
@@ -246,7 +259,7 @@ namespace SG03.UI
         // ------------------------------------------------------------------
         private void OnTopTabClicked(Button selected)
         {
-            foreach (Button tab in new[] { this.homeTab, this.shopTab, this.questTab, this.profileTab })
+            foreach (Button tab in new[] { this.homeTab, this.shopTab, this.questTab })
             {
                 if (tab == null) continue;
                 tab.RemoveFromClassList("lobby-tab--active");
@@ -330,7 +343,22 @@ namespace SG03.UI
 
             new InventoryContentUI(content);
         }
-        protected virtual void OnSettingsClicked()  { }
+        protected virtual void OnProfileClicked()   { }
+        protected virtual void OnDeskClicked()
+        {
+            if (this.contentArea == null || this.deskContentAsset == null) return;
+
+            this.contentArea.Clear();
+            TemplateContainer content = this.deskContentAsset.Instantiate();
+            content.style.flexGrow   = 1;
+            content.style.flexShrink = 1;
+            content.style.width      = new StyleLength(new Length(100, LengthUnit.Percent));
+            content.style.height     = new StyleLength(new Length(100, LengthUnit.Percent));
+            content.style.alignSelf  = Align.Stretch;
+            this.contentArea.Add(content);
+
+            new DeskContentUI(content);
+        }
 
         protected virtual void OnMailboxClicked()
         {

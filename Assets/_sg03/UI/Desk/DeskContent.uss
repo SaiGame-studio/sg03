@@ -1,0 +1,583 @@
+@import url("../../../SaiGame/UI/Common/Variables.uss");
+
+/* ============================================================
+   Desk content root — fills ContentArea
+   ============================================================ */
+.desk-root {
+    flex: 1;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(10, 12, 20, 0.97);
+}
+
+/* ============================================================
+   Header bar
+   ============================================================ */
+.desk-header {
+    flex-direction: row;
+    align-items: center;
+    height: 52px;
+    min-height: 52px;
+    padding: 0 24px;
+    background-color: rgba(16, 20, 36, 1);
+    border-bottom-width: 1px;
+    border-color: rgba(80, 100, 160, 0.35);
+}
+
+.desk-header__title {
+    flex: 1;
+    font-size: 15px;
+    color: rgb(200, 210, 255);
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.desk-header__new-btn {
+    padding: 6px 16px;
+    margin-right: 8px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(100, 200, 120, 0.5);
+    background-color: rgba(30, 80, 40, 0.7);
+    color: rgb(140, 220, 150);
+    font-size: 12px;
+    -unity-font-style: bold;
+    transition-duration: 0.1s;
+}
+
+.desk-header__new-btn:hover {
+    background-color: rgba(40, 110, 55, 0.85);
+    color: rgb(180, 245, 185);
+}
+
+.desk-header__refresh-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.4);
+    background-color: rgba(40, 50, 80, 0.6);
+    color: rgb(150, 160, 200);
+    font-size: 12px;
+    transition-duration: 0.1s;
+}
+
+.desk-header__refresh-btn:hover {
+    background-color: rgba(60, 80, 130, 0.7);
+    color: rgb(200, 215, 255);
+}
+
+/* ============================================================
+   Create form (inline, below header)
+   ============================================================ */
+.desk-create-form {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 24px;
+    background-color: rgba(20, 25, 44, 1);
+    border-bottom-width: 1px;
+    border-color: rgba(100, 200, 120, 0.25);
+}
+
+.desk-create-form__input {
+    flex: 1;
+    margin-right: 10px;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.45);
+    background-color: rgba(28, 34, 58, 1);
+    color: rgb(200, 210, 255);
+    font-size: 12px;
+    padding: 6px 10px;
+}
+
+.desk-create-form__input > .unity-text-field__input {
+    background-color: transparent;
+    color: rgb(200, 210, 255);
+    border-width: 0;
+    padding: 0;
+}
+
+.desk-create-form__confirm-btn {
+    padding: 6px 18px;
+    margin-right: 6px;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(100, 200, 120, 0.5);
+    background-color: rgba(30, 80, 40, 0.8);
+    color: rgb(140, 220, 150);
+    font-size: 12px;
+    -unity-font-style: bold;
+    transition-duration: 0.1s;
+}
+
+.desk-create-form__confirm-btn:hover {
+    background-color: rgba(40, 110, 55, 0.9);
+    color: rgb(180, 245, 185);
+}
+
+.desk-create-form__cancel-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(180, 80, 80, 0.4);
+    background-color: rgba(60, 25, 25, 0.6);
+    color: rgb(200, 140, 140);
+    font-size: 12px;
+    transition-duration: 0.1s;
+}
+
+.desk-create-form__cancel-btn:hover {
+    background-color: rgba(90, 35, 35, 0.8);
+    color: rgb(240, 170, 170);
+}
+
+/* ============================================================
+   State views — loading and empty
+   ============================================================ */
+.desk-state {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.desk-state__icon {
+    font-size: 40px;
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+}
+
+.desk-state__label {
+    font-size: 14px;
+    color: rgb(130, 145, 185);
+    -unity-text-align: middle-center;
+}
+
+/* ============================================================
+   Scrollable desk list
+   ============================================================ */
+.desk-list {
+    flex: 1;
+    padding: 16px;
+}
+
+/* ============================================================
+   Desk row card
+   ============================================================ */
+.desk-row {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(22, 26, 40, 1);
+    border-radius: 10px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.25);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition-duration: 0.1s;
+}
+
+.desk-row:hover {
+    background-color: rgba(30, 36, 58, 1);
+    border-color: rgba(100, 130, 220, 0.45);
+}
+
+.desk-row__icon {
+    font-size: 24px;
+    margin-right: 14px;
+    -unity-text-align: middle-center;
+    min-width: 32px;
+}
+
+.desk-row__info {
+    flex: 1;
+    flex-direction: column;
+}
+
+.desk-row__name {
+    font-size: 14px;
+    color: rgb(210, 220, 255);
+    -unity-font-style: bold;
+    margin-bottom: 2px;
+}
+
+.desk-row__meta {
+    font-size: 10px;
+    color: rgb(100, 115, 160);
+    letter-spacing: 0.5px;
+}
+
+.desk-row__slots {
+    font-size: 11px;
+    color: rgb(130, 160, 200);
+    -unity-text-align: middle-right;
+    min-width: 60px;
+}
+
+/* ============================================================
+   Panel switching
+   ============================================================ */
+.desk-panel {
+    flex: 1;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.desk-panel--hidden {
+    display: none;
+}
+
+/* ============================================================
+   Back button (detail header)
+   ============================================================ */
+.desk-header__back-btn {
+    padding: 6px 14px;
+    margin-right: 10px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.4);
+    background-color: rgba(40, 50, 80, 0.6);
+    color: rgb(150, 160, 200);
+    font-size: 12px;
+    transition-duration: 0.1s;
+}
+
+.desk-header__back-btn:hover {
+    background-color: rgba(60, 80, 130, 0.7);
+    color: rgb(200, 215, 255);
+}
+
+/* ============================================================
+   Slot grid
+   ============================================================ */
+.desk-slot-grid {
+    flex: 1;
+    padding: 16px;
+}
+
+.desk-slot-grid > #unity-content-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.desk-slot-grid > #unity-scroll-view > #unity-content-viewport > #unity-content-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+/* Each slot tile */
+.desk-slot {
+    width: 100px;
+    height: 140px;
+    margin: 6px;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgba(80, 100, 160, 0.3);
+    background-color: rgba(20, 24, 40, 1);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transition-duration: 0.1s;
+}
+
+.desk-slot--empty {
+    border-color: rgba(80, 100, 160, 0.2);
+    background-color: rgba(16, 20, 34, 1);
+}
+
+.desk-slot--empty:hover {
+    border-color: rgba(100, 180, 120, 0.5);
+    background-color: rgba(20, 40, 28, 0.8);
+}
+
+.desk-slot--filled {
+    border-color: rgba(100, 140, 255, 0.4);
+    background-color: rgba(22, 28, 52, 1);
+}
+
+.desk-slot__index {
+    font-size: 9px;
+    color: rgb(70, 85, 130);
+    -unity-text-align: middle-center;
+    margin-bottom: 6px;
+}
+
+.desk-slot__add-icon {
+    font-size: 28px;
+    color: rgb(80, 130, 90);
+    -unity-text-align: middle-center;
+}
+
+.desk-slot__item-icon {
+    font-size: 28px;
+    -unity-text-align: middle-center;
+    margin-bottom: 6px;
+}
+
+.desk-slot__item-name {
+    font-size: 9px;
+    color: rgb(160, 175, 220);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    -unity-word-wrap: true;
+    max-width: 88px;
+}
+
+.desk-slot__item-qty {
+    font-size: 9px;
+    color: rgb(100, 115, 160);
+    -unity-text-align: middle-center;
+    margin-top: 2px;
+}
+
+/* ============================================================
+   Item picker overlay
+   ============================================================ */
+.desk-picker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(8, 10, 18, 0.94);
+    flex-direction: column;
+}
+
+.desk-picker--hidden {
+    display: none;
+}
+
+.desk-picker__header {
+    flex-direction: row;
+    align-items: center;
+    height: 48px;
+    min-height: 48px;
+    padding: 0 20px;
+    background-color: rgba(16, 20, 36, 1);
+    border-bottom-width: 1px;
+    border-color: rgba(80, 100, 160, 0.35);
+}
+
+.desk-picker__title {
+    flex: 1;
+    font-size: 14px;
+    color: rgb(200, 210, 255);
+    -unity-font-style: bold;
+}
+
+.desk-picker__close-btn {
+    padding: 4px 12px;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(180, 80, 80, 0.4);
+    background-color: rgba(60, 25, 25, 0.6);
+    color: rgb(200, 140, 140);
+    font-size: 12px;
+    transition-duration: 0.1s;
+}
+
+.desk-picker__close-btn:hover {
+    background-color: rgba(90, 35, 35, 0.8);
+    color: rgb(240, 170, 170);
+}
+
+.desk-picker__list {
+    flex: 1;
+    padding: 12px;
+}
+
+/* Item picker row */
+.desk-picker-item {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(22, 26, 40, 1);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.2);
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    transition-duration: 0.1s;
+}
+
+.desk-picker-item:hover {
+    background-color: rgba(30, 50, 90, 0.8);
+    border-color: rgba(100, 140, 255, 0.5);
+}
+
+.desk-picker-item__icon {
+    font-size: 22px;
+    margin-right: 12px;
+    min-width: 30px;
+    -unity-text-align: middle-center;
+}
+
+.desk-picker-item__info {
+    flex: 1;
+    flex-direction: column;
+}
+
+.desk-picker-item__name {
+    font-size: 13px;
+    color: rgb(200, 215, 255);
+    -unity-font-style: bold;
+}
+
+.desk-picker-item__meta {
+    font-size: 10px;
+    color: rgb(100, 115, 160);
+    margin-top: 2px;
+}
+
+.desk-picker-item__qty {
+    font-size: 12px;
+    color: rgb(130, 160, 200);
+    -unity-text-align: middle-right;
+    min-width: 40px;
+}
+
+/* ============================================================
+   Detail panel — split layout
+   ============================================================ */
+.desk-detail-body {
+    flex: 1;
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.desk-detail-left {
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.desk-detail-right {
+    width: 240px;
+    min-width: 200px;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 10px 10px 10px 0;
+    border-left-width: 1px;
+    border-color: rgba(80, 100, 160, 0.25);
+}
+
+.desk-detail-section-title {
+    font-size: 11px;
+    color: rgb(120, 140, 200);
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+    padding: 8px 12px 4px 12px;
+}
+
+/* ============================================================
+   Inventory list (right panel)
+   ============================================================ */
+.desk-inventory-search {
+    margin: 0 10px 8px 10px;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.4);
+    background-color: rgba(22, 26, 42, 1);
+    color: rgb(200, 210, 255);
+    font-size: 12px;
+}
+
+.desk-inventory-search > .unity-base-text-field__input {
+    background-color: transparent;
+    color: rgb(200, 210, 255);
+    border-width: 0;
+    padding: 6px 8px;
+}
+
+.desk-inventory-list {
+    flex: 1;
+    padding: 0 10px 10px 10px;
+}
+
+.desk-inv-item {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(22, 26, 40, 0.8);
+    border-radius: 7px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.2);
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    transition-duration: 0.1s;
+    cursor: link;
+}
+
+.desk-inv-item:hover {
+    background-color: rgba(40, 55, 100, 0.85);
+    border-color: rgba(100, 140, 255, 0.45);
+}
+
+.desk-inv-item__icon {
+    font-size: 20px;
+    width: 28px;
+    min-width: 28px;
+    -unity-text-align: middle-center;
+    margin-right: 8px;
+}
+
+.desk-inv-item__info {
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.desk-inv-item__name {
+    font-size: 11px;
+    color: rgb(200, 215, 255);
+    -unity-font-style: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.desk-inv-item__meta {
+    font-size: 9px;
+    color: rgb(110, 125, 175);
+    margin-top: 1px;
+}
+
+.desk-inv-item__qty {
+    font-size: 10px;
+    color: rgb(100, 175, 120);
+    min-width: 28px;
+    -unity-text-align: middle-right;
+    margin-left: 6px;
+}
+
+/* ============================================================
+   Fly animation overlay
+   ============================================================ */
+.desk-fly-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.desk-fly-ghost {
+    position: absolute;
+    font-size: 32px;
+    width: 40px;
+    height: 40px;
+    -unity-text-align: middle-center;
+}
