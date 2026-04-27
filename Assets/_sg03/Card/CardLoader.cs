@@ -7,15 +7,15 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace SG03
 {
     /// <summary>
-    /// Loads a <see cref="CardData"/> ScriptableObject from Addressables and applies
-    /// it to the sibling <see cref="Card3D"/> component.
+    /// Loads a <see cref="CardData"/> ScriptableObject from Addressables and returns it.
+    /// The caller (e.g. <see cref="CardDataManager"/>) is responsible for applying the
+    /// result to a <see cref="Card3D"/> component.
     ///
     /// Usage:
     ///   1. Mark the CardData asset as Addressable in the Inspector.
     ///   2. Copy the Addressable Address string (e.g. "Cards/CardData_Warrior").
     ///   3. Paste it into the "Card Address" field on this component.
-    ///   4. Call LoadAsync() at the desired point in your game flow, or enable
-    ///      "Load On Start" for automatic loading.
+    ///   4. Set "Load On Start" = false when managed by CardDataManager.
     ///
     /// The loaded handle is released automatically when this component is destroyed.
     /// </summary>
@@ -29,21 +29,24 @@ namespace SG03
         [Tooltip("When true, LoadAsync() is called automatically in Start().")]
         [SerializeField] private bool loadOnStart = true;
 
-        private Card3D                         card3D;
         private AsyncOperationHandle<CardData> handle;
         private bool                           handleIsValid;
 
         // ─── Unity lifecycle ──────────────────────────────────────────────────────
 
-        private void Awake()
-        {
-            card3D = GetComponent<Card3D>();
-        }
-
         private void Start()
         {
             if (!loadOnStart) return;
-            _ = LoadAsync();
+            _ = LoadAndApplyAsync();
+        }
+
+        // Convenience wrapper for standalone use (loadOnStart = true).
+        // Loads CardData and applies it directly to the sibling Card3D.
+        private async System.Threading.Tasks.Task LoadAndApplyAsync()
+        {
+            CardData data = await LoadAsync();
+            if (data == null) return;
+            GetComponent<Card3D>().SetCardData(data);
         }
 
         private void OnDestroy() => ReleaseHandle();
@@ -51,22 +54,24 @@ namespace SG03
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Loads the CardData from Addressables asynchronously and applies it to
-        /// the Card3D. Releases any previously loaded handle first.
+        /// Loads the CardData from Addressables asynchronously and returns it.
+        /// The caller is responsible for calling Card3D.SetCardData with the result.
+        /// Releases any previously loaded handle first.
+        /// Returns null on failure.
         /// </summary>
-        public async Task LoadAsync(string address = null)
+        public async Task<CardData> LoadAsync(string address = null)
         {
             string resolvedAddress = string.IsNullOrEmpty(address) ? cardAddress : address;
 
             if (string.IsNullOrEmpty(resolvedAddress))
             {
                 Debug.LogWarning($"[CardLoader] Card address is empty on '{name}'.", this);
-                return;
+                return null;
             }
 
             ReleaseHandle();
 
-            handle      = Addressables.LoadAssetAsync<CardData>(resolvedAddress);
+            handle        = Addressables.LoadAssetAsync<CardData>(resolvedAddress);
             handleIsValid = true;
 
             try
@@ -77,17 +82,17 @@ namespace SG03
             {
                 Debug.LogError($"[CardLoader] Failed to load '{resolvedAddress}': {e.Message}", this);
                 ReleaseHandle();
-                return;
+                return null;
             }
 
             if (handle.Status != AsyncOperationStatus.Succeeded)
             {
                 Debug.LogError($"[CardLoader] Addressables load failed for '{resolvedAddress}'.", this);
                 ReleaseHandle();
-                return;
+                return null;
             }
 
-            card3D.SetCardData(handle.Result);
+            return handle.Result;
         }
 
         /// <summary>Releases the loaded Addressables handle.</summary>

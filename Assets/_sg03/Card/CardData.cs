@@ -11,14 +11,14 @@ namespace SG03
     public class CardData : ScriptableObject
     {
         [Header("Front Face")]
-        [Tooltip("Transparent frame PNG overlaid on top of the character artwork.")]
+        [Tooltip("(Optional) Frame PNG for this card. Leave null to use the default from CardDefaults.")]
         [SerializeField] private Texture2D frameTexture;
 
-        [Tooltip("Character artwork shown as the background of the front face.")]
+        [Tooltip("Character artwork shown as the background of the front face. Required.")]
         [SerializeField] private Texture2D characterTexture;
 
         [Header("Back Face")]
-        [Tooltip("Image shown on the card back.")]
+        [Tooltip("(Optional) Card back image for this card. Leave null to use the default from CardDefaults.")]
         [SerializeField] private Texture2D backTexture;
 
         // ─── Read-only accessors ──────────────────────────────────────────────────

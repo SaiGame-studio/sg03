@@ -37,6 +37,12 @@ namespace SG03
         [Tooltip("Duration of the flip animation in seconds.")]
         [SerializeField] private float flipDuration = 0.4f;
 
+        [Header("Card Size")]
+        [Tooltip("Physical width of the card in world units.")]
+        [SerializeField] private float cardWidth  = 0.723f;
+        [Tooltip("Physical height of the card in world units.")]
+        [SerializeField] private float cardHeight = 1f;
+
         private bool      isFacingFront = true;
         private float     currentYAngle = 0f;
         private Coroutine flipCoroutine;
@@ -48,11 +54,22 @@ namespace SG03
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Pushes the textures from the assigned CardData to their respective renderer
-        /// material instances. Safe to call at runtime and from the Inspector button.
-        /// Does nothing if <see cref="cardData"/> is null.
+        /// Scales all face quads (Character, Frame, Back) to match cardWidth × cardHeight.
         /// </summary>
-        public void ApplyTextures()
+        public void ApplySize()
+        {
+            Vector3 size = new Vector3(cardWidth, cardHeight, 1f);
+            if (frontFrameRenderer != null) frontFrameRenderer.transform.localScale = size;
+            if (characterRenderer  != null) characterRenderer.transform.localScale  = size;
+            if (backRenderer       != null) backRenderer.transform.localScale       = size;
+        }
+
+        /// <summary>
+        /// Pushes the textures from the assigned CardData to their respective renderer
+        /// material instances. Optional <paramref name="defaults"/> fills in any null
+        /// frame or back texture in CardData.
+        /// </summary>
+        public void ApplyTextures(CardDefaults defaults = null)
         {
             if (cardData == null)
             {
@@ -60,19 +77,22 @@ namespace SG03
                 return;
             }
 
-            SetRendererTexture(frontFrameRenderer, cardData.FrameTexture);
+            Texture2D frame  = cardData.FrameTexture != null ? cardData.FrameTexture : defaults?.FrameTexture;
+            Texture2D back   = cardData.BackTexture  != null ? cardData.BackTexture  : defaults?.BackTexture;
+
+            SetRendererTexture(frontFrameRenderer, frame);
             SetRendererTexture(characterRenderer,  cardData.CharacterTexture);
-            SetRendererTexture(backRenderer,       cardData.BackTexture);
+            SetRendererTexture(backRenderer,       back);
         }
 
         /// <summary>
         /// Assigns a new <see cref="CardData"/> and immediately applies its textures.
-        /// Called by <see cref="CardLoader"/> after an Addressables load completes.
+        /// Called by <see cref="CardDataManager"/> after an Addressables load completes.
         /// </summary>
-        public void SetCardData(CardData data)
+        public void SetCardData(CardData data, CardDefaults defaults = null)
         {
             cardData = data;
-            ApplyTextures();
+            ApplyTextures(defaults);
         }
 
         /// <summary>Shows the front face immediately (no animation).</summary>

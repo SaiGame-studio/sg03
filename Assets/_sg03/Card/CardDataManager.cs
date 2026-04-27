@@ -23,8 +23,11 @@ namespace SG03
         public static CardDataManager Instance { get; private set; }
 
         [Header("Card 3D Review")]
-        [SerializeField] private Card3D    card3DReview;
-        [SerializeField] private CardLoader card3DLoader;
+        [SerializeField] private Card3D       card3DReview;
+        [SerializeField] private CardLoader   card3DLoader;
+
+        [Header("Defaults")]
+        [SerializeField] private CardDefaults cardDefaults;
 
         // ─── SaiBehaviour lifecycle ───────────────────────────────────────────────
 
@@ -33,6 +36,7 @@ namespace SG03
             base.LoadComponents();
             this.RegisterSingleton();
             this.LoadCard3DReview();
+            this.LoadCardDefaults();
         }
 
         protected virtual void OnDestroy()
@@ -54,6 +58,17 @@ namespace SG03
         // Finds the "Card3DReview" object already present in the scene and caches
         // its Card3D and CardLoader references. Called automatically by LoadComponents
         // so the links are always up-to-date after a Reset.
+        private void LoadCardDefaults()
+        {
+            if (cardDefaults != null) return;
+#if UNITY_EDITOR
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:CardDefaults");
+            if (guids.Length == 0) return;
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+            cardDefaults = UnityEditor.AssetDatabase.LoadAssetAtPath<CardDefaults>(path);
+#endif
+        }
+
         private void LoadCard3DReview()
         {
             if (this.card3DReview != null) return;
@@ -85,7 +100,11 @@ namespace SG03
             if (card3DReview == null) return;
 
             card3DReview.gameObject.SetActive(true);
-            await card3DLoader.LoadAsync(cardAddress);
+
+            CardData data = await card3DLoader.LoadAsync(cardAddress);
+            if (data == null) return;
+
+            card3DReview.SetCardData(data, cardDefaults);
         }
 
         /// <summary>

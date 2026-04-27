@@ -18,16 +18,25 @@ namespace SG03
             if (GUILayout.Button("Setup Card Structure"))
                 SetupCardStructure(card);
 
+            if (GUILayout.Button("Apply Size"))
+            {
+                Undo.RecordObject(card.transform, "Apply Card Size");
+                foreach (Renderer r in card.GetComponentsInChildren<Renderer>())
+                    Undo.RecordObject(r.transform, "Apply Card Size");
+                card.ApplySize();
+                EditorUtility.SetDirty(card);
+            }
+
             if (GUILayout.Button("Apply Textures"))
             {
                 card.ApplyTextures();
                 EditorUtility.SetDirty(card);
             }
 
-            if (!Application.isPlaying) return;
-
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("Runtime Controls", EditorStyles.boldLabel);
+
+            GUI.enabled = Application.isPlaying;
 
             if (GUILayout.Button("Show Front"))
                 card.ShowFront();
@@ -37,6 +46,8 @@ namespace SG03
 
             if (GUILayout.Button("Flip"))
                 card.Flip();
+
+            GUI.enabled = true;
         }
 
         // ─── Setup helpers ────────────────────────────────────────────────────────
@@ -74,6 +85,8 @@ namespace SG03
             so.FindProperty("frontFrameRenderer").objectReferenceValue = frameGO.GetComponent<Renderer>();
             so.FindProperty("backRenderer").objectReferenceValue       = backGO.GetComponent<Renderer>();
             so.ApplyModifiedProperties();
+
+            card.ApplySize();
 
             Undo.CollapseUndoOperations(undoGroup);
         }

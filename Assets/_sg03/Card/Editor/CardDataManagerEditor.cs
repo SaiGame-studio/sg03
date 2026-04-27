@@ -12,18 +12,18 @@ namespace SG03
         {
             DrawDefaultInspector();
 
-            if (!Application.isPlaying) return;
-
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("Runtime Test", EditorStyles.boldLabel);
 
             testAddress = EditorGUILayout.TextField("Card Address", testAddress);
 
+            GUI.enabled = Application.isPlaying;
             if (GUILayout.Button("Show Card"))
                 _ = ((CardDataManager)target).ShowCardAsync(testAddress);
 
             if (GUILayout.Button("Hide Card"))
                 ((CardDataManager)target).HideCard();
+            GUI.enabled = true;
         }
     }
 }
