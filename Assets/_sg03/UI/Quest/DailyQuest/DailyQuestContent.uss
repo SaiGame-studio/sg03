@@ -203,6 +203,13 @@
     border-color: rgba(80, 140, 255, 0.4);
 }
 
+.dq-quest-item__expires {
+    font-size: 9px;
+    color: rgb(180, 120, 100);
+    -unity-text-align: middle-left;
+    margin-top: 3px;
+}
+
 /* ---- Rewards row ---- */
 .dq-quest-item__rewards {
     flex-direction: row;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine.UIElements;
 using SaiGame.Services;
 using SG03.Quest;
@@ -253,6 +254,24 @@ namespace SG03.UI
                 bottom.Add(statusLabel);
             }
 
+            string assignedDate = entry.assignment?.assigned_date;
+            string expiresAt    = entry.assignment?.expires_at;
+
+            bool assignedInFuture = IsInFuture(assignedDate);
+            if (assignedInFuture)
+            {
+                // Quest hasn't started yet — show when it will begin.
+                Label startsLabel = new Label($"Starts {TimeIn(assignedDate)}");
+                startsLabel.AddToClassList("dq-quest-item__expires");
+                bottom.Add(startsLabel);
+            }
+            else if (!string.IsNullOrEmpty(expiresAt))
+            {
+                Label expiresLabel = new Label(TimeAgo(expiresAt));
+                expiresLabel.AddToClassList("dq-quest-item__expires");
+                bottom.Add(expiresLabel);
+            }
+
             item.Add(bottom);
             return item;
         }
@@ -314,6 +333,47 @@ namespace SG03.UI
                 case "claimed":     return "dq-quest-item__status--claimed";
                 default:            return "dq-quest-item__status--not-started";
             }
+        }
+
+        private static string TimeIn(string isoTimestamp)
+        {
+            if (string.IsNullOrEmpty(isoTimestamp)) return string.Empty;
+
+            if (!DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime target))
+                return isoTimestamp;
+
+            TimeSpan diff = target.ToUniversalTime() - DateTime.UtcNow;
+
+            if (diff.TotalSeconds <= 0) return "now";
+            if (diff.TotalSeconds < 60)  return $"in {(int)diff.TotalSeconds}s";
+            if (diff.TotalMinutes < 60)  return $"in {(int)diff.TotalMinutes}m";
+            if (diff.TotalHours < 24)    return $"in {(int)diff.TotalHours}h";
+            return $"in {(int)diff.TotalDays}d";
+        }
+
+        private static bool IsInFuture(string isoTimestamp)
+        {
+            if (string.IsNullOrEmpty(isoTimestamp)) return false;
+            // assigned_date may be a date-only string "yyyy-MM-dd"; treat it as start of that UTC day.
+            if (!DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime target))
+                return false;
+            return target.ToUniversalTime() > DateTime.UtcNow;
+        }
+
+        private static string TimeAgo(string isoTimestamp)
+        {
+            if (string.IsNullOrEmpty(isoTimestamp)) return string.Empty;
+
+            if (!DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime target))
+                return isoTimestamp;
+
+            TimeSpan diff = target.ToUniversalTime() - DateTime.UtcNow;
+
+            if (diff.TotalSeconds <= 0) return "Expired";
+            if (diff.TotalSeconds < 60)  return $"{(int)diff.TotalSeconds}s left";
+            if (diff.TotalMinutes < 60)  return $"{(int)diff.TotalMinutes}m left";
+            if (diff.TotalHours < 24)    return $"{(int)diff.TotalHours}h left";
+            return $"{(int)diff.TotalDays}d left";
         }
     }
 }
