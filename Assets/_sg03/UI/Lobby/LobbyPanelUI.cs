@@ -171,6 +171,10 @@ namespace SG03.UI
         // Player name label (top-right of TopMenu)
         private Label playerNameLabel;
 
+        // Lobby background elements toggled during immersive mode
+        private VisualElement lobbyRoot;
+        private VisualElement lobbyViewport;
+
         // Content area — populate at runtime with sub-views
         protected VisualElement contentArea;
 
@@ -237,10 +241,10 @@ namespace SG03.UI
             this.contentArea = root.Q("ContentArea");
 
             // Enforce 16:9 aspect ratio with letterbox/pillarbox
-            VisualElement lobbyRoot     = root.Q("LobbyRoot");
-            VisualElement lobbyViewport = root.Q("LobbyViewport");
-            if (lobbyRoot != null && lobbyViewport != null)
-                new LobbyAspectRatioKeeper(lobbyRoot, lobbyViewport);
+            this.lobbyRoot     = root.Q("LobbyRoot");
+            this.lobbyViewport = root.Q("LobbyViewport");
+            if (this.lobbyRoot != null && this.lobbyViewport != null)
+                new LobbyAspectRatioKeeper(this.lobbyRoot, this.lobbyViewport);
         }
 
         private void OnLoginSuccess(LoginResponse _) => this.RefreshPlayerName();
@@ -357,7 +361,9 @@ namespace SG03.UI
             content.style.alignSelf  = Align.Stretch;
             this.contentArea.Add(content);
 
-            new DeskContentUI(content);
+            DeskContentUI deskUI = new DeskContentUI(content);
+            deskUI.OnCardViewerShown  += this.EnterImmersiveMode;
+            deskUI.OnCardViewerHidden += this.ExitImmersiveMode;
         }
 
         protected virtual void OnMailboxClicked()
@@ -380,6 +386,21 @@ namespace SG03.UI
         {
             if (this.saiServer?.SaiAuth != null)
                 this.saiServer.SaiAuth.OnLoginSuccess -= this.OnLoginSuccess;
+        }
+
+        // ------------------------------------------------------------------
+        //  Immersive mode — hides desktop background to reveal 3D scene
+        // ------------------------------------------------------------------
+        private void EnterImmersiveMode()
+        {
+            this.lobbyRoot?.AddToClassList("lobby-root--immersive");
+            this.lobbyViewport?.AddToClassList("lobby-viewport--immersive");
+        }
+
+        private void ExitImmersiveMode()
+        {
+            this.lobbyRoot?.RemoveFromClassList("lobby-root--immersive");
+            this.lobbyViewport?.RemoveFromClassList("lobby-viewport--immersive");
         }
     }
 }

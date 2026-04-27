@@ -7,6 +7,7 @@ namespace SG03.UI
     // Manages navigation between the list panel and the detail panel.
     public class DeskContentUI
     {
+        private readonly VisualElement deskRoot;
         private readonly VisualElement listPanel;
         private readonly ScrollView deskListView;
         private readonly VisualElement emptyState;
@@ -20,8 +21,12 @@ namespace SG03.UI
         private readonly DeskList list;
         private readonly DeskDetailUI detailUI;
 
+        public event System.Action OnCardViewerShown;
+        public event System.Action OnCardViewerHidden;
+
         public DeskContentUI(VisualElement root)
         {
+            this.deskRoot         = root.Q("DeskRoot");
             this.listPanel        = root.Q("ListPanel");
             this.deskListView     = root.Q<ScrollView>("DeskList");
             this.emptyState       = root.Q("EmptyState");
@@ -37,7 +42,9 @@ namespace SG03.UI
             this.list.OnDataUpdated += this.Render;
 
             this.detailUI = new DeskDetailUI(root, this.list);
-            this.detailUI.OnBackRequested += this.ShowListPanel;
+            this.detailUI.OnBackRequested    += this.ShowListPanel;
+            this.detailUI.OnCardViewerShown  += this.OnDetailCardViewerShown;
+            this.detailUI.OnCardViewerHidden += this.OnDetailCardViewerHidden;
 
             if (this.newDeskBtn != null)
                 this.newDeskBtn.RegisterCallback<ClickEvent>(_ => this.ShowCreateForm());
@@ -54,6 +61,20 @@ namespace SG03.UI
             this.HideCreateForm();
             this.ShowLoading();
             this.DoRefresh();
+        }
+
+        // ── Immersive mode ────────────────────────────────────────────────────
+
+        private void OnDetailCardViewerShown()
+        {
+            this.deskRoot?.AddToClassList("desk-root--immersive");
+            this.OnCardViewerShown?.Invoke();
+        }
+
+        private void OnDetailCardViewerHidden()
+        {
+            this.deskRoot?.RemoveFromClassList("desk-root--immersive");
+            this.OnCardViewerHidden?.Invoke();
         }
 
         // ── Panel navigation ──────────────────────────────────────────────────

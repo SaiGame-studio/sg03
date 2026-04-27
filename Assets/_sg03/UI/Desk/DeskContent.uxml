@@ -40,6 +40,7 @@
             <ui:VisualElement class="desk-header">
                 <ui:Button name="BackBtn" text="&#x2190; Back" class="desk-header__back-btn" />
                 <ui:Label name="DetailTitle" text="Desk" class="desk-header__title" />
+                <ui:Button name="ToggleBgBtn" text="&#x1F441; Hide BG" class="desk-header__toggle-bg-btn" />
             </ui:VisualElement>
 
             <ui:VisualElement class="desk-detail-body">

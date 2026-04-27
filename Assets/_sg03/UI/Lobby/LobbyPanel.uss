@@ -135,3 +135,14 @@
 .lobby-bottom-btn--primary:hover {
     background-color: rgba(80, 130, 255, 1);
 }
+
+/* ============================================================
+   Immersive mode — reveal 3D scene behind the lobby
+   ============================================================ */
+.lobby-root--immersive {
+    background-color: transparent;
+}
+
+.lobby-viewport--immersive {
+    background-color: transparent;
+}
