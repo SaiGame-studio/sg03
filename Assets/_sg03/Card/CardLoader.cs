@@ -23,11 +23,11 @@ namespace SG03
     [RequireComponent(typeof(Card3D))]
     public class CardLoader : MonoBehaviour
     {
-        [Tooltip("Addressable address of the CardData asset to load (e.g. Cards/CardData_Warrior).")]
         [SerializeField] private string cardAddress;
 
-        [Tooltip("When true, LoadAsync() is called automatically in Start().")]
-        [SerializeField] private bool loadOnStart = true;
+        [SerializeField] private string cardNamePrefix = "azure_blade";
+
+        [SerializeField] private bool loadOnStart = false;
 
         private AsyncOperationHandle<CardData> handle;
         private bool                           handleIsValid;
@@ -102,6 +102,21 @@ namespace SG03
             }
 
             return handle.Result;
+        }
+
+        /// <summary>
+        /// Loads the CardData by short asset name (e.g. "azure_blade").
+        /// The full address is built as: <see cref="cardNamePrefix"/> + <paramref name="cardName"/>.
+        /// </summary>
+        public async Task<CardData> LoadByNameAsync(string cardName)
+        {
+            if (string.IsNullOrEmpty(cardName))
+            {
+                Debug.LogWarning($"[CardLoader] Card name is empty on '{name}'.", this);
+                return null;
+            }
+
+            return await LoadAsync(cardNamePrefix + cardName);
         }
 
         /// <summary>Releases the loaded Addressables handle.</summary>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using SaiGame.Services;
 using UnityEngine;
@@ -25,6 +26,12 @@ namespace SG03
         [Header("Card 3D Review")]
         [SerializeField] private Card3D     card3DReview;
         [SerializeField] private CardLoader card3DLoader;
+
+        [Header("Card Catalog")]
+        [Tooltip("Addressable addresses of all CardData assets (e.g. \"Cards/CardData_azure_blade\"). Populated automatically via Reset.")]
+        [SerializeField] private List<string> cardAddresses = new();
+
+        public IReadOnlyList<string> CardAddresses => cardAddresses;
 
         // ─── SaiBehaviour lifecycle ───────────────────────────────────────────────
 
@@ -90,6 +97,31 @@ namespace SG03
         }
 
         /// <summary>
+        /// Shows the card view for the given short asset name (e.g. "azure_blade").
+        /// The full Addressable address is resolved automatically using the prefix
+        /// configured on <see cref="CardLoader"/> (default: "Cards/CardData_").
+        /// </summary>
+        public async Task ShowCardByNameAsync(string cardName)
+        {
+            if (string.IsNullOrEmpty(cardName))
+            {
+                Debug.LogWarning("[CardDataManager] cardName is empty.", this);
+                return;
+            }
+
+            EnsureCardInstance();
+
+            if (card3DReview == null) return;
+
+            card3DReview.gameObject.SetActive(true);
+
+            CardData data = await card3DLoader.LoadByNameAsync(cardName);
+            if (data == null) return;
+
+            card3DReview.SetCardData(data);
+        }
+
+        /// <summary>
         /// Hides the card view and releases the Addressables handle for the CardData.
         /// </summary>
         public void HideCard()
@@ -108,5 +140,35 @@ namespace SG03
             Debug.LogError("[CardDataManager] Card3DReview not found in scene. " +
                            "Place a GameObject named \"Card3DReview\" with Card3D + CardLoader.", this);
         }
+
+#if UNITY_EDITOR
+        private void Reset()
+        {
+            cardAddresses.Clear();
+
+            string[] guids = UnityEditor.AssetDatabase.FindAssets(
+                "t:CardData",
+                new[] { "Assets/_sg03/Card/Data" });
+
+            var settings = UnityEditor.AddressableAssets
+                .AddressableAssetSettingsDefaultObject.Settings;
+
+            if (settings == null)
+            {
+                Debug.LogWarning("[CardDataManager] Addressable settings not found.", this);
+                return;
+            }
+
+            foreach (string guid in guids)
+            {
+                UnityEditor.AddressableAssets.Settings.AddressableAssetEntry entry =
+                    settings.FindAssetEntry(guid);
+
+                if (entry == null) continue;
+
+                cardAddresses.Add(entry.address);
+            }
+        }
+#endif
     }
 }
