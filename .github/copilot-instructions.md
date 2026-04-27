@@ -29,6 +29,11 @@
 - **Never** nest `if` statements. Always prefer early return (guard clauses) to reduce nesting.
 - Handle invalid/edge cases first and return early, keeping the happy path at the lowest indentation level.
 
+## C# Compile Check Before Delivery
+- After every code change, **always** run `get_errors` on all modified `.cs` files.
+- Do **not** deliver the work until `get_errors` returns zero errors.
+- If errors are found, fix them all and run `get_errors` again before presenting the final response.
+
 ## Response Summary
 - After completing every request, always end the response with a summary section titled **"Tổng kết"**.
 - Use bullet points to list everything that was done.

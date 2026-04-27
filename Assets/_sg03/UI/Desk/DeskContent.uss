@@ -564,6 +564,94 @@
 }
 
 /* ============================================================
+   Card tile component — used in inventory list
+   ============================================================ */
+.desk-card {
+    width: 96px;
+    height: 132px;
+    margin: 4px;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgba(80, 100, 160, 0.35);
+    background-color: rgba(16, 20, 36, 1);
+    flex-direction: column;
+    align-items: stretch;
+    transition-duration: 0.12s;
+    cursor: link;
+}
+
+.desk-card:hover {
+    border-color: rgba(140, 170, 255, 0.7);
+    background-color: rgba(28, 36, 64, 1);
+}
+
+/* Art area — top portion of the card */
+.desk-card__art-area {
+    height: 68px;
+    min-height: 68px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(8, 10, 22, 0.85);
+}
+
+.desk-card__art-icon {
+    font-size: 36px;
+    -unity-text-align: middle-center;
+}
+
+/* Info area — bottom portion */
+.desk-card__info {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 4px 3px 4px;
+    background-color: rgba(12, 15, 28, 0.9);
+}
+
+.desk-card__name {
+    font-size: 9px;
+    color: rgb(210, 220, 255);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    -unity-word-wrap: true;
+    margin-bottom: 2px;
+}
+
+.desk-card__rarity {
+    font-size: 8px;
+    color: rgb(110, 125, 175);
+    -unity-text-align: middle-center;
+    margin-bottom: 1px;
+}
+
+/* Rarity color overrides */
+.desk-card__rarity--common   { color: rgb(150, 155, 165); }
+.desk-card__rarity--uncommon { color: rgb(90, 190, 110); }
+.desk-card__rarity--rare     { color: rgb(80, 145, 240); }
+.desk-card__rarity--epic     { color: rgb(175, 90, 240); }
+.desk-card__rarity--legendary { color: rgb(230, 170, 40); }
+
+/* Rarity border overrides */
+.desk-card--rarity-uncommon  { border-color: rgba(60,  180,  80, 0.45); }
+.desk-card--rarity-rare      { border-color: rgba(60,  120, 220, 0.5);  }
+.desk-card--rarity-epic      { border-color: rgba(140,  60, 220, 0.5);  }
+.desk-card--rarity-legendary { border-color: rgba(220, 160,  30, 0.6);  }
+
+.desk-card__qty {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 9px;
+    color: rgb(10, 15, 30);
+    background-color: rgb(100, 200, 120);
+    border-radius: 6px;
+    padding: 1px 5px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* ============================================================
    Fly animation overlay
    ============================================================ */
 .desk-fly-layer {

@@ -61,8 +61,23 @@ namespace SG03.UI
             if (this.detailTitle != null) this.detailTitle.text = name;
 
             this.detailPanel?.RemoveFromClassList("desk-panel--hidden");
-            this.RenderSlots(desk);
-            this.LoadInventory();
+            this.ShowLoadingSlots();
+
+            this.deskList.GetDesk(
+                presetId: desk.id,
+                onSuccess: freshDesk =>
+                {
+                    this.currentDesk = freshDesk;
+                    this.RenderSlots(freshDesk);
+                    this.LoadInventory();
+                },
+                onError: _ =>
+                {
+                    // Fall back to the data we already have
+                    this.RenderSlots(desk);
+                    this.LoadInventory();
+                }
+            );
         }
 
         public void Hide()
@@ -71,6 +86,15 @@ namespace SG03.UI
         }
 
         // ── Slot grid ─────────────────────────────────────────────────────────
+
+        private void ShowLoadingSlots()
+        {
+            if (this.slotGrid == null) return;
+            this.slotGrid.Clear();
+            Label loading = new Label("Loading...");
+            loading.AddToClassList("desk-state__label");
+            this.slotGrid.Add(loading);
+        }
 
         private void RenderSlots(PresetData desk)
         {
@@ -88,6 +112,7 @@ namespace SG03.UI
         private VisualElement BuildSlotTile(PresetData desk, int slotIndex)
         {
             string itemId = GetItemIdInSlot(desk, slotIndex);
+            bool filled   = !string.IsNullOrEmpty(itemId);
 
             VisualElement tile = new VisualElement();
             tile.name = $"Slot_{slotIndex}";
@@ -118,6 +143,7 @@ namespace SG03.UI
             {
                 if (item.id != itemId) continue;
                 string n = item.definition?.name;
+                if (!string.IsNullOrEmpty(n)) name = n;
                 break;
             }
 
@@ -162,19 +188,39 @@ namespace SG03.UI
             if (this.inventoryList == null) return;
 
             this.inventoryList.Clear();
+            this.inventoryList.contentContainer.style.flexDirection = FlexDirection.Row;
+            this.inventoryList.contentContainer.style.flexWrap      = Wrap.Wrap;
 
             HashSet<string> addedIds = this.GetAddedItemIds();
             string query = this.searchText.Trim().ToLowerInvariant();
 
-            int count = 0;
+            // Group available items by item_definition_id into stacks
+            Dictionary<string, CardStack> stackMap = new Dictionary<string, CardStack>();
             foreach (InventoryItemData item in this.allInventoryItems)
             {
                 if (addedIds.Contains(item.id)) continue;
 
-                string displayName = item.definition?.name ?? item.item_definition_id ?? string.Empty;
+                string key = item.item_definition_id ?? item.id;
+                if (!stackMap.TryGetValue(key, out CardStack stack))
+                {
+                    stackMap[key] = new CardStack(item);
+                    continue;
+                }
+
+                stack.Add(item.id);
+            }
+
+            int count = 0;
+            foreach (CardStack stack in stackMap.Values)
+            {
+                string displayName = stack.Representative.definition?.name
+                    ?? stack.Representative.item_definition_id
+                    ?? string.Empty;
+
+                if (!string.IsNullOrEmpty(query) && !displayName.ToLowerInvariant().Contains(query))
                     continue;
 
-                this.inventoryList.Add(this.BuildInventoryRow(item));
+                this.inventoryList.Add(this.BuildInventoryCard(stack));
                 count++;
             }
 
@@ -186,57 +232,73 @@ namespace SG03.UI
             this.inventoryList.Add(empty);
         }
 
-        private VisualElement BuildInventoryRow(InventoryItemData item)
+        private VisualElement BuildInventoryCard(CardStack stack)
         {
-            VisualElement row = new VisualElement();
-            row.AddToClassList("desk-inv-item");
+            InventoryItemData item = stack.Representative;
 
-            Label icon = new Label("🃏");
-            icon.AddToClassList("desk-inv-item__icon");
-            row.Add(icon);
+            VisualElement card = new VisualElement();
+            card.AddToClassList("desk-card");
 
+            // Rarity-based border modifier
+            string rarity = (item.definition?.rarity ?? string.Empty).ToLowerInvariant();
+            if (!string.IsNullOrEmpty(rarity))
+                card.AddToClassList($"desk-card--rarity-{rarity}");
+
+            // Quantity badge — top-right corner
+            Label qtyLabel = new Label($"x{stack.Count}");
+            qtyLabel.AddToClassList("desk-card__qty");
+            card.Add(qtyLabel);
+
+            // Art area
+            VisualElement artArea = new VisualElement();
+            artArea.AddToClassList("desk-card__art-area");
+            Label artIcon = new Label("🃏");
+            artIcon.AddToClassList("desk-card__art-icon");
+            artArea.Add(artIcon);
+            card.Add(artArea);
+
+            // Info area
             VisualElement info = new VisualElement();
-            info.AddToClassList("desk-inv-item__info");
+            info.AddToClassList("desk-card__info");
 
             string displayName = item.definition?.name ?? item.item_definition_id ?? "Unknown";
             Label nameLabel = new Label(displayName);
-            nameLabel.AddToClassList("desk-inv-item__name");
+            nameLabel.AddToClassList("desk-card__name");
             info.Add(nameLabel);
 
-            string rarity = item.definition?.rarity ?? string.Empty;
+            if (!string.IsNullOrEmpty(rarity))
             {
                 Label rarityLabel = new Label(rarity);
-                rarityLabel.AddToClassList("desk-inv-item__meta");
+                rarityLabel.AddToClassList("desk-card__rarity");
+                rarityLabel.AddToClassList($"desk-card__rarity--{rarity}");
                 info.Add(rarityLabel);
             }
 
-            row.Add(info);
+            card.Add(info);
 
-            Label qtyLabel = new Label($"x{item.quantity}");
-            qtyLabel.AddToClassList("desk-inv-item__qty");
-            row.Add(qtyLabel);
-
-            row.RegisterCallback<ClickEvent>(_ => this.OnInventoryItemClicked(item, row));
-            return row;
+            card.RegisterCallback<ClickEvent>(_ => this.OnInventoryItemClicked(stack, card));
+            return card;
         }
 
         // ── Interaction ───────────────────────────────────────────────────────
 
-        private void OnInventoryItemClicked(InventoryItemData item, VisualElement sourceElement)
+        private void OnInventoryItemClicked(CardStack stack, VisualElement sourceElement)
         {
             if (this.currentDesk == null) return;
+            if (stack.ItemIds.Count == 0) return;
 
             int emptySlot = this.FindFirstEmptySlot();
             if (emptySlot < 0) return;
 
             VisualElement targetSlot = this.slotGrid?.Q($"Slot_{emptySlot}");
+            string itemId = stack.ItemIds[0];
 
             this.AnimateFly(sourceElement, targetSlot, () =>
             {
                 this.deskList.AddItemToDesk(
                     presetId:        this.currentDesk.id,
                     slotIndex:       emptySlot,
-                    inventoryItemId: item.id,
+                    inventoryItemId: itemId,
                     onSuccess: updatedDesk =>
                     {
                         this.currentDesk = updatedDesk;
@@ -265,6 +327,7 @@ namespace SG03.UI
 
             for (int i = 0; i < maxSlots; i++)
             {
+                if (!filled.Contains(i)) return i;
             }
 
             return -1;
@@ -337,6 +400,7 @@ namespace SG03.UI
 
             foreach (PresetSlotData slot in this.currentDesk.slots)
             {
+                if (!string.IsNullOrEmpty(slot.inventory_item_id))
                     set.Add(slot.inventory_item_id);
             }
 
@@ -347,7 +411,7 @@ namespace SG03.UI
         {
             if (desk.slots == null) return null;
 
-            foreach (PresetSlotData slot in deck.slots)
+            foreach (PresetSlotData slot in desk.slots)
             {
                 if (slot.slot_index != slotIndex) continue;
                 return slot.inventory_item_id;
