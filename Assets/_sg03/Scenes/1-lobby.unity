@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 52825979}
   - component: {fileID: 52825980}
   - component: {fileID: 52825981}
+  - component: {fileID: 52825982}
   m_Layer: 6
   m_Name: Card3DReview
   m_TagString: Untagged
@@ -207,6 +208,21 @@ MonoBehaviour:
   originPosition: {x: 0, y: 0, z: 0}
   duration: 0.5
   ease: 6
+--- !u!114 &52825982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 52825974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e31713549bb5995428a393b0c31b10aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.Card3DReviewCtrl
+  card: {fileID: 52825979}
+  loader: {fileID: 52825980}
+  movement: {fileID: 52825981}
 --- !u!21 &197863672
 Material:
   serializedVersion: 8

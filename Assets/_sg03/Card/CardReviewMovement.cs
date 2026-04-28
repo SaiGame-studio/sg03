@@ -34,19 +34,34 @@ namespace SG03
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
-        /// <summary>Smoothly moves the card upward by <see cref="flyUpDistance"/> on the Y axis.</summary>
+        /// <summary>
+        /// Smoothly moves the card upward by <see cref="flyUpDistance"/> on the Y axis
+        /// while spinning 360° on the Y axis. Ends face-up (Y rotation = 0°).
+        /// </summary>
         public void FlyUp()
         {
-            Vector3 target = transform.position + new Vector3(0f, flyUpDistance, 0f);
+            Vector3 moveTarget   = transform.position + new Vector3(0f, flyUpDistance, 0f);
+            Vector3 rotateTarget = transform.eulerAngles + new Vector3(0f, 360f, 0f);
+
             transform.DOKill();
-            transform.DOMove(target, duration).SetEase(ease);
+            Sequence seq = DOTween.Sequence();
+            seq.Append(transform.DOMove(moveTarget, duration).SetEase(ease));
+            seq.Join(transform.DORotate(rotateTarget, duration, RotateMode.FastBeyond360).SetEase(ease));
         }
 
-        /// <summary>Smoothly returns the card to its position at scene start.</summary>
+        /// <summary>
+        /// Smoothly returns the card to its position at scene start while spinning
+        /// 360° on the Y axis. Ends face-up (Y rotation = 0°).
+        /// </summary>
         public void FlyDown()
         {
+            Vector3 rotateTarget = transform.eulerAngles + new Vector3(0f, 360f, 0f);
+
             transform.DOKill();
-            transform.DOMove(originPosition, duration).SetEase(ease);
+            Sequence seq = DOTween.Sequence();
+            seq.Append(transform.DOMove(originPosition, duration).SetEase(ease));
+            seq.Join(transform.DORotate(rotateTarget, duration, RotateMode.FastBeyond360).SetEase(ease));
+            seq.AppendCallback(() => transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0f, transform.eulerAngles.z));
         }
     }
 }
