@@ -34,6 +34,7 @@ namespace SG03.UI
 
             this.IsLoading = true;
             this.playerItem.GetItems(
+                limit: 1000,
                 category: category ?? string.Empty,
                 onSuccess: response =>
                 {
