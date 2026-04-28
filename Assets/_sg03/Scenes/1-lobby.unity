@@ -2613,8 +2613,10 @@ MonoBehaviour:
   card3DReview: {fileID: 0}
   card3DLoader: {fileID: 0}
   cardAddresses:
-  - Assets/_sg03/Card/Data/azure_blade.asset
-  - Assets/_sg03/Card/Data/hellscythe.asset
+  - Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
+  - Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
+  - Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
+  - Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
 --- !u!4 &1875238348
 Transform:
   m_ObjectHideFlags: 0
