@@ -51,6 +51,10 @@ namespace SG03
             this.SetFallbackName(displayName ?? codeName);
             this.SetFallbackStats(stats);
             this.SetFallbackDescription(description);
+            // Apply fallbacks to the currently loaded card immediately.
+            // LoadCardByCodeName is async — if the address lookup fails the card
+            // data never updates, so fallback text would never render without this call.
+            this.ApplyTextures();
             if (!this.movement.IsShown)
             {
                 this.LoadCardByCodeName(codeName);
