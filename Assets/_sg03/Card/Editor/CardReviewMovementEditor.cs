@@ -14,16 +14,16 @@ namespace SG03
 
             // ── Fly Up ────────────────────────────────────────────────────────────
             EditorGUILayout.Space(8f);
-            EditorGUILayout.LabelField("Fly Up", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Show", EditorStyles.boldLabel);
 
             GUI.enabled = Application.isPlaying;
-            if (GUILayout.Button("Fly Up"))
-                movement.FlyUp();
+            if (GUILayout.Button("Show"))
+                movement.Show();
             GUI.enabled = true;
 
-            // ── Fly Down ──────────────────────────────────────────────────────────
+            // ── Hide ──────────────────────────────────────────────────────────────
             EditorGUILayout.Space(8f);
-            EditorGUILayout.LabelField("Fly Down", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Hide", EditorStyles.boldLabel);
 
             SerializedProperty originProp = serializedObject.FindProperty("originPosition");
             EditorGUI.BeginDisabledGroup(true);
@@ -31,8 +31,8 @@ namespace SG03
             EditorGUI.EndDisabledGroup();
 
             GUI.enabled = Application.isPlaying;
-            if (GUILayout.Button("Fly Down"))
-                movement.FlyDown();
+            if (GUILayout.Button("Hide"))
+                movement.Hide();
             GUI.enabled = true;
         }
     }

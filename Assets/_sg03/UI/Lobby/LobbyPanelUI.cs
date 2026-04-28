@@ -27,8 +27,8 @@ namespace SG03.UI
         [Header("Inventory Panel Assets")]
         [SerializeField] private VisualTreeAsset inventoryContentAsset;
 
-        [Header("Desk Panel Assets")]
-        [SerializeField] private VisualTreeAsset deskContentAsset;
+        [Header("Desk Content")]
+        [SerializeField] private DeskContent deskContentBehaviour;
 
         // Provides access to every SaiServer service (Auth, GamerProgress, Shop, …).
         protected SaiServer Server => this.saiServer;
@@ -45,7 +45,7 @@ namespace SG03.UI
             this.LoadMainQuestContentAsset();
             this.LoadMailboxContentAsset();
             this.LoadInventoryContentAsset();
-            this.LoadDeskContentAsset();
+            this.LoadDeskContentBehaviour();
         }
 
         private void LoadSaiServer()
@@ -142,14 +142,14 @@ namespace SG03.UI
 #endif
         }
 
-        private void LoadDeskContentAsset()
+        private void LoadDeskContentBehaviour()
         {
-            if (this.deskContentAsset != null) return;
-#if UNITY_EDITOR
-            this.deskContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
-                "Assets/_sg03/UI/Desk/DeskContent.uxml");
-            Debug.LogWarning(transform.name + ": LoadDeskContentAsset", gameObject);
-#endif
+            if (this.deskContentBehaviour != null) return;
+            this.deskContentBehaviour = FindFirstObjectByType<DeskContent>(FindObjectsInactive.Include);
+            if (this.deskContentBehaviour == null) return;
+            this.deskContentBehaviour.OnCardViewerShown  += this.EnterImmersiveMode;
+            this.deskContentBehaviour.OnCardViewerHidden += this.ExitImmersiveMode;
+            Debug.LogWarning(transform.name + ": LoadDeskContentBehaviour", gameObject);
         }
 
         // Top tabs
@@ -350,20 +350,10 @@ namespace SG03.UI
         protected virtual void OnProfileClicked()   { }
         protected virtual void OnDeskClicked()
         {
-            if (this.contentArea == null || this.deskContentAsset == null) return;
+            if (this.contentArea == null || this.deskContentBehaviour == null) return;
 
             this.contentArea.Clear();
-            TemplateContainer content = this.deskContentAsset.Instantiate();
-            content.style.flexGrow   = 1;
-            content.style.flexShrink = 1;
-            content.style.width      = new StyleLength(new Length(100, LengthUnit.Percent));
-            content.style.height     = new StyleLength(new Length(100, LengthUnit.Percent));
-            content.style.alignSelf  = Align.Stretch;
-            this.contentArea.Add(content);
-
-            DeskContentUI deskUI = new DeskContentUI(content);
-            deskUI.OnCardViewerShown  += this.EnterImmersiveMode;
-            deskUI.OnCardViewerHidden += this.ExitImmersiveMode;
+            this.deskContentBehaviour.Show(this.contentArea);
         }
 
         protected virtual void OnMailboxClicked()

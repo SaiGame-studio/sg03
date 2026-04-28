@@ -1,56 +1,64 @@
-using SaiGame.Services;
+using DG.Tweening;
 using UnityEngine;
 
 namespace SG03
 {
     /// <summary>
-    /// Controller that wires together <see cref="Card3D"/>, <see cref="CardLoader"/>,
-    /// and <see cref="CardReviewMovement"/> via GetComponent on the same GameObject.
-    /// Provides a single public API for review scenes / test rigs.
+    /// Extends <see cref="Card3DCtrl"/> with <see cref="CardReviewMovement"/> wiring.
+    /// Adds Show / Hide / RequestShow APIs for review scenes and test rigs.
     /// </summary>
     [AddComponentMenu("SG03/Card/Card 3D Review Ctrl")]
-    [RequireComponent(typeof(Card3D))]
-    [RequireComponent(typeof(CardLoader))]
     [RequireComponent(typeof(CardReviewMovement))]
-    public class Card3DReviewCtrl : SaiBehaviour
+    public class Card3DReviewCtrl : Card3DCtrl
     {
         // ─── Linked components ────────────────────────────────────────────────────
 
-        [Header("Linked Components")]
-        [SerializeField] private Card3D             card;
-        [SerializeField] private CardLoader         loader;
+        [Header("Review Components")]
         [SerializeField] private CardReviewMovement movement;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         protected override void LoadComponents()
         {
-            card     = GetComponent<Card3D>();
-            loader   = GetComponent<CardLoader>();
-            movement = GetComponent<CardReviewMovement>();
+            base.LoadComponents();
+            this.LoadCardReviewMovement();
+        }
+
+        protected virtual void LoadCardReviewMovement()
+        {
+            if (this.movement != null) return;
+            this.movement = this.GetComponent<CardReviewMovement>();
+            Debug.LogWarning(transform.name + "LoadCardReviewMovement", gameObject);
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
-        /// <summary>Loads CardData via Addressables and applies it to the Card3D.</summary>
-        public async void LoadCard() => await loader.LoadAndApply();
-
-        /// <summary>Applies the textures currently set on Card3D.</summary>
-        public void ApplyTextures() => card.ApplyTextures();
-
-        /// <summary>Shows the card front face immediately.</summary>
-        public void ShowFront() => card.ShowFront();
-
-        /// <summary>Shows the card back face immediately.</summary>
-        public void ShowBack() => card.ShowBack();
-
-        /// <summary>Flips the card with animation.</summary>
-        public void Flip() => card.Flip();
-
         /// <summary>Flies the card upward with spin animation.</summary>
-        public void FlyUp() => movement.FlyUp();
+        public void Show() => this.movement.Show();
 
         /// <summary>Returns the card to its origin position with spin animation.</summary>
-        public void FlyDown() => movement.FlyDown();
+        public void Hide() => this.movement.Hide();
+
+        /// <summary>
+        /// Shows the card with the given <paramref name="codeName"/>.
+        /// Loads the CardData via <see cref="CardLoader.ShowByCodeName"/> first, then
+        /// triggers the movement animation. If the card is already shown, hides it
+        /// first and waits for the hide animation to finish before showing again.
+        /// </summary>
+        public void RequestShow(string codeName)
+        {
+            if (this.movement == null) return;
+            if (!this.movement.IsShown)
+            {
+                this.LoadCardByCodeName(codeName);
+                this.movement.Show();
+                return;
+            }
+            this.movement.Hide().OnComplete(() =>
+            {
+                this.LoadCardByCodeName(codeName);
+                this.movement.Show();
+            });
+        }
     }
 }

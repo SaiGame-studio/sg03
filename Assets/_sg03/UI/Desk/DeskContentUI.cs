@@ -23,6 +23,7 @@ namespace SG03.UI
 
         public event System.Action OnCardViewerShown;
         public event System.Action OnCardViewerHidden;
+        public event System.Action<InventoryItemData> OnCardViewRequested;
 
         public DeskContentUI(VisualElement root)
         {
@@ -42,9 +43,10 @@ namespace SG03.UI
             this.list.OnDataUpdated += this.Render;
 
             this.detailUI = new DeskDetailUI(root, this.list);
-            this.detailUI.OnBackRequested    += this.ShowListPanel;
+            this.detailUI.OnBackRequested      += this.ShowListPanel;
             this.detailUI.OnCardViewerShown  += this.OnDetailCardViewerShown;
             this.detailUI.OnCardViewerHidden += this.OnDetailCardViewerHidden;
+            this.detailUI.OnCardViewRequested += item => this.OnCardViewRequested?.Invoke(item);
 
             if (this.newDeskBtn != null)
                 this.newDeskBtn.RegisterCallback<ClickEvent>(_ => this.ShowCreateForm());

@@ -34,6 +34,7 @@ namespace SG03.UI
         public event Action OnBackRequested;
         public event Action OnCardViewerShown;
         public event Action OnCardViewerHidden;
+        public event Action<InventoryItemData> OnCardViewRequested;
 
         public DeskDetailUI(VisualElement deskRoot, DeskList deskList)
         {
@@ -389,20 +390,7 @@ namespace SG03.UI
 
         private void ShowCardViewer(InventoryItemData item, string itemId)
         {
-            if (this.cardViewerOverlay == null) return;
-
-            string name     = item?.definition?.name ?? TrimId(itemId);
-            string rarity   = (item?.definition?.rarity ?? string.Empty).ToUpperInvariant();
-            string category = item?.definition?.category ?? string.Empty;
-            int    qty      = item?.quantity ?? 1;
-
-            if (this.cardViewerName != null)     this.cardViewerName.text     = name;
-            if (this.cardViewerRarity != null)   this.cardViewerRarity.text   = rarity;
-            if (this.cardViewerCategory != null) this.cardViewerCategory.text = category;
-            if (this.cardViewerQty != null)      this.cardViewerQty.text      = $"Qty: {qty}";
-
-            this.cardViewerOverlay.RemoveFromClassList("desk-card-viewer--hidden");
-            this.OnCardViewerShown?.Invoke();
+            this.OnCardViewRequested?.Invoke(item);
         }
 
         private void HideCardViewer()

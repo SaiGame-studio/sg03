@@ -534,8 +534,8 @@
 }
 
 .desk-detail-right {
-    width: 240px;
-    min-width: 200px;
+    width: 300px;
+    min-width: 300px;
     flex-direction: column;
     overflow: hidden;
     padding: 10px 10px 10px 0;
