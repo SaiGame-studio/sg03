@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 52825978}
   - component: {fileID: 52825979}
   - component: {fileID: 52825980}
+  - component: {fileID: 52825981}
   m_Layer: 6
   m_Name: Card3DReview
   m_TagString: Untagged
@@ -146,7 +147,7 @@ Transform:
   m_GameObject: {fileID: 52825974}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 12}
+  m_LocalPosition: {x: 0, y: -20, z: 12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -190,6 +191,22 @@ MonoBehaviour:
   cardAddress: 
   cardNamePrefix: azure_blade
   loadOnStart: 0
+--- !u!114 &52825981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 52825974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4b93b30154863b448351bed2b96132b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.CardReviewMovement
+  flyUpDistance: 20
+  originPosition: {x: 0, y: 0, z: 0}
+  duration: 0.5
+  ease: 6
 --- !u!21 &197863672
 Material:
   serializedVersion: 8

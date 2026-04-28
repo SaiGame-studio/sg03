@@ -142,7 +142,7 @@ namespace SG03
         }
 
 #if UNITY_EDITOR
-        private void Reset()
+        protected override void Reset()
         {
             cardAddresses.Clear();
 
