@@ -1,5 +1,6 @@
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace SG03
 {
@@ -31,6 +32,12 @@ namespace SG03
         [Tooltip("Ease curve applied to both Fly Up and Fly Down.")]
         [SerializeField] private Ease ease = Ease.OutQuad;
 
+        [Header("Rotation")]
+        [Tooltip("Degrees per pixel of horizontal mouse drag while the card is shown.")]
+        [SerializeField] private float rotateSpeed = 0.5f;
+
+        private Vector2 lastMousePos;
+
         // ─── Unity lifecycle ──────────────────────────────────────────────────────
 
         private void Start()
@@ -39,7 +46,32 @@ namespace SG03
             isShown = false;
         }
 
+        private void Update() => this.HandleRotation();
+
         private void OnDestroy() => transform.DOKill();
+
+        // ─── Rotation ─────────────────────────────────────────────────────────────
+
+        private void HandleRotation()
+        {
+            if (!this.isShown) return;
+
+            Mouse mouse = Mouse.current;
+            if (mouse == null) return;
+
+            if (mouse.leftButton.wasPressedThisFrame)
+            {
+                this.lastMousePos = mouse.position.ReadValue();
+                return;
+            }
+
+            if (!mouse.leftButton.isPressed) return;
+
+            Vector2 current   = mouse.position.ReadValue();
+            float deltaX      = current.x - this.lastMousePos.x;
+            this.lastMousePos = current;
+            this.transform.Rotate(Vector3.up, -deltaX * this.rotateSpeed, Space.World);
+        }
 
         // ─── Public API ───────────────────────────────────────────────────────────
 

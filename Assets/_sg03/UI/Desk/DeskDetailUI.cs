@@ -23,13 +23,11 @@ namespace SG03.UI
         private readonly Label cardViewerRarity;
         private readonly Label cardViewerCategory;
         private readonly Label cardViewerQty;
-        private readonly Button toggleBgBtn;
         private readonly DeskList deskList;
 
         private PresetData currentDesk;
         private InventoryItemData[] allInventoryItems = Array.Empty<InventoryItemData>();
         private string searchText = string.Empty;
-        private bool isImmersive;
 
         public event Action OnBackRequested;
         public event Action OnCardViewerShown;
@@ -53,16 +51,11 @@ namespace SG03.UI
             this.cardViewerCategory = deskRoot.Q<Label>("CardViewerCategory");
             this.cardViewerQty      = deskRoot.Q<Label>("CardViewerQty");
 
-            this.toggleBgBtn = deskRoot.Q<Button>("ToggleBgBtn");
-
             if (this.flyLayer != null)
                 this.flyLayer.pickingMode = PickingMode.Ignore;
 
             if (this.backBtn != null)
                 this.backBtn.RegisterCallback<ClickEvent>(_ => this.OnBackRequested?.Invoke());
-
-            if (this.toggleBgBtn != null)
-                this.toggleBgBtn.RegisterCallback<ClickEvent>(_ => this.ToggleBackground());
 
             Button closeBtn = deskRoot.Q<Button>("CardViewerCloseBtn");
             if (closeBtn != null)
@@ -113,8 +106,6 @@ namespace SG03.UI
         public void Hide()
         {
             this.detailPanel?.AddToClassList("desk-panel--hidden");
-            if (this.isImmersive)
-                this.ExitImmersive();
         }
 
         // ── Slot grid ─────────────────────────────────────────────────────────
@@ -357,36 +348,6 @@ namespace SG03.UI
         }
 
         // ── Interaction ───────────────────────────────────────────────────────
-
-        private void ToggleBackground()
-        {
-            if (this.isImmersive)
-                this.ExitImmersive();
-            else
-                this.EnterImmersive();
-        }
-
-        private void EnterImmersive()
-        {
-            this.isImmersive = true;
-            if (this.toggleBgBtn != null)
-            {
-                this.toggleBgBtn.text = "👁 Show BG";
-                this.toggleBgBtn.AddToClassList("desk-header__toggle-bg-btn--active");
-            }
-            this.OnCardViewerShown?.Invoke();
-        }
-
-        private void ExitImmersive()
-        {
-            this.isImmersive = false;
-            if (this.toggleBgBtn != null)
-            {
-                this.toggleBgBtn.text = "👁 Hide BG";
-                this.toggleBgBtn.RemoveFromClassList("desk-header__toggle-bg-btn--active");
-            }
-            this.OnCardViewerHidden?.Invoke();
-        }
 
         private void ShowCardViewer(InventoryItemData item, string itemId)
         {

@@ -20,6 +20,8 @@ namespace SG03.UI
         private readonly Button cancelCreateBtn;
         private readonly DeskList list;
         private readonly DeskDetailUI detailUI;
+        private VisualElement dimLayer;
+        private Button dimCloseBtn;
 
         public event System.Action OnCardViewerShown;
         public event System.Action OnCardViewerHidden;
@@ -28,6 +30,8 @@ namespace SG03.UI
         public DeskContentUI(VisualElement root)
         {
             this.deskRoot         = root.Q("DeskRoot");
+            this.dimLayer         = this.deskRoot?.Q("DimLayer");
+            this.dimCloseBtn      = this.deskRoot?.Q<Button>("DimCloseBtn");
             this.listPanel        = root.Q("ListPanel");
             this.deskListView     = root.Q<ScrollView>("DeskList");
             this.emptyState       = root.Q("EmptyState");
@@ -46,7 +50,14 @@ namespace SG03.UI
             this.detailUI.OnBackRequested      += this.ShowListPanel;
             this.detailUI.OnCardViewerShown  += this.OnDetailCardViewerShown;
             this.detailUI.OnCardViewerHidden += this.OnDetailCardViewerHidden;
-            this.detailUI.OnCardViewRequested += item => this.OnCardViewRequested?.Invoke(item);
+            this.detailUI.OnCardViewRequested += item =>
+            {
+                this.ShowDimLayer();
+                this.OnCardViewRequested?.Invoke(item);
+            };
+
+            if (this.dimCloseBtn != null)
+                this.dimCloseBtn.RegisterCallback<ClickEvent>(_ => this.OnDimLayerClicked());
 
             if (this.newDeskBtn != null)
                 this.newDeskBtn.RegisterCallback<ClickEvent>(_ => this.ShowCreateForm());
@@ -76,6 +87,17 @@ namespace SG03.UI
         private void OnDetailCardViewerHidden()
         {
             this.deskRoot?.RemoveFromClassList("desk-root--immersive");
+            this.HideDimLayer();
+            this.OnCardViewerHidden?.Invoke();
+        }
+
+        private void ShowDimLayer() => this.dimLayer?.RemoveFromClassList("desk-dim-layer--hidden");
+
+        private void HideDimLayer() => this.dimLayer?.AddToClassList("desk-dim-layer--hidden");
+
+        private void OnDimLayerClicked()
+        {
+            this.HideDimLayer();
             this.OnCardViewerHidden?.Invoke();
         }
 

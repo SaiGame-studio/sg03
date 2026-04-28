@@ -40,7 +40,6 @@
             <ui:VisualElement class="desk-header">
                 <ui:Button name="BackBtn" text="&#x2190; Back" class="desk-header__back-btn" />
                 <ui:Label name="DetailTitle" text="Desk" class="desk-header__title" />
-                <ui:Button name="ToggleBgBtn" text="&#x1F441; Hide BG" class="desk-header__toggle-bg-btn" />
             </ui:VisualElement>
 
             <ui:VisualElement class="desk-detail-body">
@@ -63,6 +62,10 @@
 
             <ui:VisualElement name="FlyLayer" class="desk-fly-layer" />
 
+        </ui:VisualElement>
+
+        <ui:VisualElement name="DimLayer" class="desk-dim-layer desk-dim-layer--hidden">
+            <ui:Button name="DimCloseBtn" text="✕" class="desk-dim-close-btn" />
         </ui:VisualElement>
 
         <ui:VisualElement name="CardViewerOverlay" class="desk-card-viewer desk-card-viewer--hidden">

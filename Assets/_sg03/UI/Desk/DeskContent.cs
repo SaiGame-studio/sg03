@@ -86,7 +86,11 @@ namespace SG03.UI
 
             ui = new DeskContentUI(content);
             ui.OnCardViewerShown   += () => OnCardViewerShown?.Invoke();
-            ui.OnCardViewerHidden  += () => OnCardViewerHidden?.Invoke();
+            ui.OnCardViewerHidden  += () =>
+            {
+                this.cardReviewCtrl?.Hide();
+                OnCardViewerHidden?.Invoke();
+            };
             ui.OnCardViewRequested += item =>
             {
                 CardBaseStats stats       = ParseBaseStats(item?.definition?.base_stats);
