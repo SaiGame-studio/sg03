@@ -15,6 +15,16 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 23f565229de3a5e479ee3849d00fd09c
   m_SerializeEntries:
+  - m_GUID: 0fd00c6a0911c63439351264592baf5d
+    m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 325981bf9ef75574993ed66f351f820f
+    m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3fe1da2b2c760aa4680679499fce77fd
     m_Address: Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
     m_ReadOnly: 0
@@ -22,6 +32,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6afd6f7305243ca49b6994795e032089
     m_Address: Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c511028519219e489397271c6c2e6f2
+    m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_grunt.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

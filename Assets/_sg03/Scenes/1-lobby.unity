@@ -2614,6 +2614,9 @@ MonoBehaviour:
   card3DLoader: {fileID: 0}
   cardAddresses:
   - Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
+  - Assets/_sg03/Card/Data/Character/Goblin/goblin_grunt.asset
+  - Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
+  - Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
   - Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
   - Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
   - Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
