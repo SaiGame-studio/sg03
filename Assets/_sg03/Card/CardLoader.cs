@@ -54,25 +54,7 @@ namespace SG03
         {
             base.Start();
             if (!this.loadOnStart) return;
-            _ = this.LoadAndApplyAsync();
-        }
-
-        // Convenience wrapper for standalone use (loadOnStart = true).
-        // Loads CardData and applies it directly to the sibling Card3D.
-        private async System.Threading.Tasks.Task LoadAndApplyAsync()
-        {
-            CardData data = await this.LoadAsync();
-            if (data == null) return;
-            this.ctrl.SetCardData(data);
-        }
-
-        /// <summary>
-        /// Loads the CardData and applies it to the sibling Card3D immediately.
-        /// Callable from Editor buttons or runtime code.
-        /// </summary>
-        public async System.Threading.Tasks.Task LoadAndApply()
-        {
-            await this.LoadAndApplyAsync();
+            _ = this.LoadAndApply();
         }
 
         private void OnDestroy() => this.ReleaseHandle();
@@ -81,9 +63,7 @@ namespace SG03
 
         /// <summary>
         /// Loads the CardData from Addressables asynchronously and returns it.
-        /// The caller is responsible for calling Card3D.SetCardData with the result.
-        /// Releases any previously loaded handle first.
-        /// Returns null on failure.
+        /// Releases any previously loaded handle first. Returns null on failure.
         /// </summary>
         public async Task<CardData> LoadAsync(string address = null)
         {
@@ -122,8 +102,27 @@ namespace SG03
         }
 
         /// <summary>
-        /// Loads the CardData by short asset name (e.g. "azure_blade").
-        /// The full address is built as: <see cref="cardNamePrefix"/> + <paramref name="cardName"/>.
+        /// Loads the CardData from <see cref="cardAddress"/> and applies it to the Card3D.
+        /// </summary>
+        public async System.Threading.Tasks.Task LoadAndApply()
+        {
+            CardData data = await this.LoadAsync();
+            if (data == null) return;
+            this.ctrl.SetCardData(data);
+        }
+
+        /// <summary>Releases the loaded Addressables handle.</summary>
+        public void ReleaseHandle()
+        {
+            if (!this.handleIsValid) return;
+            Addressables.Release(this.handle);
+            this.handleIsValid = false;
+        }
+
+        /// <summary>
+        /// Loads the CardData by short asset name. The full address is built as
+        /// <see cref="cardNamePrefix"/> + <paramref name="cardName"/>.
+        /// Returns null on failure; does not apply to Card3D.
         /// </summary>
         public async Task<CardData> LoadByNameAsync(string cardName)
         {
@@ -136,26 +135,42 @@ namespace SG03
             return await this.LoadAsync(this.cardNamePrefix + cardName);
         }
 
-        /// <summary>Releases the loaded Addressables handle.</summary>
-        public void ReleaseHandle()
+        /// <summary>
+        /// Searches <see cref="CardDataManager.CardAddresses"/> for an address containing
+        /// <see cref="cardNamePrefix"/> and writes it into <see cref="cardAddress"/>.
+        /// Returns true when a match is found.
+        /// </summary>
+        public bool ApplyAddressByPrefix()
         {
-            if (!this.handleIsValid) return;
-            Addressables.Release(this.handle);
-            this.handleIsValid = false;
+            if (CardDataManager.Instance == null)
+            {
+                Debug.LogWarning($"[CardLoader] CardDataManager not found on '{name}'.", this);
+                return false;
+            }
+
+            foreach (string addr in CardDataManager.Instance.CardAddresses)
+            {
+                if (!addr.Contains(this.cardNamePrefix)) continue;
+                this.cardAddress = addr;
+                return true;
+            }
+
+            Debug.LogWarning($"[CardLoader] No address found containing '{this.cardNamePrefix}' on '{name}'.", this);
+            return false;
         }
 
         /// <summary>
-        /// Sets <see cref="cardNamePrefix"/> to <paramref name="codeName"/>, then
-        /// loads the CardData and applies it to the sibling Card3D.
-        /// Equivalent to setting the prefix in the Inspector and calling LoadByName.
+        /// Sets <see cref="cardNamePrefix"/> to <paramref name="codeName"/>, resolves the
+        /// full Addressable address via <see cref="ApplyAddressByPrefix"/>, then loads and
+        /// applies the CardData — mirroring the "Load Card By Name" → "Load Card By Address"
+        /// Inspector button flow.
         /// </summary>
         public async System.Threading.Tasks.Task ShowByCodeName(string codeName)
         {
             if (string.IsNullOrEmpty(codeName)) return;
             this.cardNamePrefix = codeName;
-            CardData data = await this.LoadByNameAsync(string.Empty);
-            if (data == null) return;
-            this.ctrl.SetCardData(data);
+            if (!this.ApplyAddressByPrefix()) return;
+            await this.LoadAndApply();
         }
     }
 }

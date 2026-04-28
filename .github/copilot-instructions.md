@@ -29,6 +29,27 @@
 - **Never** nest `if` statements. Always prefer early return (guard clauses) to reduce nesting.
 - Handle invalid/edge cases first and return early, keeping the happy path at the lowest indentation level.
 
+## Unity Lifecycle Methods Are Call-Only
+- `Awake`, `Start`, `OnEnable`, `OnDisable`, `OnDestroy`, `Reset`, and all other Unity lifecycle callbacks **must not** contain inline logic.
+- They may **only** contain method calls — no `if`, loops, variable declarations, assignments, or expressions directly inside the body.
+- Extract all logic into dedicated `private`/`protected` methods and call those instead.
+
+```csharp
+// WRONG
+private void Start()
+{
+    if (data == null) data = ScriptableObject.CreateInstance<CardData>();
+    label.text = data.name;
+}
+
+// CORRECT
+private void Start()
+{
+    this.InitData();
+    this.RefreshLabel();
+}
+```
+
 ## No Runtime GetComponent
 - **Never** call `GetComponent` (or any variant: `GetComponentInChildren`, `GetComponentInParent`, etc.) in runtime gameplay methods.
 - All component references **must** be pre-wired: declare a `[SerializeField]` field and resolve it inside `LoadComponents()` or `Reset()` (editor-only callbacks).
