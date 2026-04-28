@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 namespace SG03
@@ -40,6 +41,34 @@ namespace SG03
         [Tooltip("Duration of the flip animation in seconds.")]
         [SerializeField] private float flipDuration = 0.4f;
 
+        // Shown in CardNameText when CardData.CardName is null or empty.
+        // Set externally via Card3DCtrl.SetFallbackName() before ApplyTextures().
+        private string fallbackName;
+
+        // Used for ATK / DEF / Stars when CardData has zeros (e.g. unfilled test cards).
+        // Set externally via Card3DCtrl.SetFallbackStats() before ApplyTextures().
+        private CardBaseStats fallbackStats;
+
+        // Shown in DescriptionText when CardData.Description is null or empty.
+        // Sourced from ItemDefinitionMetadata.description via Card3DCtrl.SetFallbackDescription().
+        private string fallbackDescription;
+
+        [Header("Card Text")]
+        [Tooltip("TextMeshPro showing the card name.")]
+        [SerializeField] private TextMeshPro cardNameText;
+
+        [Tooltip("TextMeshPro showing the star rating (★ symbols).")]
+        [SerializeField] private TextMeshPro starsText;
+
+        [Tooltip("TextMeshPro showing the ATK value.")]
+        [SerializeField] private TextMeshPro atkText;
+
+        [Tooltip("TextMeshPro showing the DEF value.")]
+        [SerializeField] private TextMeshPro defText;
+
+        [Tooltip("TextMeshPro showing the card description.")]
+        [SerializeField] private TextMeshPro descriptionText;
+
         [Header("Card Size")]
         [Tooltip("Card width in pixels (converted to world units via Pixels Per Unit).")]
         [SerializeField] private int   cardWidthPixels  = 750;
@@ -57,7 +86,10 @@ namespace SG03
 
         // ─── Unity lifecycle ──────────────────────────────────────────────────────
 
-        private void Start() => ApplyTextures();
+        private void Start()
+        {
+            this.ApplyTextures();
+        }
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
@@ -97,13 +129,34 @@ namespace SG03
                 return;
             }
 
-            Texture2D frame = cardData.FrameTexture != null ? cardData.FrameTexture : cardDefaults?.FrameTexture;
-            Texture2D back  = cardData.BackTexture  != null ? cardData.BackTexture  : cardDefaults?.BackTexture;
+            Texture2D frame = this.cardData.FrameTexture != null ? this.cardData.FrameTexture : this.cardDefaults?.FrameTexture;
+            Texture2D back  = this.cardData.BackTexture  != null ? this.cardData.BackTexture  : this.cardDefaults?.BackTexture;
 
-            SetRendererTexture(frontFrameRenderer, frame);
-            SetRendererTexture(characterRenderer,  cardData.CharacterTexture);
-            SetRendererTexture(backRenderer,       back);
+            SetRendererTexture(this.frontFrameRenderer, frame);
+            SetRendererTexture(this.characterRenderer,  this.cardData.CharacterTexture);
+            SetRendererTexture(this.backRenderer,       back);
+
+            this.ApplyCardText();
         }
+
+        /// <summary>
+        /// Sets a display name to show in <see cref="cardNameText"/> when
+        /// <see cref="CardData.CardName"/> is null or empty (e.g. test cards
+        /// whose CardData asset has not been filled in yet).
+        /// </summary>
+        public void SetFallbackName(string name) => this.fallbackName = name;
+
+        /// <summary>
+        /// Sets fallback ATK / DEF / Stars shown when CardData has zero values.
+        /// Pass the stats parsed from <c>ItemDefinitionData.base_stats</c>.
+        /// </summary>
+        public void SetFallbackStats(CardBaseStats stats) => this.fallbackStats = stats;
+
+        /// <summary>
+        /// Sets fallback description shown in DescriptionText when CardData.Description is empty.
+        /// Pass <c>ItemDefinitionMetadata.description</c> parsed from the server response.
+        /// </summary>
+        public void SetFallbackDescription(string description) => this.fallbackDescription = description;
 
         /// <summary>
         /// Assigns a new <see cref="CardData"/> and immediately applies its textures.
@@ -111,8 +164,8 @@ namespace SG03
         /// </summary>
         public void SetCardData(CardData data)
         {
-            cardData = data;
-            ApplyTextures();
+            this.cardData = data;
+            this.ApplyTextures();
         }
 
         /// <summary>Shows the front face immediately (no animation).</summary>
@@ -167,6 +220,39 @@ namespace SG03
             currentYAngle = toY;
             transform.localEulerAngles = new Vector3(0f, toY, 0f);
             flipCoroutine = null;
+        }
+
+        /// <summary>
+        /// Pushes card name, stars, ATK, DEF, and description from <see cref="cardData"/>
+        /// to the matching <see cref="TextMeshPro"/> components.
+        /// </summary>
+        public void ApplyCardText()
+        {
+            if (this.cardData == null) return;
+
+            string displayName = string.IsNullOrEmpty(this.cardData.CardName)
+                ? this.fallbackName
+                : this.cardData.CardName;
+
+            int displayAtk   = this.cardData.Atk   != 0 ? this.cardData.Atk   : this.fallbackStats?.atk  ?? 0;
+            int displayDef   = this.cardData.Def   != 0 ? this.cardData.Def   : this.fallbackStats?.def  ?? 0;
+            int displayStars = this.cardData.Stars != 0 ? this.cardData.Stars : this.fallbackStats?.star ?? 0;
+
+            string displayDescription = string.IsNullOrEmpty(this.cardData.Description)
+                ? this.fallbackDescription
+                : this.cardData.Description;
+
+            this.SetTMPText(this.cardNameText,    displayName);
+            this.SetTMPText(this.starsText,       new string('\u2605', displayStars));
+            this.SetTMPText(this.atkText,         $"ATK/{displayAtk}");
+            this.SetTMPText(this.defText,         $"DEF/{displayDef}");
+            this.SetTMPText(this.descriptionText, displayDescription);
+        }
+
+        private void SetTMPText(TextMeshPro tmp, string text)
+        {
+            if (tmp == null) return;
+            tmp.text = text;
         }
 
         private static void SetRendererTexture(Renderer rend, Texture2D texture)

@@ -50,14 +50,6 @@
     min-height: 260px;
 }
 
-.dq-day-card:first-child {
-    margin-left: 0;
-}
-
-.dq-day-card:last-child {
-    margin-right: 0;
-}
-
 /* Today: accent border + tinted background */
 .dq-day-card--today {
     border-color: rgba(90, 150, 255, 0.7);

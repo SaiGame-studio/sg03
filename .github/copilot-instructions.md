@@ -29,10 +29,34 @@
 - **Never** nest `if` statements. Always prefer early return (guard clauses) to reduce nesting.
 - Handle invalid/edge cases first and return early, keeping the happy path at the lowest indentation level.
 
+## Unity Lifecycle Methods Are Call-Only
+- Lifecycle callbacks (`Awake`, `Start`, `OnEnable`, `OnDisable`, `OnDestroy`, `Reset`) may **only** contain method calls — no inline logic, `if`, loops, or assignments.
+- See skill: `unity-lifecycle-rules`.
+
+## No Runtime GetComponent
+- **Never** call `GetComponent` in runtime methods. Pre-wire all references via `[SerializeField]` in `LoadComponents()`.
+- See skill: `unity-lifecycle-rules`.
+
+## Controller LoadComponents Pattern
+- Ctrl classes (`SaiBehaviour` subclasses ending in `Ctrl`) must follow the `LoadComponents()` + `Load<X>()` pattern with null guard and `Debug.LogWarning`.
+- See skill: `unity-ctrl-pattern`.
+
 ## C# Compile Check Before Delivery
 - After every code change, **always** run `get_errors` on all modified `.cs` files.
 - Do **not** deliver the work until `get_errors` returns zero errors.
 - If errors are found, fix them all and run `get_errors` again before presenting the final response.
+
+## Always Use `this.`
+- **Always** qualify instance field, property, and method access with `this.` inside a class. No exceptions.
+- See skill: `use-this-keyword`.
+
+## UI Toolkit Element Names
+- Every `VisualElement` in `.uxml` or C# **must** have a non-empty `name`. Anonymous elements are not allowed.
+- See skill: `unity-ui-toolkit`.
+
+## Evidence-Based Analysis
+- Every finding or conclusion **must** cite a code reference. Prefer method names. State explicitly if no reference exists.
+- See skill: `evidence-based-analysis`.
 
 ## Response Summary
 - After completing every request, always end the response with a summary section titled **"Tổng kết"**.

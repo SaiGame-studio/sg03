@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -20,9 +21,11 @@ namespace SG03
     /// The loaded handle is released automatically when this component is destroyed.
     /// </summary>
     [AddComponentMenu("SG03/Card/Card Loader")]
-    [RequireComponent(typeof(Card3D))]
-    public class CardLoader : MonoBehaviour
+    [RequireComponent(typeof(Card3DCtrl))]
+    public class CardLoader : SaiBehaviour
     {
+        [SerializeField] private Card3DCtrl ctrl;
+
         [SerializeField] private string cardAddress;
 
         [SerializeField] private string cardNamePrefix = "azure_blade";
@@ -32,45 +35,39 @@ namespace SG03
         private AsyncOperationHandle<CardData> handle;
         private bool                           handleIsValid;
 
-        // ─── Unity lifecycle ──────────────────────────────────────────────────────
+// ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
-        private void Start()
+        protected override void LoadComponents()
         {
-            if (!loadOnStart) return;
-            _ = LoadAndApplyAsync();
+            base.LoadComponents();
+            this.LoadCard3DCtrl();
         }
 
-        // Convenience wrapper for standalone use (loadOnStart = true).
-        // Loads CardData and applies it directly to the sibling Card3D.
-        private async System.Threading.Tasks.Task LoadAndApplyAsync()
+        protected virtual void LoadCard3DCtrl()
         {
-            CardData data = await LoadAsync();
-            if (data == null) return;
-            GetComponent<Card3D>().SetCardData(data);
+            if (this.ctrl != null) return;
+            this.ctrl = this.GetComponent<Card3DCtrl>();
+            Debug.LogWarning(transform.name + "LoadCard3DCtrl", gameObject);
         }
 
-        /// <summary>
-        /// Loads the CardData and applies it to the sibling Card3D immediately.
-        /// Callable from Editor buttons or runtime code.
-        /// </summary>
-        public async System.Threading.Tasks.Task LoadAndApply()
+        protected override void Start()
         {
-            await LoadAndApplyAsync();
+            base.Start();
+            if (!this.loadOnStart) return;
+            _ = this.LoadAndApply();
         }
 
-        private void OnDestroy() => ReleaseHandle();
+        private void OnDestroy() => this.ReleaseHandle();
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
         /// Loads the CardData from Addressables asynchronously and returns it.
-        /// The caller is responsible for calling Card3D.SetCardData with the result.
-        /// Releases any previously loaded handle first.
-        /// Returns null on failure.
+        /// Releases any previously loaded handle first. Returns null on failure.
         /// </summary>
         public async Task<CardData> LoadAsync(string address = null)
         {
-            string resolvedAddress = string.IsNullOrEmpty(address) ? cardAddress : address;
+            string resolvedAddress = string.IsNullOrEmpty(address) ? this.cardAddress : address;
 
             if (string.IsNullOrEmpty(resolvedAddress))
             {
@@ -78,35 +75,54 @@ namespace SG03
                 return null;
             }
 
-            ReleaseHandle();
+            this.ReleaseHandle();
 
-            handle        = Addressables.LoadAssetAsync<CardData>(resolvedAddress);
-            handleIsValid = true;
+            this.handle        = Addressables.LoadAssetAsync<CardData>(resolvedAddress);
+            this.handleIsValid = true;
 
             try
             {
-                await handle.Task;
+                await this.handle.Task;
             }
             catch (Exception e)
             {
                 Debug.LogError($"[CardLoader] Failed to load '{resolvedAddress}': {e.Message}", this);
-                ReleaseHandle();
+                this.ReleaseHandle();
                 return null;
             }
 
-            if (handle.Status != AsyncOperationStatus.Succeeded)
+            if (this.handle.Status != AsyncOperationStatus.Succeeded)
             {
                 Debug.LogError($"[CardLoader] Addressables load failed for '{resolvedAddress}'.", this);
-                ReleaseHandle();
+                this.ReleaseHandle();
                 return null;
             }
 
-            return handle.Result;
+            return this.handle.Result;
         }
 
         /// <summary>
-        /// Loads the CardData by short asset name (e.g. "azure_blade").
-        /// The full address is built as: <see cref="cardNamePrefix"/> + <paramref name="cardName"/>.
+        /// Loads the CardData from <see cref="cardAddress"/> and applies it to the Card3D.
+        /// </summary>
+        public async System.Threading.Tasks.Task LoadAndApply()
+        {
+            CardData data = await this.LoadAsync();
+            if (data == null) return;
+            this.ctrl.SetCardData(data);
+        }
+
+        /// <summary>Releases the loaded Addressables handle.</summary>
+        public void ReleaseHandle()
+        {
+            if (!this.handleIsValid) return;
+            Addressables.Release(this.handle);
+            this.handleIsValid = false;
+        }
+
+        /// <summary>
+        /// Loads the CardData by short asset name. The full address is built as
+        /// <see cref="cardNamePrefix"/> + <paramref name="cardName"/>.
+        /// Returns null on failure; does not apply to Card3D.
         /// </summary>
         public async Task<CardData> LoadByNameAsync(string cardName)
         {
@@ -116,15 +132,45 @@ namespace SG03
                 return null;
             }
 
-            return await LoadAsync(cardNamePrefix + cardName);
+            return await this.LoadAsync(this.cardNamePrefix + cardName);
         }
 
-        /// <summary>Releases the loaded Addressables handle.</summary>
-        public void ReleaseHandle()
+        /// <summary>
+        /// Searches <see cref="CardDataManager.CardAddresses"/> for an address containing
+        /// <see cref="cardNamePrefix"/> and writes it into <see cref="cardAddress"/>.
+        /// Returns true when a match is found.
+        /// </summary>
+        public bool ApplyAddressByPrefix()
         {
-            if (!handleIsValid) return;
-            Addressables.Release(handle);
-            handleIsValid = false;
+            if (CardDataManager.Instance == null)
+            {
+                Debug.LogWarning($"[CardLoader] CardDataManager not found on '{name}'.", this);
+                return false;
+            }
+
+            foreach (string addr in CardDataManager.Instance.CardAddresses)
+            {
+                if (!addr.Contains(this.cardNamePrefix)) continue;
+                this.cardAddress = addr;
+                return true;
+            }
+
+            Debug.LogWarning($"[CardLoader] No address found containing '{this.cardNamePrefix}' on '{name}'.", this);
+            return false;
+        }
+
+        /// <summary>
+        /// Sets <see cref="cardNamePrefix"/> to <paramref name="codeName"/>, resolves the
+        /// full Addressable address via <see cref="ApplyAddressByPrefix"/>, then loads and
+        /// applies the CardData — mirroring the "Load Card By Name" → "Load Card By Address"
+        /// Inspector button flow.
+        /// </summary>
+        public async System.Threading.Tasks.Task ShowByCodeName(string codeName)
+        {
+            if (string.IsNullOrEmpty(codeName)) return;
+            this.cardNamePrefix = codeName;
+            if (!this.ApplyAddressByPrefix()) return;
+            await this.LoadAndApply();
         }
     }
 }

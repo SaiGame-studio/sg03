@@ -93,6 +93,7 @@ namespace SG03.UI
             }
 
             this.playerItem.GetItems(
+                limit: 1000,
                 onSuccess: response => onSuccess?.Invoke(response?.items ?? Array.Empty<InventoryItemData>()),
                 onError:   onError
             );
