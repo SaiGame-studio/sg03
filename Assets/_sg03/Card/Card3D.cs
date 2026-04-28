@@ -41,6 +41,18 @@ namespace SG03
         [Tooltip("Duration of the flip animation in seconds.")]
         [SerializeField] private float flipDuration = 0.4f;
 
+        // Shown in CardNameText when CardData.CardName is null or empty.
+        // Set externally via Card3DCtrl.SetFallbackName() before ApplyTextures().
+        private string fallbackName;
+
+        // Used for ATK / DEF / Stars when CardData has zeros (e.g. unfilled test cards).
+        // Set externally via Card3DCtrl.SetFallbackStats() before ApplyTextures().
+        private CardBaseStats fallbackStats;
+
+        // Shown in DescriptionText when CardData.Description is null or empty.
+        // Sourced from ItemDefinitionMetadata.description via Card3DCtrl.SetFallbackDescription().
+        private string fallbackDescription;
+
         [Header("Card Text")]
         [Tooltip("TextMeshPro showing the card name.")]
         [SerializeField] private TextMeshPro cardNameText;
@@ -128,6 +140,25 @@ namespace SG03
         }
 
         /// <summary>
+        /// Sets a display name to show in <see cref="cardNameText"/> when
+        /// <see cref="CardData.CardName"/> is null or empty (e.g. test cards
+        /// whose CardData asset has not been filled in yet).
+        /// </summary>
+        public void SetFallbackName(string name) => this.fallbackName = name;
+
+        /// <summary>
+        /// Sets fallback ATK / DEF / Stars shown when CardData has zero values.
+        /// Pass the stats parsed from <c>ItemDefinitionData.base_stats</c>.
+        /// </summary>
+        public void SetFallbackStats(CardBaseStats stats) => this.fallbackStats = stats;
+
+        /// <summary>
+        /// Sets fallback description shown in DescriptionText when CardData.Description is empty.
+        /// Pass <c>ItemDefinitionMetadata.description</c> parsed from the server response.
+        /// </summary>
+        public void SetFallbackDescription(string description) => this.fallbackDescription = description;
+
+        /// <summary>
         /// Assigns a new <see cref="CardData"/> and immediately applies its textures.
         /// Called by <see cref="CardDataManager"/> after an Addressables load completes.
         /// </summary>
@@ -199,11 +230,23 @@ namespace SG03
         {
             if (this.cardData == null) return;
 
-            this.SetTMPText(this.cardNameText,    this.cardData.CardName);
-            this.SetTMPText(this.starsText,       new string('\u2605', this.cardData.Stars));
-            this.SetTMPText(this.atkText,         $"ATK/{this.cardData.Atk}");
-            this.SetTMPText(this.defText,         $"DEF/{this.cardData.Def}");
-            this.SetTMPText(this.descriptionText, this.cardData.Description);
+            string displayName = string.IsNullOrEmpty(this.cardData.CardName)
+                ? this.fallbackName
+                : this.cardData.CardName;
+
+            int displayAtk   = this.cardData.Atk   != 0 ? this.cardData.Atk   : this.fallbackStats?.atk  ?? 0;
+            int displayDef   = this.cardData.Def   != 0 ? this.cardData.Def   : this.fallbackStats?.def  ?? 0;
+            int displayStars = this.cardData.Stars != 0 ? this.cardData.Stars : this.fallbackStats?.star ?? 0;
+
+            string displayDescription = string.IsNullOrEmpty(this.cardData.Description)
+                ? this.fallbackDescription
+                : this.cardData.Description;
+
+            this.SetTMPText(this.cardNameText,    displayName);
+            this.SetTMPText(this.starsText,       new string('\u2605', displayStars));
+            this.SetTMPText(this.atkText,         $"ATK/{displayAtk}");
+            this.SetTMPText(this.defText,         $"DEF/{displayDef}");
+            this.SetTMPText(this.descriptionText, displayDescription);
         }
 
         private void SetTMPText(TextMeshPro tmp, string text)

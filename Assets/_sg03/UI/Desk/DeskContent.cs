@@ -48,6 +48,14 @@ namespace SG03.UI
             Debug.LogWarning(transform.name + ": LoadCardReviewCtrl", gameObject);
         }
 
+        // Parses the raw base_stats JSON string from the server into a CardBaseStats object.
+        // Returns null if the string is null or empty.
+        private static CardBaseStats ParseBaseStats(string json)
+        {
+            if (string.IsNullOrEmpty(json)) return null;
+            return JsonUtility.FromJson<CardBaseStats>(json);
+        }
+
         // ─── Events ───────────────────────────────────────────────────────────────
 
         public event Action OnCardViewerShown;
@@ -79,7 +87,16 @@ namespace SG03.UI
             ui = new DeskContentUI(content);
             ui.OnCardViewerShown   += () => OnCardViewerShown?.Invoke();
             ui.OnCardViewerHidden  += () => OnCardViewerHidden?.Invoke();
-            ui.OnCardViewRequested += item => cardReviewCtrl?.RequestShow(item?.definition?.item_code);
+            ui.OnCardViewRequested += item =>
+            {
+                CardBaseStats stats       = ParseBaseStats(item?.definition?.base_stats);
+                string        description = item?.definition?.ParsedMetadata?.description;
+                cardReviewCtrl?.RequestShow(
+                    item?.definition?.item_code,
+                    item?.definition?.name,
+                    stats,
+                    description);
+            };
         }
     }
 }

@@ -41,13 +41,16 @@ namespace SG03
 
         /// <summary>
         /// Shows the card with the given <paramref name="codeName"/>.
-        /// Loads the CardData via <see cref="CardLoader.ShowByCodeName"/> first, then
-        /// triggers the movement animation. If the card is already shown, hides it
-        /// first and waits for the hide animation to finish before showing again.
+        /// <paramref name="displayName"/> is the fallback card name when CardData.CardName is empty.
+        /// <paramref name="stats"/> provides fallback ATK / DEF / Stars when CardData has zeros.
+        /// <paramref name="description"/> is the fallback description from ItemDefinitionMetadata.
         /// </summary>
-        public void RequestShow(string codeName)
+        public void RequestShow(string codeName, string displayName = null, CardBaseStats stats = null, string description = null)
         {
             if (this.movement == null) return;
+            this.SetFallbackName(displayName ?? codeName);
+            this.SetFallbackStats(stats);
+            this.SetFallbackDescription(description);
             if (!this.movement.IsShown)
             {
                 this.LoadCardByCodeName(codeName);

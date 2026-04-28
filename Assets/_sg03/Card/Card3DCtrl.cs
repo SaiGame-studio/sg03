@@ -65,5 +65,25 @@ namespace SG03
 
         /// <summary>Assigns new CardData and immediately applies its textures.</summary>
         public void SetCardData(CardData data) => this.card.SetCardData(data);
+
+        /// <summary>
+        /// Sets the fallback display name shown in CardNameText when the
+        /// assigned CardData has no CardName filled in.
+        /// Call before <see cref="LoadCardByCodeName"/> so the name is ready
+        /// when ApplyCardText runs.
+        /// </summary>
+        public void SetFallbackName(string name) => this.card.SetFallbackName(name);
+
+        /// <summary>
+        /// Sets fallback ATK / DEF / Stars shown when the assigned CardData has zeros.
+        /// Pass stats parsed from <c>ItemDefinitionData.base_stats</c>.
+        /// </summary>
+        public void SetFallbackStats(CardBaseStats stats) => this.card.SetFallbackStats(stats);
+
+        /// <summary>
+        /// Sets fallback description shown in DescriptionText when CardData.Description is empty.
+        /// Pass <c>ItemDefinitionMetadata.description</c>.
+        /// </summary>
+        public void SetFallbackDescription(string description) => this.card.SetFallbackDescription(description);
     }
 }
