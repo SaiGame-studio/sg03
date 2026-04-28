@@ -30,64 +30,16 @@
 - Handle invalid/edge cases first and return early, keeping the happy path at the lowest indentation level.
 
 ## Unity Lifecycle Methods Are Call-Only
-- `Awake`, `Start`, `OnEnable`, `OnDisable`, `OnDestroy`, `Reset`, and all other Unity lifecycle callbacks **must not** contain inline logic.
-- They may **only** contain method calls — no `if`, loops, variable declarations, assignments, or expressions directly inside the body.
-- Extract all logic into dedicated `private`/`protected` methods and call those instead.
-
-```csharp
-// WRONG
-private void Start()
-{
-    if (data == null) data = ScriptableObject.CreateInstance<CardData>();
-    label.text = data.name;
-}
-
-// CORRECT
-private void Start()
-{
-    this.InitData();
-    this.RefreshLabel();
-}
-```
+- Lifecycle callbacks (`Awake`, `Start`, `OnEnable`, `OnDisable`, `OnDestroy`, `Reset`) may **only** contain method calls — no inline logic, `if`, loops, or assignments.
+- See skill: `unity-lifecycle-rules`.
 
 ## No Runtime GetComponent
-- **Never** call `GetComponent` (or any variant: `GetComponentInChildren`, `GetComponentInParent`, etc.) in runtime gameplay methods.
-- All component references **must** be pre-wired: declare a `[SerializeField]` field and resolve it inside `LoadComponents()` or `Reset()` (editor-only callbacks).
-- `GetComponent` is **only** permitted inside `LoadComponents()`, `Reset()`, and `Awake()` (initialization only).
-- A **Ctrl class** (e.g. `Card3DReviewCtrl`) is the single owner of all component links for a given GameObject. Other components on the same object must **not** resolve siblings themselves at runtime; they receive references from the Ctrl class or from the Inspector.
+- **Never** call `GetComponent` in runtime methods. Pre-wire all references via `[SerializeField]` in `LoadComponents()`.
+- See skill: `unity-lifecycle-rules`.
 
 ## Controller LoadComponents Pattern
-When creating a controller class (any class ending in `Ctrl` that inherits from `SaiBehaviour`), every component link **must** follow this exact pattern:
-
-1. Override `LoadComponents()` and call one dedicated method per component.
-2. Each dedicated method is `protected virtual`, named `Load<ComponentType>()`, and uses an early-return null guard.
-3. Log a `Debug.LogWarning` with `transform.name + "Load<ComponentType>"` so missing links are visible in the Console.
-
-```csharp
-protected override void LoadComponents()
-{
-    this.LoadCard3D();
-    this.LoadCardLoader();
-}
-
-protected virtual void LoadCard3D()
-{
-    if (this.card != null) return;
-    this.card = this.GetComponent<Card3D>();
-    Debug.LogWarning(transform.name + "LoadCard3D", gameObject);
-}
-
-protected virtual void LoadCardLoader()
-{
-    if (this.loader != null) return;
-    this.loader = this.GetComponent<CardLoader>();
-    Debug.LogWarning(transform.name + "LoadCardLoader", gameObject);
-}
-```
-
-- The null guard (`if (this.x != null) return;`) prevents overwriting Inspector-assigned values.
-- Marking the method `virtual` allows subclasses to override the wiring if needed.
-- Each `[SerializeField]` field must have exactly one corresponding `Load<X>()` method.
+- Ctrl classes (`SaiBehaviour` subclasses ending in `Ctrl`) must follow the `LoadComponents()` + `Load<X>()` pattern with null guard and `Debug.LogWarning`.
+- See skill: `unity-ctrl-pattern`.
 
 ## C# Compile Check Before Delivery
 - After every code change, **always** run `get_errors` on all modified `.cs` files.
@@ -95,18 +47,16 @@ protected virtual void LoadCardLoader()
 - If errors are found, fix them all and run `get_errors` again before presenting the final response.
 
 ## Always Use `this.`
-- **Always** qualify instance field, property, and method access with `this.` inside a class.
-- This applies to all reads, writes, and method calls on the current instance — no exceptions.
+- **Always** qualify instance field, property, and method access with `this.` inside a class. No exceptions.
+- See skill: `use-this-keyword`.
 
 ## UI Toolkit Element Names
-- Every element defined in a `.uxml` file or created in C# via `new VisualElement()` (and any subclass) **must** have a non-empty `name` attribute / `name` property set.
-- Use `name` values that are descriptive and unique within their parent container (e.g. `"submit-button"`, `"card-title-label"`).
-- Anonymous elements (no `name`) are **not** allowed — they break `Q<T>("name")` queries and make debugging in the UI Debugger impossible.
+- Every `VisualElement` in `.uxml` or C# **must** have a non-empty `name`. Anonymous elements are not allowed.
+- See skill: `unity-ui-toolkit`.
 
 ## Evidence-Based Analysis
-- Every analysis finding or conclusion **must** be backed by a code reference.
-- Prefer citing function/method names (e.g. `LoadCard3D()`, `SetCardData()`) over line numbers or file paths alone.
-- If a conclusion cannot be supported by a concrete code reference, state that explicitly rather than asserting it as fact.
+- Every finding or conclusion **must** cite a code reference. Prefer method names. State explicitly if no reference exists.
+- See skill: `evidence-based-analysis`.
 
 ## Response Summary
 - After completing every request, always end the response with a summary section titled **"Tổng kết"**.
