@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 
@@ -87,6 +88,22 @@ namespace SG03
             so.FindProperty("characterRenderer").objectReferenceValue  = characterGO.GetComponent<Renderer>();
             so.FindProperty("frontFrameRenderer").objectReferenceValue = frameGO.GetComponent<Renderer>();
             so.FindProperty("backRenderer").objectReferenceValue       = backGO.GetComponent<Renderer>();
+
+            // --- Text elements on the front face ---
+            // Card is 7.5 x 10.5 world units (750 x 1050 px at 100 PPU), centered at (0,0,0).
+            // Z = -0.003f keeps text in front of both the Character and Frame quads.
+            GameObject cardNameGO   = GetOrCreateTMPText("CardNameText",    frontFace, new Vector3( 0f,    3.8f, -0.003f), 0.35f, TextAlignmentOptions.Center);
+            GameObject starsGO      = GetOrCreateTMPText("StarsText",       frontFace, new Vector3( 0f,    2.9f, -0.003f), 0.35f, TextAlignmentOptions.Center);
+            GameObject atkGO        = GetOrCreateTMPText("AtkText",         frontFace, new Vector3(-1.5f, -3.8f, -0.003f), 0.30f, TextAlignmentOptions.Left);
+            GameObject defGO        = GetOrCreateTMPText("DefText",         frontFace, new Vector3( 1.5f, -3.8f, -0.003f), 0.30f, TextAlignmentOptions.Left);
+            GameObject descriptionGO = GetOrCreateTMPText("DescriptionText", frontFace, new Vector3( 0f,  -1.5f, -0.003f), 0.18f, TextAlignmentOptions.Center);
+
+            so.FindProperty("cardNameText").objectReferenceValue    = cardNameGO.GetComponent<TextMeshPro>();
+            so.FindProperty("starsText").objectReferenceValue       = starsGO.GetComponent<TextMeshPro>();
+            so.FindProperty("atkText").objectReferenceValue         = atkGO.GetComponent<TextMeshPro>();
+            so.FindProperty("defText").objectReferenceValue         = defGO.GetComponent<TextMeshPro>();
+            so.FindProperty("descriptionText").objectReferenceValue = descriptionGO.GetComponent<TextMeshPro>();
+
             so.ApplyModifiedProperties();
 
             AutoFillCardDefaults(so);
@@ -174,6 +191,32 @@ namespace SG03
             Undo.RegisterCreatedObjectUndo(go, "Create " + childName);
             go.transform.SetParent(parent, false);
             return go.transform;
+        }
+
+        private static GameObject GetOrCreateTMPText(
+            string      objName,
+            Transform   parent,
+            Vector3     localPosition,
+            float       fontSize,
+            TextAlignmentOptions alignment)
+        {
+            Transform existing = parent.Find(objName);
+            if (existing != null) return existing.gameObject;
+
+            GameObject go = new GameObject(objName);
+            Undo.RegisterCreatedObjectUndo(go, "Create " + objName);
+            Undo.SetTransformParent(go.transform, parent, "Parent " + objName);
+            go.transform.localPosition = localPosition;
+            go.transform.localRotation = Quaternion.identity;
+            go.transform.localScale    = Vector3.one;
+
+            TextMeshPro tmp = Undo.AddComponent<TextMeshPro>(go);
+            tmp.fontSize  = fontSize;
+            tmp.alignment = alignment;
+            tmp.text      = objName;
+            tmp.enableWordWrapping = objName == "DescriptionText";
+
+            return go;
         }
 
         private static GameObject GetOrCreateQuad(string quadName, Transform parent)
