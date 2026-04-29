@@ -351,6 +351,7 @@ namespace SG03.UI
 
         private void ShowCardViewer(InventoryItemData item, string itemId)
         {
+            this.OnCardViewerShown?.Invoke();
             this.OnCardViewRequested?.Invoke(item);
         }
 
