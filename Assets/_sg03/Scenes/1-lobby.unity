@@ -2613,6 +2613,12 @@ MonoBehaviour:
   card3DReview: {fileID: 0}
   card3DLoader: {fileID: 0}
   cardAddresses:
+  - Assets/_sg03/Card/Data/Ability/DarkElf/animate_dead.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/king_return.asset
+  - Assets/_sg03/Card/Data/Ability/Goblin/back_stab.asset
+  - Assets/_sg03/Card/Data/Ability/Goblin/totem_pulse.asset
+  - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/cross_guard.asset
+  - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/spinning_slash.asset
   - Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
   - Assets/_sg03/Card/Data/Character/Goblin/goblin_grunt.asset
   - Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset

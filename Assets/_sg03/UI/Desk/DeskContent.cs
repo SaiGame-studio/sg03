@@ -2,6 +2,7 @@ using System;
 using SaiGame.Services;
 using SG03;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace SG03.UI
@@ -67,6 +68,8 @@ namespace SG03.UI
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
+        private void Update() => this.HandleCloseViewerOnEscape();
+
         /// <summary>
         /// Instantiates the desk content UXML into <paramref name="container"/> and
         /// initialises the UI logic. The caller is responsible for clearing the
@@ -103,6 +106,16 @@ namespace SG03.UI
                     stats,
                     description);
             };
+        }
+
+        private void HandleCloseViewerOnEscape()
+        {
+            Keyboard keyboard = Keyboard.current;
+            if (keyboard == null) return;
+            if (!keyboard.escapeKey.wasPressedThisFrame) return;
+            if (this.ui == null) return;
+
+            this.ui.RequestCloseViewerFromDimLayer();
         }
     }
 }
