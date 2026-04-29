@@ -56,6 +56,12 @@
 - Every `VisualElement` in `.uxml` or C# **must** have a non-empty `name`. Anonymous elements are not allowed.
 - See skill: `unity-ui-toolkit`.
 
+## No SaiGame.UI Dependency
+- Code under `Assets/_sg03/` must **not** use the `SaiGame.UI` namespace.
+- Do **not** add `using SaiGame.UI;` in `_sg03` scripts.
+- Do **not** inherit from or depend on UI classes located under `Assets/SaiGame/UI/`.
+- If `_sg03` needs UI routing, panels, or helpers, create dedicated implementations under `Assets/_sg03/` using the `SG03.UI` namespace.
+
 ## Evidence-Based Analysis
 - Every finding or conclusion **must** cite a code reference. Prefer method names. State explicitly if no reference exists.
 - See skill: `evidence-based-analysis`.

@@ -1,14 +1,5 @@
-/*
- * =========================================================
- *  Variables.uss — Design tokens & shared utility classes
- *  Import this file at the top of every panel's .uss:
- *      @import url("../Common/Variables.uss");
- * =========================================================
- */
+/* Shared _sg03 UI Toolkit variables and utility classes. */
 
-/* ----------------------------------------------------------
-   Full-screen centre container (root of every panel)
-   ---------------------------------------------------------- */
 .panel-root {
     flex: 1;
     align-items: center;
@@ -16,9 +7,6 @@
     background-color: rgba(10, 12, 20, 0.92);
 }
 
-/* ----------------------------------------------------------
-   Card  (centred content box)
-   ---------------------------------------------------------- */
 .card {
     padding: 40px 36px 36px 36px;
     background-color: rgba(22, 26, 40, 1);
@@ -28,9 +16,6 @@
     align-items: stretch;
 }
 
-/* ----------------------------------------------------------
-   Typography
-   ---------------------------------------------------------- */
 .panel-title {
     font-size: 28px;
     color: rgb(230, 235, 255);
@@ -47,9 +32,6 @@
     margin-top: 12px;
 }
 
-/* ----------------------------------------------------------
-   Input field
-   ---------------------------------------------------------- */
 .input-field {
     margin-bottom: 0;
     border-radius: 8px;
@@ -65,9 +47,6 @@
     border-color: rgba(80, 140, 255, 0.9);
 }
 
-/* ----------------------------------------------------------
-   Toggle row  (checkbox + label side by side)
-   ---------------------------------------------------------- */
 .toggle-row {
     flex-direction: row;
     align-items: center;
@@ -85,9 +64,6 @@
     flex: 1;
 }
 
-/* ----------------------------------------------------------
-   Primary button
-   ---------------------------------------------------------- */
 .btn-primary {
     margin-top: 28px;
     padding: 12px;
@@ -114,7 +90,6 @@
     color: rgba(150, 155, 180, 0.6);
 }
 
-/* Secondary / ghost button */
 .btn-secondary {
     margin-top: 12px;
     padding: 10px;
@@ -138,9 +113,6 @@
     border-color: rgba(50, 60, 100, 0.4);
 }
 
-/* ----------------------------------------------------------
-   Divider
-   ---------------------------------------------------------- */
 .divider {
     height: 1px;
     background-color: rgba(80, 100, 160, 0.25);
@@ -148,10 +120,6 @@
     margin-bottom: 8px;
 }
 
-/* ----------------------------------------------------------
-   Feedback message  (shown below a form)
-   Usage: add "feedback--error" or "feedback--success" from code
-   ---------------------------------------------------------- */
 .feedback {
     margin-top: 14px;
     font-size: 12px;

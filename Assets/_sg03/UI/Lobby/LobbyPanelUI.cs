@@ -2,16 +2,18 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using SaiGame.Services;
-using SaiGame.UI;
 using SG03.UI.Components;
 
 namespace SG03.UI
 {
     // Lobby panel — top menu tabs + bottom navigation bar.
     // Access all SaiServer services via the Server property.
-    public class LobbyPanelUI : UIPanelBase
+    public class LobbyPanelUI : SaiBehaviour
     {
-        public override string PanelId => "Lobby";
+        public string PanelId => "Lobby";
+
+        [Header("Panel")]
+        [SerializeField] private VisualTreeAsset panelAsset;
 
         [Header("References")]
         [SerializeField] private SaiServer saiServer;
@@ -56,14 +58,14 @@ namespace SG03.UI
         {
             if (this.saiServer != null) return;
             this.saiServer = SaiServer.Instance;
-            Debug.LogWarning(transform.name + ": LoadSaiServer", gameObject);
+            Debug.LogWarning(this.transform.name + ": LoadSaiServer", this.gameObject);
         }
 
         private void LoadUIDocument()
         {
             if (this.uiDocument != null) return;
             this.uiDocument = this.GetComponent<UIDocument>();
-            Debug.LogWarning(transform.name + ": LoadUIDocument", gameObject);
+            Debug.LogWarning(this.transform.name + ": LoadUIDocument", this.gameObject);
         }
 
         private void LoadPanelSettings()
@@ -74,7 +76,7 @@ namespace SG03.UI
             PanelSettings ps = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>(
                 "Assets/_sg03/UI/LobbyPanelSettings.asset");
             if (ps != null) this.uiDocument.panelSettings = ps;
-            Debug.LogWarning(transform.name + ": LoadPanelSettings", gameObject);
+            Debug.LogWarning(this.transform.name + ": LoadPanelSettings", this.gameObject);
 #endif
         }
 
@@ -85,13 +87,13 @@ namespace SG03.UI
             {
                 this.panelAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                     "Assets/_sg03/UI/Lobby/LobbyPanel.uxml");
-                Debug.LogWarning(transform.name + ": LoadPanelAsset", gameObject);
+                Debug.LogWarning(this.transform.name + ": LoadPanelAsset", this.gameObject);
             }
 
             if (this.uiDocument != null && this.uiDocument.visualTreeAsset == null && this.panelAsset != null)
             {
                 this.uiDocument.visualTreeAsset = this.panelAsset;
-                Debug.LogWarning(transform.name + ": LoadPanelAsset → UIDocument.visualTreeAsset", gameObject);
+                Debug.LogWarning(this.transform.name + ": LoadPanelAsset → UIDocument.visualTreeAsset", this.gameObject);
             }
 #endif
         }
@@ -102,7 +104,7 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.questPanelAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Quest/QuestPanel.uxml");
-            Debug.LogWarning(transform.name + ": LoadQuestPanelAsset", gameObject);
+            Debug.LogWarning(this.transform.name + ": LoadQuestPanelAsset", this.gameObject);
 #endif
         }
 
@@ -112,7 +114,7 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.dailyQuestContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Quest/DailyQuest/DailyQuestContent.uxml");
-            Debug.LogWarning(transform.name + ": LoadDailyQuestContentAsset", gameObject);
+            Debug.LogWarning(this.transform.name + ": LoadDailyQuestContentAsset", this.gameObject);
 #endif
         }
 
@@ -122,7 +124,7 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.mainQuestContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Quest/MainQuest/MainQuestContent.uxml");
-            Debug.LogWarning(transform.name + ": LoadMainQuestContentAsset", gameObject);
+            Debug.LogWarning(this.transform.name + ": LoadMainQuestContentAsset", this.gameObject);
 #endif
         }
 
@@ -132,7 +134,7 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.mailboxContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Mailbox/MailboxContent.uxml");
-            Debug.LogWarning(transform.name + ": LoadMailboxContentAsset", gameObject);
+            Debug.LogWarning(this.transform.name + ": LoadMailboxContentAsset", this.gameObject);
 #endif
         }
 
@@ -142,7 +144,7 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.inventoryContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Inventory/InventoryContent.uxml");
-            Debug.LogWarning(transform.name + ": LoadInventoryContentAsset", gameObject);
+            Debug.LogWarning(this.transform.name + ": LoadInventoryContentAsset", this.gameObject);
 #endif
         }
 
@@ -153,7 +155,7 @@ namespace SG03.UI
             if (this.deskContentBehaviour == null) return;
             this.deskContentBehaviour.OnCardViewerShown  += this.EnterImmersiveMode;
             this.deskContentBehaviour.OnCardViewerHidden += this.ExitImmersiveMode;
-            Debug.LogWarning(transform.name + ": LoadDeskContentBehaviour", gameObject);
+            Debug.LogWarning(this.transform.name + ": LoadDeskContentBehaviour", this.gameObject);
         }
 
         // Top tabs
@@ -181,23 +183,26 @@ namespace SG03.UI
 
         // Content area — populate at runtime with sub-views
         protected VisualElement contentArea;
+        private VisualElement root;
 
-        // Self-initialize when used standalone (UIDocument on same object, no UIRouter).
         protected override void Start()
         {
             base.Start();
-
-            if (this.Root != null) return;
-
-            UIDocument doc = this.GetComponent<UIDocument>();
-            if (doc == null) return;
-
-            this.BindFromRoot(doc.rootVisualElement);
+            this.InitializeStandalonePanel();
         }
 
-        protected override void OnBindElements(VisualElement root)
+        private void InitializeStandalonePanel()
         {
-            this.BindFromRoot(root);
+            if (this.root != null) return;
+            if (this.uiDocument == null) return;
+            this.BindPanelRoot(this.uiDocument.rootVisualElement);
+        }
+
+        private void BindPanelRoot(VisualElement panelRoot)
+        {
+            if (panelRoot == null) return;
+            this.root = panelRoot;
+            this.BindFromRoot(this.root);
         }
 
         private void BindFromRoot(VisualElement root)
@@ -382,8 +387,13 @@ namespace SG03.UI
 
         protected virtual void OnDestroy()
         {
-            if (this.saiServer?.SaiAuth != null)
-                this.saiServer.SaiAuth.OnLoginSuccess -= this.OnLoginSuccess;
+            this.UnsubscribeFromLoginSuccess();
+        }
+
+        private void UnsubscribeFromLoginSuccess()
+        {
+            if (this.saiServer?.SaiAuth == null) return;
+            this.saiServer.SaiAuth.OnLoginSuccess -= this.OnLoginSuccess;
         }
 
         // ------------------------------------------------------------------

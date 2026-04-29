@@ -1,4 +1,4 @@
-@import url("../../../SaiGame/UI/Common/Variables.uss");
+@import url("../Common/Variables.uss");
 
 /* ============================================================
    Inventory content root — fills ContentArea
