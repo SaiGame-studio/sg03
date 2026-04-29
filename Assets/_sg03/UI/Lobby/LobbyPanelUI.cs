@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using SaiGame.Services;
 using SaiGame.UI;
@@ -29,6 +30,9 @@ namespace SG03.UI
 
         [Header("Desk Content")]
         [SerializeField] private DeskContent deskContentBehaviour;
+
+        [Header("Scene Navigation")]
+        [SerializeField] private string gameSceneName = "2-game";
 
         // Provides access to every SaiServer service (Auth, GamerProgress, Shop, …).
         protected SaiServer Server => this.saiServer;
@@ -331,7 +335,11 @@ namespace SG03.UI
         // ------------------------------------------------------------------
         //  Bottom button handlers — override in subclass or extend here
         // ------------------------------------------------------------------
-        protected virtual void OnPlayClicked()      { }
+        protected virtual void OnPlayClicked()
+        {
+            if (string.IsNullOrWhiteSpace(this.gameSceneName)) return;
+            SceneManager.LoadScene(this.gameSceneName);
+        }
         protected virtual void OnInventoryClicked()
         {
             if (this.contentArea == null || this.inventoryContentAsset == null) return;
