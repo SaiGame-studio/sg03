@@ -2618,6 +2618,10 @@ MonoBehaviour:
   - Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
   - Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
   - Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
+  - Assets/_sg03/Card/Data/Character/LightElf/volt_heart.asset
+  - Assets/_sg03/Card/Data/Character/LightElf/zelene.asset
+  - Assets/_sg03/Card/Data/Character/Undead/skeleton.asset
+  - Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
   - Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
   - Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
 --- !u!4 &1875238348
