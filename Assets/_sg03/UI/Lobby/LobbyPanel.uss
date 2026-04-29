@@ -1,5 +1,5 @@
 /* Import shared design tokens */
-@import url("../../../SaiGame/UI/Common/Variables.uss");
+@import url("../Common/Variables.uss");
 
 /* ============================================================
    Lobby root — full screen, column layout

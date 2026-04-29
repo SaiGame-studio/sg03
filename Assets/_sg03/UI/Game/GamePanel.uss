@@ -1,0 +1,152 @@
+@import url("../Common/Variables.uss");
+
+.game-root {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: transparent;
+}
+
+.game-viewport {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: transparent;
+}
+
+.game-top-menu {
+    flex-direction: row;
+    align-items: center;
+    height: 56px;
+    min-height: 56px;
+    background-color: rgba(16, 20, 36, 0.92);
+    border-bottom-width: 1px;
+    border-color: rgba(80, 100, 160, 0.35);
+    padding: 0 20px;
+}
+
+.game-top-menu__title {
+    font-size: 16px;
+    color: rgb(200, 210, 255);
+    -unity-font-style: bold;
+    margin-right: 24px;
+    letter-spacing: 1px;
+}
+
+.game-top-menu__tabs {
+    flex-direction: row;
+    flex: 1;
+    align-items: center;
+}
+
+.game-tab {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border-width: 0;
+    background-color: transparent;
+    color: rgb(150, 160, 200);
+    font-size: 13px;
+    margin-right: 4px;
+    transition-duration: 0.12s;
+}
+
+.game-tab:hover {
+    background-color: rgba(80, 100, 160, 0.25);
+    color: rgb(200, 215, 255);
+}
+
+.game-tab--active {
+    background-color: rgba(60, 110, 230, 0.25);
+    color: rgb(110, 160, 255);
+    -unity-font-style: bold;
+}
+
+.game-tab--loader {
+    background-color: rgba(38, 46, 68, 0.86);
+    color: rgb(210, 220, 245);
+}
+
+.game-tab--loader:hover {
+    background-color: rgba(58, 68, 96, 0.92);
+    color: rgb(240, 244, 255);
+}
+
+.game-top-menu__player-name {
+    font-size: 13px;
+    color: rgb(180, 195, 240);
+    -unity-font-style: bold;
+    margin-left: 16px;
+    -unity-text-align: middle-right;
+}
+
+.game-top-menu__card-count {
+    min-width: 112px;
+    font-size: 13px;
+    color: rgb(220, 228, 255);
+    -unity-font-style: bold;
+    margin-left: 16px;
+    -unity-text-align: middle-right;
+}
+
+.game-world-view-space {
+    flex: 1;
+    width: 100%;
+    background-color: transparent;
+}
+
+.game-bottom-menu {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    height: 64px;
+    min-height: 64px;
+    background-color: rgba(16, 20, 36, 0.92);
+    border-top-width: 1px;
+    border-color: rgba(80, 100, 160, 0.35);
+    padding: 0 12px;
+}
+
+.game-bottom-btn {
+    flex: 1;
+    margin: 0 6px;
+    padding: 10px 8px;
+    border-radius: 10px;
+    border-width: 0;
+    background-color: transparent;
+    color: rgb(150, 160, 200);
+    font-size: 13px;
+    transition-duration: 0.12s;
+    -unity-text-align: middle-center;
+}
+
+.game-bottom-btn:hover {
+    background-color: rgba(80, 100, 160, 0.25);
+    color: rgb(200, 215, 255);
+}
+
+.game-bottom-btn--secondary {
+    background-color: rgba(38, 46, 68, 0.86);
+    color: rgb(210, 220, 245);
+}
+
+.game-bottom-btn--secondary:hover {
+    background-color: rgba(58, 68, 96, 0.92);
+    color: rgb(240, 244, 255);
+}
+
+.game-bottom-btn--primary {
+    background-color: rgba(60, 110, 230, 1);
+    color: rgb(240, 244, 255);
+    -unity-font-style: bold;
+}
+
+.game-bottom-btn--primary:hover {
+    background-color: rgba(80, 130, 255, 1);
+}

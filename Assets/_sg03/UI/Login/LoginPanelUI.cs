@@ -2,18 +2,19 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using SaiGame.Services;
-using SaiGame.UI;
 
 namespace SG03.UI
 {
-    // Login panel for _sg03 — mirrors SaiGame.UI.LoginPanelUI,
-    // binds to SaiAuth, no auth logic inside.
-    public class LoginPanelUI : UIPanelBase
+    public class LoginPanelUI : SaiBehaviour
     {
-        public override string PanelId => "Login";
+        public string PanelId => "Login";
+
+        [Header("Panel")]
+        [SerializeField] private VisualTreeAsset panelAsset;
 
         [Header("References")]
         [SerializeField] private SaiAuth saiAuth;
+        [SerializeField] private UIDocument uiDocument;
 
         [Header("Settings")]
         [SerializeField] private string nextScenes = "1-lobby";
@@ -22,34 +23,57 @@ namespace SG03.UI
         private TextField usernameField;
         private TextField passwordField;
         private Button loginButton;
+        private Label feedbackLabel;
+        private VisualElement root;
+        private bool authEventsSubscribed;
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
-
-            if (this.saiAuth == null)
-                this.saiAuth = this.GetComponentInParent<SaiAuth>();
+            this.LoadSaiAuth();
+            this.LoadUIDocument();
         }
 
-        // Self-initialize when used standalone (UIDocument on same object, no UIRouter).
+        private void LoadSaiAuth()
+        {
+            if (this.saiAuth != null) return;
+            this.saiAuth = this.GetComponentInParent<SaiAuth>();
+            Debug.LogWarning(this.transform.name + ": LoadSaiAuth", this.gameObject);
+        }
+
+        private void LoadUIDocument()
+        {
+            if (this.uiDocument != null) return;
+            this.uiDocument = this.GetComponent<UIDocument>();
+            Debug.LogWarning(this.transform.name + ": LoadUIDocument", this.gameObject);
+        }
+
         protected override void Start()
         {
             base.Start();
-
-            if (this.Root != null) return; // Already initialized by UIRouter
-
-            UIDocument doc = this.GetComponent<UIDocument>();
-            if (doc == null) return;
-
-            this.BindFromRoot(doc.rootVisualElement);
-
-            if (this.autoLoadCredentials)
-                this.LoadCredentialsFromAuth();
+            this.InitializeStandalonePanel();
+            this.LoadCredentialsFromAuthIfEnabled();
         }
 
-        protected override void OnBindElements(VisualElement root)
+        private void InitializeStandalonePanel()
         {
-            this.BindFromRoot(root);
+            if (this.root != null) return;
+            if (this.uiDocument == null) return;
+            this.BindPanelRoot(this.uiDocument.rootVisualElement);
+        }
+
+        private void LoadCredentialsFromAuthIfEnabled()
+        {
+            if (!this.autoLoadCredentials) return;
+            this.LoadCredentialsFromAuth();
+        }
+
+        private void BindPanelRoot(VisualElement panelRoot)
+        {
+            if (panelRoot == null) return;
+            this.root = panelRoot;
+            this.feedbackLabel = this.root.Q<Label>("MessageLabel");
+            this.BindFromRoot(this.root);
         }
 
         private void BindFromRoot(VisualElement root)
@@ -64,13 +88,6 @@ namespace SG03.UI
             this.SubscribeToAuthEvents();
         }
 
-        protected override void OnShow()
-        {
-            this.LoadCredentialsFromAuth();
-            this.HideFeedback();
-        }
-
-        // Called by LoginPanelUIEditor button — safe to call at runtime only.
         public void LoadCredentialsFromAuth()
         {
             if (this.usernameField == null || this.saiAuth == null) return;
@@ -81,16 +98,20 @@ namespace SG03.UI
 
         private void SubscribeToAuthEvents()
         {
+            if (this.authEventsSubscribed) return;
             if (this.saiAuth == null) return;
             this.saiAuth.OnLoginSuccess += this.HandleLoginSuccess;
             this.saiAuth.OnLoginFailure += this.HandleLoginFailure;
+            this.authEventsSubscribed = true;
         }
 
         private void UnsubscribeFromAuthEvents()
         {
+            if (!this.authEventsSubscribed) return;
             if (this.saiAuth == null) return;
             this.saiAuth.OnLoginSuccess -= this.HandleLoginSuccess;
             this.saiAuth.OnLoginFailure -= this.HandleLoginFailure;
+            this.authEventsSubscribed = false;
         }
 
         private void OnLoginButtonClicked()
@@ -115,10 +136,33 @@ namespace SG03.UI
             this.ShowFeedback(error, isError: true);
         }
 
+        private void ShowFeedback(string message, bool isError)
+        {
+            if (this.feedbackLabel == null) return;
+
+            this.feedbackLabel.text = message;
+            this.feedbackLabel.RemoveFromClassList("feedback--error");
+            this.feedbackLabel.RemoveFromClassList("feedback--success");
+            this.feedbackLabel.AddToClassList(isError ? "feedback--error" : "feedback--success");
+        }
+
+        private void HideFeedback()
+        {
+            if (this.feedbackLabel == null) return;
+
+            this.feedbackLabel.text = string.Empty;
+            this.feedbackLabel.RemoveFromClassList("feedback--error");
+            this.feedbackLabel.RemoveFromClassList("feedback--success");
+        }
+
         protected virtual void OnDestroy()
         {
             this.UnsubscribeFromAuthEvents();
+            this.UnregisterLoginButtonClicked();
+        }
 
+        private void UnregisterLoginButtonClicked()
+        {
             if (this.loginButton != null)
                 this.loginButton.clicked -= this.OnLoginButtonClicked;
         }

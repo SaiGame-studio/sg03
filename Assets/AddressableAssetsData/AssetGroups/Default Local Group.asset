@@ -15,8 +15,23 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 23f565229de3a5e479ee3849d00fd09c
   m_SerializeEntries:
+  - m_GUID: 0c0eb85feafe74a459900e7e7f8c886f
+    m_Address: Assets/_sg03/Card/Data/Character/Undead/skeleton.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0fd00c6a0911c63439351264592baf5d
     m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 19813d66ce1892f47bc3d58d7e0dfd7e
+    m_Address: Assets/_sg03/Card/Data/Character/LightElf/volt_heart.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a554768c0af93b4cbce70957352a99d
+    m_Address: Assets/_sg03/Card/Data/Ability/Human/AzureBlade/spinning_slash.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -25,8 +40,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34016b5d7f4437240bc9e76d6281c068
+    m_Address: Assets/_sg03/Card/Data/Ability/Goblin/back_stab.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3fe1da2b2c760aa4680679499fce77fd
     m_Address: Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54b73085f240c714e91a9f87491d14bf
+    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/king_return.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -40,8 +65,33 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a1dbcb8f49ff902448d783578bd455c0
+    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/animate_dead.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b54d7ce8ddf795a46b14aa2c5ba7b894
+    m_Address: Assets/_sg03/Card/Data/Ability/Goblin/totem_pulse.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c47dbeb3327fdd64aaf74f8835c734b9
+    m_Address: Assets/_sg03/Card/Data/Character/LightElf/zelene.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc20ad589d414bd49b44b0917ff99adc
+    m_Address: Assets/_sg03/Card/Data/Ability/Human/AzureBlade/cross_guard.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d7b3a1d2f007ace4e86c6b864f3c33b7
     m_Address: Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e313158a88c9caa4abb2ee8ce2e810ee
+    m_Address: Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

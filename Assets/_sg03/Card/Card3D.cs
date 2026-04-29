@@ -84,13 +84,6 @@ namespace SG03
         private float     currentYAngle = 0f;
         private Coroutine flipCoroutine;
 
-        // ─── Unity lifecycle ──────────────────────────────────────────────────────
-
-        private void Start()
-        {
-            this.ApplyTextures();
-        }
-
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>

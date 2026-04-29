@@ -27,6 +27,8 @@ namespace SG03.UI
         public event System.Action OnCardViewerHidden;
         public event System.Action<InventoryItemData> OnCardViewRequested;
 
+        public bool IsDimLayerVisible => this.dimLayer != null && !this.dimLayer.ClassListContains("desk-dim-layer--hidden");
+
         public DeskContentUI(VisualElement root)
         {
             this.deskRoot         = root.Q("DeskRoot");
@@ -99,6 +101,12 @@ namespace SG03.UI
         {
             this.HideDimLayer();
             this.OnCardViewerHidden?.Invoke();
+        }
+
+        public void RequestCloseViewerFromDimLayer()
+        {
+            if (!this.IsDimLayerVisible) return;
+            this.OnDimLayerClicked();
         }
 
         // ── Panel navigation ──────────────────────────────────────────────────
