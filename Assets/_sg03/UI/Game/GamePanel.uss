@@ -98,7 +98,31 @@
 .game-world-view-space {
     flex: 1;
     width: 100%;
+    position: relative;
     background-color: transparent;
+}
+
+.battle-hp-label {
+    position: absolute;
+    left: 18px;
+    min-width: 132px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.42);
+    background-color: rgba(16, 20, 36, 0.82);
+    color: rgb(235, 240, 255);
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+}
+
+.battle-hp-label--omega {
+    top: 18px;
+}
+
+.battle-hp-label--alpha {
+    bottom: 18px;
 }
 
 .game-bottom-menu {
@@ -129,6 +153,29 @@
 .game-bottom-btn:hover {
     background-color: rgba(80, 100, 160, 0.25);
     color: rgb(200, 215, 255);
+}
+
+.game-bottom-input {
+    flex: 1.25;
+    margin: 0 6px;
+    min-width: 160px;
+    color: rgb(220, 228, 255);
+    font-size: 13px;
+}
+
+.game-bottom-input .unity-label {
+    min-width: 46px;
+    color: rgb(180, 195, 240);
+    -unity-font-style: bold;
+}
+
+.game-bottom-input .unity-text-input {
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.45);
+    background-color: rgba(38, 46, 68, 0.86);
+    color: rgb(240, 244, 255);
+    padding: 6px 8px;
 }
 
 .game-bottom-btn--secondary {

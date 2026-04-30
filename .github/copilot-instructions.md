@@ -17,6 +17,12 @@
 - Do **not** define multiple top-level types in the same file.
 - Do **not** create sub-classes (nested classes) inside a parent class unless the nested type is a private implementation detail that is never referenced outside that single file — and even then, prefer extracting it.
 
+## Split Large Logic Files
+- Any file containing code logic that exceeds 1000 lines must be reviewed for a reasonable split into smaller files.
+- Prefer extracting cohesive responsibilities into dedicated classes, partial classes, page controllers, models, services, or helper types that follow existing project patterns.
+- Do **not** add new logic to a file already over 1000 lines unless splitting is impossible or the user explicitly approves keeping it together.
+- Keep each extracted type in its own file and preserve behavior while reducing file size.
+
 ## Unity Inspector Buttons
 - **Never** use `[ContextMenu]` to expose buttons.
 - Always create Inspector buttons via a dedicated `[CustomEditor]` script.

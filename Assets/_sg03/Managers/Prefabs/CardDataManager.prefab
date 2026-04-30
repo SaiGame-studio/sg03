@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5717615789749278500
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3901108077790416459}
+  - component: {fileID: 3471930897440109911}
+  m_Layer: 0
+  m_Name: CardDataManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3901108077790416459
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5717615789749278500}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3471930897440109911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5717615789749278500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a84e20622b6e59b4baca0988837cd135, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.CardDataManager
+  card3DReview: {fileID: 0}
+  card3DLoader: {fileID: 0}
+  cardAddresses:
+  - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/animate_dead.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/king_return.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/skeleton_shield.asset
+  - Assets/_sg03/Card/Data/Ability/Goblin/back_stab.asset
+  - Assets/_sg03/Card/Data/Ability/Goblin/goblin_shaman/totem_pulse.asset
+  - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/cross_guard.asset
+  - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/spinning_slash.asset
+  - Assets/_sg03/Card/Data/Ability/LightElf/holy_glow.asset
+  - Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/lightning_strike.asset
+  - Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
+  - Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
+  - Assets/_sg03/Card/Data/Character/Goblin/goblin_grunt.asset
+  - Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
+  - Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
+  - Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
+  - Assets/_sg03/Card/Data/Character/LightElf/volt_heart.asset
+  - Assets/_sg03/Card/Data/Character/LightElf/zelene.asset
+  - Assets/_sg03/Card/Data/Character/Undead/skeleton.asset
+  - Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
+  - Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
+  - Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset

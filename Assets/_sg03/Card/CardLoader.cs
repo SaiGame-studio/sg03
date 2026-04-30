@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using SaiGame.Services;
 using UnityEngine;
@@ -28,7 +29,7 @@ namespace SG03
 
         [SerializeField] private string cardAddress;
 
-        [SerializeField] private string cardNamePrefix = "azure_blade";
+        [SerializeField] private string cardNamePrefix = "";
 
         [SerializeField] private bool loadOnStart = false;
 
@@ -47,12 +48,17 @@ namespace SG03
         {
             if (this.ctrl != null) return;
             this.ctrl = this.GetComponent<Card3DCtrl>();
-            Debug.LogWarning(transform.name + "LoadCard3DCtrl", gameObject);
+            Debug.LogWarning(this.transform.name + "LoadCard3DCtrl", this.gameObject);
         }
 
         protected override void Start()
         {
             base.Start();
+            this.LoadOnStartIfEnabled();
+        }
+
+        private void LoadOnStartIfEnabled()
+        {
             if (!this.loadOnStart) return;
             _ = this.LoadAndApply();
         }
@@ -71,7 +77,7 @@ namespace SG03
 
             if (string.IsNullOrEmpty(resolvedAddress))
             {
-                Debug.LogWarning($"[CardLoader] Card address is empty on '{name}'.", this);
+                Debug.LogWarning($"[CardLoader] Card address is empty on '{this.name}'.", this);
                 return null;
             }
 
@@ -128,7 +134,7 @@ namespace SG03
         {
             if (string.IsNullOrEmpty(cardName))
             {
-                Debug.LogWarning($"[CardLoader] Card name is empty on '{name}'.", this);
+                Debug.LogWarning($"[CardLoader] Card name is empty on '{this.name}'.", this);
                 return null;
             }
 
@@ -136,27 +142,61 @@ namespace SG03
         }
 
         /// <summary>
-        /// Searches <see cref="CardDataManager.CardAddresses"/> for an address containing
-        /// <see cref="cardNamePrefix"/> and writes it into <see cref="cardAddress"/>.
+        /// Searches <see cref="CardDataManager.CardAddresses"/> for an address whose asset
+        /// file name matches <see cref="cardNamePrefix"/> + ".asset" and writes it into
+        /// <see cref="cardAddress"/>.
         /// Returns true when a match is found.
         /// </summary>
         public bool ApplyAddressByPrefix()
         {
             if (CardDataManager.Instance == null)
             {
-                Debug.LogWarning($"[CardLoader] CardDataManager not found on '{name}'.", this);
+                Debug.LogWarning($"[CardLoader] CardDataManager not found on '{this.name}'.", this);
                 return false;
             }
 
-            foreach (string addr in CardDataManager.Instance.CardAddresses)
+            if (TryResolveAddressByAssetName(CardDataManager.Instance.CardAddresses, this.cardNamePrefix, out string addr))
             {
-                if (!addr.Contains(this.cardNamePrefix)) continue;
                 this.cardAddress = addr;
                 return true;
             }
 
-            Debug.LogWarning($"[CardLoader] No address found containing '{this.cardNamePrefix}' on '{name}'.", this);
+            Debug.LogWarning($"[CardLoader] No address found ending with '{this.cardNamePrefix}.asset' on '{this.name}'.", this);
             return false;
+        }
+
+        public static bool TryResolveAddressByAssetName(
+            IReadOnlyList<string> cardAddresses,
+            string codeName,
+            out string address)
+        {
+            address = null;
+
+            if (cardAddresses == null) return false;
+            if (string.IsNullOrEmpty(codeName)) return false;
+
+            string expectedFileName = codeName + ".asset";
+            foreach (string candidate in cardAddresses)
+            {
+                if (!IsAddressFileName(candidate, expectedFileName)) continue;
+                address = candidate;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsAddressFileName(string address, string expectedFileName)
+        {
+            if (string.IsNullOrEmpty(address)) return false;
+
+            string normalizedAddress = address.Replace('\\', '/');
+            int fileNameStartIndex = normalizedAddress.LastIndexOf('/') + 1;
+            string fileName = fileNameStartIndex > 0 && fileNameStartIndex < normalizedAddress.Length
+                ? normalizedAddress.Substring(fileNameStartIndex)
+                : normalizedAddress;
+
+            return string.Equals(fileName, expectedFileName, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

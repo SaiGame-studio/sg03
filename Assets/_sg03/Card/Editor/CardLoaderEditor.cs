@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,7 +8,7 @@ namespace SG03
     {
         public override void OnInspectorGUI()
         {
-            DrawDefaultInspector();
+            this.DrawDefaultInspector();
 
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("Load Controls", EditorStyles.boldLabel);
@@ -17,10 +16,10 @@ namespace SG03
             GUI.enabled = Application.isPlaying;
 
             if (GUILayout.Button("Load Card by Address"))
-                _ = ((CardLoader)target).LoadAndApply();
+                _ = ((CardLoader)this.target).LoadAndApply();
 
             if (GUILayout.Button("Load Card By Name"))
-                LoadByName((CardLoader)target);
+                this.LoadByName((CardLoader)this.target);
 
             GUI.enabled = true;
         }
@@ -33,19 +32,16 @@ namespace SG03
                 return;
             }
 
-            string prefix = serializedObject.FindProperty("cardNamePrefix").stringValue;
+            string prefix = this.serializedObject.FindProperty("cardNamePrefix").stringValue;
 
-            string found = CardDataManager.Instance.CardAddresses
-                .FirstOrDefault(a => a.Contains(prefix));
-
-            if (string.IsNullOrEmpty(found))
+            if (!CardLoader.TryResolveAddressByAssetName(CardDataManager.Instance.CardAddresses, prefix, out string found))
             {
-                Debug.LogWarning($"[CardLoaderEditor] No address found containing '{prefix}'.", loader);
+                Debug.LogWarning($"[CardLoaderEditor] No address found ending with '{prefix}.asset'.", loader);
                 return;
             }
 
-            serializedObject.FindProperty("cardAddress").stringValue = found;
-            serializedObject.ApplyModifiedProperties();
+            this.serializedObject.FindProperty("cardAddress").stringValue = found;
+            this.serializedObject.ApplyModifiedProperties();
 
             _ = loader.LoadAndApply();
         }

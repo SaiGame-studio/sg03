@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SaiGame.Services;
 using UnityEngine;
@@ -8,6 +9,11 @@ namespace SG03.UI
 {
     public class GamePanelUI : SaiBehaviour
     {
+        private const string BattleStartScriptName = "battle_start";
+        private const string BattleEndScriptName = "battle_end";
+        private const string BattleStatusScriptName = "battle_status";
+        private const string BattleModeNormal = "normal";
+
         public string PanelId => "Game";
 
         [Header("Panel")]
@@ -16,6 +22,7 @@ namespace SG03.UI
         [Header("References")]
         [SerializeField] private SaiServer saiServer;
         [SerializeField] private ItemPreset itemPreset;
+        [SerializeField] private BattleScript battleScript;
         [SerializeField] private UIDocument uiDocument;
 
         [Header("Selection")]
@@ -28,12 +35,17 @@ namespace SG03.UI
         private VisualElement deskTabs;
         private readonly List<Button> deskButtons = new List<Button>();
         private Button btnBackToLobby;
+        private Button btnEndBattle;
+        private Button btnCheckStatus;
         private Button btnEndTurn;
         private Button btnDrawCard;
         private Button btnAttack;
         private Button btnStartBattle;
+        private TextField enemyCodeNameInput;
         private Label cardCountLabel;
         private Label playerNameLabel;
+        private Label alphaHpLabel;
+        private Label omegaHpLabel;
         private VisualElement gameRoot;
         private VisualElement gameViewport;
         private VisualElement root;
@@ -44,6 +56,7 @@ namespace SG03.UI
             base.LoadComponents();
             this.LoadSaiServer();
             this.LoadItemPreset();
+            this.LoadBattleScript();
             this.LoadUIDocument();
             this.LoadPanelSettings();
             this.LoadPanelAsset();
@@ -57,6 +70,7 @@ namespace SG03.UI
             this.UnsubscribeFromAuthEvents();
             this.saiServer = instance;
             this.itemPreset = null;
+            this.battleScript = null;
             Debug.LogWarning(this.transform.name + ": LoadSaiServer", this.gameObject);
         }
 
@@ -68,6 +82,16 @@ namespace SG03.UI
             if (this.itemPreset == null) this.itemPreset = this.saiServer.GetComponentInChildren<ItemPreset>(true);
             if (this.itemPreset == null) return;
             Debug.LogWarning(this.transform.name + ": LoadItemPreset", this.gameObject);
+        }
+
+        private void LoadBattleScript()
+        {
+            if (this.saiServer == null) return;
+            BattleScript serverBattleScript = this.saiServer.BattleScript;
+            if (serverBattleScript == null) return;
+            if (this.battleScript == serverBattleScript) return;
+            this.battleScript = serverBattleScript;
+            Debug.LogWarning(this.transform.name + ": LoadBattleScript", this.gameObject);
         }
 
         private bool HasValidItemPresetReference()
@@ -135,6 +159,7 @@ namespace SG03.UI
         {
             this.EnsureSaiServerReference();
             this.EnsureItemPresetReference();
+            this.EnsureBattleScriptReference();
             this.SubscribeToAuthEvents();
         }
 
@@ -146,6 +171,7 @@ namespace SG03.UI
             this.UnsubscribeFromAuthEvents();
             this.saiServer = instance;
             this.itemPreset = null;
+            this.battleScript = null;
         }
 
         private void EnsureItemPresetReference()
@@ -155,6 +181,15 @@ namespace SG03.UI
             if (serverItemPreset == null) return;
             if (this.itemPreset == serverItemPreset) return;
             this.itemPreset = serverItemPreset;
+        }
+
+        private void EnsureBattleScriptReference()
+        {
+            if (this.saiServer == null) return;
+            BattleScript serverBattleScript = this.saiServer.BattleScript;
+            if (serverBattleScript == null) return;
+            if (this.battleScript == serverBattleScript) return;
+            this.battleScript = serverBattleScript;
         }
 
         private void InitializeStandalonePanel()
@@ -191,14 +226,20 @@ namespace SG03.UI
         private void BindBottomMenu(VisualElement panelRoot)
         {
             this.btnBackToLobby = panelRoot.Q<Button>("BtnBackToLobby");
+            this.btnEndBattle = panelRoot.Q<Button>("BtnEndBattle");
+            this.btnCheckStatus = panelRoot.Q<Button>("BtnCheckStatus");
             this.btnEndTurn = panelRoot.Q<Button>("BtnEndTurn");
             this.btnDrawCard = panelRoot.Q<Button>("BtnDrawCard");
             this.btnAttack = panelRoot.Q<Button>("BtnAttack");
+            this.enemyCodeNameInput = panelRoot.Q<TextField>("EnemyCodeNameInput");
             this.btnStartBattle = panelRoot.Q<Button>("BtnStartBattle");
             this.btnBackToLobby?.RegisterCallback<ClickEvent>(_ => this.OnBackToLobbyClicked());
+            this.btnEndBattle?.RegisterCallback<ClickEvent>(_ => this.OnEndBattleClicked());
+            this.btnCheckStatus?.RegisterCallback<ClickEvent>(_ => this.OnCheckStatusClicked());
             this.btnEndTurn?.RegisterCallback<ClickEvent>(_ => this.OnEndTurnClicked());
             this.btnDrawCard?.RegisterCallback<ClickEvent>(_ => this.OnDrawCardClicked());
             this.btnAttack?.RegisterCallback<ClickEvent>(_ => this.OnAttackClicked());
+            this.enemyCodeNameInput?.RegisterValueChangedCallback(_ => this.ResetStartBattleButtonText());
             this.btnStartBattle?.RegisterCallback<ClickEvent>(_ => this.OnStartBattleClicked());
         }
 
@@ -212,6 +253,8 @@ namespace SG03.UI
         {
             this.gameRoot = panelRoot.Q("GameRoot");
             this.gameViewport = panelRoot.Q("GameViewport");
+            this.alphaHpLabel = panelRoot.Q<Label>("AlphaHpLabel");
+            this.omegaHpLabel = panelRoot.Q<Label>("OmegaHpLabel");
             if (this.gameRoot == null) return;
             if (this.gameViewport == null) return;
             _ = new LobbyAspectRatioKeeper(this.gameRoot, this.gameViewport);
@@ -228,7 +271,8 @@ namespace SG03.UI
         {
             this.EnsureServiceReferences();
             this.OnDeskTabClicked(selected);
-            this.selectedPreset = null;
+            this.selectedPreset = preset;
+            this.ResetStartBattleButtonText();
             if (preset == null) return;
             if (this.itemPreset == null) return;
             if (string.IsNullOrWhiteSpace(preset.id)) return;
@@ -417,6 +461,16 @@ namespace SG03.UI
         {
         }
 
+        protected virtual void OnEndBattleClicked()
+        {
+            this.EndBattle();
+        }
+
+        protected virtual void OnCheckStatusClicked()
+        {
+            this.CheckBattleStatus();
+        }
+
         protected virtual void OnDrawCardClicked()
         {
         }
@@ -427,6 +481,214 @@ namespace SG03.UI
 
         protected virtual void OnStartBattleClicked()
         {
+            this.StartBattle();
+        }
+
+        private void CheckBattleStatus()
+        {
+            this.EnsureServiceReferences();
+            if (!this.CanCheckBattleStatus()) return;
+            this.SetCheckStatusLoading(true);
+            this.battleScript.RunScript(
+                BattleStatusScriptName,
+                null,
+                this.OnBattleStatusSucceeded,
+                this.OnBattleStatusFailed);
+        }
+
+        private bool CanCheckBattleStatus()
+        {
+            if (this.battleScript != null) return true;
+            this.SetCheckStatusButtonText("No Script");
+            return false;
+        }
+
+        private void SetCheckStatusLoading(bool isLoading)
+        {
+            if (this.btnCheckStatus == null) return;
+            this.btnCheckStatus.SetEnabled(!isLoading);
+            this.btnCheckStatus.text = isLoading ? "Checking..." : "Check Status";
+        }
+
+        private void SetCheckStatusButtonText(string text)
+        {
+            if (this.btnCheckStatus == null) return;
+            this.btnCheckStatus.text = text;
+        }
+
+        private void OnBattleStatusSucceeded(string response)
+        {
+            this.SetCheckStatusLoading(false);
+            this.SetCheckStatusButtonText("Status OK");
+            this.ApplyBattleStatusResponse(response);
+        }
+
+        private void OnBattleStatusFailed(string error)
+        {
+            this.SetCheckStatusLoading(false);
+            this.SetCheckStatusButtonText("Status Failed");
+            Debug.LogWarning(this.transform.name + ": Battle status failed: " + error, this.gameObject);
+        }
+
+        private void ApplyBattleStatusResponse(string response)
+        {
+            if (string.IsNullOrWhiteSpace(response)) return;
+
+            try
+            {
+                BattleStatusScriptResponse status = JsonUtility.FromJson<BattleStatusScriptResponse>(response);
+                this.ApplyBattleStatusResponse(status);
+            }
+            catch (Exception exception)
+            {
+                this.OnBattleStatusFailed(exception.Message);
+            }
+        }
+
+        private void ApplyBattleStatusResponse(BattleStatusScriptResponse status)
+        {
+            if (status == null) return;
+            if (status.output == null) return;
+            this.SetBattleHp(status.output.alpha_hp, status.output.omega_hp);
+        }
+
+        private void SetBattleHp(int alphaHp, int omegaHp)
+        {
+            if (this.alphaHpLabel != null) this.alphaHpLabel.text = $"Alpha HP: {alphaHp}";
+            if (this.omegaHpLabel != null) this.omegaHpLabel.text = $"Omega HP: {omegaHp}";
+        }
+
+        private void EndBattle()
+        {
+            this.EnsureServiceReferences();
+            if (!this.CanEndBattle()) return;
+            this.SetEndBattleLoading(true);
+            this.battleScript.RunScript(
+                BattleEndScriptName,
+                null,
+                this.OnBattleEndSucceeded,
+                this.OnBattleEndFailed);
+        }
+
+        private bool CanEndBattle()
+        {
+            if (this.battleScript != null) return true;
+            this.SetEndBattleButtonText("No Script");
+            return false;
+        }
+
+        private void SetEndBattleLoading(bool isLoading)
+        {
+            if (this.btnEndBattle == null) return;
+            this.btnEndBattle.SetEnabled(!isLoading);
+            this.btnEndBattle.text = isLoading ? "Ending..." : "End Battle";
+        }
+
+        private void SetEndBattleButtonText(string text)
+        {
+            if (this.btnEndBattle == null) return;
+            this.btnEndBattle.text = text;
+        }
+
+        private void OnBattleEndSucceeded(string response)
+        {
+            this.SetEndBattleLoading(false);
+            this.SetEndBattleButtonText("Battle Ended");
+        }
+
+        private void OnBattleEndFailed(string error)
+        {
+            this.SetEndBattleLoading(false);
+            this.SetEndBattleButtonText("End Failed");
+            Debug.LogWarning(this.transform.name + ": Battle end failed: " + error, this.gameObject);
+        }
+
+        private void StartBattle()
+        {
+            this.EnsureServiceReferences();
+            if (!this.CanStartBattle()) return;
+            string enemyCodeName = this.GetEnemyCodeName();
+            string presetInstanceId = this.selectedPreset.id;
+            string requestBody = this.BuildBattleStartRequestBody(enemyCodeName, presetInstanceId);
+            this.SetStartBattleLoading(true);
+            this.battleScript.RunScript(
+                BattleStartScriptName,
+                requestBody,
+                this.OnBattleStartSucceeded,
+                this.OnBattleStartFailed);
+        }
+
+        private bool CanStartBattle()
+        {
+            if (this.selectedPreset == null)
+            {
+                this.SetStartBattleButtonText("Select Desk");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(this.selectedPreset.id))
+            {
+                this.SetStartBattleButtonText("Select Desk");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(this.GetEnemyCodeName()))
+            {
+                this.SetStartBattleButtonText("Enter Enemy");
+                return false;
+            }
+
+            if (this.battleScript != null) return true;
+            this.SetStartBattleButtonText("No Script");
+            return false;
+        }
+
+        private string GetEnemyCodeName()
+        {
+            if (this.enemyCodeNameInput == null) return string.Empty;
+            if (this.enemyCodeNameInput.value == null) return string.Empty;
+            return this.enemyCodeNameInput.value.Trim();
+        }
+
+        private string BuildBattleStartRequestBody(string enemyCodeName, string presetInstanceId)
+        {
+            BattleStartScriptRequest request = new BattleStartScriptRequest();
+            request.payload = new BattleStartPayload();
+            request.payload.battle_mode = BattleModeNormal;
+            request.payload.enemy_entity_key = enemyCodeName;
+            request.payload.preset_instance_id = presetInstanceId;
+            return JsonUtility.ToJson(request);
+        }
+
+        private void SetStartBattleLoading(bool isLoading)
+        {
+            if (this.btnStartBattle == null) return;
+            this.btnStartBattle.SetEnabled(!isLoading);
+            this.btnStartBattle.text = isLoading ? "Starting..." : "Start Battle";
+        }
+
+        private void SetStartBattleButtonText(string text)
+        {
+            if (this.btnStartBattle == null) return;
+            this.btnStartBattle.text = text;
+        }
+
+        private void ResetStartBattleButtonText()
+        {
+            this.SetStartBattleButtonText("Start Battle");
+        }
+
+        private void OnBattleStartSucceeded(string response)
+        {
+            this.SetStartBattleLoading(false);
+            this.SetStartBattleButtonText("Battle Started");
+        }
+
+        private void OnBattleStartFailed(string error)
+        {
+            this.SetStartBattleLoading(false);
+            this.SetStartBattleButtonText("Battle Failed");
+            Debug.LogWarning(this.transform.name + ": Battle start failed: " + error, this.gameObject);
         }
 
         protected virtual void OnBackToLobbyClicked()
