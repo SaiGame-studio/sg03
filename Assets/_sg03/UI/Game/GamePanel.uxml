@@ -19,10 +19,15 @@
                 <ui:Label name="CardCountLabel" text="Card Count: 0" class="game-top-menu__card-count" />
             </ui:VisualElement>
 
-            <ui:VisualElement name="WorldViewSpace" class="game-world-view-space" />
+            <ui:VisualElement name="WorldViewSpace" class="game-world-view-space">
+                <ui:Label name="OmegaHpLabel" text="Omega HP: --" class="battle-hp-label battle-hp-label--omega" />
+                <ui:Label name="AlphaHpLabel" text="Alpha HP: --" class="battle-hp-label battle-hp-label--alpha" />
+            </ui:VisualElement>
 
             <ui:VisualElement name="BottomMenu" class="game-bottom-menu">
                 <ui:Button name="BtnBackToLobby" text="Back to Lobby" class="game-bottom-btn game-bottom-btn--secondary" />
+                <ui:Button name="BtnEndBattle" text="End Battle" class="game-bottom-btn game-bottom-btn--secondary" />
+                <ui:Button name="BtnCheckStatus" text="Check Status" class="game-bottom-btn" />
                 <ui:Button name="BtnEndTurn" text="End Turn" class="game-bottom-btn" />
                 <ui:Button name="BtnDrawCard" text="Draw Card" class="game-bottom-btn" />
                 <ui:Button name="BtnAttack" text="Attack" class="game-bottom-btn" />

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SaiGame.Services;
 using UnityEngine;
@@ -9,6 +10,8 @@ namespace SG03.UI
     public class GamePanelUI : SaiBehaviour
     {
         private const string BattleStartScriptName = "battle_start";
+        private const string BattleEndScriptName = "battle_end";
+        private const string BattleStatusScriptName = "battle_status";
         private const string BattleModeNormal = "normal";
 
         public string PanelId => "Game";
@@ -32,6 +35,8 @@ namespace SG03.UI
         private VisualElement deskTabs;
         private readonly List<Button> deskButtons = new List<Button>();
         private Button btnBackToLobby;
+        private Button btnEndBattle;
+        private Button btnCheckStatus;
         private Button btnEndTurn;
         private Button btnDrawCard;
         private Button btnAttack;
@@ -39,6 +44,8 @@ namespace SG03.UI
         private TextField enemyCodeNameInput;
         private Label cardCountLabel;
         private Label playerNameLabel;
+        private Label alphaHpLabel;
+        private Label omegaHpLabel;
         private VisualElement gameRoot;
         private VisualElement gameViewport;
         private VisualElement root;
@@ -219,12 +226,16 @@ namespace SG03.UI
         private void BindBottomMenu(VisualElement panelRoot)
         {
             this.btnBackToLobby = panelRoot.Q<Button>("BtnBackToLobby");
+            this.btnEndBattle = panelRoot.Q<Button>("BtnEndBattle");
+            this.btnCheckStatus = panelRoot.Q<Button>("BtnCheckStatus");
             this.btnEndTurn = panelRoot.Q<Button>("BtnEndTurn");
             this.btnDrawCard = panelRoot.Q<Button>("BtnDrawCard");
             this.btnAttack = panelRoot.Q<Button>("BtnAttack");
             this.enemyCodeNameInput = panelRoot.Q<TextField>("EnemyCodeNameInput");
             this.btnStartBattle = panelRoot.Q<Button>("BtnStartBattle");
             this.btnBackToLobby?.RegisterCallback<ClickEvent>(_ => this.OnBackToLobbyClicked());
+            this.btnEndBattle?.RegisterCallback<ClickEvent>(_ => this.OnEndBattleClicked());
+            this.btnCheckStatus?.RegisterCallback<ClickEvent>(_ => this.OnCheckStatusClicked());
             this.btnEndTurn?.RegisterCallback<ClickEvent>(_ => this.OnEndTurnClicked());
             this.btnDrawCard?.RegisterCallback<ClickEvent>(_ => this.OnDrawCardClicked());
             this.btnAttack?.RegisterCallback<ClickEvent>(_ => this.OnAttackClicked());
@@ -242,6 +253,8 @@ namespace SG03.UI
         {
             this.gameRoot = panelRoot.Q("GameRoot");
             this.gameViewport = panelRoot.Q("GameViewport");
+            this.alphaHpLabel = panelRoot.Q<Label>("AlphaHpLabel");
+            this.omegaHpLabel = panelRoot.Q<Label>("OmegaHpLabel");
             if (this.gameRoot == null) return;
             if (this.gameViewport == null) return;
             _ = new LobbyAspectRatioKeeper(this.gameRoot, this.gameViewport);
@@ -448,6 +461,16 @@ namespace SG03.UI
         {
         }
 
+        protected virtual void OnEndBattleClicked()
+        {
+            this.EndBattle();
+        }
+
+        protected virtual void OnCheckStatusClicked()
+        {
+            this.CheckBattleStatus();
+        }
+
         protected virtual void OnDrawCardClicked()
         {
         }
@@ -459,6 +482,125 @@ namespace SG03.UI
         protected virtual void OnStartBattleClicked()
         {
             this.StartBattle();
+        }
+
+        private void CheckBattleStatus()
+        {
+            this.EnsureServiceReferences();
+            if (!this.CanCheckBattleStatus()) return;
+            this.SetCheckStatusLoading(true);
+            this.battleScript.RunScript(
+                BattleStatusScriptName,
+                null,
+                this.OnBattleStatusSucceeded,
+                this.OnBattleStatusFailed);
+        }
+
+        private bool CanCheckBattleStatus()
+        {
+            if (this.battleScript != null) return true;
+            this.SetCheckStatusButtonText("No Script");
+            return false;
+        }
+
+        private void SetCheckStatusLoading(bool isLoading)
+        {
+            if (this.btnCheckStatus == null) return;
+            this.btnCheckStatus.SetEnabled(!isLoading);
+            this.btnCheckStatus.text = isLoading ? "Checking..." : "Check Status";
+        }
+
+        private void SetCheckStatusButtonText(string text)
+        {
+            if (this.btnCheckStatus == null) return;
+            this.btnCheckStatus.text = text;
+        }
+
+        private void OnBattleStatusSucceeded(string response)
+        {
+            this.SetCheckStatusLoading(false);
+            this.SetCheckStatusButtonText("Status OK");
+            this.ApplyBattleStatusResponse(response);
+        }
+
+        private void OnBattleStatusFailed(string error)
+        {
+            this.SetCheckStatusLoading(false);
+            this.SetCheckStatusButtonText("Status Failed");
+            Debug.LogWarning(this.transform.name + ": Battle status failed: " + error, this.gameObject);
+        }
+
+        private void ApplyBattleStatusResponse(string response)
+        {
+            if (string.IsNullOrWhiteSpace(response)) return;
+
+            try
+            {
+                BattleStatusScriptResponse status = JsonUtility.FromJson<BattleStatusScriptResponse>(response);
+                this.ApplyBattleStatusResponse(status);
+            }
+            catch (Exception exception)
+            {
+                this.OnBattleStatusFailed(exception.Message);
+            }
+        }
+
+        private void ApplyBattleStatusResponse(BattleStatusScriptResponse status)
+        {
+            if (status == null) return;
+            if (status.output == null) return;
+            this.SetBattleHp(status.output.alpha_hp, status.output.omega_hp);
+        }
+
+        private void SetBattleHp(int alphaHp, int omegaHp)
+        {
+            if (this.alphaHpLabel != null) this.alphaHpLabel.text = $"Alpha HP: {alphaHp}";
+            if (this.omegaHpLabel != null) this.omegaHpLabel.text = $"Omega HP: {omegaHp}";
+        }
+
+        private void EndBattle()
+        {
+            this.EnsureServiceReferences();
+            if (!this.CanEndBattle()) return;
+            this.SetEndBattleLoading(true);
+            this.battleScript.RunScript(
+                BattleEndScriptName,
+                null,
+                this.OnBattleEndSucceeded,
+                this.OnBattleEndFailed);
+        }
+
+        private bool CanEndBattle()
+        {
+            if (this.battleScript != null) return true;
+            this.SetEndBattleButtonText("No Script");
+            return false;
+        }
+
+        private void SetEndBattleLoading(bool isLoading)
+        {
+            if (this.btnEndBattle == null) return;
+            this.btnEndBattle.SetEnabled(!isLoading);
+            this.btnEndBattle.text = isLoading ? "Ending..." : "End Battle";
+        }
+
+        private void SetEndBattleButtonText(string text)
+        {
+            if (this.btnEndBattle == null) return;
+            this.btnEndBattle.text = text;
+        }
+
+        private void OnBattleEndSucceeded(string response)
+        {
+            this.SetEndBattleLoading(false);
+            this.SetEndBattleButtonText("Battle Ended");
+        }
+
+        private void OnBattleEndFailed(string error)
+        {
+            this.SetEndBattleLoading(false);
+            this.SetEndBattleButtonText("End Failed");
+            Debug.LogWarning(this.transform.name + ": Battle end failed: " + error, this.gameObject);
         }
 
         private void StartBattle()

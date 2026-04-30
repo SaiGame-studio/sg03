@@ -98,7 +98,31 @@
 .game-world-view-space {
     flex: 1;
     width: 100%;
+    position: relative;
     background-color: transparent;
+}
+
+.battle-hp-label {
+    position: absolute;
+    left: 18px;
+    min-width: 132px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.42);
+    background-color: rgba(16, 20, 36, 0.82);
+    color: rgb(235, 240, 255);
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+}
+
+.battle-hp-label--omega {
+    top: 18px;
+}
+
+.battle-hp-label--alpha {
+    bottom: 18px;
 }
 
 .game-bottom-menu {
