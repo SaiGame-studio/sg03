@@ -189,6 +189,68 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e31713549bb5995428a393b0c31b10aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.Card3DReviewCtrl
+--- !u!1001 &311549541
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 331941082}
+    m_Modifications:
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.612
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -3.61428
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 11.81613
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7908861190732204320, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_Name
+      value: QuestDailyManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+--- !u!4 &311549542 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+  m_PrefabInstance: {fileID: 311549541}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -374,9 +436,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 701451424}
-  - {fileID: 1313731243}
-  - {fileID: 1875238348}
+  - {fileID: 1707058299}
+  - {fileID: 1987035389}
+  - {fileID: 311549542}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &331941083
@@ -391,9 +453,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fde2d6e838c783d42b198ee330aef57d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.ManagersCtrl
-  profileManager: {fileID: 1313731244}
-  cardDataManager: {fileID: 1875238347}
-  questDailyManager: {fileID: 701451425}
+  profileManager: {fileID: 0}
+  cardDataManager: {fileID: 0}
+  questDailyManager: {fileID: 0}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -671,54 +733,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 330585546}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &701451423
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 701451424}
-  - component: {fileID: 701451425}
-  m_Layer: 0
-  m_Name: QuestDailyManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &701451424
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 701451423}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 734468703}
-  m_Father: {fileID: 331941082}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &701451425
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 701451423}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 555ac40ce1e53564f8046a39311cc70e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SG03.Quest.QuestDailyManager
-  pools: []
-  questLists:
-  - {fileID: 734468704}
 --- !u!1001 &706587908
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1019,69 +1033,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6db983f2c2c1aa41811cf2f9bb125c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.PlayerContainer
---- !u!1 &734468702
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 734468703}
-  - component: {fileID: 734468704}
-  - component: {fileID: 734468705}
-  m_Layer: 0
-  m_Name: daily_quests
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &734468703
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 734468702}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 701451424}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &734468704
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 734468702}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8cca0fb6b3e213438075f07a5bb4be8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SG03.Quest.QuestList
-  poolKey: daily_quests
-  manager: {fileID: 701451425}
-  refreshMode: 0
-  daysAhead: 6
-  entries: []
---- !u!114 &734468705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 734468702}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 168c07b3dd9c0d042b2f729942deb5ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SG03.Quest.DailyQuestAutoStarter
-  questList: {fileID: 734468704}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1484,56 +1435,128 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.UI.DeskContent
   contentAsset: {fileID: 9197481963319205126, guid: 08b6bc04afb2fbe4cb3500db6ea34e3e, type: 3}
   cardReviewCtrl: {fileID: 52825982}
---- !u!1 &1313731242
-GameObject:
+--- !u!1001 &1707058298
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1313731243}
-  - component: {fileID: 1313731244}
-  m_Layer: 0
-  m_Name: ProfileManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1313731243
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1313731242}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 331941082}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1313731244
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 331941082}
+    m_Modifications:
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: cardAddresses.Array.size
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[7]'
+      value: Assets/_sg03/Card/Data/Ability/LightElf/holy_glow.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[8]'
+      value: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/lightning_strike.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[9]'
+      value: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[10]'
+      value: Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[11]'
+      value: Assets/_sg03/Card/Data/Character/Goblin/goblin_grunt.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[12]'
+      value: Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[13]'
+      value: Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[14]'
+      value: Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[15]'
+      value: Assets/_sg03/Card/Data/Character/LightElf/volt_heart.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[16]'
+      value: Assets/_sg03/Card/Data/Character/LightElf/zelene.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[17]'
+      value: Assets/_sg03/Card/Data/Character/Undead/skeleton.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[18]'
+      value: Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[19]'
+      value: Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[20]'
+      value: Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.612
+      objectReference: {fileID: 0}
+    - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -3.61428
+      objectReference: {fileID: 0}
+    - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 11.81613
+      objectReference: {fileID: 0}
+    - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5717615789749278500, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: m_Name
+      value: CardDataManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+--- !u!4 &1707058299 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+  m_PrefabInstance: {fileID: 1707058298}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1313731242}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bab3ad61bdde64946b52205303e0d7ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SG03.ProfileManager
-  progressId: 
-  userId: 
-  level: 0
-  experience: 0
-  gold: 0
-  gameData: 
 --- !u!84 &1774004019
 RenderTexture:
   m_ObjectHideFlags: 0
@@ -1615,70 +1638,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a39f709729bc4224ea2b8b948b695f77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.QuestProgressor
---- !u!1 &1875238346
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1875238348}
-  - component: {fileID: 1875238347}
-  m_Layer: 0
-  m_Name: CardDataManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1875238347
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1875238346}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a84e20622b6e59b4baca0988837cd135, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SG03.CardDataManager
-  card3DReview: {fileID: 0}
-  card3DLoader: {fileID: 0}
-  cardAddresses:
-  - Assets/_sg03/Card/Data/Ability/DarkElf/animate_dead.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/king_return.asset
-  - Assets/_sg03/Card/Data/Ability/Goblin/back_stab.asset
-  - Assets/_sg03/Card/Data/Ability/Goblin/totem_pulse.asset
-  - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/cross_guard.asset
-  - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/spinning_slash.asset
-  - Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
-  - Assets/_sg03/Card/Data/Character/Goblin/goblin_grunt.asset
-  - Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
-  - Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
-  - Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
-  - Assets/_sg03/Card/Data/Character/LightElf/volt_heart.asset
-  - Assets/_sg03/Card/Data/Character/LightElf/zelene.asset
-  - Assets/_sg03/Card/Data/Character/Undead/skeleton.asset
-  - Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
-  - Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
-  - Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
---- !u!4 &1875238348
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1875238346}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 331941082}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1967044023 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
@@ -1756,6 +1715,68 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb92c51d95c8cc142a356069c666972e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.SaiAuth
+--- !u!1001 &1987035388
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 331941082}
+    m_Modifications:
+    - target: {fileID: 2299453004026750645, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_Name
+      value: ProfileManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.612
+      objectReference: {fileID: 0}
+    - target: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -3.61428
+      objectReference: {fileID: 0}
+    - target: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 11.81613
+      objectReference: {fileID: 0}
+    - target: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+--- !u!4 &1987035389 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+  m_PrefabInstance: {fileID: 1987035388}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1851816416187282572
 PrefabInstance:
   m_ObjectHideFlags: 0

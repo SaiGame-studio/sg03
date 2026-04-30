@@ -3,9 +3,25 @@ hãy vẽ lại theo phong cách Hyper-Realistic Rendering of Anime Characters, 
 hãy vẽ lại theo phong cách Digital Painting kết hợp với Stylized Realis
 goblin_shaman_old
 
+animate_dead
 hãy vẽ 1 nhân vật nữ chính giống Tifa lockhart nhưng là Dark Elf, đang triệu hồi 3 skeleton cầm kiếm khiên tự dưới đất lên để bảo vệ nữ chính bằng cách quay lưng về phía nữ chính, nữ chính thì trong tư thế đứng phòng thủ, vẽ theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, POV là top down, image size 750x1050, 4k resolution
 
+king_return
 hãy vẽ 1 nhân vật nữ chính giống Tifa lockhart nhưng là Dark Elf, đang triệu hồi 1 skeleton king từ dưới đất lên để bảo vệ nữ chính bằng cách quay lưng về phía nữ chính, nữ chính thì trong tư thế đứng phòng thủ đứng sau lưng skeleton king, vẽ theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution
+
+skeleton_shield
+hãy vẽ 1 nhân vật nữ chính giống Tifa lockhart nhưng là Dark Elf (ảnh 1), đang được 1 skeleton (ảnh 2) đứng ra hứng 1 đòn tấn công thế mạng cho nữ chính, nữ chính thì trong tư thế đứng phòng thủ đứng sau lưng skeleton, vẽ theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution, POV là phía trước skeleton
+
+lightning_strike
+hãy vẽ 1 nhân vật nữ chính giống Hinata Hyuga nhưng là Light Elf (ảnh 1) đang đánh 1 đòng sấm xét cực mạnh xuống 1 enemy, tronh ảnh cũng chỉ có 1 enmy đó và nữ chính đối đầu với nhau, vẽ theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution, POV từ phía sau vai trái của nữ chính, chủ thể được đặt tại phần ba trên (Upper third) của khung hình
+
+static_bind
+hãy vẽ 1 nhân vật nữ chính giống Hinata Hyuga nhưng là Light Elf (ảnh 1) đang phóng điện vào 1 enemy khiến cho enemy đó bị stun, tronh ảnh cũng chỉ có 1 enmy đó và nữ chính đối đầu với nhau, vẽ theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution, POV từ phía sau vai trái của nữ chính, chủ thể được đặt tại phần ba trên (Upper third) của khung hình
+
+holy_glow
+hãy vẽ 1 vị vua bận giáp vàng đang chiến đấu 1 cách mệt mỏi và được 1 nữ pháp sư light elf (ảnh 1) trị thương bằng gậy phép từ phía sau, vẽ theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution, POV từ phía trước của vị vua, chủ thể được đặt tại phần ba trên (Upper third) của khung hình, trong ảnh chỉ có nữ light efl và vị vua
+phép hồi phục cần phải trong mạnh mẽ hơn, phải như tia sáng từ thiên đường chiếu xuống vị vưa, những phép sư cũng cần phải trong dũng mãnh hơn khi thi triển phép
+
 
 image size 1024x1434, 4k resolution
 

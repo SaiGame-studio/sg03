@@ -35,6 +35,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 282a862c3062e2f4bb6094fe43bb2f47
+    m_Address: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 325981bf9ef75574993ed66f351f820f
     m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
     m_ReadOnly: 0
@@ -55,6 +60,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 55a3dfc83811bee45b54ee5ccb994fe9
+    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/skeleton_shield.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6afd6f7305243ca49b6994795e032089
     m_Address: Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
     m_ReadOnly: 0
@@ -65,13 +75,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c9191ef9875b3e4eae0e4a6123c74cc
+    m_Address: Assets/_sg03/Card/Data/Ability/LightElf/holy_glow.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1dbcb8f49ff902448d783578bd455c0
     m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/animate_dead.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b54d7ce8ddf795a46b14aa2c5ba7b894
-    m_Address: Assets/_sg03/Card/Data/Ability/Goblin/totem_pulse.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Goblin/goblin_shaman/totem_pulse.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -92,6 +107,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e313158a88c9caa4abb2ee8ce2e810ee
     m_Address: Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fb951131c1f83df4596191934e87c025
+    m_Address: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/lightning_strike.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
