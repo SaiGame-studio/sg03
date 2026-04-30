@@ -453,9 +453,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fde2d6e838c783d42b198ee330aef57d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.ManagersCtrl
-  profileManager: {fileID: 0}
-  cardDataManager: {fileID: 0}
-  questDailyManager: {fileID: 0}
+  profileManager: {fileID: 1987035390}
+  cardDataManager: {fileID: 1727157089}
+  questDailyManager: {fileID: 668832384}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -733,6 +733,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 330585546}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &668832384 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3982072084831160567, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+  m_PrefabInstance: {fileID: 311549541}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 555ac40ce1e53564f8046a39311cc70e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.Quest.QuestDailyManager
 --- !u!1001 &706587908
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1443,66 +1454,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 331941082}
     m_Modifications:
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: cardAddresses.Array.size
-      value: 21
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[7]'
-      value: Assets/_sg03/Card/Data/Ability/LightElf/holy_glow.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[8]'
-      value: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/lightning_strike.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[9]'
-      value: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[10]'
-      value: Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[11]'
-      value: Assets/_sg03/Card/Data/Character/Goblin/goblin_grunt.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[12]'
-      value: Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[13]'
-      value: Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[14]'
-      value: Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[15]'
-      value: Assets/_sg03/Card/Data/Character/LightElf/volt_heart.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[16]'
-      value: Assets/_sg03/Card/Data/Character/LightElf/zelene.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[17]'
-      value: Assets/_sg03/Card/Data/Character/Undead/skeleton.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[18]'
-      value: Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[19]'
-      value: Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[20]'
-      value: Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
-      objectReference: {fileID: 0}
     - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.612
@@ -1557,6 +1508,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
   m_PrefabInstance: {fileID: 1707058298}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1727157089 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+  m_PrefabInstance: {fileID: 1707058298}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a84e20622b6e59b4baca0988837cd135, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.CardDataManager
 --- !u!84 &1774004019
 RenderTexture:
   m_ObjectHideFlags: 0
@@ -1777,6 +1739,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3533111444953485616, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
   m_PrefabInstance: {fileID: 1987035388}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1987035390 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 76451466826063662, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
+  m_PrefabInstance: {fileID: 1987035388}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bab3ad61bdde64946b52205303e0d7ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.ProfileManager
 --- !u!1001 &1851816416187282572
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1841,6 +1814,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1061435743}
+    - target: {fileID: 9041437042871058224, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
+      propertyPath: cardNamePrefix
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

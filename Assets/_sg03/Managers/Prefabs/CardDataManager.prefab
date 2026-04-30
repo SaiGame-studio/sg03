@@ -47,13 +47,14 @@ MonoBehaviour:
   card3DReview: {fileID: 0}
   card3DLoader: {fileID: 0}
   cardAddresses:
-  - Assets/_sg03/Card/Data/Ability/DarkElf/animate_dead.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/king_return.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/skeleton_shield.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/animate_dead.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/king_return.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/skeleton_shield.asset
   - Assets/_sg03/Card/Data/Ability/Goblin/back_stab.asset
   - Assets/_sg03/Card/Data/Ability/Goblin/goblin_shaman/totem_pulse.asset
   - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/cross_guard.asset
   - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/spinning_slash.asset
+  - Assets/_sg03/Card/Data/Ability/LightElf/holy_glow.asset
   - Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/lightning_strike.asset
   - Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
   - Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset

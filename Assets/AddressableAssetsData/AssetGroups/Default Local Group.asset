@@ -56,12 +56,12 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 54b73085f240c714e91a9f87491d14bf
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/king_return.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/king_return.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 55a3dfc83811bee45b54ee5ccb994fe9
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/skeleton_shield.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/skeleton_shield.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -81,7 +81,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1dbcb8f49ff902448d783578bd455c0
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/animate_dead.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/animate_dead.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

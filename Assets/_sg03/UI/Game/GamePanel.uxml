@@ -26,6 +26,7 @@
                 <ui:Button name="BtnEndTurn" text="End Turn" class="game-bottom-btn" />
                 <ui:Button name="BtnDrawCard" text="Draw Card" class="game-bottom-btn" />
                 <ui:Button name="BtnAttack" text="Attack" class="game-bottom-btn" />
+                <ui:TextField name="EnemyCodeNameInput" label="Enemy" class="game-bottom-input" />
                 <ui:Button name="BtnStartBattle" text="Start Battle" class="game-bottom-btn game-bottom-btn--primary" />
             </ui:VisualElement>
 
