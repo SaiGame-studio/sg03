@@ -46,6 +46,10 @@ namespace SG03.UI
         private Label playerNameLabel;
         private Label alphaHpLabel;
         private Label omegaHpLabel;
+        private Label alphaSourceCountLabel;
+        private Label omeraSourceCountLabel;
+        private Label alphaTheVoidCountLabel;
+        private Label omegaTheVoidCountLabel;
         private VisualElement gameRoot;
         private VisualElement gameViewport;
         private VisualElement root;
@@ -255,6 +259,10 @@ namespace SG03.UI
             this.gameViewport = panelRoot.Q("GameViewport");
             this.alphaHpLabel = panelRoot.Q<Label>("AlphaHpLabel");
             this.omegaHpLabel = panelRoot.Q<Label>("OmegaHpLabel");
+            this.alphaSourceCountLabel = panelRoot.Q<Label>("AlphaSourceCountLabel");
+            this.omeraSourceCountLabel = panelRoot.Q<Label>("OmeraSourceCountLabel");
+            this.alphaTheVoidCountLabel = panelRoot.Q<Label>("AlphaTheVoidCountLabel");
+            this.omegaTheVoidCountLabel = panelRoot.Q<Label>("OmegaTheVoidCountLabel");
             if (this.gameRoot == null) return;
             if (this.gameViewport == null) return;
             _ = new LobbyAspectRatioKeeper(this.gameRoot, this.gameViewport);
@@ -550,6 +558,20 @@ namespace SG03.UI
             if (status == null) return;
             if (status.output == null) return;
             this.SetBattleHp(status.output.alpha_hp, status.output.omega_hp);
+            this.SetBattleSourceCounts(status.output.alpha_the_source_count, status.output.omega_the_source_count);
+            this.SetBattleVoidCounts(status.output.alpha_the_void_count, status.output.omega_the_void_count);
+        }
+
+        private void SetBattleSourceCounts(int alphaCount, int omeraCount)
+        {
+            if (this.alphaSourceCountLabel != null) this.alphaSourceCountLabel.text = $"Alpha Source: {alphaCount}";
+            if (this.omeraSourceCountLabel != null) this.omeraSourceCountLabel.text = $"Omera Source: {omeraCount}";
+        }
+
+        private void SetBattleVoidCounts(int alphaCount, int omegaCount)
+        {
+            if (this.alphaTheVoidCountLabel != null) this.alphaTheVoidCountLabel.text = $"Void: {alphaCount}";
+            if (this.omegaTheVoidCountLabel != null) this.omegaTheVoidCountLabel.text = $"Void: {omegaCount}";
         }
 
         private void SetBattleHp(int alphaHp, int omegaHp)

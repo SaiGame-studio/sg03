@@ -11,7 +11,9 @@
         <ui:VisualElement name="GameViewport" class="game-viewport">
 
             <ui:VisualElement name="TopMenu" class="game-top-menu">
-                <ui:Label name="BattleTitle" text="PvE Battle" class="game-top-menu__title" />
+                <ui:Label name="BattleTitle" text="Omega" class="game-top-menu__title" />
+                <ui:TextField name="EnemyCodeNameInput" label="Enemy" value="goblin_shaman" class="game-bottom-input" />
+                <ui:Button name="BtnStartBattle" text="Start Battle" class="game-bottom-btn game-bottom-btn--primary" />
                 <ui:VisualElement name="DeskTabs" class="game-top-menu__tabs">
                     <ui:Button name="BtnLoadAddDesk" text="Load Add Desk" class="game-tab game-tab--loader" />
                 </ui:VisualElement>
@@ -20,19 +22,22 @@
             </ui:VisualElement>
 
             <ui:VisualElement name="WorldViewSpace" class="game-world-view-space">
-                <ui:Label name="OmegaHpLabel" text="Omega HP: --" class="battle-hp-label battle-hp-label--omega" />
-                <ui:Label name="AlphaHpLabel" text="Alpha HP: --" class="battle-hp-label battle-hp-label--alpha" />
+                <ui:Label name="OmegaHpLabel" text="HP: --" class="battle-hp-label battle-hp-label--omega" />
+                <ui:Label name="AlphaHpLabel" text="HP: --" class="battle-hp-label battle-hp-label--alpha" />
+                <ui:Label name="OmeraSourceCountLabel" text="Source: --" class="battle-source-count-label battle-source-count-label--top-right" />
+                <ui:Label name="OmegaTheVoidCountLabel" text="Void: --" class="battle-source-count-label battle-source-count-label--top-right-2" />
+                <ui:Label name="AlphaTheVoidCountLabel" text="Void: --" class="battle-source-count-label battle-source-count-label--bottom-right-2" />
+                <ui:Label name="AlphaSourceCountLabel" text="Source: --" class="battle-source-count-label battle-source-count-label--bottom-right" />
             </ui:VisualElement>
 
             <ui:VisualElement name="BottomMenu" class="game-bottom-menu">
+                <ui:Label name="AlphaLabel" text="Alpha" class="game-top-menu__title" />
                 <ui:Button name="BtnBackToLobby" text="Back to Lobby" class="game-bottom-btn game-bottom-btn--secondary" />
                 <ui:Button name="BtnEndBattle" text="End Battle" class="game-bottom-btn game-bottom-btn--secondary" />
                 <ui:Button name="BtnCheckStatus" text="Check Status" class="game-bottom-btn" />
                 <ui:Button name="BtnEndTurn" text="End Turn" class="game-bottom-btn" />
                 <ui:Button name="BtnDrawCard" text="Draw Card" class="game-bottom-btn" />
                 <ui:Button name="BtnAttack" text="Attack" class="game-bottom-btn" />
-                <ui:TextField name="EnemyCodeNameInput" label="Enemy" class="game-bottom-input" />
-                <ui:Button name="BtnStartBattle" text="Start Battle" class="game-bottom-btn game-bottom-btn--primary" />
             </ui:VisualElement>
 
         </ui:VisualElement>
