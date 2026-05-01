@@ -1,5 +1,53 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1694213750892974901
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7391328292783992900}
+  - component: {fileID: 3731728121393147189}
+  m_Layer: 0
+  m_Name: LuaScript
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7391328292783992900
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694213750892974901}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8277413932139228352}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3731728121393147189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694213750892974901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52c6cde7e9904265a0230f8bb0cc8266, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.LuaScriptManager
+  battleStartScriptName: battle_start
+  battleTurnScriptName: battle_turn
+  battleEndScriptName: battle_end
+  scriptFiles: []
 --- !u!1 &4330135680898373133
 GameObject:
   m_ObjectHideFlags: 0
@@ -603,6 +651,7 @@ Transform:
   - {fileID: 750887673584618928}
   - {fileID: 3667272808700333575}
   - {fileID: 8448881463889205349}
+  - {fileID: 7391328292783992900}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8686393883881292769
@@ -676,11 +725,11 @@ MonoBehaviour:
     is_verified: 0
     created_at: 0
   loginTime: 0
-  autoLogin: 1
+  autoLogin: 0
   autoRefreshToken: 1
   refreshBeforeExpire: 2
-  username: simonsai
-  password: A-=Wk9H28b1V5bhry1zZ
+  username: 
+  password: 
   registerEmail: 
   registerUsername: 
   registerPassword: 
@@ -696,7 +745,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef3a5bffa3fad0a498905dcf2a23ed5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.GoogleBackendLogin
-  accessToken: simonsai
+  accessToken: 
   refreshToken: 
   expiresIn: 0
   userData:
