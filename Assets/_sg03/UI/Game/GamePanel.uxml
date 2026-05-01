@@ -19,6 +19,7 @@
                 </ui:VisualElement>
                 <ui:Label name="PlayerNameLabel" text="Guest" class="game-top-menu__player-name" />
                 <ui:Label name="CardCountLabel" text="Card Count: 0" class="game-top-menu__card-count" />
+                <ui:Button name="BtnBackToLobby" text="Lobby" class="game-bottom-btn game-bottom-btn--secondary" />
             </ui:VisualElement>
 
             <ui:VisualElement name="WorldViewSpace" class="game-world-view-space">
@@ -32,9 +33,9 @@
 
             <ui:VisualElement name="BottomMenu" class="game-bottom-menu">
                 <ui:Label name="AlphaLabel" text="Alpha" class="game-top-menu__title" />
-                <ui:Button name="BtnBackToLobby" text="Back to Lobby" class="game-bottom-btn game-bottom-btn--secondary" />
-                <ui:Button name="BtnEndBattle" text="End Battle" class="game-bottom-btn game-bottom-btn--secondary" />
+                <ui:Button name="BtnEndBattle" text="End Battle" class="game-bottom-btn game-bottom-btn--secondary game-bottom-btn--danger" />
                 <ui:Button name="BtnCheckStatus" text="Check Status" class="game-bottom-btn" />
+                <ui:Button name="BtnInitCard" text="Init Card" class="game-bottom-btn" />
                 <ui:Button name="BtnEndTurn" text="End Turn" class="game-bottom-btn" />
                 <ui:Button name="BtnDrawCard" text="Draw Card" class="game-bottom-btn" />
                 <ui:Button name="BtnAttack" text="Attack" class="game-bottom-btn" />

@@ -219,6 +219,17 @@
     color: rgb(240, 244, 255);
 }
 
+.game-bottom-btn--danger {
+    background-color: rgba(180, 30, 30, 0.85);
+    color: rgb(255, 220, 220);
+    -unity-font-style: bold;
+}
+
+.game-bottom-btn--danger:hover {
+    background-color: rgba(220, 50, 50, 1);
+    color: rgb(255, 240, 240);
+}
+
 .game-bottom-btn--primary {
     background-color: rgba(60, 110, 230, 1);
     color: rgb(240, 244, 255);
@@ -248,4 +259,11 @@
     padding: 4px 10px;
     font-size: 11px;
     margin: 0 4px;
+}
+
+#BtnBackToLobby {
+    flex: 0 0 auto;
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
 }

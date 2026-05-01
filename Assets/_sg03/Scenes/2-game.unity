@@ -662,6 +662,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 813458455079530658, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: autoLogin
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6971719431293405431, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: m_Name
       value: SaiServer
@@ -984,6 +988,7 @@ GameObject:
   - component: {fileID: 2030001002}
   - component: {fileID: 2030001004}
   - component: {fileID: 2030001003}
+  - component: {fileID: 2030001005}
   m_Layer: 0
   m_Name: GamePanelUI
   m_TagString: Untagged
@@ -1044,6 +1049,7 @@ MonoBehaviour:
   panelAsset: {fileID: 9197481963319205126, guid: a715fe8f068e4b14ac9d7262278af840, type: 3}
   saiServer: {fileID: 706587910}
   itemPreset: {fileID: 1147895069}
+  battleScript: {fileID: 0}
   uiDocument: {fileID: 2030001003}
   selectedPreset:
     id: 
@@ -1064,6 +1070,27 @@ MonoBehaviour:
     created_at: 
     updated_at: 
   lobbySceneName: 1-lobby
+--- !u!114 &2030001005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2030001001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6f32c09c77747e44850feedbafb767e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.UI.BattleState
+  battleStatusJson: 
+  alphaHp: 0
+  omegaHp: 0
+  alphaTheSourceCount: 0
+  omegaTheSourceCount: 0
+  alphaTheVoidCount: 0
+  omegaTheVoidCount: 0
+  alphaTheSource: []
+  omeraTheSource: []
 --- !u!1001 &659844538840790474
 PrefabInstance:
   m_ObjectHideFlags: 0

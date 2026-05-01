@@ -8,7 +8,9 @@ namespace SG03.UI
         public int    alpha_hp;
         public int    omega_hp;
         public string[] alpha_the_source;
-        public string[] omera_the_source;
+        public BattleCardSlot[] alpha_hand;
+        public BattleCardSlot[] alpha_back_line;
+        public BattleCardSlot[] alpha_front_line;
         public int    alpha_the_source_count;
         public int    omega_the_source_count;
         public int    alpha_the_void_count;
