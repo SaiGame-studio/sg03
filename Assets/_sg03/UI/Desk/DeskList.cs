@@ -94,6 +94,7 @@ namespace SG03.UI
 
             this.playerItem.GetItems(
                 limit: 1000,
+                category: "card",
                 onSuccess: response => onSuccess?.Invoke(response?.items ?? Array.Empty<InventoryItemData>()),
                 onError:   onError
             );
@@ -123,6 +124,17 @@ namespace SG03.UI
             }
 
             this.itemPreset.RemoveItemFromPreset(presetId, slotIndex, onSuccess, onError);
+        }
+
+        public void DeleteDesk(string presetId, Action onSuccess, Action<string> onError)
+        {
+            if (this.itemPreset == null)
+            {
+                onError?.Invoke("ItemPreset service not available.");
+                return;
+            }
+
+            this.itemPreset.DeletePreset(presetId, _ => onSuccess?.Invoke(), onError);
         }
     }
 }

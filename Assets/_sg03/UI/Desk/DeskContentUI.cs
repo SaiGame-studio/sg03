@@ -215,44 +215,56 @@ namespace SG03.UI
         private VisualElement BuildDeskRow(PresetData desk)
         {
             VisualElement row = new VisualElement();
+            row.name = $"DeskRow_{desk.id}";
             row.AddToClassList("desk-row");
 
             Label icon = new Label("🃏");
+            icon.name = $"DeskRowIcon_{desk.id}";
             icon.AddToClassList("desk-row__icon");
             row.Add(icon);
 
             VisualElement info = new VisualElement();
+            info.name = $"DeskRowInfo_{desk.id}";
             info.AddToClassList("desk-row__info");
 
             string displayName = string.IsNullOrEmpty(desk.name) ? "Unnamed Desk" : desk.name;
             Label nameLabel = new Label(displayName);
+            nameLabel.name = $"DeskRowName_{desk.id}";
             nameLabel.AddToClassList("desk-row__name");
             info.Add(nameLabel);
 
             string presetType = string.IsNullOrEmpty(desk.preset_type) ? "card_desk" : desk.preset_type;
             Label metaLabel = new Label(presetType);
+            metaLabel.name = $"DeskRowMeta_{desk.id}";
             metaLabel.AddToClassList("desk-row__meta");
             info.Add(metaLabel);
 
             row.Add(info);
 
-            int filledSlots = 0;
-            if (desk.slots != null)
-            {
-                foreach (PresetSlotData slot in desk.slots)
-                {
-                        filledSlots++;
-                }
-            }
-
-            Label slotsLabel = new Label($"{filledSlots} / {desk.max_slots}");
-            slotsLabel.AddToClassList("desk-row__slots");
-            row.Add(slotsLabel);
-
+            Button deleteBtn = new Button();
+            deleteBtn.name = $"DeskRowDeleteBtn_{desk.id}";
+            deleteBtn.text = "🗑";
+            deleteBtn.AddToClassList("desk-row__delete-btn");
             PresetData captured = desk;
+            deleteBtn.RegisterCallback<ClickEvent>(e =>
+            {
+                e.StopPropagation();
+                this.OnDeleteDesk(captured);
+            });
+            row.Add(deleteBtn);
+
             row.RegisterCallback<ClickEvent>(_ => this.ShowDetailPanel(captured));
 
             return row;
+        }
+
+        private void OnDeleteDesk(PresetData desk)
+        {
+            this.list.DeleteDesk(
+                presetId: desk.id,
+                onSuccess: () => this.DoRefresh(),
+                onError: _ => { }
+            );
         }
     }
 }
