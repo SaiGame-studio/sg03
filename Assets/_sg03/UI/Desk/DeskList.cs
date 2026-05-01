@@ -136,5 +136,18 @@ namespace SG03.UI
 
             this.itemPreset.DeletePreset(presetId, _ => onSuccess?.Invoke(), onError);
         }
+
+        public void UpdateDeskMetadata(string presetId, string metadataJson, Action onSuccess, Action<string> onError)
+        {
+            if (this.itemPreset == null)
+            {
+                onError?.Invoke("ItemPreset service not available.");
+                return;
+            }
+
+            this.itemPreset.UpdatePreset(presetId, null, metadataJson,
+                onSuccess: _ => onSuccess?.Invoke(),
+                onError:   onError);
+        }
     }
 }

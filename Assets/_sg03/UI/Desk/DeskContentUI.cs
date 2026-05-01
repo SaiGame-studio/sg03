@@ -241,11 +241,12 @@ namespace SG03.UI
 
             row.Add(info);
 
+            PresetData captured = desk;
+
             Button deleteBtn = new Button();
             deleteBtn.name = $"DeskRowDeleteBtn_{desk.id}";
-            deleteBtn.text = "🗑";
+            deleteBtn.text = "\uD83D\uDDD1";
             deleteBtn.AddToClassList("desk-row__delete-btn");
-            PresetData captured = desk;
             deleteBtn.RegisterCallback<ClickEvent>(e =>
             {
                 e.StopPropagation();
