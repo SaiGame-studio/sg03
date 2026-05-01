@@ -13,6 +13,7 @@ namespace SG03.UI
         private readonly VisualElement detailPanel;
         private readonly Label detailTitle;
         private readonly Label slotCountLabel;
+        private readonly Label starCountLabel;
         private readonly Button backBtn;
         private readonly ScrollView slotGrid;
         private readonly TextField inventorySearch;
@@ -28,6 +29,8 @@ namespace SG03.UI
         private PresetData currentDesk;
         private InventoryItemData[] allInventoryItems = Array.Empty<InventoryItemData>();
         private string searchText = string.Empty;
+        private readonly HashSet<int> starredSlots = new HashSet<int>();
+        private const int MaxStarredSlots = 3;
 
         public event Action OnBackRequested;
         public event Action OnCardViewerShown;
@@ -40,6 +43,7 @@ namespace SG03.UI
             this.detailPanel     = deskRoot.Q("DetailPanel");
             this.detailTitle     = deskRoot.Q<Label>("DetailTitle");
             this.slotCountLabel  = deskRoot.Q<Label>("SlotCountLabel");
+            this.starCountLabel  = deskRoot.Q<Label>("StarCountLabel");
             this.slotGrid        = deskRoot.Q<ScrollView>("SlotGrid");
             this.backBtn         = deskRoot.Q<Button>("BackBtn");
             this.inventorySearch = deskRoot.Q<TextField>("InventorySearch");
@@ -77,6 +81,7 @@ namespace SG03.UI
         {
             this.currentDesk = desk;
             this.searchText = string.Empty;
+            this.starredSlots.Clear();
 
             if (this.inventorySearch != null) this.inventorySearch.SetValueWithoutNotify(string.Empty);
 
@@ -86,10 +91,19 @@ namespace SG03.UI
             this.detailPanel?.RemoveFromClassList("desk-panel--hidden");
             this.ShowLoadingSlots();
 
+            string listMetadataJson = desk.metadataJson;
+
             this.deskList.GetDesk(
                 presetId: desk.id,
                 onSuccess: freshDesk =>
                 {
+                    // GetPreset does not populate metadataJson — inject it from the list data
+                    if (string.IsNullOrEmpty(freshDesk.metadataJson))
+                        freshDesk.metadataJson = listMetadataJson;
+
+                    this.starredSlots.Clear();
+                    this.RestoreStarredSlotsFromMetadata(freshDesk);
+
                     this.currentDesk = freshDesk;
                     this.RenderSlots(freshDesk);
                     this.LoadInventory();
@@ -139,6 +153,8 @@ namespace SG03.UI
             if (this.slotCountLabel != null)
                 this.slotCountLabel.text = $"{filledSlots}/{maxSlots}";
 
+            this.UpdateStarCount();
+
             for (int i = 0; i < maxSlots; i++)
                 this.slotGrid.Add(this.BuildSlotTile(desk, i));
         }
@@ -160,6 +176,25 @@ namespace SG03.UI
             if (filled)
             {
                 this.BuildFilledContent(tile, desk, slotIndex, itemId);
+
+                bool isStarred = this.starredSlots.Contains(slotIndex);
+                bool canStar   = isStarred || this.starredSlots.Count < MaxStarredSlots;
+
+                Button starBtn = new Button();
+                starBtn.name = $"SlotStarBtn_{slotIndex}";
+                starBtn.text = "\u2605";
+                starBtn.AddToClassList("desk-slot__star-btn");
+                if (isStarred)
+                    starBtn.AddToClassList("desk-slot__star-btn--active");
+                starBtn.SetEnabled(canStar);
+                int capturedIndex = slotIndex;
+                starBtn.RegisterCallback<ClickEvent>(e =>
+                {
+                    e.StopPropagation();
+                    this.OnToggleStarSlot(capturedIndex);
+                });
+                tile.Add(starBtn);
+
                 return tile;
             }
 
@@ -348,6 +383,102 @@ namespace SG03.UI
         }
 
         // ── Interaction ───────────────────────────────────────────────────────
+
+        private void OnToggleStarSlot(int slotIndex)
+        {
+            if (this.starredSlots.Contains(slotIndex))
+                this.starredSlots.Remove(slotIndex);
+            else if (this.starredSlots.Count < MaxStarredSlots)
+                this.starredSlots.Add(slotIndex);
+
+            if (this.currentDesk != null)
+                this.RenderSlots(this.currentDesk);
+
+            this.SaveStarMetadata();
+        }
+
+        private void SaveStarMetadata()
+        {
+            if (this.currentDesk == null) return;
+
+            string metadataJson = this.BuildStarMetadataJson();
+            this.deskList.UpdateDeskMetadata(
+                presetId:     this.currentDesk.id,
+                metadataJson: metadataJson,
+                onSuccess:    () => { },
+                onError:      _ => { }
+            );
+        }
+
+        private string BuildStarMetadataJson()
+        {
+            int[] sorted = new int[this.starredSlots.Count];
+            this.starredSlots.CopyTo(sorted);
+            System.Array.Sort(sorted);
+
+            string[] values = new string[MaxStarredSlots];
+            for (int i = 0; i < MaxStarredSlots; i++)
+            {
+                string itemId = string.Empty;
+                if (i < sorted.Length)
+                    itemId = GetItemIdInSlot(this.currentDesk, sorted[i]) ?? string.Empty;
+                values[i] = $"\"choose_card_{i + 1}\":\"{EscapeJson(itemId)}\"";
+            }
+
+            return "{" + string.Join(",", values) + "}";
+        }
+
+        private static string EscapeJson(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return string.Empty;
+            return s.Replace("\\", "\\\\").Replace("\"", "\\\"");
+        }
+
+        private void RestoreStarredSlotsFromMetadata(PresetData desk)
+        {
+            this.starredSlots.Clear();
+
+            if (string.IsNullOrEmpty(desk.metadataJson)) return;
+            if (desk.slots == null) return;
+
+            for (int i = 1; i <= MaxStarredSlots; i++)
+            {
+                string key = $"choose_card_{i}";
+                string itemId = ParseJsonStringValue(desk.metadataJson, key);
+                if (string.IsNullOrEmpty(itemId)) continue;
+
+                foreach (PresetSlotData slot in desk.slots)
+                {
+                    if (slot.inventory_item_id != itemId) continue;
+                    this.starredSlots.Add(slot.slot_index);
+                    break;
+                }
+            }
+        }
+
+        private static string ParseJsonStringValue(string json, string key)
+        {
+            string search = $"\"{key}\"";
+            int keyIdx = json.IndexOf(search);
+            if (keyIdx < 0) return null;
+
+            int colon = json.IndexOf(':', keyIdx + search.Length);
+            if (colon < 0) return null;
+
+            int openQuote = json.IndexOf('"', colon + 1);
+            if (openQuote < 0) return null;
+
+            int closeQuote = json.IndexOf('"', openQuote + 1);
+            if (closeQuote < 0) return null;
+
+            return json.Substring(openQuote + 1, closeQuote - openQuote - 1);
+        }
+
+        private void UpdateStarCount()
+        {
+            if (this.starCountLabel == null) return;
+            this.starCountLabel.text = $"\u2605 {this.starredSlots.Count} / {MaxStarredSlots}";
+        }
 
         private void ShowCardViewer(InventoryItemData item, string itemId)
         {

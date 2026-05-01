@@ -12,6 +12,7 @@ namespace SG03.UI
         private const string BattleStartScriptName = "battle_start";
         private const string BattleEndScriptName = "battle_end";
         private const string BattleStatusScriptName = "battle_status";
+        private const string InitCardScriptName = "init_cards";
         private const string BattleModeNormal = "normal";
 
         public string PanelId => "Game";
@@ -37,6 +38,7 @@ namespace SG03.UI
         private Button btnBackToLobby;
         private Button btnEndBattle;
         private Button btnCheckStatus;
+        private Button btnInitCard;
         private Button btnEndTurn;
         private Button btnDrawCard;
         private Button btnAttack;
@@ -46,6 +48,10 @@ namespace SG03.UI
         private Label playerNameLabel;
         private Label alphaHpLabel;
         private Label omegaHpLabel;
+        private Label alphaSourceCountLabel;
+        private Label omeraSourceCountLabel;
+        private Label alphaTheVoidCountLabel;
+        private Label omegaTheVoidCountLabel;
         private VisualElement gameRoot;
         private VisualElement gameViewport;
         private VisualElement root;
@@ -228,6 +234,7 @@ namespace SG03.UI
             this.btnBackToLobby = panelRoot.Q<Button>("BtnBackToLobby");
             this.btnEndBattle = panelRoot.Q<Button>("BtnEndBattle");
             this.btnCheckStatus = panelRoot.Q<Button>("BtnCheckStatus");
+            this.btnInitCard = panelRoot.Q<Button>("BtnInitCard");
             this.btnEndTurn = panelRoot.Q<Button>("BtnEndTurn");
             this.btnDrawCard = panelRoot.Q<Button>("BtnDrawCard");
             this.btnAttack = panelRoot.Q<Button>("BtnAttack");
@@ -236,6 +243,7 @@ namespace SG03.UI
             this.btnBackToLobby?.RegisterCallback<ClickEvent>(_ => this.OnBackToLobbyClicked());
             this.btnEndBattle?.RegisterCallback<ClickEvent>(_ => this.OnEndBattleClicked());
             this.btnCheckStatus?.RegisterCallback<ClickEvent>(_ => this.OnCheckStatusClicked());
+            this.btnInitCard?.RegisterCallback<ClickEvent>(_ => this.OnInitCardClicked());
             this.btnEndTurn?.RegisterCallback<ClickEvent>(_ => this.OnEndTurnClicked());
             this.btnDrawCard?.RegisterCallback<ClickEvent>(_ => this.OnDrawCardClicked());
             this.btnAttack?.RegisterCallback<ClickEvent>(_ => this.OnAttackClicked());
@@ -255,6 +263,10 @@ namespace SG03.UI
             this.gameViewport = panelRoot.Q("GameViewport");
             this.alphaHpLabel = panelRoot.Q<Label>("AlphaHpLabel");
             this.omegaHpLabel = panelRoot.Q<Label>("OmegaHpLabel");
+            this.alphaSourceCountLabel = panelRoot.Q<Label>("AlphaSourceCountLabel");
+            this.omeraSourceCountLabel = panelRoot.Q<Label>("OmeraSourceCountLabel");
+            this.alphaTheVoidCountLabel = panelRoot.Q<Label>("AlphaTheVoidCountLabel");
+            this.omegaTheVoidCountLabel = panelRoot.Q<Label>("OmegaTheVoidCountLabel");
             if (this.gameRoot == null) return;
             if (this.gameViewport == null) return;
             _ = new LobbyAspectRatioKeeper(this.gameRoot, this.gameViewport);
@@ -457,6 +469,11 @@ namespace SG03.UI
             this.playerNameLabel.text = string.IsNullOrEmpty(displayName) ? "Guest" : displayName;
         }
 
+        protected virtual void OnInitCardClicked()
+        {
+            this.InitCard();
+        }
+
         protected virtual void OnEndTurnClicked()
         {
         }
@@ -482,6 +499,51 @@ namespace SG03.UI
         protected virtual void OnStartBattleClicked()
         {
             this.StartBattle();
+        }
+
+        private void InitCard()
+        {
+            this.EnsureServiceReferences();
+            if (!this.CanInitCard()) return;
+            this.SetInitCardLoading(true);
+            this.battleScript.RunScript(
+                InitCardScriptName,
+                null,
+                this.OnInitCardSucceeded,
+                this.OnInitCardFailed);
+        }
+
+        private bool CanInitCard()
+        {
+            if (this.battleScript != null) return true;
+            this.SetInitCardButtonText("No Script");
+            return false;
+        }
+
+        private void SetInitCardLoading(bool isLoading)
+        {
+            if (this.btnInitCard == null) return;
+            this.btnInitCard.SetEnabled(!isLoading);
+            this.btnInitCard.text = isLoading ? "Initing..." : "Init Card";
+        }
+
+        private void SetInitCardButtonText(string text)
+        {
+            if (this.btnInitCard == null) return;
+            this.btnInitCard.text = text;
+        }
+
+        private void OnInitCardSucceeded(string response)
+        {
+            this.SetInitCardLoading(false);
+            this.SetInitCardButtonText("Init OK");
+        }
+
+        private void OnInitCardFailed(string error)
+        {
+            this.SetInitCardLoading(false);
+            this.SetInitCardButtonText("Init Failed");
+            Debug.LogWarning(this.transform.name + ": Init card failed: " + error, this.gameObject);
         }
 
         private void CheckBattleStatus()
@@ -533,6 +595,7 @@ namespace SG03.UI
         private void ApplyBattleStatusResponse(string response)
         {
             if (string.IsNullOrWhiteSpace(response)) return;
+            BattleState.Instance?.UpdateFromBattleStatus(response);
 
             try
             {
@@ -550,6 +613,20 @@ namespace SG03.UI
             if (status == null) return;
             if (status.output == null) return;
             this.SetBattleHp(status.output.alpha_hp, status.output.omega_hp);
+            this.SetBattleSourceCounts(status.output.alpha_the_source_count, status.output.omega_the_source_count);
+            this.SetBattleVoidCounts(status.output.alpha_the_void_count, status.output.omega_the_void_count);
+        }
+
+        private void SetBattleSourceCounts(int alphaCount, int omeraCount)
+        {
+            if (this.alphaSourceCountLabel != null) this.alphaSourceCountLabel.text = $"Alpha Source: {alphaCount}";
+            if (this.omeraSourceCountLabel != null) this.omeraSourceCountLabel.text = $"Omera Source: {omeraCount}";
+        }
+
+        private void SetBattleVoidCounts(int alphaCount, int omegaCount)
+        {
+            if (this.alphaTheVoidCountLabel != null) this.alphaTheVoidCountLabel.text = $"Void: {alphaCount}";
+            if (this.omegaTheVoidCountLabel != null) this.omegaTheVoidCountLabel.text = $"Void: {omegaCount}";
         }
 
         private void SetBattleHp(int alphaHp, int omegaHp)
