@@ -96,7 +96,8 @@ namespace SG03
 
             for (int i = 0; i < alphaCount; i++)
             {
-                this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
+                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
+                if (card != null) card.MoveTo(this.deskPosition.AlphaTheSource.position);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -105,7 +106,8 @@ namespace SG03
 
             for (int i = 0; i < omegaCount; i++)
             {
-                this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+                if (card != null) card.MoveTo(this.deskPosition.OmegaTheSource.position);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -115,12 +117,13 @@ namespace SG03
             this.spawnRoutine = null;
         }
 
-        private void SpawnCardAt(Card3DCtrl prefab, Transform spawnPoint)
+        private Card3DCtrl SpawnCardAt(Card3DCtrl prefab, Transform spawnPoint)
         {
-            if (spawnPoint == null) return;
+            if (spawnPoint == null) return null;
             Card3DCtrl card = this.cardPool.Spawn(prefab, spawnPoint.position);
             card.transform.rotation = spawnPoint.rotation;
             card.gameObject.SetActive(true);
+            return card;
         }
 
         private void SpawnSlots(BattleCardSlot[] slots, Transform[] positions)
