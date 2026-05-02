@@ -1082,8 +1082,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardMovement
   ctrl: {fileID: 724914520211398535}
-  duration: 0.5
+  duration: 1
   ease: 6
+  location: 0
 --- !u!1 &8850135446255561160
 GameObject:
   m_ObjectHideFlags: 0
