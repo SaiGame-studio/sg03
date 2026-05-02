@@ -1,4 +1,3 @@
-using SaiGame.Services;
 using UnityEngine;
 
 namespace SG03
@@ -12,7 +11,7 @@ namespace SG03
     [AddComponentMenu("SG03/Card/Card 3D Ctrl")]
     [RequireComponent(typeof(Card3D))]
     [RequireComponent(typeof(CardLoader))]
-    public class Card3DCtrl : SaiBehaviour
+    public class Card3DCtrl : PoolObj
     {
         // ─── Linked components ────────────────────────────────────────────────────
 
@@ -22,8 +21,11 @@ namespace SG03
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
+        public override string GetName() => this.name;
+
         protected override void LoadComponents()
         {
+            base.LoadComponents();
             this.LoadCard3D();
             this.LoadCardLoader();
         }

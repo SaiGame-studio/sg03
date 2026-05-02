@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SG03
 {
     [CustomEditor(typeof(CardReviewMovement))]
-    public class CardReviewMovementEditor : Editor
+    public class CardReviewMovementEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

@@ -56,6 +56,7 @@ namespace SG03.UI
         private VisualElement gameViewport;
         private VisualElement root;
         private bool authEventsSubscribed;
+        private bool battleStateEventsSubscribed;
 
         protected override void LoadComponents()
         {
@@ -267,9 +268,35 @@ namespace SG03.UI
             this.omeraSourceCountLabel = panelRoot.Q<Label>("OmeraSourceCountLabel");
             this.alphaTheVoidCountLabel = panelRoot.Q<Label>("AlphaTheVoidCountLabel");
             this.omegaTheVoidCountLabel = panelRoot.Q<Label>("OmegaTheVoidCountLabel");
+            this.SubscribeToBattleStateEvents();
             if (this.gameRoot == null) return;
             if (this.gameViewport == null) return;
             _ = new LobbyAspectRatioKeeper(this.gameRoot, this.gameViewport);
+        }
+
+        private void SubscribeToBattleStateEvents()
+        {
+            if (this.battleStateEventsSubscribed) return;
+            if (BattleState.Instance == null) return;
+            BattleState.Instance.OnBattleStatusChanged += this.RefreshBattleStatusUI;
+            this.battleStateEventsSubscribed = true;
+        }
+
+        private void UnsubscribeFromBattleStateEvents()
+        {
+            if (!this.battleStateEventsSubscribed) return;
+            if (BattleState.Instance == null) return;
+            BattleState.Instance.OnBattleStatusChanged -= this.RefreshBattleStatusUI;
+            this.battleStateEventsSubscribed = false;
+        }
+
+        private void RefreshBattleStatusUI()
+        {
+            BattleState state = BattleState.Instance;
+            if (state == null) return;
+            this.SetBattleHp(state.AlphaHp, state.OmegaHp);
+            this.SetBattleSourceCounts(state.AlphaTheSourceCount, state.OmegaTheSourceCount);
+            this.SetBattleVoidCounts(state.AlphaTheVoidCount, state.OmegaTheVoidCount);
         }
 
         private void OnDeskTabClicked(Button selected)
@@ -537,6 +564,7 @@ namespace SG03.UI
         {
             this.SetInitCardLoading(false);
             this.SetInitCardButtonText("Init OK");
+            BattleState.Instance.UpdateFromInitCards(response);
         }
 
         private void OnInitCardFailed(string error)
@@ -596,31 +624,12 @@ namespace SG03.UI
         {
             if (string.IsNullOrWhiteSpace(response)) return;
             BattleState.Instance?.UpdateFromBattleStatus(response);
-
-            try
-            {
-                BattleStatusScriptResponse status = JsonUtility.FromJson<BattleStatusScriptResponse>(response);
-                this.ApplyBattleStatusResponse(status);
-            }
-            catch (Exception exception)
-            {
-                this.OnBattleStatusFailed(exception.Message);
-            }
-        }
-
-        private void ApplyBattleStatusResponse(BattleStatusScriptResponse status)
-        {
-            if (status == null) return;
-            if (status.output == null) return;
-            this.SetBattleHp(status.output.alpha_hp, status.output.omega_hp);
-            this.SetBattleSourceCounts(status.output.alpha_the_source_count, status.output.omega_the_source_count);
-            this.SetBattleVoidCounts(status.output.alpha_the_void_count, status.output.omega_the_void_count);
         }
 
         private void SetBattleSourceCounts(int alphaCount, int omeraCount)
         {
-            if (this.alphaSourceCountLabel != null) this.alphaSourceCountLabel.text = $"Alpha Source: {alphaCount}";
-            if (this.omeraSourceCountLabel != null) this.omeraSourceCountLabel.text = $"Omera Source: {omeraCount}";
+            if (this.alphaSourceCountLabel != null) this.alphaSourceCountLabel.text = $"Source: {alphaCount}";
+            if (this.omeraSourceCountLabel != null) this.omeraSourceCountLabel.text = $"Source: {omeraCount}";
         }
 
         private void SetBattleVoidCounts(int alphaCount, int omegaCount)
@@ -631,8 +640,8 @@ namespace SG03.UI
 
         private void SetBattleHp(int alphaHp, int omegaHp)
         {
-            if (this.alphaHpLabel != null) this.alphaHpLabel.text = $"Alpha HP: {alphaHp}";
-            if (this.omegaHpLabel != null) this.omegaHpLabel.text = $"Omega HP: {omegaHp}";
+            if (this.alphaHpLabel != null) this.alphaHpLabel.text = $"HP: {alphaHp}";
+            if (this.omegaHpLabel != null) this.omegaHpLabel.text = $"HP: {omegaHp}";
         }
 
         private void EndBattle()
@@ -776,6 +785,7 @@ namespace SG03.UI
 
         protected virtual void OnDestroy()
         {
+            this.UnsubscribeFromBattleStateEvents();
             this.UnsubscribeFromAuthEvents();
             this.ClearDeskTabs();
         }
