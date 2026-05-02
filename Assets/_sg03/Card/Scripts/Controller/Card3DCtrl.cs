@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace SG03
@@ -14,6 +15,11 @@ namespace SG03
     [RequireComponent(typeof(CardMovement))]
     public class Card3DCtrl : PoolObj
     {
+        // ─── Static hover events ──────────────────────────────────────────────────
+
+        public static event Action<Card3DCtrl> HoverEntered;
+        public static event Action<Card3DCtrl> HoverExited;
+
         // ─── Linked components ────────────────────────────────────────────────────
 
         [Header("Linked Components")]
@@ -24,6 +30,9 @@ namespace SG03
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         public override string GetName() => this.name;
+
+        public void NotifyHoverEntered() => HoverEntered?.Invoke(this);
+        public void NotifyHoverExited() => HoverExited?.Invoke(this);
 
         protected override void LoadComponents()
         {
