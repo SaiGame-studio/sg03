@@ -13,8 +13,9 @@ namespace SG03.UI
     {
 
         [Header("References")]
-        [SerializeField] private Card3DCtrl card3DCtrl;
-        
+        [SerializeField] private string prefabName = "Card3D";
+        [SerializeField] private CardPool cardPool;
+
         [Header("Battle Status Cache — Read Only")]
         [SerializeField][TextArea(5, 20)] private string battleStatusJson;
         [SerializeField] private int alphaHp;
@@ -49,21 +50,22 @@ namespace SG03.UI
         public int OmegaCardsDrawn => this.omegaCardsDrawn;
         public OmegaInitCardSlot[] OmegaHand => this.omegaHand;
         public string SessionId => this.sessionId;
-        public Card3DCtrl Card3DCtrl => this.card3DCtrl;
+        public string PrefabName => this.prefabName;
+        public CardPool CardPool => this.cardPool;
 
         public event Action OnBattleStatusChanged;
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
-            this.LoadCard3DCtrl();
+            this.LoadCardPool();
         }
 
-        protected virtual void LoadCard3DCtrl()
+        protected virtual void LoadCardPool()
         {
-            if (this.card3DCtrl != null) return;
-            this.card3DCtrl = this.GetComponentInChildren<Card3DCtrl>(true);
-            Debug.LogWarning(this.transform.name + "LoadCard3DCtrl", this.gameObject);
+            if (this.cardPool != null) return;
+            this.cardPool = GameObject.FindAnyObjectByType<CardPool>();
+            Debug.LogWarning(this.transform.name + "LoadCardPool", this.gameObject);
         }
 
         public void ClearData()
@@ -182,6 +184,7 @@ namespace SG03.UI
             this.alphaBackLine = output.alpha_back_line;
             this.alphaFrontLine = output.alpha_front_line;
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
+            this.SpawnAlphaHandCards();
             this.OnBattleStatusChanged?.Invoke();
         }
 
@@ -202,7 +205,23 @@ namespace SG03.UI
             if (output.alpha_hand != null) this.alphaHand = output.alpha_hand;
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
             if (output.session_id != null) this.sessionId = output.session_id;
+            this.SpawnAlphaHandCards();
             this.OnBattleStatusChanged?.Invoke();
+        }
+
+        private void SpawnAlphaHandCards()
+        {
+            if (this.cardPool == null) return;
+            if (this.alphaHand == null) return;
+            Card3DCtrl prefab = this.cardPool.PoolPrefabs.GetByName(this.prefabName);
+            if (prefab == null) return;
+            foreach (BattleCardSlot slot in this.alphaHand)
+            {
+                Card3DCtrl card = this.cardPool.Spawn(prefab);
+                card.gameObject.SetActive(true);
+                card.SetFallbackName(slot.item_definition_name);
+                card.LoadCardByCodeName(slot.item_definition_code_name);
+            }
         }
     }
 }
