@@ -12,6 +12,7 @@ namespace SG03
         [SerializeField] private DeskPositionCtrl deskPosition;
         [SerializeField] private string prefabName = "Card3D";
         [SerializeField] private int spawnPerFrame = 1;
+        [SerializeField] private float spawnInterval = 0.05f;
 
         private Coroutine spawnRoutine;
 
@@ -95,10 +96,8 @@ namespace SG03
         {
             Card3DCtrl prefab = this.ResolvePrefab();
             if (prefab == null) yield break;
-            yield return this.SpawnAlphaSourceRoutine(prefab);
-            yield return this.SpawnOmegaSourceRoutine(prefab);
-            yield return this.SpawnOmegaHandRoutine(prefab);
-            yield return this.SpawnAlphaHandResumeRoutine(prefab);
+            yield return this.RunParallel(this.SpawnAlphaSourceRoutine(prefab), this.SpawnOmegaSourceRoutine(prefab));
+            yield return this.RunParallel(this.SpawnAlphaHandResumeRoutine(prefab), this.SpawnOmegaHandRoutine(prefab));
             this.spawnRoutine = null;
         }
 
@@ -106,10 +105,17 @@ namespace SG03
         {
             Card3DCtrl prefab = this.ResolvePrefab();
             if (prefab == null) yield break;
-            yield return this.SpawnAlphaSourceRoutine(prefab);
-            yield return this.SpawnOmegaSourceRoutine(prefab);
+            yield return this.RunParallel(this.SpawnAlphaSourceRoutine(prefab), this.SpawnOmegaSourceRoutine(prefab));
             yield return this.SpawnOmegaHandRoutine(prefab);
             this.spawnRoutine = null;
+        }
+
+        private IEnumerator RunParallel(IEnumerator a, IEnumerator b)
+        {
+            Coroutine ca = this.StartCoroutine(a);
+            Coroutine cb = this.StartCoroutine(b);
+            yield return ca;
+            yield return cb;
         }
 
         private Card3DCtrl ResolvePrefab()
@@ -129,7 +135,7 @@ namespace SG03
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
-                yield return null;
+                yield return this.WaitAfterSpawn();
             }
         }
 
@@ -144,7 +150,7 @@ namespace SG03
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
-                yield return null;
+                yield return this.WaitAfterSpawn();
             }
         }
 
@@ -161,7 +167,7 @@ namespace SG03
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
-                yield return null;
+                yield return this.WaitAfterSpawn();
             }
         }
 
@@ -185,8 +191,14 @@ namespace SG03
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
-                yield return null;
+                yield return this.WaitAfterSpawn();
             }
+        }
+
+        private YieldInstruction WaitAfterSpawn()
+        {
+            if (this.spawnInterval > 0f) return new WaitForSeconds(this.spawnInterval);
+            return null;
         }
 
         private Card3DCtrl SpawnCardAt(Card3DCtrl prefab, Transform spawnPoint)
