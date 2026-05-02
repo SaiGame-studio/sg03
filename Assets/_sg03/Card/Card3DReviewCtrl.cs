@@ -14,7 +14,7 @@ namespace SG03
         // ─── Linked components ────────────────────────────────────────────────────
 
         [Header("Review Components")]
-        [SerializeField] private CardReviewMovement movement;
+        [SerializeField] private CardReviewMovement reviewMovement;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -26,18 +26,18 @@ namespace SG03
 
         protected virtual void LoadCardReviewMovement()
         {
-            if (this.movement != null) return;
-            this.movement = this.GetComponent<CardReviewMovement>();
+            if (this.reviewMovement != null) return;
+            this.reviewMovement = this.GetComponent<CardReviewMovement>();
             Debug.LogWarning(transform.name + "LoadCardReviewMovement", gameObject);
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>Flies the card upward with spin animation.</summary>
-        public void Show() => this.movement.Show();
+        public void Show() => this.reviewMovement.Show();
 
         /// <summary>Returns the card to its origin position with spin animation.</summary>
-        public void Hide() => this.movement.Hide();
+        public void Hide() => this.reviewMovement.Hide();
 
         /// <summary>
         /// Shows the card with the given <paramref name="codeName"/>.
@@ -47,7 +47,7 @@ namespace SG03
         /// </summary>
         public void RequestShow(string codeName, string displayName = null, CardBaseStats stats = null, string description = null)
         {
-            if (this.movement == null) return;
+            if (this.reviewMovement == null) return;
             this.SetFallbackName(displayName ?? codeName);
             this.SetFallbackStats(stats);
             this.SetFallbackDescription(description);
@@ -55,16 +55,16 @@ namespace SG03
             // LoadCardByCodeName is async — if the address lookup fails the card
             // data never updates, so fallback text would never render without this call.
             this.ApplyTextures();
-            if (!this.movement.IsShown)
+            if (!this.reviewMovement.IsShown)
             {
                 this.LoadCardByCodeName(codeName);
-                this.movement.Show();
+                this.reviewMovement.Show();
                 return;
             }
-            this.movement.Hide().OnComplete(() =>
+            this.reviewMovement.Hide().OnComplete(() =>
             {
                 this.LoadCardByCodeName(codeName);
-                this.movement.Show();
+                this.reviewMovement.Show();
             });
         }
     }

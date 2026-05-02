@@ -37,7 +37,7 @@ namespace SaiGame.Services
             }
 
             int applied = EnvLoader.ApplyAtRuntime(saiServer);
-            // Debug.Log($"[EnvLoader] Applied {applied} value(s) from .env at game start.");
+            Debug.Log($"[EnvLoader] Applied {applied} value(s) from .env at game start.");
         }
     }
 }

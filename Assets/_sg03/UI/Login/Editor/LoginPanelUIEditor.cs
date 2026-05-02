@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SG03.UI
 {
     [CustomEditor(typeof(LoginPanelUI))]
-    public class LoginPanelUIEditor : Editor
+    public class LoginPanelUIEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
