@@ -5891,8 +5891,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardSpawning
   cardPool: {fileID: 2028831696}
   deskPosition: {fileID: 948749802}
+  battleState: {fileID: 2015755439}
   prefabName: Card3D
   spawnPerFrame: 1
+  spawnInterval: 0.05
 --- !u!114 &2015755439
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6048,6 +6050,7 @@ MonoBehaviour:
   itemPreset: {fileID: 1147895069}
   battleScript: {fileID: 480811550}
   uiDocument: {fileID: 2030001003}
+  battleState: {fileID: 2015755439}
   selectedPreset:
     id: 
     definition_id: 

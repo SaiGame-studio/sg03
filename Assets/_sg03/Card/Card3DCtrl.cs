@@ -105,5 +105,8 @@ namespace SG03
 
         /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
         public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
+
+        /// <summary>Current logical location of this card.</summary>
+        public Location Location => this.movement.Location;
     }
 }

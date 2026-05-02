@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using SaiGame.Services;
 using SG03.UI;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace SG03
     {
         [SerializeField] private CardPool cardPool;
         [SerializeField] private DeskPositionCtrl deskPosition;
+        [SerializeField] private BattleState battleState;
         [SerializeField] private string prefabName = "Card3D";
         [SerializeField] private int spawnPerFrame = 1;
         [SerializeField] private float spawnInterval = 0.05f;
@@ -20,14 +22,14 @@ namespace SG03
 
         public void SpawnGameStart()
         {
-            Debug.Log("<color=#FFD700><b>[CardSpawning] SpawnGameStart — alpha: " + BattleState.Instance.AlphaTheSourceCount + ", omega: " + BattleState.Instance.OmegaTheSourceCount + "</b></color>");
+            Debug.Log("<color=#FFD700><b>[CardSpawning] SpawnGameStart — alpha: " + this.battleState.AlphaTheSourceCount + ", omega: " + this.battleState.OmegaTheSourceCount + "</b></color>");
             if (this.spawnRoutine != null) this.StopCoroutine(this.spawnRoutine);
             this.spawnRoutine = this.StartCoroutine(this.SpawnGameStartRoutine());
         }
 
         public void SpawnGameResume()
         {
-            Debug.Log("<color=#00CFFF><b>[CardSpawning] SpawnGameResume — alpha: " + BattleState.Instance.AlphaTheSourceCount + ", omega: " + BattleState.Instance.OmegaTheSourceCount + "</b></color>");
+            Debug.Log("<color=#00CFFF><b>[CardSpawning] SpawnGameResume — alpha: " + this.battleState.AlphaTheSourceCount + ", omega: " + this.battleState.OmegaTheSourceCount + "</b></color>");
             if (this.spawnRoutine != null) this.StopCoroutine(this.spawnRoutine);
             this.spawnRoutine = this.StartCoroutine(this.SpawnGameResumeRoutine());
         }
@@ -64,6 +66,7 @@ namespace SG03
             base.LoadComponents();
             this.LoadCardPool();
             this.LoadDeskPosition();
+            this.LoadBattleState();
         }
 
         protected virtual void LoadCardPool()
@@ -80,16 +83,114 @@ namespace SG03
             Debug.LogWarning(this.transform.name + ": LoadDeskPosition", this.gameObject);
         }
 
+        protected virtual void LoadBattleState()
+        {
+            if (this.battleState != null) return;
+            this.battleState = GameObject.FindAnyObjectByType<BattleState>();
+            Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
+        }
+
         private void SubscribeEvents()
         {
             BattleState.OnGameStart += this.SpawnGameStart;
             BattleState.OnGameResume += this.SpawnGameResume;
+            BattleState.OnInitCards += this.OnInitCardsReceived;
         }
 
         private void UnsubscribeEvents()
         {
             BattleState.OnGameStart -= this.SpawnGameStart;
             BattleState.OnGameResume -= this.SpawnGameResume;
+            BattleState.OnInitCards -= this.OnInitCardsReceived;
+        }
+
+        private void OnInitCardsReceived(InitCardsResult result)
+        {
+            this.LogInitCardsResult(result);
+            if (this.spawnRoutine != null) this.StopCoroutine(this.spawnRoutine);
+            this.spawnRoutine = this.StartCoroutine(this.InitCardsRoutine(result));
+        }
+
+        private void LogInitCardsResult(InitCardsResult result)
+        {
+            Debug.Log(
+                "<color=#FFD700><b>[CardSpawning] InitCards complete</b></color>" +
+                " | Alpha added to hand: " + result.AlphaCardsAddedToHand +
+                " | Alpha removed from source: " + result.AlphaCardsRemovedFromSource +
+                " | Omega added to hand: " + result.OmegaCardsAddedToHand +
+                " | Omega removed from source: " + result.OmegaCardsRemovedFromSource);
+        }
+
+        private IEnumerator InitCardsRoutine(InitCardsResult result)
+        {
+            yield return this.RunParallel(
+                this.MoveAlphaSourceToHandRoutine(result.AlphaCardsAddedToHand),
+                this.MoveOmegaSourceToHandRoutine(result.OmegaCardsAddedToHand));
+            this.spawnRoutine = null;
+        }
+
+        private IEnumerator MoveAlphaSourceToHandRoutine(int count)
+        {
+            List<Card3DCtrl> sourceCards = this.FindSourceCards(this.deskPosition.AlphaTheSource);
+            BattleCardSlot[] hand = this.battleState.AlphaHand;
+            int moveCount = Mathf.Min(count, sourceCards.Count);
+            int spawnedThisFrame = 0;
+            for (int i = 0; i < moveCount; i++)
+            {
+                Transform target = i < this.deskPosition.AlphaHand.Length
+                    ? this.deskPosition.AlphaHand[i]
+                    : this.deskPosition.AlphaSpawnPoint;
+                Card3DCtrl card = sourceCards[i];
+                if (hand != null && i < hand.Length)
+                {
+                    card.SetFallbackName(hand[i].item_definition_name);
+                    card.LoadCardByCodeName(hand[i].item_definition_code_name);
+                }
+                card.MoveTo(target, Location.in_hand);
+                spawnedThisFrame++;
+                if (spawnedThisFrame < this.spawnPerFrame) continue;
+                spawnedThisFrame = 0;
+                yield return this.WaitAfterSpawn();
+            }
+        }
+
+        private IEnumerator MoveOmegaSourceToHandRoutine(int count)
+        {
+            List<Card3DCtrl> sourceCards = this.FindSourceCards(this.deskPosition.OmegaTheSource);
+            OmegaInitCardSlot[] hand = this.battleState.OmegaHand;
+            int moveCount = Mathf.Min(count, sourceCards.Count);
+            int spawnedThisFrame = 0;
+            for (int i = 0; i < moveCount; i++)
+            {
+                Transform target = this.deskPosition.GetOmegaHand(i);
+                if (target == null) target = this.deskPosition.OmegaSpawnPoint;
+                Card3DCtrl card = sourceCards[i];
+                if (hand != null && i < hand.Length)
+                    card.LoadCardByCodeName(hand[i].item_code_name);
+                card.MoveTo(target, Location.in_hand);
+                spawnedThisFrame++;
+                if (spawnedThisFrame < this.spawnPerFrame) continue;
+                spawnedThisFrame = 0;
+                yield return this.WaitAfterSpawn();
+            }
+        }
+
+        private List<Card3DCtrl> FindSourceCards(Transform nearestTo)
+        {
+            Card3DCtrl[] all = Object.FindObjectsByType<Card3DCtrl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            List<Card3DCtrl> result = new List<Card3DCtrl>();
+            foreach (Card3DCtrl card in all)
+            {
+                if (card.Location != Location.in_source) continue;
+                result.Add(card);
+            }
+            result.Sort((a, b) =>
+            {
+                float da = Vector3.Distance(a.transform.position, nearestTo.position);
+                float db = Vector3.Distance(b.transform.position, nearestTo.position);
+                return da.CompareTo(db);
+            });
+            return result;
         }
 
         private IEnumerator SpawnGameResumeRoutine()
@@ -126,7 +227,7 @@ namespace SG03
 
         private IEnumerator SpawnAlphaSourceRoutine(Card3DCtrl prefab)
         {
-            int count = BattleState.Instance.AlphaTheSourceCount;
+            int count = this.battleState.AlphaTheSourceCount;
             int spawnedThisFrame = 0;
             for (int i = 0; i < count; i++)
             {
@@ -141,7 +242,7 @@ namespace SG03
 
         private IEnumerator SpawnOmegaSourceRoutine(Card3DCtrl prefab)
         {
-            int count = BattleState.Instance.OmegaTheSourceCount;
+            int count = this.battleState.OmegaTheSourceCount;
             int spawnedThisFrame = 0;
             for (int i = 0; i < count; i++)
             {
@@ -156,7 +257,7 @@ namespace SG03
 
         private IEnumerator SpawnOmegaHandRoutine(Card3DCtrl prefab)
         {
-            int count = BattleState.Instance.OmegaHandCount;
+            int count = this.battleState.OmegaHandCount;
             int spawnedThisFrame = 0;
             for (int i = 0; i < count; i++)
             {
@@ -173,7 +274,7 @@ namespace SG03
 
         private IEnumerator SpawnAlphaHandResumeRoutine(Card3DCtrl prefab)
         {
-            BattleCardSlot[] handSlots = BattleState.Instance.AlphaHand;
+            BattleCardSlot[] handSlots = this.battleState.AlphaHand;
             if (handSlots == null) yield break;
             int spawnedThisFrame = 0;
             for (int i = 0; i < handSlots.Length; i++)

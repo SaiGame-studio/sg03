@@ -10,7 +10,7 @@ namespace SG03.UI
     /// Any script that receives a battle_status response should call UpdateFromBattleStatus
     /// to keep this cache up to date. All data is exposed as readonly properties.
     /// </summary>
-    public class BattleState : SaiSingleton<BattleState>
+    public class BattleState : SaiBehaviour
     {
 
         [Header("References")]
@@ -67,6 +67,7 @@ namespace SG03.UI
         public event Action OnBattleStatusChanged;
         public static event Action OnGameStart;
         public static event Action OnGameResume;
+        public static event Action<InitCardsResult> OnInitCards;
 
         protected override void LoadComponents()
         {
@@ -232,10 +233,21 @@ namespace SG03.UI
             this.omegaHandCount = output.omega_hand_count;
             if (output.session_id != null) this.sessionId = output.session_id;
             this.TryFireGameStart();
-            if (!this.skipAlphaHandOnce)
-                this.cardSpawning?.SpawnAlphaHand(this.alphaHand);
             this.skipAlphaHandOnce = false;
+            this.FireInitCardsEvent(output);
             this.OnBattleStatusChanged?.Invoke();
+        }
+
+        private void FireInitCardsEvent(InitCardsOutput output)
+        {
+            InitCardsResult result = new InitCardsResult
+            {
+                AlphaCardsAddedToHand = output.alpha_cards_drawn,
+                AlphaCardsRemovedFromSource = output.alpha_cards_drawn,
+                OmegaCardsAddedToHand = output.omega_cards_drawn,
+                OmegaCardsRemovedFromSource = output.omega_cards_drawn
+            };
+            OnInitCards?.Invoke(result);
         }
 
         private void TryFireGameStart()

@@ -63,5 +63,6 @@ namespace SG03
             this.transform.DOMove(target.position, this.duration).SetEase(this.ease);
             this.transform.DORotateQuaternion(target.rotation, this.duration).SetEase(this.ease);
         }
+
     }
 }
