@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SG03
 {
     [CustomEditor(typeof(CardLoader))]
-    public class CardLoaderEditor : Editor
+    public class CardLoaderEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

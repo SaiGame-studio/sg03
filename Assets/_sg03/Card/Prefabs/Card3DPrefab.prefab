@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3224538444746627556}
   - component: {fileID: 5128154558789406729}
   - component: {fileID: 9221625749736723552}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Frame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 2396959498987495333}
   - component: {fileID: 7902947969342526895}
   - component: {fileID: 5430974725798921348}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -191,7 +191,7 @@ GameObject:
   - component: {fileID: 2906211568743924252}
   - component: {fileID: 2955687961266307114}
   - component: {fileID: 8752282058966526777}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: DescriptionText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -370,7 +370,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7014831980156612404}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: BackFace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -404,7 +404,7 @@ GameObject:
   - component: {fileID: 6914425806330681257}
   - component: {fileID: 5479032659863669747}
   - component: {fileID: 3724972524044309510}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: AtkText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -583,7 +583,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5058899214787717230}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FrontFace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -623,7 +623,7 @@ GameObject:
   - component: {fileID: 6861007660675967375}
   - component: {fileID: 5749703991534581947}
   - component: {fileID: 5571234346840938346}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: CardNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -804,7 +804,7 @@ GameObject:
   - component: {fileID: 3227181756066447694}
   - component: {fileID: 1199703959569270677}
   - component: {fileID: 9181609221170815586}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: DefText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -986,7 +986,7 @@ GameObject:
   - component: {fileID: 1279015152172670498}
   - component: {fileID: 7980353759426569992}
   - component: {fileID: 724914520211398535}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Card3DPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1064,6 +1064,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ae79fc8a26efbc4aa4a82d278ebe81d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.Card3DCtrl
+  despawn: {fileID: 0}
   card: {fileID: 1279015152172670498}
   loader: {fileID: 7980353759426569992}
 --- !u!1 &8850135446255561160
@@ -1077,7 +1078,7 @@ GameObject:
   - component: {fileID: 64127187081667836}
   - component: {fileID: 5452759506467081973}
   - component: {fileID: 792007169825556148}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Character
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1167,7 +1168,7 @@ GameObject:
   - component: {fileID: 1240512147390855666}
   - component: {fileID: 4029086001210276844}
   - component: {fileID: 6288588338998864053}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: StarsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SG03
 {
     [CustomEditor(typeof(CardDataManager))]
-    public class CardDataManagerEditor : Editor
+    public class CardDataManagerEditor : UnityEditor.Editor
     {
         private string testAddress = "Cards/CardData_Example";
 

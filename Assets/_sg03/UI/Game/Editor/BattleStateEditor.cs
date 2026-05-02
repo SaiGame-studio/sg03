@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SG03.UI
 {
     [CustomEditor(typeof(BattleState))]
-    public class BattleStateEditor : Editor
+    public class BattleStateEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
