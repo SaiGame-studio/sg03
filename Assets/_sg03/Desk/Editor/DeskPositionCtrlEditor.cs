@@ -14,11 +14,18 @@ namespace SG03.Editor
             DeskPositionCtrl ctrl = (DeskPositionCtrl)this.target;
 
             EditorGUILayout.Space();
-            if (GUILayout.Button("Toggle Show/Hide Test Cards"))
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Show Test Cards"))
             {
-                Undo.RecordObjects(this.GetTestCardObjects(ctrl), "Toggle Test Cards");
-                ctrl.ToggleTestCards();
+                Undo.RecordObjects(this.GetTestCardObjects(ctrl), "Show Test Cards");
+                ctrl.ShowTestCards();
             }
+            if (GUILayout.Button("Hide Test Cards"))
+            {
+                Undo.RecordObjects(this.GetTestCardObjects(ctrl), "Hide Test Cards");
+                ctrl.HideTestCards();
+            }
+            EditorGUILayout.EndHorizontal();
         }
 
         private Object[] GetTestCardObjects(DeskPositionCtrl ctrl)

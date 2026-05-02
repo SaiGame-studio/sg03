@@ -80,6 +80,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f274126714bab941a9c9c9f1aa0f9cd
+    m_Address: Assets/_sg03/Card/Data/Env/abyssal_mist.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8a5ca88c7387f444689e985478c535b0
+    m_Address: Assets/_sg03/Card/Data/Env/graveyard.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1dbcb8f49ff902448d783578bd455c0
     m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/animate_dead.asset
     m_ReadOnly: 0
@@ -115,8 +125,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fc5a9563796479348a81847d039f777d
+    m_Address: Assets/_sg03/Card/Data/Env/gright_forest.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fec84290bc9f9f24f9ece1d96e52b213
     m_Address: Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fee7b29290278e84bba6252d78c1e8ed
+    m_Address: Assets/_sg03/Card/Data/Env/iron_citadel.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

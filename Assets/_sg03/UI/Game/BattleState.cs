@@ -1,5 +1,6 @@
 using System;
 using SaiGame.Services;
+using SG03;
 using UnityEngine;
 
 namespace SG03.UI
@@ -13,8 +14,7 @@ namespace SG03.UI
     {
 
         [Header("References")]
-        [SerializeField] private string prefabName = "Card3D";
-        [SerializeField] private CardPool cardPool;
+        [SerializeField] private CardSpawning cardSpawning;
 
         [Header("Battle Status Cache — Read Only")]
         [SerializeField][TextArea(5, 20)] private string battleStatusJson;
@@ -34,6 +34,7 @@ namespace SG03.UI
         [SerializeField] private OmegaInitCardSlot[] omegaHand;
         [SerializeField] private string sessionId;
 
+        private bool gameStartFired;
 
         public string BattleStatusJson => this.battleStatusJson;
         public int AlphaHp => this.alphaHp;
@@ -50,22 +51,21 @@ namespace SG03.UI
         public int OmegaCardsDrawn => this.omegaCardsDrawn;
         public OmegaInitCardSlot[] OmegaHand => this.omegaHand;
         public string SessionId => this.sessionId;
-        public string PrefabName => this.prefabName;
-        public CardPool CardPool => this.cardPool;
 
         public event Action OnBattleStatusChanged;
+        public static event Action OnGameStart;
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
-            this.LoadCardPool();
+            this.LoadCardSpawning();
         }
 
-        protected virtual void LoadCardPool()
+        protected virtual void LoadCardSpawning()
         {
-            if (this.cardPool != null) return;
-            this.cardPool = GameObject.FindAnyObjectByType<CardPool>();
-            Debug.LogWarning(this.transform.name + "LoadCardPool", this.gameObject);
+            if (this.cardSpawning != null) return;
+            this.cardSpawning = GameObject.FindAnyObjectByType<CardSpawning>();
+            Debug.LogWarning(this.transform.name + ": LoadCardSpawning", this.gameObject);
         }
 
         public void ClearData()
@@ -85,6 +85,7 @@ namespace SG03.UI
             this.omegaCardsDrawn = 0;
             this.omegaHand = null;
             this.sessionId = string.Empty;
+            this.gameStartFired = false;
             this.OnBattleStatusChanged?.Invoke();
         }
 
@@ -184,7 +185,8 @@ namespace SG03.UI
             this.alphaBackLine = output.alpha_back_line;
             this.alphaFrontLine = output.alpha_front_line;
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
-            this.SpawnAlphaHandCards();
+            this.TryFireGameStart();
+            this.cardSpawning?.SpawnAlphaHand(this.alphaHand);
             this.OnBattleStatusChanged?.Invoke();
         }
 
@@ -205,23 +207,18 @@ namespace SG03.UI
             if (output.alpha_hand != null) this.alphaHand = output.alpha_hand;
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
             if (output.session_id != null) this.sessionId = output.session_id;
-            this.SpawnAlphaHandCards();
+            this.TryFireGameStart();
+            this.cardSpawning?.SpawnAlphaHand(this.alphaHand);
             this.OnBattleStatusChanged?.Invoke();
         }
 
-        private void SpawnAlphaHandCards()
+        private void TryFireGameStart()
         {
-            if (this.cardPool == null) return;
-            if (this.alphaHand == null) return;
-            Card3DCtrl prefab = this.cardPool.PoolPrefabs.GetByName(this.prefabName);
-            if (prefab == null) return;
-            foreach (BattleCardSlot slot in this.alphaHand)
-            {
-                Card3DCtrl card = this.cardPool.Spawn(prefab);
-                card.gameObject.SetActive(true);
-                card.SetFallbackName(slot.item_definition_name);
-                card.LoadCardByCodeName(slot.item_definition_code_name);
-            }
+            if (this.gameStartFired) return;
+            if (this.alphaTheSourceCount < 25) return;
+            if (this.omegaTheSourceCount < 25) return;
+            this.gameStartFired = true;
+            OnGameStart?.Invoke();
         }
     }
 }
