@@ -1,3 +1,4 @@
+using System;
 using SaiGame.Services;
 using UnityEngine;
 
@@ -10,30 +11,80 @@ namespace SG03.UI
     /// </summary>
     public class BattleState : SaiSingleton<BattleState>
     {
+
+        [Header("References")]
+        [SerializeField] private Card3DCtrl card3DCtrl;
+        
         [Header("Battle Status Cache — Read Only")]
         [SerializeField][TextArea(5, 20)] private string battleStatusJson;
-        [SerializeField] private int    alphaHp;
-        [SerializeField] private int    omegaHp;
-        [SerializeField] private int    alphaTheSourceCount;
-        [SerializeField] private int    omegaTheSourceCount;
-        [SerializeField] private int    alphaTheVoidCount;
-        [SerializeField] private int    omegaTheVoidCount;
+        [SerializeField] private int alphaHp;
+        [SerializeField] private int omegaHp;
+        [SerializeField] private int alphaTheSourceCount;
+        [SerializeField] private int omegaTheSourceCount;
+        [SerializeField] private int alphaTheVoidCount;
+        [SerializeField] private int omegaTheVoidCount;
         [SerializeField] private string[] alphaTheSource;
         [SerializeField] private BattleCardSlot[] alphaHand;
         [SerializeField] private BattleCardSlot[] alphaBackLine;
         [SerializeField] private BattleCardSlot[] alphaFrontLine;
 
-        public string   BattleStatusJson      => this.battleStatusJson;
-        public int      AlphaHp               => this.alphaHp;
-        public int      OmegaHp               => this.omegaHp;
-        public int      AlphaTheSourceCount   => this.alphaTheSourceCount;
-        public int      OmegaTheSourceCount   => this.omegaTheSourceCount;
-        public int      AlphaTheVoidCount     => this.alphaTheVoidCount;
-        public int      OmegaTheVoidCount     => this.omegaTheVoidCount;
-        public string[] AlphaTheSource        => this.alphaTheSource;
-        public BattleCardSlot[] AlphaHand      => this.alphaHand;
-        public BattleCardSlot[] AlphaBackLine  => this.alphaBackLine;
+        [SerializeField] private int alphaCardsDrawn;
+        [SerializeField] private int omegaCardsDrawn;
+        [SerializeField] private OmegaInitCardSlot[] omegaHand;
+        [SerializeField] private string sessionId;
+
+
+        public string BattleStatusJson => this.battleStatusJson;
+        public int AlphaHp => this.alphaHp;
+        public int OmegaHp => this.omegaHp;
+        public int AlphaTheSourceCount => this.alphaTheSourceCount;
+        public int OmegaTheSourceCount => this.omegaTheSourceCount;
+        public int AlphaTheVoidCount => this.alphaTheVoidCount;
+        public int OmegaTheVoidCount => this.omegaTheVoidCount;
+        public string[] AlphaTheSource => this.alphaTheSource;
+        public BattleCardSlot[] AlphaHand => this.alphaHand;
+        public BattleCardSlot[] AlphaBackLine => this.alphaBackLine;
         public BattleCardSlot[] AlphaFrontLine => this.alphaFrontLine;
+        public int AlphaCardsDrawn => this.alphaCardsDrawn;
+        public int OmegaCardsDrawn => this.omegaCardsDrawn;
+        public OmegaInitCardSlot[] OmegaHand => this.omegaHand;
+        public string SessionId => this.sessionId;
+        public Card3DCtrl Card3DCtrl => this.card3DCtrl;
+
+        public event Action OnBattleStatusChanged;
+
+        protected override void LoadComponents()
+        {
+            base.LoadComponents();
+            this.LoadCard3DCtrl();
+        }
+
+        protected virtual void LoadCard3DCtrl()
+        {
+            if (this.card3DCtrl != null) return;
+            this.card3DCtrl = this.GetComponentInChildren<Card3DCtrl>(true);
+            Debug.LogWarning(this.transform.name + "LoadCard3DCtrl", this.gameObject);
+        }
+
+        public void ClearData()
+        {
+            this.battleStatusJson = string.Empty;
+            this.alphaHp = 0;
+            this.omegaHp = 0;
+            this.alphaTheSourceCount = 0;
+            this.omegaTheSourceCount = 0;
+            this.alphaTheVoidCount = 0;
+            this.omegaTheVoidCount = 0;
+            this.alphaTheSource = null;
+            this.alphaHand = null;
+            this.alphaBackLine = null;
+            this.alphaFrontLine = null;
+            this.alphaCardsDrawn = 0;
+            this.omegaCardsDrawn = 0;
+            this.omegaHand = null;
+            this.sessionId = string.Empty;
+            this.OnBattleStatusChanged?.Invoke();
+        }
 
         /// <summary>
         /// Called by any script that receives a raw battle_status JSON response.
@@ -46,10 +97,20 @@ namespace SG03.UI
             this.ParseAndApplyBattleStatus(rawJson);
         }
 
+        /// <summary>
+        /// Called by any script that receives a raw init_cards JSON response.
+        /// Parses and caches all returned fields. Fields absent from the response are left unchanged.
+        /// </summary>
+        public void UpdateFromInitCards(string rawJson)
+        {
+            if (string.IsNullOrWhiteSpace(rawJson)) return;
+            this.ParseAndApplyInitCards(rawJson);
+        }
+
         private static string BeautifyJson(string json)
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            int  indent   = 0;
+            int indent = 0;
             bool inString = false;
 
             for (int i = 0; i < json.Length; i++)
@@ -110,16 +171,38 @@ namespace SG03.UI
 
         private void ApplyOutput(BattleStatusOutput output)
         {
-            this.alphaHp             = output.alpha_hp;
-            this.omegaHp             = output.omega_hp;
+            this.alphaHp = output.alpha_hp;
+            this.omegaHp = output.omega_hp;
             this.alphaTheSourceCount = output.alpha_the_source_count;
             this.omegaTheSourceCount = output.omega_the_source_count;
-            this.alphaTheVoidCount   = output.alpha_the_void_count;
-            this.omegaTheVoidCount   = output.omega_the_void_count;
-            this.alphaTheSource      = output.alpha_the_source;
-            this.alphaHand           = output.alpha_hand;
-            this.alphaBackLine       = output.alpha_back_line;
-            this.alphaFrontLine      = output.alpha_front_line;
+            this.alphaTheVoidCount = output.alpha_the_void_count;
+            this.omegaTheVoidCount = output.omega_the_void_count;
+            this.alphaTheSource = output.alpha_the_source;
+            this.alphaHand = output.alpha_hand;
+            this.alphaBackLine = output.alpha_back_line;
+            this.alphaFrontLine = output.alpha_front_line;
+            if (output.omega_hand != null) this.omegaHand = output.omega_hand;
+            this.OnBattleStatusChanged?.Invoke();
+        }
+
+        private void ParseAndApplyInitCards(string rawJson)
+        {
+            InitCardsScriptResponse response = JsonUtility.FromJson<InitCardsScriptResponse>(rawJson);
+            if (response == null) return;
+            if (response.output == null) return;
+            this.ApplyInitCardsOutput(response.output);
+        }
+
+        private void ApplyInitCardsOutput(InitCardsOutput output)
+        {
+            this.alphaCardsDrawn = output.alpha_cards_drawn;
+            this.omegaCardsDrawn = output.omega_cards_drawn;
+            this.alphaTheSourceCount = output.alpha_the_source_count;
+            this.omegaTheSourceCount = output.omega_the_source_count;
+            if (output.alpha_hand != null) this.alphaHand = output.alpha_hand;
+            if (output.omega_hand != null) this.omegaHand = output.omega_hand;
+            if (output.session_id != null) this.sessionId = output.session_id;
+            this.OnBattleStatusChanged?.Invoke();
         }
     }
 }

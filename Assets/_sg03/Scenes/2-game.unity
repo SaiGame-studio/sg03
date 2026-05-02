@@ -510,6 +510,17 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!114 &480811550 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5292617345916487666, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+  m_PrefabInstance: {fileID: 706587908}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db608e07204a27a448e2db9b3934afa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.BattleScript
 --- !u!1 &650371472
 GameObject:
   m_ObjectHideFlags: 0
@@ -961,6 +972,22 @@ RenderTexture:
   m_Dimension: 2
   m_VolumeDepth: 1
   m_ShadowSamplingMode: 2
+--- !u!114 &1789002520 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 724914520211398535, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+  m_PrefabInstance: {fileID: 8380321798757510902}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ae79fc8a26efbc4aa4a82d278ebe81d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.Card3DCtrl
+--- !u!4 &1789002523 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4973814592829607053, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+  m_PrefabInstance: {fileID: 8380321798757510902}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1875238347 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
@@ -1008,7 +1035,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1789002523}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2030001003
@@ -1049,7 +1077,7 @@ MonoBehaviour:
   panelAsset: {fileID: 9197481963319205126, guid: a715fe8f068e4b14ac9d7262278af840, type: 3}
   saiServer: {fileID: 706587910}
   itemPreset: {fileID: 1147895069}
-  battleScript: {fileID: 0}
+  battleScript: {fileID: 480811550}
   uiDocument: {fileID: 2030001003}
   selectedPreset:
     id: 
@@ -1090,7 +1118,14 @@ MonoBehaviour:
   alphaTheVoidCount: 0
   omegaTheVoidCount: 0
   alphaTheSource: []
-  omeraTheSource: []
+  alphaHand: []
+  alphaBackLine: []
+  alphaFrontLine: []
+  alphaCardsDrawn: 0
+  omegaCardsDrawn: 0
+  omegaHand: []
+  sessionId: 
+  card3DCtrl: {fileID: 1789002520}
 --- !u!1001 &659844538840790474
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1268,7 +1303,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 2030001002}
     m_Modifications:
     - target: {fileID: 792007169825556148, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -1292,15 +1327,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4973814592829607053, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4973814592829607053, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4973814592829607053, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4973814592829607053, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1355,5 +1390,4 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 706587908}
   - {fileID: 331941082}
-  - {fileID: 8380321798757510902}
   - {fileID: 2030001002}
