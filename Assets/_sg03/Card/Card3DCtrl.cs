@@ -103,7 +103,7 @@ namespace SG03
         /// </summary>
         public void SetFallbackDescription(string description) => this.card.SetFallbackDescription(description);
 
-        /// <summary>Smoothly moves the card to the specified world-space position.</summary>
-        public void MoveTo(Vector3 target) => this.movement.MoveTo(target);
+        /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
+        public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
     }
 }

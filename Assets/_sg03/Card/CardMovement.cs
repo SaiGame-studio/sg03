@@ -21,10 +21,13 @@ namespace SG03
 
         [Header("Animation")]
         [Tooltip("Duration of the move animation in seconds.")]
-        [SerializeField] private float duration = 0.5f;
+        [SerializeField] private float duration = 1f;
 
         [Tooltip("Ease curve applied to the move animation.")]
         [SerializeField] private Ease ease = Ease.OutQuad;
+
+        [Header("State")]
+        [SerializeField] private Location location;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -45,15 +48,20 @@ namespace SG03
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
+        public Location Location => this.location;
+
         /// <summary>
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position.
         /// Any in-progress tween is cancelled before starting the new one.
         /// </summary>
-        /// <param name="target">Destination position in world space.</param>
-        public void MoveTo(Vector3 target)
+        /// <param name="target">Destination transform in world space.</param>
+        /// <param name="destination">Location enum value for the destination.</param>
+        public void MoveTo(Transform target, Location destination)
         {
+            this.location = destination;
             this.transform.DOKill();
-            this.transform.DOMove(target, this.duration).SetEase(this.ease);
+            this.transform.DOMove(target.position, this.duration).SetEase(this.ease);
+            this.transform.DORotateQuaternion(target.rotation, this.duration).SetEase(this.ease);
         }
     }
 }

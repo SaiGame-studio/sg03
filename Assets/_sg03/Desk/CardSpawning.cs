@@ -24,6 +24,13 @@ namespace SG03
             this.spawnRoutine = this.StartCoroutine(this.SpawnGameStartRoutine());
         }
 
+        public void SpawnGameResume()
+        {
+            Debug.Log("<color=#00CFFF><b>[CardSpawning] SpawnGameResume — alpha: " + BattleState.Instance.AlphaTheSourceCount + ", omega: " + BattleState.Instance.OmegaTheSourceCount + "</b></color>");
+            if (this.spawnRoutine != null) this.StopCoroutine(this.spawnRoutine);
+            this.spawnRoutine = this.StartCoroutine(this.SpawnGameResumeRoutine());
+        }
+
         public void SpawnAlphaHand(BattleCardSlot[] slots)
         {
             this.SpawnSlots(slots, this.deskPosition.AlphaHand);
@@ -75,46 +82,111 @@ namespace SG03
         private void SubscribeEvents()
         {
             BattleState.OnGameStart += this.SpawnGameStart;
+            BattleState.OnGameResume += this.SpawnGameResume;
         }
 
         private void UnsubscribeEvents()
         {
             BattleState.OnGameStart -= this.SpawnGameStart;
+            BattleState.OnGameResume -= this.SpawnGameResume;
         }
 
-        // ─── Helpers ──────────────────────────────────────────────────────────────
+        private IEnumerator SpawnGameResumeRoutine()
+        {
+            Card3DCtrl prefab = this.ResolvePrefab();
+            if (prefab == null) yield break;
+            yield return this.SpawnAlphaSourceRoutine(prefab);
+            yield return this.SpawnOmegaSourceRoutine(prefab);
+            yield return this.SpawnOmegaHandRoutine(prefab);
+            yield return this.SpawnAlphaHandResumeRoutine(prefab);
+            this.spawnRoutine = null;
+        }
 
         private IEnumerator SpawnGameStartRoutine()
         {
-            if (this.cardPool == null) yield break;
-            Card3DCtrl prefab = this.cardPool.PoolPrefabs.GetByName(this.prefabName);
+            Card3DCtrl prefab = this.ResolvePrefab();
             if (prefab == null) yield break;
+            yield return this.SpawnAlphaSourceRoutine(prefab);
+            yield return this.SpawnOmegaSourceRoutine(prefab);
+            yield return this.SpawnOmegaHandRoutine(prefab);
+            this.spawnRoutine = null;
+        }
 
-            int alphaCount = BattleState.Instance.AlphaTheSourceCount;
-            int omegaCount = BattleState.Instance.OmegaTheSourceCount;
+        private Card3DCtrl ResolvePrefab()
+        {
+            if (this.cardPool == null) return null;
+            return this.cardPool.PoolPrefabs.GetByName(this.prefabName);
+        }
+
+        private IEnumerator SpawnAlphaSourceRoutine(Card3DCtrl prefab)
+        {
+            int count = BattleState.Instance.AlphaTheSourceCount;
             int spawnedThisFrame = 0;
-
-            for (int i = 0; i < alphaCount; i++)
+            for (int i = 0; i < count; i++)
             {
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
-                if (card != null) card.MoveTo(this.deskPosition.AlphaTheSource.position);
+                if (card != null) card.MoveTo(this.deskPosition.AlphaTheSource, Location.in_source);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
                 yield return null;
             }
+        }
 
-            for (int i = 0; i < omegaCount; i++)
+        private IEnumerator SpawnOmegaSourceRoutine(Card3DCtrl prefab)
+        {
+            int count = BattleState.Instance.OmegaTheSourceCount;
+            int spawnedThisFrame = 0;
+            for (int i = 0; i < count; i++)
             {
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
-                if (card != null) card.MoveTo(this.deskPosition.OmegaTheSource.position);
+                if (card != null) card.MoveTo(this.deskPosition.OmegaTheSource, Location.in_source);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
                 yield return null;
             }
+        }
 
-            this.spawnRoutine = null;
+        private IEnumerator SpawnOmegaHandRoutine(Card3DCtrl prefab)
+        {
+            int count = BattleState.Instance.OmegaHandCount;
+            int spawnedThisFrame = 0;
+            for (int i = 0; i < count; i++)
+            {
+                Transform target = this.deskPosition.GetOmegaHand(i);
+                if (target == null) target = this.deskPosition.OmegaSpawnPoint;
+                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+                if (card != null) card.MoveTo(target, Location.in_hand);
+                spawnedThisFrame++;
+                if (spawnedThisFrame < this.spawnPerFrame) continue;
+                spawnedThisFrame = 0;
+                yield return null;
+            }
+        }
+
+        private IEnumerator SpawnAlphaHandResumeRoutine(Card3DCtrl prefab)
+        {
+            BattleCardSlot[] handSlots = BattleState.Instance.AlphaHand;
+            if (handSlots == null) yield break;
+            int spawnedThisFrame = 0;
+            for (int i = 0; i < handSlots.Length; i++)
+            {
+                Transform target = i < this.deskPosition.AlphaHand.Length
+                    ? this.deskPosition.AlphaHand[i]
+                    : this.deskPosition.AlphaSpawnPoint;
+                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
+                if (card != null)
+                {
+                    card.SetFallbackName(handSlots[i].item_definition_name);
+                    card.LoadCardByCodeName(handSlots[i].item_definition_code_name);
+                    card.MoveTo(target, Location.in_hand);
+                }
+                spawnedThisFrame++;
+                if (spawnedThisFrame < this.spawnPerFrame) continue;
+                spawnedThisFrame = 0;
+                yield return null;
+            }
         }
 
         private Card3DCtrl SpawnCardAt(Card3DCtrl prefab, Transform spawnPoint)
@@ -136,6 +208,7 @@ namespace SG03
             {
                 Transform targetPos = i < positions.Length ? positions[i] : this.deskPosition.AlphaSpawnPoint;
                 Card3DCtrl card = this.cardPool.Spawn(prefab, targetPos.position);
+                card.transform.rotation = targetPos.rotation;
                 card.SetFallbackName(slots[i].item_definition_name);
                 card.LoadCardByCodeName(slots[i].item_definition_code_name);
                 card.gameObject.SetActive(true);

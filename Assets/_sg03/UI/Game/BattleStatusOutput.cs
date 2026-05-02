@@ -18,5 +18,6 @@ namespace SG03.UI
         public int                 alpha_the_void_count;
         public int                 omega_the_void_count;
         public OmegaInitCardSlot[] omega_hand;
+        public int                 omega_hand_count;
     }
 }

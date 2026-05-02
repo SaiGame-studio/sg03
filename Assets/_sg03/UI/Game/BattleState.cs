@@ -15,6 +15,11 @@ namespace SG03.UI
 
         [Header("References")]
         [SerializeField] private CardSpawning cardSpawning;
+        
+        [Header("Flags")]
+        private bool gameStartFired;
+        [SerializeField] private bool isResuming;
+        private bool skipAlphaHandOnce;
 
         [Header("Battle Status Cache — Read Only")]
         [SerializeField][TextArea(5, 20)] private string battleStatusJson;
@@ -34,9 +39,9 @@ namespace SG03.UI
         [SerializeField] private int alphaCardsDrawn;
         [SerializeField] private int omegaCardsDrawn;
         [SerializeField] private OmegaInitCardSlot[] omegaHand;
+        [SerializeField] private int omegaHandCount;
         [SerializeField] private string sessionId;
 
-        private bool gameStartFired;
 
         public string BattleStatusJson => this.battleStatusJson;
         public int Turn  => this.turn;
@@ -54,10 +59,14 @@ namespace SG03.UI
         public int AlphaCardsDrawn => this.alphaCardsDrawn;
         public int OmegaCardsDrawn => this.omegaCardsDrawn;
         public OmegaInitCardSlot[] OmegaHand => this.omegaHand;
+        public int OmegaHandCount => this.omegaHandCount;
         public string SessionId => this.sessionId;
+
+        public bool IsResuming => this.isResuming;
 
         public event Action OnBattleStatusChanged;
         public static event Action OnGameStart;
+        public static event Action OnGameResume;
 
         protected override void LoadComponents()
         {
@@ -90,8 +99,11 @@ namespace SG03.UI
             this.alphaCardsDrawn = 0;
             this.omegaCardsDrawn = 0;
             this.omegaHand = null;
+            this.omegaHandCount = 0;
             this.sessionId = string.Empty;
             this.gameStartFired = false;
+            this.isResuming = false;
+            this.skipAlphaHandOnce = false;
             this.OnBattleStatusChanged?.Invoke();
         }
 
@@ -193,8 +205,11 @@ namespace SG03.UI
             this.alphaBackLine = output.alpha_back_line;
             this.alphaFrontLine = output.alpha_front_line;
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
+            this.omegaHandCount = output.omega_hand_count;
             this.TryFireGameStart();
-            this.cardSpawning?.SpawnAlphaHand(this.alphaHand);
+            if (!this.skipAlphaHandOnce)
+                this.cardSpawning?.SpawnAlphaHand(this.alphaHand);
+            this.skipAlphaHandOnce = false;
             this.OnBattleStatusChanged?.Invoke();
         }
 
@@ -214,20 +229,29 @@ namespace SG03.UI
             this.omegaTheSourceCount = output.omega_the_source_count;
             if (output.alpha_hand != null) this.alphaHand = output.alpha_hand;
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
+            this.omegaHandCount = output.omega_hand_count;
             if (output.session_id != null) this.sessionId = output.session_id;
             this.TryFireGameStart();
-            this.cardSpawning?.SpawnAlphaHand(this.alphaHand);
+            if (!this.skipAlphaHandOnce)
+                this.cardSpawning?.SpawnAlphaHand(this.alphaHand);
+            this.skipAlphaHandOnce = false;
             this.OnBattleStatusChanged?.Invoke();
         }
 
         private void TryFireGameStart()
         {
             if (this.gameStartFired) return;
-            if (this.turn != 1) return;
-            if (this.action != 1) return;
             this.gameStartFired = true;
-            Debug.Log("<color=#00FF88><b>[BattleState] OnGameStart fired — turn=1, action=1</b></color>");
-            OnGameStart?.Invoke();
+            if (this.turn == 1 && this.action == 1)
+            {
+                Debug.Log("<color=#00FF88><b>[BattleState] OnGameStart fired — turn=1, action=1</b></color>");
+                OnGameStart?.Invoke();
+                return;
+            }
+            this.isResuming = true;
+            this.skipAlphaHandOnce = true;
+            Debug.Log($"<color=#00CFFF><b>[BattleState] OnGameResume fired — turn={this.turn}, action={this.action}</b></color>");
+            OnGameResume?.Invoke();
         }
     }
 }

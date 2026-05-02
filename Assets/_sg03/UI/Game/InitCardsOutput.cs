@@ -12,6 +12,7 @@ namespace SG03.UI
         public BattleCardSlot[]   alpha_hand;
         public int                omega_cards_drawn;
         public OmegaInitCardSlot[] omega_hand;
+        public int                omega_hand_count;
         public string             session_id;
         public int                alpha_the_source_count;
         public int                omega_the_source_count;
