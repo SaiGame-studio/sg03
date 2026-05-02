@@ -18,6 +18,8 @@ namespace SG03.UI
 
         [Header("Battle Status Cache — Read Only")]
         [SerializeField][TextArea(5, 20)] private string battleStatusJson;
+        [SerializeField] private int turn;
+        [SerializeField] private int action;
         [SerializeField] private int alphaHp;
         [SerializeField] private int omegaHp;
         [SerializeField] private int alphaTheSourceCount;
@@ -37,6 +39,8 @@ namespace SG03.UI
         private bool gameStartFired;
 
         public string BattleStatusJson => this.battleStatusJson;
+        public int Turn  => this.turn;
+        public int Action => this.action;
         public int AlphaHp => this.alphaHp;
         public int OmegaHp => this.omegaHp;
         public int AlphaTheSourceCount => this.alphaTheSourceCount;
@@ -71,6 +75,8 @@ namespace SG03.UI
         public void ClearData()
         {
             this.battleStatusJson = string.Empty;
+            this.turn = 0;
+            this.action = 0;
             this.alphaHp = 0;
             this.omegaHp = 0;
             this.alphaTheSourceCount = 0;
@@ -174,6 +180,8 @@ namespace SG03.UI
 
         private void ApplyOutput(BattleStatusOutput output)
         {
+            this.turn = output.turn;
+            this.action = output.action;
             this.alphaHp = output.alpha_hp;
             this.omegaHp = output.omega_hp;
             this.alphaTheSourceCount = output.alpha_the_source_count;
@@ -215,9 +223,10 @@ namespace SG03.UI
         private void TryFireGameStart()
         {
             if (this.gameStartFired) return;
-            if (this.alphaTheSourceCount < 25) return;
-            if (this.omegaTheSourceCount < 25) return;
+            if (this.turn != 1) return;
+            if (this.action != 1) return;
             this.gameStartFired = true;
+            Debug.Log("<color=#00FF88><b>[BattleState] OnGameStart fired — turn=1, action=1</b></color>");
             OnGameStart?.Invoke();
         }
     }

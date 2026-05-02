@@ -11,6 +11,7 @@ namespace SG03
     [AddComponentMenu("SG03/Card/Card 3D Ctrl")]
     [RequireComponent(typeof(Card3D))]
     [RequireComponent(typeof(CardLoader))]
+    [RequireComponent(typeof(CardMovement))]
     public class Card3DCtrl : PoolObj
     {
         // ─── Linked components ────────────────────────────────────────────────────
@@ -18,6 +19,7 @@ namespace SG03
         [Header("Linked Components")]
         [SerializeField] private Card3D card;
         [SerializeField] private CardLoader loader;
+        [SerializeField] private CardMovement movement;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -28,6 +30,7 @@ namespace SG03
             base.LoadComponents();
             this.LoadCard3D();
             this.LoadCardLoader();
+            this.LoadCardMovement();
         }
 
         protected virtual void LoadCard3D()
@@ -42,6 +45,18 @@ namespace SG03
             if (this.loader != null) return;
             this.loader = this.GetComponent<CardLoader>();
             Debug.LogWarning(transform.name + "LoadCardLoader", gameObject);
+        }
+
+        protected virtual void LoadCardMovement()
+        {
+            if (this.movement != null) return;
+            this.movement = this.GetComponent<CardMovement>();
+            Debug.LogWarning(transform.name + "LoadCardMovement", gameObject);
+        }
+
+        protected override void LoadDespawn()
+        {
+            //do nothing
         }
 
 
@@ -87,5 +102,8 @@ namespace SG03
         /// Pass <c>ItemDefinitionMetadata.description</c>.
         /// </summary>
         public void SetFallbackDescription(string description) => this.card.SetFallbackDescription(description);
+
+        /// <summary>Smoothly moves the card to the specified world-space position.</summary>
+        public void MoveTo(Vector3 target) => this.movement.MoveTo(target);
     }
 }

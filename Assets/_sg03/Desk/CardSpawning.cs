@@ -1,3 +1,4 @@
+using System.Collections;
 using SaiGame.Services;
 using SG03.UI;
 using UnityEngine;
@@ -10,13 +11,17 @@ namespace SG03
         [SerializeField] private CardPool cardPool;
         [SerializeField] private DeskPositionCtrl deskPosition;
         [SerializeField] private string prefabName = "Card3D";
+        [SerializeField] private int spawnPerFrame = 1;
+
+        private Coroutine spawnRoutine;
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
         public void SpawnGameStart()
         {
-            this.SpawnAtPoint(BattleState.Instance.AlphaCardsDrawn, this.deskPosition.AlphaSpawnPoint);
-            this.SpawnAtPoint(BattleState.Instance.OmegaCardsDrawn, this.deskPosition.OmegaSpawnPoint);
+            Debug.Log("<color=#FFD700><b>[CardSpawning] SpawnGameStart — alpha: " + BattleState.Instance.AlphaTheSourceCount + ", omega: " + BattleState.Instance.OmegaTheSourceCount + "</b></color>");
+            if (this.spawnRoutine != null) this.StopCoroutine(this.spawnRoutine);
+            this.spawnRoutine = this.StartCoroutine(this.SpawnGameStartRoutine());
         }
 
         public void SpawnAlphaHand(BattleCardSlot[] slots)
@@ -79,17 +84,43 @@ namespace SG03
 
         // ─── Helpers ──────────────────────────────────────────────────────────────
 
-        private void SpawnAtPoint(int count, Transform spawnPoint)
+        private IEnumerator SpawnGameStartRoutine()
         {
-            if (this.cardPool == null) return;
-            if (spawnPoint == null) return;
+            if (this.cardPool == null) yield break;
             Card3DCtrl prefab = this.cardPool.PoolPrefabs.GetByName(this.prefabName);
-            if (prefab == null) return;
-            for (int i = 0; i < count; i++)
+            if (prefab == null) yield break;
+
+            int alphaCount = BattleState.Instance.AlphaTheSourceCount;
+            int omegaCount = BattleState.Instance.OmegaTheSourceCount;
+            int spawnedThisFrame = 0;
+
+            for (int i = 0; i < alphaCount; i++)
             {
-                Card3DCtrl card = this.cardPool.Spawn(prefab, spawnPoint.position);
-                card.gameObject.SetActive(true);
+                this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
+                spawnedThisFrame++;
+                if (spawnedThisFrame < this.spawnPerFrame) continue;
+                spawnedThisFrame = 0;
+                yield return null;
             }
+
+            for (int i = 0; i < omegaCount; i++)
+            {
+                this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+                spawnedThisFrame++;
+                if (spawnedThisFrame < this.spawnPerFrame) continue;
+                spawnedThisFrame = 0;
+                yield return null;
+            }
+
+            this.spawnRoutine = null;
+        }
+
+        private void SpawnCardAt(Card3DCtrl prefab, Transform spawnPoint)
+        {
+            if (spawnPoint == null) return;
+            Card3DCtrl card = this.cardPool.Spawn(prefab, spawnPoint.position);
+            card.transform.rotation = spawnPoint.rotation;
+            card.gameObject.SetActive(true);
         }
 
         private void SpawnSlots(BattleCardSlot[] slots, Transform[] positions)

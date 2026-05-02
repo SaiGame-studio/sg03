@@ -124,7 +124,7 @@ namespace SG03
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            Debug.Log($"[OverUICameraSetup] Overlay canvas created. sortOrder={this.overlaySortOrder}");
+            // Debug.Log($"[OverUICameraSetup] Overlay canvas created. sortOrder={this.overlaySortOrder}");
         }
 
         private void EnsureRenderTexture()

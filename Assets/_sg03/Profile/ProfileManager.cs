@@ -57,7 +57,7 @@ namespace SG03
         private void OnGetProgressSuccess(GamerProgressData data)
         {
             this.ApplyToInspector(data);
-            Debug.Log($"[ProfileManager] Progress loaded — Level {data.level}, XP {data.experience}, Gold {data.gold}");
+            // Debug.Log($"[ProfileManager] Progress loaded — Level {data.level}, XP {data.experience}, Gold {data.gold}");
         }
 
         // Step 2b: no progress yet — create a new one.

@@ -5,6 +5,8 @@ namespace SG03.UI
     [Serializable]
     public class BattleStatusOutput
     {
+        public int    turn;
+        public int    action;
         public int    alpha_hp;
         public int    omega_hp;
         public string[] alpha_the_source;
