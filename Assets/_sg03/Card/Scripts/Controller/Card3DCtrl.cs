@@ -15,10 +15,11 @@ namespace SG03
     [RequireComponent(typeof(CardMovement))]
     public class Card3DCtrl : PoolObj
     {
-        // ─── Static hover events ──────────────────────────────────────────────────
+        // ─── Static card events ───────────────────────────────────────────────────
 
         public static event Action<Card3DCtrl> HoverEntered;
         public static event Action<Card3DCtrl> HoverExited;
+        public static event Action<Card3DCtrl> CardSelected;
 
         // ─── Linked components ────────────────────────────────────────────────────
 
@@ -32,7 +33,8 @@ namespace SG03
         public override string GetName() => this.name;
 
         public void NotifyHoverEntered() => HoverEntered?.Invoke(this);
-        public void NotifyHoverExited() => HoverExited?.Invoke(this);
+        public void NotifyHoverExited()  => HoverExited?.Invoke(this);
+        public void NotifySelected()     => CardSelected?.Invoke(this);
 
         protected override void LoadComponents()
         {
@@ -114,6 +116,12 @@ namespace SG03
 
         /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
         public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
+
+        /// <summary>Moves the card to the full-detail point without changing its logical location.</summary>
+        public void MoveToFullDetail(Transform point) => this.movement.MoveToFullDetail(point);
+
+        /// <summary>Returns the card from full-detail back to its selected position in hand.</summary>
+        public void ReturnFromFullDetail() => this.movement.ReturnFromFullDetail();
 
         /// <summary>Current logical location of this card.</summary>
         public Location Location => this.movement.Location;

@@ -10,6 +10,9 @@ namespace SG03
     {
         private const int LineSize = 5;
 
+        [Header("Full Detail")]
+        [SerializeField] private Transform fullDetailPoint;
+
         [Header("Alpha — Single Points")]
         [SerializeField] private Transform alphaTheSource;
         [SerializeField] private Transform alphaTheVoid;
@@ -43,6 +46,7 @@ namespace SG03
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
+        public Transform FullDetailPoint   => this.fullDetailPoint;
         public Transform AlphaTheSource   => this.alphaTheSource;
         public Transform AlphaTheVoid     => this.alphaTheVoid;
         public Transform OmegaTheSource   => this.omegaTheSource;
@@ -87,6 +91,7 @@ namespace SG03
         protected override void LoadComponents()
         {
             base.LoadComponents();
+            this.LoadFullDetailPoint();
             this.LoadAlphaTheSource();
             this.LoadAlphaTheVoid();
             this.LoadOmegaTheSource();
@@ -100,6 +105,13 @@ namespace SG03
             this.LoadOmegaFrontLine();
             this.LoadOmegaBackLine();
             this.LoadTestCards();
+        }
+
+        protected virtual void LoadFullDetailPoint()
+        {
+            if (this.fullDetailPoint != null) return;
+            this.fullDetailPoint = this.FindOrCreateChild("FullDetailPoint");
+            Debug.LogWarning(this.transform.name + ": LoadFullDetailPoint", this.gameObject);
         }
 
         protected virtual void LoadAlphaTheSource()

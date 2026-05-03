@@ -1,12 +1,32 @@
+using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace SG03
 {
-    public class CardSelection : MonoBehaviour
+    public class CardSelection : SaiBehaviour
     {
         [SerializeField] private Card3DCtrl selected;
         [SerializeField] private Card3DCtrl hovered;
+
+        [Header("Full Detail")]
+        [SerializeField] private DeskPositionCtrl deskPositions;
+        [SerializeField] private bool fullDetail;
+
+        // ─── SaiBehaviour overrides ───────────────────────────────────────────────
+
+        protected override void LoadComponents()
+        {
+            base.LoadComponents();
+            this.LoadDeskPositions();
+        }
+
+        protected virtual void LoadDeskPositions()
+        {
+            if (this.deskPositions != null) return;
+            this.deskPositions = Object.FindFirstObjectByType<DeskPositionCtrl>(FindObjectsInactive.Include);
+            Debug.LogWarning(this.transform.name + ": LoadDeskPositions", this.gameObject);
+        }
 
         // ─── Unity lifecycle ──────────────────────────────────────────────────────
 
@@ -19,7 +39,8 @@ namespace SG03
         private void CheckClick()
         {
             if (!this.IsMouseClickedThisFrame()) return;
-            this.SelectHovered();
+            if (CardMovement.IsAnyCardMoving) return;
+            this.HandleClick();
         }
 
         private bool IsMouseClickedThisFrame()
@@ -28,11 +49,46 @@ namespace SG03
             return Mouse.current.leftButton.wasPressedThisFrame;
         }
 
-        private void SelectHovered()
+        private void HandleClick()
         {
             if (this.hovered == null) return;
             if (this.IsLocationNonSelectable(this.hovered.Location)) return;
+            if (this.fullDetail)
+            {
+                this.ExitFullDetail();
+                return;
+            }
+            if (this.IsClickOnSelected())
+            {
+                this.EnterFullDetail();
+                return;
+            }
+            this.SelectHovered();
+        }
+
+        private bool IsClickOnSelected()
+        {
+            return this.hovered == this.selected && this.selected != null;
+        }
+
+        private void SelectHovered()
+        {
+            this.fullDetail = false;
             this.selected = this.hovered;
+            this.selected.NotifySelected();
+        }
+
+        private void EnterFullDetail()
+        {
+            if (this.deskPositions == null) return;
+            this.fullDetail = true;
+            this.selected.MoveToFullDetail(this.deskPositions.FullDetailPoint);
+        }
+
+        private void ExitFullDetail()
+        {
+            this.fullDetail = false;
+            this.selected.ReturnFromFullDetail();
         }
 
         private bool IsLocationNonSelectable(Location location)
