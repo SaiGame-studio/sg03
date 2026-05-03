@@ -234,6 +234,7 @@ namespace SG03
         {
             Card3DCtrl prefab = this.ResolvePrefab();
             if (prefab == null) yield break;
+            yield return this.WaitForDefinitions();
             yield return this.RunParallel(this.SpawnAlphaSourceRoutine(prefab), this.SpawnOmegaSourceRoutine(prefab));
             yield return this.RunParallel(this.SpawnAlphaHandResumeRoutine(prefab), this.SpawnOmegaHandRoutine(prefab));
             this.spawnRoutine = null;
@@ -322,8 +323,11 @@ namespace SG03
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
                 if (card != null)
                 {
+                    string code = handSlots[i].item_definition_code_name;
+                    card.SetCodeName(code);
                     card.SetFallbackName(handSlots[i].item_definition_name);
-                    card.LoadCardByCodeName(handSlots[i].item_definition_code_name);
+                    card.LoadCardByCodeName(code);
+                    card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
                     card.MoveAndRotate(target, Location.in_hand);
                 }
                 spawnedThisFrame++;
