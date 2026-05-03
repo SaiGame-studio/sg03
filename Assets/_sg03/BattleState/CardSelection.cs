@@ -42,10 +42,42 @@ namespace SG03
 
         private void CheckClick()
         {
-            if (!this.IsMouseClickedThisFrame()) return;
             if (CardMovement.IsAnyCardMoving) return;
+            if (this.fullDetail)
+            {
+                this.HandleFullDetailClick();
+                return;
+            }
+            this.HandleLeftClick();
+            this.HandleRightClick();
+        }
+
+        private void HandleFullDetailClick()
+        {
+            if (this.hovered != this.selected) return;
+            if (!this.IsMouseClickedThisFrame() && !this.IsMouseRightClickedThisFrame()) return;
+            this.ExitFullDetail();
+        }
+
+        private void HandleLeftClick()
+        {
+            if (!this.IsMouseClickedThisFrame()) return;
             this.HandleCardClick();
             this.HandleHolderClick();
+        }
+
+        private void HandleRightClick()
+        {
+            if (!this.IsMouseRightClickedThisFrame()) return;
+            this.SelectHoveredOnRightClick();
+            this.HandleSelectedToggleFace();
+        }
+
+        private void SelectHoveredOnRightClick()
+        {
+            if (this.hovered == null) return;
+            if (this.IsLocationNonSelectable(this.hovered.Location)) return;
+            this.SelectHovered();
         }
 
         private bool IsMouseClickedThisFrame()
@@ -54,15 +86,16 @@ namespace SG03
             return Mouse.current.leftButton.wasPressedThisFrame;
         }
 
+        private bool IsMouseRightClickedThisFrame()
+        {
+            if (Mouse.current == null) return false;
+            return Mouse.current.rightButton.wasPressedThisFrame;
+        }
+
         private void HandleCardClick()
         {
             if (this.hovered == null) return;
             if (this.IsLocationNonSelectable(this.hovered.Location)) return;
-            if (this.fullDetail)
-            {
-                this.ExitFullDetail();
-                return;
-            }
             if (this.IsClickOnSelected())
             {
                 this.EnterFullDetail();
@@ -92,6 +125,7 @@ namespace SG03
         private void EnterFullDetail()
         {
             if (this.deskPositions == null) return;
+            if (this.IsLocationFlippable(this.selected.Location)) return;
             this.fullDetail = true;
             this.selected.MoveToFullDetail(this.deskPositions.FullDetailPoint);
         }
@@ -105,6 +139,19 @@ namespace SG03
         private bool IsLocationNonSelectable(Location location)
         {
             return location == Location.in_source || location == Location.in_void;
+        }
+
+        private void HandleSelectedToggleFace()
+        {
+            if (this.selected == null) return;
+            if (!this.IsLocationFlippable(this.selected.Location)) return;
+            this.selected.ToggleFace();
+            this.selected = null;
+        }
+
+        private bool IsLocationFlippable(Location location)
+        {
+            return location == Location.in_front || location == Location.in_back;
         }
 
         // ─── Event subscription ───────────────────────────────────────────────────
@@ -155,7 +202,31 @@ namespace SG03
         {
             this.holderSelected = holder;
             if (this.selected == null) return;
-            this.selected.SetCardHolder(holder);
+            Card3DCtrl heldCard = holder.HeldCard;
+            if (heldCard == null)
+            {
+                this.PlaceSelectedIntoEmptyHolder(holder);
+                return;
+            }
+            if (heldCard == this.selected) return;
+            this.SwapCardsWithHolder(holder);
+        }
+
+        private void PlaceSelectedIntoEmptyHolder(CardHolderCtrl targetHolder)
+        {
+            this.selected.CardHolder?.SetCard(null);
+            this.selected.SetCardHolder(targetHolder);
+            targetHolder.SetCard(this.selected);
+        }
+
+        private void SwapCardsWithHolder(CardHolderCtrl targetHolder)
+        {
+            Card3DCtrl     otherCard  = targetHolder.HeldCard;
+            CardHolderCtrl prevHolder = this.selected.CardHolder;
+            this.selected.SetCardHolder(targetHolder);
+            targetHolder.SetCard(this.selected);
+            otherCard.SetCardHolder(prevHolder);
+            prevHolder?.SetCard(otherCard);
         }
     }
 }

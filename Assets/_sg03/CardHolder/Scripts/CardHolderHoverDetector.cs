@@ -63,8 +63,13 @@ namespace SG03
             if (Mouse.current == null) return null;
             Vector2 mousePos = Mouse.current.position.ReadValue();
             Ray ray = this.mainCamera.ScreenPointToRay(mousePos);
-            if (!Physics.Raycast(ray, out RaycastHit hit)) return null;
-            return hit.collider.GetComponent<CardHolderCtrl>();
+            RaycastHit[] hits = Physics.RaycastAll(ray);
+            foreach (RaycastHit hit in hits)
+            {
+                CardHolderCtrl holder = hit.collider.GetComponent<CardHolderCtrl>();
+                if (holder != null) return holder;
+            }
+            return null;
         }
     }
 }

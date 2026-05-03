@@ -20,6 +20,11 @@ namespace SG03
         [SerializeField] private Link  link;
         [SerializeField] private int   index;
 
+        // ─── Held card ────────────────────────────────────────────────────────────
+
+        [Header("State")]
+        [SerializeField] private Card3DCtrl heldCard;
+
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         protected override void ResetValue()
@@ -67,6 +72,10 @@ namespace SG03
         public Owner HolderOwner => this.owner;
         public Link  HolderLink  => this.link;
         public int   Index       => this.index;
+        public Card3DCtrl HeldCard => this.heldCard;
+
+        /// <summary>Links a card to this holder. Pass null to clear the slot.</summary>
+        public void SetCard(Card3DCtrl card) => this.heldCard = card;
     }
 }
 

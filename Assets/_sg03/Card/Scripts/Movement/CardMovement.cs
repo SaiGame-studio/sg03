@@ -97,6 +97,7 @@ namespace SG03
 
         private float handAnchorY;
         private bool  isSelected;
+        private bool  isFlipping;
         private Tween yTween;
         private Tween moveTween;
         private Sequence faceTween;
@@ -175,6 +176,7 @@ namespace SG03
         /// <summary>Smoothly rotates the card to face-up using global euler angles.</summary>
         public void FaceUp()
         {
+            if (this.isFlipping) return;
             this.faceState = FaceState.FaceUp;
             this.DoFaceFlip(this.faceUpRotation, this.flipAxisUpDown);
         }
@@ -182,6 +184,7 @@ namespace SG03
         /// <summary>Smoothly rotates the card to face-down using global euler angles.</summary>
         public void FaceDown()
         {
+            if (this.isFlipping) return;
             this.faceState = FaceState.FaceDown;
             this.DoFaceFlip(this.faceDownRotation, this.flipAxisUpDown);
         }
@@ -189,6 +192,7 @@ namespace SG03
         /// <summary>Rotates the card to face-up using the Unknown axis, without rising.</summary>
         public void FaceUpUnknown()
         {
+            if (this.isFlipping) return;
             this.faceState = FaceState.FaceUp;
             this.DoFaceFlipNoRise(this.faceUpRotation, this.flipAxisUnknown);
         }
@@ -196,8 +200,20 @@ namespace SG03
         /// <summary>Rotates the card to face-down using the Unknown axis, without rising.</summary>
         public void FaceDownUnknown()
         {
+            if (this.isFlipping) return;
             this.faceState = FaceState.FaceDown;
             this.DoFaceFlipNoRise(this.faceDownRotation, this.flipAxisUnknown);
+        }
+
+        /// <summary>Toggles between FaceUp and FaceDown. Defaults to FaceUp when Unknown.</summary>
+        public void ToggleFace()
+        {
+            if (this.faceState == FaceState.FaceUp)
+            {
+                this.FaceDown();
+                return;
+            }
+            this.FaceUp();
         }
 
         private void DoFaceFlipNoRise(Vector3 targetEulers, Vector3 axis)
@@ -205,11 +221,13 @@ namespace SG03
             float totalTime = this.flipDuration * 2f;
             float angle     = this.ComputeFlipAngle(targetEulers, axis);
 
+            this.isFlipping = true;
             this.faceTween?.Kill();
             this.faceTween = DOTween.Sequence();
             this.faceTween.Insert(0f,
                 this.transform.DORotate(axis.normalized * angle, totalTime, RotateMode.WorldAxisAdd)
                     .SetEase(this.flipEase));
+            this.faceTween.OnKill(() => this.isFlipping = false);
         }
 
         private void DoFaceFlip(Vector3 targetEulers, Vector3 axis)
@@ -219,8 +237,10 @@ namespace SG03
             float   totalTime = this.flipDuration * 2f;
             float   angle     = this.ComputeFlipAngle(targetEulers, axis);
 
+            this.isFlipping = true;
             this.faceTween?.Kill();
             this.faceTween = DOTween.Sequence();
+            this.faceTween.OnKill(() => this.isFlipping = false);
             // Rise
             this.faceTween.Append(
                 this.transform.DOMove(risen, this.flipDuration).SetEase(this.flipEase));

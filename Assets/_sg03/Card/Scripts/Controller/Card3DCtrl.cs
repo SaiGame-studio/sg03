@@ -122,11 +122,12 @@ namespace SG03
         /// <summary>Links a <see cref="CardHolderCtrl"/> to this card and moves the card to the holder's position.</summary>
         public void SetCardHolder(CardHolderCtrl holder)
         {
+            bool hadHolder = this.cardHolder != null;
             this.cardHolder = holder;
             if (this.cardHolder == null) return;
             Location destination = this.cardHolder.HolderLink == Link.front ? Location.in_front : Location.in_back;
             this.movement.MoveTo(this.cardHolder.transform, destination);
-            this.movement.FaceUpUnknown();
+            if (!hadHolder) this.movement.FaceUpUnknown();
         }
 
         /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
@@ -141,7 +142,13 @@ namespace SG03
         /// <summary>Returns the card from full-detail back to its selected position in hand.</summary>
         public void ReturnFromFullDetail() => this.movement.ReturnFromFullDetail();
 
+        /// <summary>Toggles the card between face-up and face-down.</summary>
+        public void ToggleFace() => this.movement.ToggleFace();
+
         /// <summary>Current logical location of this card.</summary>
         public Location Location => this.movement.Location;
+
+        /// <summary>The holder this card is currently assigned to, or null if none.</summary>
+        public CardHolderCtrl CardHolder => this.cardHolder;
     }
 }
