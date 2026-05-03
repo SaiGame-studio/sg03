@@ -68,6 +68,13 @@
 - Do **not** inherit from or depend on UI classes located under `Assets/SaiGame/UI/`.
 - If `_sg03` needs UI routing, panels, or helpers, create dedicated implementations under `Assets/_sg03/` using the `SG03.UI` namespace.
 
+## Single Responsibility — Method Level
+- Every method must do **exactly one thing**. If you can describe what it does using "and" or "then", split it.
+- If a method has two or more distinct loops, phases, or concerns, extract each into its own named method.
+- Coroutine coordinators must contain only `yield return` calls — no inline logic.
+- If two methods share identical logic, extract the shared part and reuse it (DRY).
+- See skill: `single-responsibility-method`.
+
 ## Evidence-Based Analysis
 - Every finding or conclusion **must** cite a code reference. Prefer method names. State explicitly if no reference exists.
 - See skill: `evidence-based-analysis`.

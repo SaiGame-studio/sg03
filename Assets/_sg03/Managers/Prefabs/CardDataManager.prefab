@@ -68,3 +68,7 @@ MonoBehaviour:
   - Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
   - Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
   - Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
+  - Assets/_sg03/Card/Data/Env/abyssal_mist.asset
+  - Assets/_sg03/Card/Data/Env/graveyard.asset
+  - Assets/_sg03/Card/Data/Env/gright_forest.asset
+  - Assets/_sg03/Card/Data/Env/iron_citadel.asset

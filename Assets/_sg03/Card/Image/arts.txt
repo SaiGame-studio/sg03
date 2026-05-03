@@ -22,7 +22,13 @@ holy_glow
 hãy vẽ 1 vị vua bận giáp vàng đang chiến đấu 1 cách mệt mỏi và được 1 nữ pháp sư light elf (ảnh 1) trị thương bằng gậy phép từ phía sau, vẽ theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution, POV từ phía trước của vị vua, chủ thể được đặt tại phần ba trên (Upper third) của khung hình, trong ảnh chỉ có nữ light efl và vị vua
 phép hồi phục cần phải trong mạnh mẽ hơn, phải như tia sáng từ thiên đường chiếu xuống vị vưa, những phép sư cũng cần phải trong dũng mãnh hơn khi thi triển phép
 
+global_graveyard
+hãy vẽ một cô gái đẹp bị lạc vào một khu nghĩa trang có nhiều bia mộ xung quanh, theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution,
 
-image size 1024x1434, 4k resolution
+Bright Forest
+hãy vẽ một khu rừng sáng có nhiều cây cối xanh tươi, đừng vẽ người chỉ vẽ cây cối, nhân vật chính là 1 chú nai đực oai vệ, theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution, chủ thể được đặt tại phần ba trên (Upper third) của khung hình
 
-ảnh này bị nhiều noise quá, hãy làm sạch để ảnh được rõ ràng hơn, phải giữ đúng image size 1024x1434, 4k resolution
+hãy vẽ một Iron Citadel tươi sáng, đừng vẽ người chỉ tòa thành cao, theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution, chủ thể được đặt tại phần ba trên (Upper third) của khung hình
+
+
+hãy vẽ một abyssal mist u ám, đừng vẽ người chỉ vẽ abyssal mist, theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution, chủ thể được đặt tại phần ba trên (Upper third) của khung hình

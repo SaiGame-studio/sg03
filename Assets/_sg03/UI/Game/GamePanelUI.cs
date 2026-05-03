@@ -25,6 +25,7 @@ namespace SG03.UI
         [SerializeField] private ItemPreset itemPreset;
         [SerializeField] private BattleScript battleScript;
         [SerializeField] private UIDocument uiDocument;
+        [SerializeField] private BattleState battleState;
 
         [Header("Selection")]
         [SerializeField] private PresetData selectedPreset;
@@ -67,6 +68,7 @@ namespace SG03.UI
             this.LoadUIDocument();
             this.LoadPanelSettings();
             this.LoadPanelAsset();
+            this.LoadBattleState();
         }
 
         private void LoadSaiServer()
@@ -134,6 +136,13 @@ namespace SG03.UI
             this.LoadPanelAssetReference();
             this.AssignPanelAssetToDocument();
 #endif
+        }
+
+        private void LoadBattleState()
+        {
+            if (this.battleState != null) return;
+            this.battleState = GameObject.FindAnyObjectByType<BattleState>();
+            Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
         }
 
 #if UNITY_EDITOR
@@ -277,22 +286,22 @@ namespace SG03.UI
         private void SubscribeToBattleStateEvents()
         {
             if (this.battleStateEventsSubscribed) return;
-            if (BattleState.Instance == null) return;
-            BattleState.Instance.OnBattleStatusChanged += this.RefreshBattleStatusUI;
+            if (this.battleState == null) return;
+            this.battleState.OnBattleStatusChanged += this.RefreshBattleStatusUI;
             this.battleStateEventsSubscribed = true;
         }
 
         private void UnsubscribeFromBattleStateEvents()
         {
             if (!this.battleStateEventsSubscribed) return;
-            if (BattleState.Instance == null) return;
-            BattleState.Instance.OnBattleStatusChanged -= this.RefreshBattleStatusUI;
+            if (this.battleState == null) return;
+            this.battleState.OnBattleStatusChanged -= this.RefreshBattleStatusUI;
             this.battleStateEventsSubscribed = false;
         }
 
         private void RefreshBattleStatusUI()
         {
-            BattleState state = BattleState.Instance;
+            BattleState state = this.battleState;
             if (state == null) return;
             this.SetBattleHp(state.AlphaHp, state.OmegaHp);
             this.SetBattleSourceCounts(state.AlphaTheSourceCount, state.OmegaTheSourceCount);
@@ -564,7 +573,7 @@ namespace SG03.UI
         {
             this.SetInitCardLoading(false);
             this.SetInitCardButtonText("Init OK");
-            BattleState.Instance.UpdateFromInitCards(response);
+            this.battleState?.UpdateFromInitCards(response);
         }
 
         private void OnInitCardFailed(string error)
@@ -623,7 +632,7 @@ namespace SG03.UI
         private void ApplyBattleStatusResponse(string response)
         {
             if (string.IsNullOrWhiteSpace(response)) return;
-            BattleState.Instance?.UpdateFromBattleStatus(response);
+            this.battleState?.UpdateFromBattleStatus(response);
         }
 
         private void SetBattleSourceCounts(int alphaCount, int omeraCount)
@@ -680,6 +689,7 @@ namespace SG03.UI
         {
             this.SetEndBattleLoading(false);
             this.SetEndBattleButtonText("Battle Ended");
+            this.battleState.ClearData();
         }
 
         private void OnBattleEndFailed(string error)

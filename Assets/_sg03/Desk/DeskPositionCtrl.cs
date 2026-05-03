@@ -10,30 +10,35 @@ namespace SG03
     {
         private const int LineSize = 5;
 
+        [Header("Full Detail")]
+        [SerializeField] private Transform fullDetailPoint;
+
         [Header("Alpha — Single Points")]
         [SerializeField] private Transform alphaTheSource;
         [SerializeField] private Transform alphaTheVoid;
+        [SerializeField] private Transform alphaSpawnPoint;
 
         [Header("Omega — Single Points")]
         [SerializeField] private Transform omegaTheSource;
         [SerializeField] private Transform omegaTheVoid;
+        [SerializeField] private Transform omegaSpawnPoint;
 
-        [Header("Alpha Hand (5)")]
+        [Header("Alpha Hand")]
         [SerializeField] private Transform[] alphaHand = new Transform[LineSize];
 
-        [Header("Omega Hand (5)")]
+        [Header("Omega Hand")]
         [SerializeField] private Transform[] omegaHand = new Transform[LineSize];
 
-        [Header("Alpha Front Line (5)")]
+        [Header("Alpha Front Line")]
         [SerializeField] private Transform[] alphaFrontLine = new Transform[LineSize];
 
-        [Header("Alpha Back Line (5)")]
+        [Header("Alpha Back Line")]
         [SerializeField] private Transform[] alphaBackLine = new Transform[LineSize];
 
-        [Header("Omega Front Line (5)")]
+        [Header("Omega Front Line")]
         [SerializeField] private Transform[] omegaFrontLine = new Transform[LineSize];
 
-        [Header("Omega Back Line (5)")]
+        [Header("Omega Back Line")]
         [SerializeField] private Transform[] omegaBackLine = new Transform[LineSize];
 
         [Header("Test Cards")]
@@ -41,10 +46,13 @@ namespace SG03
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
+        public Transform FullDetailPoint   => this.fullDetailPoint;
         public Transform AlphaTheSource   => this.alphaTheSource;
         public Transform AlphaTheVoid     => this.alphaTheVoid;
         public Transform OmegaTheSource   => this.omegaTheSource;
         public Transform OmegaTheVoid     => this.omegaTheVoid;
+        public Transform AlphaSpawnPoint  => this.alphaSpawnPoint;
+        public Transform OmegaSpawnPoint  => this.omegaSpawnPoint;
         public Transform[] AlphaHand      => this.alphaHand;
         public Transform[] OmegaHand      => this.omegaHand;
         public Transform[] AlphaFrontLine => this.alphaFrontLine;
@@ -59,6 +67,18 @@ namespace SG03
                 card.gameObject.SetActive(!card.gameObject.activeSelf);
         }
 
+        public void ShowTestCards()
+        {
+            foreach (Card3DCtrl card in this.testCards)
+                card.gameObject.SetActive(true);
+        }
+
+        public void HideTestCards()
+        {
+            foreach (Card3DCtrl card in this.testCards)
+                card.gameObject.SetActive(false);
+        }
+
         public Transform GetAlphaHand(int index)      => this.GetSlot(this.alphaHand, index);
         public Transform GetOmegaHand(int index)      => this.GetSlot(this.omegaHand, index);
         public Transform GetAlphaFrontLine(int index) => this.GetSlot(this.alphaFrontLine, index);
@@ -71,10 +91,13 @@ namespace SG03
         protected override void LoadComponents()
         {
             base.LoadComponents();
+            this.LoadFullDetailPoint();
             this.LoadAlphaTheSource();
             this.LoadAlphaTheVoid();
             this.LoadOmegaTheSource();
             this.LoadOmegaTheVoid();
+            this.LoadAlphaSpawnPoint();
+            this.LoadOmegaSpawnPoint();
             this.LoadAlphaHand();
             this.LoadOmegaHand();
             this.LoadAlphaFrontLine();
@@ -82,6 +105,13 @@ namespace SG03
             this.LoadOmegaFrontLine();
             this.LoadOmegaBackLine();
             this.LoadTestCards();
+        }
+
+        protected virtual void LoadFullDetailPoint()
+        {
+            if (this.fullDetailPoint != null) return;
+            this.fullDetailPoint = this.FindOrCreateChild("FullDetailPoint");
+            Debug.LogWarning(this.transform.name + ": LoadFullDetailPoint", this.gameObject);
         }
 
         protected virtual void LoadAlphaTheSource()
@@ -110,6 +140,20 @@ namespace SG03
             if (this.omegaTheVoid != null) return;
             this.omegaTheVoid = this.FindOrCreateChild("OmegaTheVoid");
             Debug.LogWarning(this.transform.name + ": LoadOmegaTheVoid", this.gameObject);
+        }
+
+        protected virtual void LoadAlphaSpawnPoint()
+        {
+            if (this.alphaSpawnPoint != null) return;
+            this.alphaSpawnPoint = this.FindOrCreateChild("AlphaSpawnPoint");
+            Debug.LogWarning(this.transform.name + ": LoadAlphaSpawnPoint", this.gameObject);
+        }
+
+        protected virtual void LoadOmegaSpawnPoint()
+        {
+            if (this.omegaSpawnPoint != null) return;
+            this.omegaSpawnPoint = this.FindOrCreateChild("OmegaSpawnPoint");
+            Debug.LogWarning(this.transform.name + ": LoadOmegaSpawnPoint", this.gameObject);
         }
 
         protected virtual void LoadAlphaHand()

@@ -986,13 +986,15 @@ GameObject:
   - component: {fileID: 1279015152172670498}
   - component: {fileID: 7980353759426569992}
   - component: {fileID: 724914520211398535}
+  - component: {fileID: 4719509819920680533}
+  - component: {fileID: 2260832097321709496}
   m_Layer: 0
   m_Name: Card3DPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4973814592829607053
 Transform:
   m_ObjectHideFlags: 0
@@ -1067,6 +1069,44 @@ MonoBehaviour:
   despawn: {fileID: 0}
   card: {fileID: 1279015152172670498}
   loader: {fileID: 7980353759426569992}
+  movement: {fileID: 4719509819920680533}
+--- !u!114 &4719509819920680533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8660204716586372184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4428d1f20ae25404bb5e73bf8c5d6d74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.CardMovement
+  ctrl: {fileID: 724914520211398535}
+  duration: 1
+  ease: 6
+  location: 0
+--- !u!65 &2260832097321709496
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8660204716586372184}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 7.5, y: 10.5, z: 0.3}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8850135446255561160
 GameObject:
   m_ObjectHideFlags: 0
