@@ -158,6 +158,8 @@ namespace SG03
         private void SwapSelectedWithHovered()
         {
             Card3DCtrl     otherCard    = this.hovered;
+            if (this.selected.IsFlipping) return;
+            if (otherCard.IsFlipping) return;
             CardHolderCtrl targetHolder = otherCard.CardHolder;
             CardHolderCtrl prevHolder   = this.selected.CardHolder;
             this.selected.SetCardHolder(targetHolder);
@@ -295,6 +297,7 @@ namespace SG03
 
         private void PlaceSelectedIntoEmptyHolder(CardHolderCtrl targetHolder)
         {
+            if (this.selected.IsFlipping) return;
             this.selected.CardHolder?.SetCard(null);
             this.selected.SetCardHolder(targetHolder);
             targetHolder.SetCard(this.selected);

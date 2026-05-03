@@ -146,7 +146,8 @@ namespace SG03
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
-        public Location Location => this.location;
+        public Location Location   => this.location;
+        public bool    IsFlipping  => this.isFlipping;
 
         /// <summary>
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position.
@@ -154,6 +155,7 @@ namespace SG03
         /// </summary>
         public void MoveAndRotate(Transform target, Location destination)
         {
+            if (this.isFlipping) return;
             this.location = destination;
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
@@ -167,6 +169,7 @@ namespace SG03
         /// </summary>
         public void MoveTo(Transform target, Location destination)
         {
+            if (this.isFlipping) return;
             this.location = destination;
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
@@ -268,6 +271,7 @@ namespace SG03
         /// </summary>
         public void MoveToFullDetail(Transform point)
         {
+            if (this.isFlipping) return;
             this.preFullDetailPosition = this.transform.position;
             this.preFullDetailRotation = this.transform.rotation;
             this.KillAllTweens();
@@ -280,6 +284,7 @@ namespace SG03
         /// </summary>
         public void ReturnFromFullDetail()
         {
+            if (this.isFlipping) return;
             this.KillAllTweens();
             this.StartMoveTween(this.preFullDetailPosition, this.fullDetailReturnDuration, this.fullDetailReturnEase);
             this.transform.DORotateQuaternion(this.preFullDetailRotation, this.fullDetailReturnDuration).SetEase(this.fullDetailReturnEase);

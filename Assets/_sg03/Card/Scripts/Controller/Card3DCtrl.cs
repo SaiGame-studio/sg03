@@ -129,6 +129,7 @@ namespace SG03
         /// <summary>Links a <see cref="CardHolderCtrl"/> to this card and moves the card to the holder's position.</summary>
         public void SetCardHolder(CardHolderCtrl holder)
         {
+            if (this.movement.IsFlipping) return;
             bool hadHolder = this.cardHolder != null;
             this.cardHolder = holder;
             if (this.cardHolder == null) return;
@@ -153,7 +154,8 @@ namespace SG03
         public void ToggleFace() => this.movement.ToggleFace();
 
         /// <summary>Current logical location of this card.</summary>
-        public Location Location => this.movement.Location;
+        public Location Location  => this.movement.Location;
+        public bool    IsFlipping => this.movement.IsFlipping;
 
         /// <summary>The holder this card is currently assigned to, or null if none.</summary>
         public CardHolderCtrl CardHolder => this.cardHolder;
