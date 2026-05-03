@@ -65,15 +65,35 @@ namespace SG03
         [Tooltip("Ease curve for returning from FullDetailPoint.")]
         [SerializeField] private Ease fullDetailReturnEase = Ease.InOutQuad;
 
+        // ─── Face Rotation ────────────────────────────────────────────────────────
+
+        [Header("Face Rotation")]
+        [Tooltip("Global euler angles when the card is face-up.")]
+        [SerializeField] private Vector3 faceUpRotation = new Vector3(90f, 0f, 0f);
+
+        [Tooltip("Global euler angles when the card is face-down.")]
+        [SerializeField] private Vector3 faceDownRotation = new Vector3(-90f, 0f, 0f);
+
+        [Tooltip("World units the card rises during the flip.")]
+        [SerializeField] private float flipRiseHeight = 5f;
+
+        [Tooltip("Duration of each flip phase (rise and return) in seconds.")]
+        [SerializeField] private float flipDuration = 0.4f;
+
+        [Tooltip("Ease curve for the flip rise and return.")]
+        [SerializeField] private Ease flipEase = Ease.InOutQuad;
+
         // ─── Runtime state ────────────────────────────────────────────────────────
 
         [Header("State")]
         [SerializeField] private Location location;
+        [SerializeField] private FaceState faceState = FaceState.Unknown;
 
         private float handAnchorY;
         private bool  isSelected;
         private Tween yTween;
         private Tween moveTween;
+        private Sequence faceTween;
         private Vector3    preFullDetailPosition;
         private Quaternion preFullDetailRotation;
 
@@ -144,6 +164,31 @@ namespace SG03
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
             this.StartMoveTween(target.position, this.duration, this.ease);
+        }
+
+        /// <summary>Smoothly rotates the card to face-up using global euler angles.</summary>
+        public void FaceUp()
+        {
+            this.faceState = FaceState.FaceUp;
+            this.DoFaceFlip(this.faceUpRotation);
+        }
+
+        /// <summary>Smoothly rotates the card to face-down using global euler angles.</summary>
+        public void FaceDown()
+        {
+            this.faceState = FaceState.FaceDown;
+            this.DoFaceFlip(this.faceDownRotation);
+        }
+
+        private void DoFaceFlip(Vector3 targetRotation)
+        {
+            Vector3 origin = this.transform.position;
+            Vector3 risen = origin + Vector3.up * this.flipRiseHeight;
+            this.faceTween?.Kill();
+            this.faceTween = DOTween.Sequence();
+            this.faceTween.Join(this.transform.DOMove(risen, this.flipDuration).SetEase(this.flipEase));
+            this.faceTween.Join(this.transform.DORotate(targetRotation, this.flipDuration).SetEase(this.flipEase));
+            this.faceTween.Append(this.transform.DOMove(origin, this.flipDuration).SetEase(this.flipEase));
         }
 
         /// <summary>
@@ -248,6 +293,8 @@ namespace SG03
             this.KillMoveTween();
             this.yTween?.Kill();
             this.yTween = null;
+            this.faceTween?.Kill();
+            this.faceTween = null;
             this.transform.DOKill();
         }
     }
