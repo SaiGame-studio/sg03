@@ -146,7 +146,7 @@ namespace SG03
                     card.SetFallbackName(hand[i].item_definition_name);
                     card.LoadCardByCodeName(hand[i].item_definition_code_name);
                 }
-                card.MoveTo(target, Location.in_hand);
+                card.MoveAndRotate(target, Location.in_hand);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -167,7 +167,7 @@ namespace SG03
                 Card3DCtrl card = sourceCards[i];
                 if (hand != null && i < hand.Length)
                     card.LoadCardByCodeName(hand[i].item_code_name);
-                card.MoveTo(target, Location.in_hand);
+                card.MoveAndRotate(target, Location.in_hand);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -232,7 +232,7 @@ namespace SG03
             for (int i = 0; i < count; i++)
             {
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
-                if (card != null) card.MoveTo(this.deskPosition.AlphaTheSource, Location.in_source);
+                if (card != null) card.MoveAndRotate(this.deskPosition.AlphaTheSource, Location.in_source);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -247,7 +247,7 @@ namespace SG03
             for (int i = 0; i < count; i++)
             {
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
-                if (card != null) card.MoveTo(this.deskPosition.OmegaTheSource, Location.in_source);
+                if (card != null) card.MoveAndRotate(this.deskPosition.OmegaTheSource, Location.in_source);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -264,7 +264,7 @@ namespace SG03
                 Transform target = this.deskPosition.GetOmegaHand(i);
                 if (target == null) target = this.deskPosition.OmegaSpawnPoint;
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
-                if (card != null) card.MoveTo(target, Location.in_hand);
+                if (card != null) card.MoveAndRotate(target, Location.in_hand);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -287,7 +287,7 @@ namespace SG03
                 {
                     card.SetFallbackName(handSlots[i].item_definition_name);
                     card.LoadCardByCodeName(handSlots[i].item_definition_code_name);
-                    card.MoveTo(target, Location.in_hand);
+                    card.MoveAndRotate(target, Location.in_hand);
                 }
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;

@@ -28,6 +28,11 @@ namespace SG03
         [SerializeField] private CardLoader loader;
         [SerializeField] private CardMovement movement;
 
+        // ─── Optional external references ─────────────────────────────────────────
+
+        [Header("Optional References")]
+        [SerializeField] private CardHolderCtrl cardHolder;
+
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         public override string GetName() => this.name;
@@ -114,7 +119,19 @@ namespace SG03
         /// </summary>
         public void SetFallbackDescription(string description) => this.card.SetFallbackDescription(description);
 
+        /// <summary>Links a <see cref="CardHolderCtrl"/> to this card and moves the card to the holder's position.</summary>
+        public void SetCardHolder(CardHolderCtrl holder)
+        {
+            this.cardHolder = holder;
+            if (this.cardHolder == null) return;
+            Location destination = this.cardHolder.HolderLink == Link.front ? Location.in_front : Location.in_back;
+            this.movement.MoveTo(this.cardHolder.transform, destination);
+        }
+
         /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
+        public void MoveAndRotate(Transform target, Location destination) => this.movement.MoveAndRotate(target, destination);
+
+        /// <summary>Smoothly moves the card to the specified transform, position only (no rotation change).</summary>
         public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
 
         /// <summary>Moves the card to the full-detail point without changing its logical location.</summary>

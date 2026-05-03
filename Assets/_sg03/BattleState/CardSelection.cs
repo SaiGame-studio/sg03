@@ -151,6 +151,11 @@ namespace SG03
             this.holderHover = null;
         }
 
-        private void OnHolderSelected(CardHolderCtrl holder) => this.holderSelected = holder;
+        private void OnHolderSelected(CardHolderCtrl holder)
+        {
+            this.holderSelected = holder;
+            if (this.selected == null) return;
+            this.selected.SetCardHolder(holder);
+        }
     }
 }

@@ -125,13 +125,25 @@ namespace SG03
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position.
         /// Any in-progress tween is cancelled before starting the new one.
         /// </summary>
-        public void MoveTo(Transform target, Location destination)
+        public void MoveAndRotate(Transform target, Location destination)
         {
             this.location = destination;
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
             this.StartMoveTween(target.position, this.duration, this.ease);
             this.transform.DORotateQuaternion(target.rotation, this.duration).SetEase(this.ease);
+        }
+
+        /// <summary>
+        /// Smoothly moves the card to the specified world-space <paramref name="target"/> position
+        /// without changing its rotation. Any in-progress tween is cancelled before starting the new one.
+        /// </summary>
+        public void MoveTo(Transform target, Location destination)
+        {
+            this.location = destination;
+            this.RecordHandAnchor(target, destination);
+            this.KillAllTweens();
+            this.StartMoveTween(target.position, this.duration, this.ease);
         }
 
         /// <summary>
