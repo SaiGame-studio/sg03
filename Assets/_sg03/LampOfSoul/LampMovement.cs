@@ -55,6 +55,14 @@ namespace SG03
             this.StartMoveTween(target.position);
         }
 
+        /// <summary>Moves the lamp based on turn parity: odd turn → Alpha, even turn → Omega.</summary>
+        public void InitPosition(int turn, Transform alphaLampPosition, Transform omegaLampPosition)
+        {
+            bool isOddTurn = turn % 2 != 0;
+            Transform target = isOddTurn ? alphaLampPosition : omegaLampPosition;
+            this.MoveTo(target);
+        }
+
         // ─── Private helpers ──────────────────────────────────────────────────────
 
         private void StartMoveTween(Vector3 destination)
