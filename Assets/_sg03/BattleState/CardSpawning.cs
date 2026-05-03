@@ -86,7 +86,9 @@ namespace SG03
         protected virtual void LoadBattleState()
         {
             if (this.battleState != null) return;
-            this.battleState = GameObject.FindAnyObjectByType<BattleState>();
+            BattleStateCtrl ctrl = this.GetComponent<BattleStateCtrl>();
+            if (ctrl == null) return;
+            this.battleState = ctrl.BattleState;
             Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
         }
 

@@ -24,8 +24,8 @@ namespace SG03.UI
         [SerializeField] private SaiServer saiServer;
         [SerializeField] private ItemPreset itemPreset;
         [SerializeField] private BattleScript battleScript;
+        [SerializeField] private BattleStateCtrl battleStateCtrl;
         [SerializeField] private UIDocument uiDocument;
-        [SerializeField] private BattleState battleState;
 
         [Header("Selection")]
         [SerializeField] private PresetData selectedPreset;
@@ -58,6 +58,7 @@ namespace SG03.UI
         private VisualElement root;
         private bool authEventsSubscribed;
         private bool battleStateEventsSubscribed;
+        private bool battleStatusFirstCallDone;
 
         protected override void LoadComponents()
         {
@@ -65,10 +66,10 @@ namespace SG03.UI
             this.LoadSaiServer();
             this.LoadItemPreset();
             this.LoadBattleScript();
+            this.LoadBattleStateCtrl();
             this.LoadUIDocument();
             this.LoadPanelSettings();
             this.LoadPanelAsset();
-            this.LoadBattleState();
         }
 
         private void LoadSaiServer()
@@ -101,6 +102,14 @@ namespace SG03.UI
             if (this.battleScript == serverBattleScript) return;
             this.battleScript = serverBattleScript;
             Debug.LogWarning(this.transform.name + ": LoadBattleScript", this.gameObject);
+        }
+
+        private void LoadBattleStateCtrl()
+        {
+            if (this.battleStateCtrl != null) return;
+            this.battleStateCtrl = GameObject.FindAnyObjectByType<BattleStateCtrl>();
+            if (this.battleStateCtrl == null) return;
+            Debug.LogWarning(this.transform.name + ": LoadBattleStateCtrl", this.gameObject);
         }
 
         private bool HasValidItemPresetReference()
@@ -138,13 +147,6 @@ namespace SG03.UI
 #endif
         }
 
-        private void LoadBattleState()
-        {
-            if (this.battleState != null) return;
-            this.battleState = GameObject.FindAnyObjectByType<BattleState>();
-            Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
-        }
-
 #if UNITY_EDITOR
         private void LoadPanelAssetReference()
         {
@@ -176,6 +178,7 @@ namespace SG03.UI
             this.EnsureSaiServerReference();
             this.EnsureItemPresetReference();
             this.EnsureBattleScriptReference();
+            this.EnsureBattleStateCtrlReference();
             this.SubscribeToAuthEvents();
         }
 
@@ -206,6 +209,12 @@ namespace SG03.UI
             if (serverBattleScript == null) return;
             if (this.battleScript == serverBattleScript) return;
             this.battleScript = serverBattleScript;
+        }
+
+        private void EnsureBattleStateCtrlReference()
+        {
+            if (this.battleStateCtrl != null) return;
+            this.battleStateCtrl = GameObject.FindAnyObjectByType<BattleStateCtrl>();
         }
 
         private void InitializeStandalonePanel()
@@ -286,22 +295,22 @@ namespace SG03.UI
         private void SubscribeToBattleStateEvents()
         {
             if (this.battleStateEventsSubscribed) return;
-            if (this.battleState == null) return;
-            this.battleState.OnBattleStatusChanged += this.RefreshBattleStatusUI;
+            if (this.battleStateCtrl?.BattleState == null) return;
+            this.battleStateCtrl.BattleState.OnBattleStatusChanged += this.RefreshBattleStatusUI;
             this.battleStateEventsSubscribed = true;
         }
 
         private void UnsubscribeFromBattleStateEvents()
         {
             if (!this.battleStateEventsSubscribed) return;
-            if (this.battleState == null) return;
-            this.battleState.OnBattleStatusChanged -= this.RefreshBattleStatusUI;
+            if (this.battleStateCtrl?.BattleState == null) return;
+            this.battleStateCtrl.BattleState.OnBattleStatusChanged -= this.RefreshBattleStatusUI;
             this.battleStateEventsSubscribed = false;
         }
 
         private void RefreshBattleStatusUI()
         {
-            BattleState state = this.battleState;
+            BattleState state = this.battleStateCtrl?.BattleState;
             if (state == null) return;
             this.SetBattleHp(state.AlphaHp, state.OmegaHp);
             this.SetBattleSourceCounts(state.AlphaTheSourceCount, state.OmegaTheSourceCount);
@@ -573,7 +582,7 @@ namespace SG03.UI
         {
             this.SetInitCardLoading(false);
             this.SetInitCardButtonText("Init OK");
-            this.battleState?.UpdateFromInitCards(response);
+            this.battleStateCtrl?.BattleState?.UpdateFromInitCards(response);
         }
 
         private void OnInitCardFailed(string error)
@@ -587,12 +596,20 @@ namespace SG03.UI
         {
             this.EnsureServiceReferences();
             if (!this.CanCheckBattleStatus()) return;
+            this.TriggerGetAllCardDefinitionsOnFirstBattleStatus();
             this.SetCheckStatusLoading(true);
             this.battleScript.RunScript(
                 BattleStatusScriptName,
                 null,
                 this.OnBattleStatusSucceeded,
                 this.OnBattleStatusFailed);
+        }
+
+        private void TriggerGetAllCardDefinitionsOnFirstBattleStatus()
+        {
+            if (this.battleStatusFirstCallDone) return;
+            this.battleStatusFirstCallDone = true;
+            this.GetAllCardDefinitions();
         }
 
         private bool CanCheckBattleStatus()
@@ -632,7 +649,7 @@ namespace SG03.UI
         private void ApplyBattleStatusResponse(string response)
         {
             if (string.IsNullOrWhiteSpace(response)) return;
-            this.battleState?.UpdateFromBattleStatus(response);
+            this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
         }
 
         private void SetBattleSourceCounts(int alphaCount, int omeraCount)
@@ -689,7 +706,7 @@ namespace SG03.UI
         {
             this.SetEndBattleLoading(false);
             this.SetEndBattleButtonText("Battle Ended");
-            this.battleState.ClearData();
+            this.battleStateCtrl?.BattleState?.ClearData();
         }
 
         private void OnBattleEndFailed(string error)
@@ -778,6 +795,7 @@ namespace SG03.UI
         {
             this.SetStartBattleLoading(false);
             this.SetStartBattleButtonText("Battle Started");
+            this.GetAllCardDefinitions();
         }
 
         private void OnBattleStartFailed(string error)
@@ -785,6 +803,12 @@ namespace SG03.UI
             this.SetStartBattleLoading(false);
             this.SetStartBattleButtonText("Battle Failed");
             Debug.LogWarning(this.transform.name + ": Battle start failed: " + error, this.gameObject);
+        }
+
+        private void GetAllCardDefinitions()
+        {
+            if (this.battleStateCtrl?.BattleCardDefinitions == null) return;
+            this.battleStateCtrl.BattleCardDefinitions.GetAll();
         }
 
         protected virtual void OnBackToLobbyClicked()

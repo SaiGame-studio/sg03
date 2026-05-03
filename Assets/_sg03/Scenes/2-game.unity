@@ -7540,6 +7540,8 @@ GameObject:
   - component: {fileID: 2015755440}
   - component: {fileID: 2015755441}
   - component: {fileID: 2015755442}
+  - component: {fileID: 2015755443}
+  - component: {fileID: 2015755444}
   m_Layer: 0
   m_Name: BattleState
   m_TagString: Untagged
@@ -7660,6 +7662,41 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardHolderHoverDetector
   mainCamera: {fileID: 330585545}
+--- !u!114 &2015755443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2015755436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af523903f48ecbe418fb62848b9c8750, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.BattleCardDefinitions
+  scriptName: get_card_definitions
+  requestBody: "{\n    \"payload\": {\n\n    }\n}"
+  jsonResponse: 
+  codes: []
+  definitions: []
+--- !u!114 &2015755444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2015755436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 048b08ebad862a94c82eb806bf1fac98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.BattleStateCtrl
+  battleState: {fileID: 2015755439}
+  cardSpawning: {fileID: 2015755438}
+  cardSelection: {fileID: 2015755440}
+  cardHoverDetector: {fileID: 2015755441}
+  cardHolderHoverDetector: {fileID: 2015755442}
+  battleCardDefinitions: {fileID: 2015755443}
 --- !u!1 &2028831695
 GameObject:
   m_ObjectHideFlags: 0
@@ -7782,8 +7819,8 @@ MonoBehaviour:
   saiServer: {fileID: 706587910}
   itemPreset: {fileID: 1147895069}
   battleScript: {fileID: 480811550}
+  battleStateCtrl: {fileID: 2015755444}
   uiDocument: {fileID: 2030001003}
-  battleState: {fileID: 2015755439}
   selectedPreset:
     id: 
     definition_id: 
