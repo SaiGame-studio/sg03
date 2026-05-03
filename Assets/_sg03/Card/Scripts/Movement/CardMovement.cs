@@ -68,19 +68,25 @@ namespace SG03
         // ─── Face Rotation ────────────────────────────────────────────────────────
 
         [Header("Face Rotation")]
-        [Tooltip("Global euler angles when the card is face-up.")]
+        [Tooltip("World-space euler angles when the card is face-up.")]
         [SerializeField] private Vector3 faceUpRotation = new Vector3(90f, 0f, 0f);
 
-        [Tooltip("Global euler angles when the card is face-down.")]
+        [Tooltip("World-space euler angles when the card is face-down.")]
         [SerializeField] private Vector3 faceDownRotation = new Vector3(-90f, 0f, 0f);
+
+        [Tooltip("World-space axis used when FaceState is Unknown (first-time flip).")]
+        [SerializeField] private Vector3 flipAxisUnknown = new Vector3(1f, 0f, 0f);
+
+        [Tooltip("World-space axis used when flipping between FaceUp and FaceDown.")]
+        [SerializeField] private Vector3 flipAxisUpDown = new Vector3(0f, 0f, 1f);
 
         [Tooltip("World units the card rises during the flip.")]
         [SerializeField] private float flipRiseHeight = 5f;
 
-        [Tooltip("Duration of each flip phase (rise and return) in seconds.")]
+        [Tooltip("Duration of each flip phase in seconds.")]
         [SerializeField] private float flipDuration = 0.4f;
 
-        [Tooltip("Ease curve for the flip rise and return.")]
+        [Tooltip("Ease curve for the flip.")]
         [SerializeField] private Ease flipEase = Ease.InOutQuad;
 
         // ─── Runtime state ────────────────────────────────────────────────────────
@@ -170,25 +176,70 @@ namespace SG03
         public void FaceUp()
         {
             this.faceState = FaceState.FaceUp;
-            this.DoFaceFlip(this.faceUpRotation);
+            this.DoFaceFlip(this.faceUpRotation, this.flipAxisUpDown);
         }
 
         /// <summary>Smoothly rotates the card to face-down using global euler angles.</summary>
         public void FaceDown()
         {
             this.faceState = FaceState.FaceDown;
-            this.DoFaceFlip(this.faceDownRotation);
+            this.DoFaceFlip(this.faceDownRotation, this.flipAxisUpDown);
         }
 
-        private void DoFaceFlip(Vector3 targetRotation)
+        /// <summary>Rotates the card to face-up using the Unknown axis, without rising.</summary>
+        public void FaceUpUnknown()
         {
-            Vector3 origin = this.transform.position;
-            Vector3 risen = origin + Vector3.up * this.flipRiseHeight;
+            this.faceState = FaceState.FaceUp;
+            this.DoFaceFlipNoRise(this.faceUpRotation, this.flipAxisUnknown);
+        }
+
+        /// <summary>Rotates the card to face-down using the Unknown axis, without rising.</summary>
+        public void FaceDownUnknown()
+        {
+            this.faceState = FaceState.FaceDown;
+            this.DoFaceFlipNoRise(this.faceDownRotation, this.flipAxisUnknown);
+        }
+
+        private void DoFaceFlipNoRise(Vector3 targetEulers, Vector3 axis)
+        {
+            float totalTime = this.flipDuration * 2f;
+            float angle     = this.ComputeFlipAngle(targetEulers, axis);
+
             this.faceTween?.Kill();
             this.faceTween = DOTween.Sequence();
-            this.faceTween.Join(this.transform.DOMove(risen, this.flipDuration).SetEase(this.flipEase));
-            this.faceTween.Join(this.transform.DORotate(targetRotation, this.flipDuration).SetEase(this.flipEase));
-            this.faceTween.Append(this.transform.DOMove(origin, this.flipDuration).SetEase(this.flipEase));
+            this.faceTween.Insert(0f,
+                this.transform.DORotate(axis.normalized * angle, totalTime, RotateMode.WorldAxisAdd)
+                    .SetEase(this.flipEase));
+        }
+
+        private void DoFaceFlip(Vector3 targetEulers, Vector3 axis)
+        {
+            Vector3 origin    = this.transform.position;
+            Vector3 risen     = origin + Vector3.up * this.flipRiseHeight;
+            float   totalTime = this.flipDuration * 2f;
+            float   angle     = this.ComputeFlipAngle(targetEulers, axis);
+
+            this.faceTween?.Kill();
+            this.faceTween = DOTween.Sequence();
+            // Rise
+            this.faceTween.Append(
+                this.transform.DOMove(risen, this.flipDuration).SetEase(this.flipEase));
+            // Rotate around the selected axis to reach target orientation (starts simultaneously with rise)
+            this.faceTween.Insert(0f,
+                this.transform.DORotate(axis.normalized * angle, totalTime, RotateMode.WorldAxisAdd)
+                    .SetEase(this.flipEase));
+            // Descend back to origin
+            this.faceTween.Append(
+                this.transform.DOMove(origin, this.flipDuration).SetEase(this.flipEase));
+        }
+
+        private float ComputeFlipAngle(Vector3 targetEulers, Vector3 axis)
+        {
+            Quaternion from  = this.transform.rotation;
+            Quaternion to    = Quaternion.Euler(targetEulers);
+            Quaternion delta = to * Quaternion.Inverse(from);
+            delta.ToAngleAxis(out float angle, out Vector3 rotAxis);
+            return angle * Mathf.Sign(Vector3.Dot(rotAxis, axis.normalized));
         }
 
         /// <summary>

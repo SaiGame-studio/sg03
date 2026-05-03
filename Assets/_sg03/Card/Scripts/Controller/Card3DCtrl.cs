@@ -126,6 +126,7 @@ namespace SG03
             if (this.cardHolder == null) return;
             Location destination = this.cardHolder.HolderLink == Link.front ? Location.in_front : Location.in_back;
             this.movement.MoveTo(this.cardHolder.transform, destination);
+            this.movement.FaceUpUnknown();
         }
 
         /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
