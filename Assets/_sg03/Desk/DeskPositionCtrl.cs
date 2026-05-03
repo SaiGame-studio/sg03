@@ -23,6 +23,10 @@ namespace SG03
         [SerializeField] private Transform omegaTheVoid;
         [SerializeField] private Transform omegaSpawnPoint;
 
+        [Header("Lamp Positions")]
+        [SerializeField] private Transform alphaLampPosition;
+        [SerializeField] private Transform omegaLampPosition;
+
         [Header("Alpha Hand")]
         [SerializeField] private Transform[] alphaHand = new Transform[LineSize];
 
@@ -51,8 +55,10 @@ namespace SG03
         public Transform AlphaTheVoid     => this.alphaTheVoid;
         public Transform OmegaTheSource   => this.omegaTheSource;
         public Transform OmegaTheVoid     => this.omegaTheVoid;
-        public Transform AlphaSpawnPoint  => this.alphaSpawnPoint;
-        public Transform OmegaSpawnPoint  => this.omegaSpawnPoint;
+        public Transform AlphaSpawnPoint    => this.alphaSpawnPoint;
+        public Transform OmegaSpawnPoint    => this.omegaSpawnPoint;
+        public Transform AlphaLampPosition  => this.alphaLampPosition;
+        public Transform OmegaLampPosition  => this.omegaLampPosition;
         public Transform[] AlphaHand      => this.alphaHand;
         public Transform[] OmegaHand      => this.omegaHand;
         public Transform[] AlphaFrontLine => this.alphaFrontLine;
@@ -98,6 +104,8 @@ namespace SG03
             this.LoadOmegaTheVoid();
             this.LoadAlphaSpawnPoint();
             this.LoadOmegaSpawnPoint();
+            this.LoadAlphaLampPosition();
+            this.LoadOmegaLampPosition();
             this.LoadAlphaHand();
             this.LoadOmegaHand();
             this.LoadAlphaFrontLine();
@@ -154,6 +162,20 @@ namespace SG03
             if (this.omegaSpawnPoint != null) return;
             this.omegaSpawnPoint = this.FindOrCreateChild("OmegaSpawnPoint");
             Debug.LogWarning(this.transform.name + ": LoadOmegaSpawnPoint", this.gameObject);
+        }
+
+        protected virtual void LoadAlphaLampPosition()
+        {
+            if (this.alphaLampPosition != null) return;
+            this.alphaLampPosition = this.FindOrCreateChild("AlphaLampPosition");
+            Debug.LogWarning(this.transform.name + ": LoadAlphaLampPosition", this.gameObject);
+        }
+
+        protected virtual void LoadOmegaLampPosition()
+        {
+            if (this.omegaLampPosition != null) return;
+            this.omegaLampPosition = this.FindOrCreateChild("OmegaLampPosition");
+            Debug.LogWarning(this.transform.name + ": LoadOmegaLampPosition", this.gameObject);
         }
 
         protected virtual void LoadAlphaHand()

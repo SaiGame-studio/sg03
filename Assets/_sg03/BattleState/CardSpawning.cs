@@ -170,7 +170,6 @@ namespace SG03
                 if (hand != null && i < hand.Length)
                 {
                     string code = hand[i].item_definition_code_name;
-                    Debug.Log($"<color=#00BFFF>[CardSpawning] Alpha hand[{i}] code=<b>{code}</b> name={hand[i].item_definition_name}</color>");
                     card.SetCodeName(code);
                     card.SetFallbackName(hand[i].item_definition_name);
                     card.LoadCardByCodeName(code);
