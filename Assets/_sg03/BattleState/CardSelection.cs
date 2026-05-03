@@ -233,7 +233,6 @@ namespace SG03
             if (this.hovered != this.selected) return;
             if (!this.IsLocationFlippable(this.selected.Location)) return;
             this.selected.ToggleFace();
-            this.selected = null;
         }
 
         private bool IsLocationFlippable(Location location)
