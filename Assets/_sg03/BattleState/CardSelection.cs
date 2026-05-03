@@ -9,6 +9,10 @@ namespace SG03
         [SerializeField] private Card3DCtrl selected;
         [SerializeField] private Card3DCtrl hovered;
 
+        [Header("Holders")]
+        [SerializeField] private CardHolderCtrl holderSelected;
+        [SerializeField] private CardHolderCtrl holderHover;
+
         [Header("Full Detail")]
         [SerializeField] private DeskPositionCtrl deskPositions;
         [SerializeField] private bool fullDetail;
@@ -40,7 +44,8 @@ namespace SG03
         {
             if (!this.IsMouseClickedThisFrame()) return;
             if (CardMovement.IsAnyCardMoving) return;
-            this.HandleClick();
+            this.HandleCardClick();
+            this.HandleHolderClick();
         }
 
         private bool IsMouseClickedThisFrame()
@@ -49,7 +54,7 @@ namespace SG03
             return Mouse.current.leftButton.wasPressedThisFrame;
         }
 
-        private void HandleClick()
+        private void HandleCardClick()
         {
             if (this.hovered == null) return;
             if (this.IsLocationNonSelectable(this.hovered.Location)) return;
@@ -64,6 +69,12 @@ namespace SG03
                 return;
             }
             this.SelectHovered();
+        }
+
+        private void HandleHolderClick()
+        {
+            if (this.holderHover == null) return;
+            this.holderHover.NotifySelected();
         }
 
         private bool IsClickOnSelected()
@@ -100,17 +111,23 @@ namespace SG03
 
         private void Subscribe()
         {
-            Card3DCtrl.HoverEntered += this.OnCardHoverEntered;
-            Card3DCtrl.HoverExited += this.OnCardHoverExited;
+            Card3DCtrl.HoverEntered    += this.OnCardHoverEntered;
+            Card3DCtrl.HoverExited     += this.OnCardHoverExited;
+            CardHolderCtrl.HoverEntered  += this.OnHolderHoverEntered;
+            CardHolderCtrl.HoverExited   += this.OnHolderHoverExited;
+            CardHolderCtrl.HolderSelected += this.OnHolderSelected;
         }
 
         private void Unsubscribe()
         {
-            Card3DCtrl.HoverEntered -= this.OnCardHoverEntered;
-            Card3DCtrl.HoverExited -= this.OnCardHoverExited;
+            Card3DCtrl.HoverEntered    -= this.OnCardHoverEntered;
+            Card3DCtrl.HoverExited     -= this.OnCardHoverExited;
+            CardHolderCtrl.HoverEntered  -= this.OnHolderHoverEntered;
+            CardHolderCtrl.HoverExited   -= this.OnHolderHoverExited;
+            CardHolderCtrl.HolderSelected -= this.OnHolderSelected;
         }
 
-        // ─── Hover handlers ───────────────────────────────────────────────────────
+        // ─── Card hover handlers ──────────────────────────────────────────────────
 
         private void OnCardHoverEntered(Card3DCtrl card) => this.hovered = card;
 
@@ -121,5 +138,19 @@ namespace SG03
             if (this.hovered != card) return;
             this.hovered = null;
         }
+
+        // ─── Holder hover/select handlers ────────────────────────────────────────
+
+        private void OnHolderHoverEntered(CardHolderCtrl holder) => this.holderHover = holder;
+
+        private void OnHolderHoverExited(CardHolderCtrl holder) => this.ClearHolderHoverIfMatch(holder);
+
+        private void ClearHolderHoverIfMatch(CardHolderCtrl holder)
+        {
+            if (this.holderHover != holder) return;
+            this.holderHover = null;
+        }
+
+        private void OnHolderSelected(CardHolderCtrl holder) => this.holderSelected = holder;
     }
 }
