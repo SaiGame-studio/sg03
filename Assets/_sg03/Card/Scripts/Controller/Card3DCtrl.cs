@@ -28,6 +28,12 @@ namespace SG03
         [SerializeField] private CardLoader loader;
         [SerializeField] private CardMovement movement;
 
+        // ─── Identity ─────────────────────────────────────────────────────────────
+
+        [Header("Identity")]
+        [SerializeField] private CardType cardType;
+        [SerializeField] private Owner    cardOwner;
+
         // ─── Optional external references ─────────────────────────────────────────
 
         [Header("Optional References")]
@@ -150,5 +156,14 @@ namespace SG03
 
         /// <summary>The holder this card is currently assigned to, or null if none.</summary>
         public CardHolderCtrl CardHolder => this.cardHolder;
+
+        /// <summary>The type of this card (character or support).</summary>
+        public CardType CardType => this.cardType;
+
+        /// <summary>The owner (alpha or omega) of this card.</summary>
+        public Owner CardOwner => this.cardOwner;
+
+        /// <summary>Returns true if this card's type is character.</summary>
+        public bool IsCharacter() => this.cardType == CardType.character;
     }
 }

@@ -150,6 +150,7 @@ namespace SG03
             if (this.hovered == null) return false;
             if (this.hovered == this.selected) return false;
             if (!this.IsLocationFlippable(this.hovered.Location)) return false;
+            if (!this.IsSwapValid()) return false;
             this.SwapSelectedWithHovered();
             return true;
         }
@@ -289,6 +290,7 @@ namespace SG03
             this.holderSelected = holder;
             if (this.selected == null) return;
             if (holder.HeldCard != null) return;
+            if (!this.IsPlacementValid(this.selected, holder)) return;
             this.PlaceSelectedIntoEmptyHolder(holder);
         }
 
@@ -297,6 +299,23 @@ namespace SG03
             this.selected.CardHolder?.SetCard(null);
             this.selected.SetCardHolder(targetHolder);
             targetHolder.SetCard(this.selected);
+        }
+
+        // ─── Placement validation ─────────────────────────────────────────────────
+
+        private bool IsPlacementValid(Card3DCtrl card, CardHolderCtrl holder)
+        {
+            if (card.CardOwner != holder.HolderOwner) return false;
+            if (card.IsCharacter() && holder.HolderLink != Link.front) return false;
+            if (!card.IsCharacter() && holder.HolderLink != Link.back) return false;
+            return true;
+        }
+
+        private bool IsSwapValid()
+        {
+            if (!this.IsPlacementValid(this.selected, this.hovered.CardHolder)) return false;
+            if (!this.IsPlacementValid(this.hovered, this.selected.CardHolder)) return false;
+            return true;
         }
     }
 }
