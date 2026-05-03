@@ -152,7 +152,6 @@ namespace SG03
             BattleCardDefinitions.OnDefinitionsLoaded += SetLoaded;
             yield return new UnityEngine.WaitUntil(() => loaded);
             BattleCardDefinitions.OnDefinitionsLoaded -= SetLoaded;
-            Debug.Log("<color=#00FF88>[CardSpawning] BattleCardDefinitions ready — proceeding.</color>");
             void SetLoaded() => loaded = true;
         }
 
