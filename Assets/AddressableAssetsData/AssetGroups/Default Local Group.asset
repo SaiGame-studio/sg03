@@ -40,6 +40,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e0ea6a6744e096489d7cd1b48c77da9
+    m_Address: Assets/_sg03/CardHolder/Materials/Omega/OmegaCardHolderDefault.mat
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 325981bf9ef75574993ed66f351f820f
     m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
     m_ReadOnly: 0

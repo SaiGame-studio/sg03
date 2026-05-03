@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2278403789962914213}
   - component: {fileID: 3890381777051524021}
   - component: {fileID: 6696618329774845696}
+  - component: {fileID: 4627032858346784398}
   m_Layer: 0
   m_Name: CardHolder
   m_TagString: Untagged
@@ -68,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 7dfa6ceae083bc0469033801e18feba8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -125,4 +126,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c832dcdd38554f84f8a63e7ef94c7a8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardHolderCtrl
-  card: {fileID: 0}
+  owner: 1
+  link: 1
+  index: 0
+--- !u!114 &4627032858346784398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5568040763661808769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08d386758934ad7408f96e92c83fa0eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.CardHolderVisual
+  ctrl: {fileID: 6696618329774845696}
+  meshRenderer: {fileID: 2278403789962914213}
+  alphaDefault: {fileID: 2100000, guid: 7dfa6ceae083bc0469033801e18feba8, type: 2}
+  alphaHover: {fileID: 2100000, guid: eb509ba1b1d5efd4791ee00bcc0081de, type: 2}
+  alphaSelected: {fileID: 2100000, guid: 4b141fca15c59314a8d287b216e710f3, type: 2}
+  omegaDefault: {fileID: 2100000, guid: 2e0ea6a6744e096489d7cd1b48c77da9, type: 2}
+  omegaHover: {fileID: 2100000, guid: b41219195cf40444b9d25d5e7a5e15fd, type: 2}
+  omegaSelected: {fileID: 2100000, guid: 826c7b1002ab5ee4c93b0f68549f6793, type: 2}
