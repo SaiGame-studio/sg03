@@ -304,6 +304,7 @@ namespace SG03
 
         private bool IsPlacementValid(Card3DCtrl card, CardHolderCtrl holder)
         {
+            if (card.CardOwner == Owner.omega) return false;
             if (card.CardOwner != holder.HolderOwner) return false;
             if (card.IsCharacter() && holder.HolderLink != Link.front) return false;
             if (!card.IsCharacter() && holder.HolderLink != Link.back) return false;

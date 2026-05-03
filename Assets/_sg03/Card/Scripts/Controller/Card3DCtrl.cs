@@ -31,7 +31,6 @@ namespace SG03
         // ─── Identity ─────────────────────────────────────────────────────────────
 
         [Header("Identity")]
-        [SerializeField] private CardType           cardType;
         [SerializeField] private Owner              cardOwner;
         [SerializeField] private string             codeName;
         [SerializeField] private CardDefinitionData definition;
@@ -159,14 +158,14 @@ namespace SG03
         /// <summary>The holder this card is currently assigned to, or null if none.</summary>
         public CardHolderCtrl CardHolder => this.cardHolder;
 
-        /// <summary>The type of this card (character or support).</summary>
-        public CardType CardType => this.cardType;
+        /// <summary>The type of this card (character or support), derived from Definition.Metadata.type.</summary>
+        public CardType CardType => Enum.TryParse(this.definition?.metadata?.type, out CardType t) ? t : default;
 
         /// <summary>The owner (alpha or omega) of this card.</summary>
         public Owner CardOwner => this.cardOwner;
 
         /// <summary>Returns true if this card's type is character.</summary>
-        public bool IsCharacter() => this.cardType == CardType.character;
+        public bool IsCharacter() => this.CardType == CardType.character;
 
         /// <summary>Stores the definition data looked up by code name from BattleCardDefinitions.</summary>
         public void SetDefinition(CardDefinitionData def) => this.definition = def;
