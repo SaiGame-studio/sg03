@@ -31,8 +31,10 @@ namespace SG03
         // ─── Identity ─────────────────────────────────────────────────────────────
 
         [Header("Identity")]
-        [SerializeField] private CardType cardType;
-        [SerializeField] private Owner    cardOwner;
+        [SerializeField] private CardType           cardType;
+        [SerializeField] private Owner              cardOwner;
+        [SerializeField] private string             codeName;
+        [SerializeField] private CardDefinitionData definition;
 
         // ─── Optional external references ─────────────────────────────────────────
 
@@ -165,5 +167,17 @@ namespace SG03
 
         /// <summary>Returns true if this card's type is character.</summary>
         public bool IsCharacter() => this.cardType == CardType.character;
+
+        /// <summary>Stores the definition data looked up by code name from BattleCardDefinitions.</summary>
+        public void SetDefinition(CardDefinitionData def) => this.definition = def;
+
+        /// <summary>The definition data currently assigned to this card.</summary>
+        public CardDefinitionData Definition => this.definition;
+
+        /// <summary>Stores the code name used to look up this card's definition.</summary>
+        public void SetCodeName(string code) => this.codeName = code;
+
+        /// <summary>The code name assigned to this card.</summary>
+        public string CodeName => this.codeName;
     }
 }

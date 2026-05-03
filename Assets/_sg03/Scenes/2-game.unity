@@ -7580,6 +7580,7 @@ MonoBehaviour:
   cardPool: {fileID: 2028831696}
   deskPosition: {fileID: 948749802}
   battleState: {fileID: 2015755439}
+  battleCardDefinitions: {fileID: 2015755443}
   prefabName: Card3D
   spawnPerFrame: 1
   spawnInterval: 0.05

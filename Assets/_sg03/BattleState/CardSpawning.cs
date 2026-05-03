@@ -9,9 +9,10 @@ namespace SG03
     [AddComponentMenu("SG03/Desk/Card Spawning")]
     public class CardSpawning : SaiBehaviour
     {
-        [SerializeField] private CardPool cardPool;
-        [SerializeField] private DeskPositionCtrl deskPosition;
-        [SerializeField] private BattleState battleState;
+        [SerializeField] private CardPool               cardPool;
+        [SerializeField] private DeskPositionCtrl         deskPosition;
+        [SerializeField] private BattleState              battleState;
+        [SerializeField] private BattleCardDefinitions    battleCardDefinitions;
         [SerializeField] private string prefabName = "Card3D";
         [SerializeField] private int spawnPerFrame = 1;
         [SerializeField] private float spawnInterval = 0.05f;
@@ -67,6 +68,7 @@ namespace SG03
             this.LoadCardPool();
             this.LoadDeskPosition();
             this.LoadBattleState();
+            this.LoadBattleCardDefinitions();
         }
 
         protected virtual void LoadCardPool()
@@ -92,18 +94,27 @@ namespace SG03
             Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
         }
 
+        protected virtual void LoadBattleCardDefinitions()
+        {
+            if (this.battleCardDefinitions != null) return;
+            BattleStateCtrl ctrl = this.GetComponent<BattleStateCtrl>();
+            if (ctrl == null) return;
+            this.battleCardDefinitions = ctrl.BattleCardDefinitions;
+            Debug.LogWarning(this.transform.name + ": LoadBattleCardDefinitions", this.gameObject);
+        }
+
         private void SubscribeEvents()
         {
-            BattleState.OnGameStart += this.SpawnGameStart;
-            BattleState.OnGameResume += this.SpawnGameResume;
-            BattleState.OnInitCards += this.OnInitCardsReceived;
+            BattleState.OnGameStart                         += this.SpawnGameStart;
+            BattleState.OnGameResume                        += this.SpawnGameResume;
+            BattleState.OnInitCards                         += this.OnInitCardsReceived;
         }
 
         private void UnsubscribeEvents()
         {
-            BattleState.OnGameStart -= this.SpawnGameStart;
-            BattleState.OnGameResume -= this.SpawnGameResume;
-            BattleState.OnInitCards -= this.OnInitCardsReceived;
+            BattleState.OnGameStart                         -= this.SpawnGameStart;
+            BattleState.OnGameResume                        -= this.SpawnGameResume;
+            BattleState.OnInitCards                         -= this.OnInitCardsReceived;
         }
 
         private void OnInitCardsReceived(InitCardsResult result)
@@ -125,10 +136,24 @@ namespace SG03
 
         private IEnumerator InitCardsRoutine(InitCardsResult result)
         {
+            yield return this.WaitForDefinitions();
             yield return this.RunParallel(
                 this.MoveAlphaSourceToHandRoutine(result.AlphaCardsAddedToHand),
                 this.MoveOmegaSourceToHandRoutine(result.OmegaCardsAddedToHand));
             this.spawnRoutine = null;
+        }
+
+        private IEnumerator WaitForDefinitions()
+        {
+            if (this.battleCardDefinitions == null) yield break;
+            if (this.battleCardDefinitions.IsLoaded) yield break;
+            Debug.Log("<color=#FFD700>[CardSpawning] Waiting for BattleCardDefinitions to load...</color>");
+            bool loaded = false;
+            BattleCardDefinitions.OnDefinitionsLoaded += SetLoaded;
+            yield return new UnityEngine.WaitUntil(() => loaded);
+            BattleCardDefinitions.OnDefinitionsLoaded -= SetLoaded;
+            Debug.Log("<color=#00FF88>[CardSpawning] BattleCardDefinitions ready — proceeding.</color>");
+            void SetLoaded() => loaded = true;
         }
 
         private IEnumerator MoveAlphaSourceToHandRoutine(int count)
@@ -145,8 +170,12 @@ namespace SG03
                 Card3DCtrl card = sourceCards[i];
                 if (hand != null && i < hand.Length)
                 {
+                    string code = hand[i].item_definition_code_name;
+                    Debug.Log($"<color=#00BFFF>[CardSpawning] Alpha hand[{i}] code=<b>{code}</b> name={hand[i].item_definition_name}</color>");
+                    card.SetCodeName(code);
                     card.SetFallbackName(hand[i].item_definition_name);
-                    card.LoadCardByCodeName(hand[i].item_definition_code_name);
+                    card.LoadCardByCodeName(code);
+                    card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
                 }
                 card.MoveAndRotate(target, Location.in_hand);
                 spawnedThisFrame++;
@@ -168,7 +197,13 @@ namespace SG03
                 if (target == null) target = this.deskPosition.OmegaSpawnPoint;
                 Card3DCtrl card = sourceCards[i];
                 if (hand != null && i < hand.Length)
-                    card.LoadCardByCodeName(hand[i].item_code_name);
+                {
+                    string code = hand[i].item_code_name;
+                    Debug.Log($"<color=#00CFFF>[CardSpawning] Omega hand[{i}] code=<b>{code}</b></color>");
+                    card.SetCodeName(code);
+                    card.LoadCardByCodeName(code);
+                    card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+                }
                 card.MoveAndRotate(target, Location.in_hand);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;

@@ -209,6 +209,7 @@ namespace SG03
         {
             if (string.IsNullOrEmpty(codeName)) return;
             this.cardNamePrefix = codeName;
+            Debug.Log($"<color=#00BFFF>[CardLoader] ShowByCodeName: <b>{codeName}</b> on '{this.name}'</color>", this);
             if (!this.ApplyAddressByPrefix()) return;
             await this.LoadAndApply();
         }

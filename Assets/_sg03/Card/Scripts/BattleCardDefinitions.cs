@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SaiGame.Services;
 using UnityEngine;
@@ -6,12 +7,15 @@ namespace SG03
 {
     public class BattleCardDefinitions : BattleScript
     {
+        public static event Action OnDefinitionsLoaded;
+
         [Header("Card Definitions Cache")]
         [SerializeField] private List<string> codes = new List<string>();
         [SerializeField] private List<CardDefinitionData> definitions = new List<CardDefinitionData>();
 
         public IReadOnlyList<string> Codes => this.codes;
         public IReadOnlyList<CardDefinitionData> Definitions => this.definitions;
+        public bool IsLoaded => this.definitions.Count > 0;
 
         protected override void ResetValue()
         {
@@ -21,12 +25,18 @@ namespace SG03
 
         public void GetAll()
         {
+            Debug.Log("<color=#FFD700>[BattleCardDefinitions] GetAll — calling RunScript</color>", this);
             this.RunScript(onSuccess: this.ParseResponse);
         }
 
         public CardDefinitionData GetDefinitionByCode(string code)
         {
-            return this.definitions.Find(d => d.item_code == code);
+            CardDefinitionData result = this.definitions.Find(d => d.item_code == code);
+            if (result == null)
+                Debug.LogWarning($"<color=#FF4444>[BattleCardDefinitions] Definition NOT FOUND for code '<b>{code}</b>'. Total definitions loaded: {this.definitions.Count}</color>", this);
+            else
+                Debug.Log($"<color=#00FF88>[BattleCardDefinitions] Found definition for '<b>{code}</b>': name={result.name}</color>", this);
+            return result;
         }
 
         private void ParseResponse(string rawJson)
@@ -48,8 +58,14 @@ namespace SG03
         private void ApplyDefinitions(CardDefinitionData[] rawDefinitions)
         {
             this.definitions.Clear();
-            if (rawDefinitions == null) return;
+            if (rawDefinitions == null)
+            {
+                Debug.LogWarning("<color=#FF4444>[BattleCardDefinitions] ApplyDefinitions received null array</color>", this);
+                return;
+            }
             this.definitions.AddRange(rawDefinitions);
+            Debug.Log($"<color=#FFD700>[BattleCardDefinitions] Loaded <b>{this.definitions.Count}</b> definitions.</color>", this);
+            OnDefinitionsLoaded?.Invoke();
         }
     }
 }
