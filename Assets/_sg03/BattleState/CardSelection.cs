@@ -17,12 +17,34 @@ namespace SG03
         [SerializeField] private DeskPositionCtrl deskPositions;
         [SerializeField] private bool fullDetail;
 
+        [Header("Marks")]
+        [SerializeField] private GameObject markSelected;
+        [SerializeField] private float markFollowSpeed = 10f;
+        [SerializeField] private Transform markIdlePosition;
+
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
             this.LoadDeskPositions();
+            this.LoadMarkSelected();
+            this.LoadMarkIdlePosition();
+        }
+
+        protected virtual void LoadMarkIdlePosition()
+        {
+            if (this.markIdlePosition != null) return;
+            if (this.deskPositions == null) return;
+            this.markIdlePosition = this.deskPositions.AlphaTheSource;
+            Debug.LogWarning(this.transform.name + ": LoadMarkIdlePosition", this.gameObject);
+        }
+
+        protected virtual void LoadMarkSelected()
+        {
+            if (this.markSelected != null) return;
+            this.markSelected = this.transform.Find("MarkSelected")?.gameObject;
+            Debug.LogWarning(this.transform.name + ": LoadMarkSelected", this.gameObject);
         }
 
         protected virtual void LoadDeskPositions()
@@ -36,7 +58,56 @@ namespace SG03
 
         private void OnEnable() => this.Subscribe();
         private void OnDisable() => this.Unsubscribe();
-        private void Update() => this.CheckClick();
+        private void Update()
+        {
+            this.CheckClick();
+            this.UpdateMarkSelected();
+        }
+
+        // ─── Mark selected ────────────────────────────────────────────────────────
+
+        private void UpdateMarkSelected()
+        {
+            if (this.markSelected == null) return;
+            if (this.selected == null || !this.IsLocationFlippable(this.selected.Location))
+            {
+                this.HideMarkSelected();
+                return;
+            }
+            if (CardMovement.IsAnyCardMoving)
+            {
+                this.HideMarkSelected();
+                return;
+            }
+            this.SnapToSelectedCard();
+            this.ShowMarkSelected();
+        }
+
+        private void ShowMarkSelected()
+        {
+            if (this.markSelected.activeSelf) return;
+            this.markSelected.SetActive(true);
+        }
+
+        private void HideMarkSelected()
+        {
+            if (!this.markSelected.activeSelf) return;
+            this.markSelected.SetActive(false);
+        }
+
+        private void FollowIdlePosition()
+        {
+            if (this.markIdlePosition == null) return;
+            this.markSelected.transform.position = Vector3.Lerp(
+                this.markSelected.transform.position,
+                this.markIdlePosition.position,
+                this.markFollowSpeed * Time.deltaTime);
+        }
+
+        private void SnapToSelectedCard()
+        {
+            this.markSelected.transform.position = this.selected.transform.position;
+        }
 
         // ─── Click detection ──────────────────────────────────────────────────────
 
@@ -69,15 +140,29 @@ namespace SG03
         private void HandleRightClick()
         {
             if (!this.IsMouseRightClickedThisFrame()) return;
-            this.SelectHoveredOnRightClick();
+            if (this.TrySwapWithHovered()) return;
             this.HandleSelectedToggleFace();
         }
 
-        private void SelectHoveredOnRightClick()
+        private bool TrySwapWithHovered()
         {
-            if (this.hovered == null) return;
-            if (this.IsLocationNonSelectable(this.hovered.Location)) return;
-            this.SelectHovered();
+            if (this.selected == null) return false;
+            if (this.hovered == null) return false;
+            if (this.hovered == this.selected) return false;
+            if (!this.IsLocationFlippable(this.hovered.Location)) return false;
+            this.SwapSelectedWithHovered();
+            return true;
+        }
+
+        private void SwapSelectedWithHovered()
+        {
+            Card3DCtrl     otherCard    = this.hovered;
+            CardHolderCtrl targetHolder = otherCard.CardHolder;
+            CardHolderCtrl prevHolder   = this.selected.CardHolder;
+            this.selected.SetCardHolder(targetHolder);
+            targetHolder?.SetCard(this.selected);
+            otherCard.SetCardHolder(prevHolder);
+            prevHolder?.SetCard(otherCard);
         }
 
         private bool IsMouseClickedThisFrame()
@@ -144,6 +229,7 @@ namespace SG03
         private void HandleSelectedToggleFace()
         {
             if (this.selected == null) return;
+            if (this.hovered != this.selected) return;
             if (!this.IsLocationFlippable(this.selected.Location)) return;
             this.selected.ToggleFace();
             this.selected = null;
@@ -202,14 +288,8 @@ namespace SG03
         {
             this.holderSelected = holder;
             if (this.selected == null) return;
-            Card3DCtrl heldCard = holder.HeldCard;
-            if (heldCard == null)
-            {
-                this.PlaceSelectedIntoEmptyHolder(holder);
-                return;
-            }
-            if (heldCard == this.selected) return;
-            this.SwapCardsWithHolder(holder);
+            if (holder.HeldCard != null) return;
+            this.PlaceSelectedIntoEmptyHolder(holder);
         }
 
         private void PlaceSelectedIntoEmptyHolder(CardHolderCtrl targetHolder)
@@ -217,16 +297,6 @@ namespace SG03
             this.selected.CardHolder?.SetCard(null);
             this.selected.SetCardHolder(targetHolder);
             targetHolder.SetCard(this.selected);
-        }
-
-        private void SwapCardsWithHolder(CardHolderCtrl targetHolder)
-        {
-            Card3DCtrl     otherCard  = targetHolder.HeldCard;
-            CardHolderCtrl prevHolder = this.selected.CardHolder;
-            this.selected.SetCardHolder(targetHolder);
-            targetHolder.SetCard(this.selected);
-            otherCard.SetCardHolder(prevHolder);
-            prevHolder?.SetCard(otherCard);
         }
     }
 }
