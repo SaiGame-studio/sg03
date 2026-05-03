@@ -269,7 +269,9 @@ namespace SG03
             for (int i = 0; i < count; i++)
             {
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
-                if (card != null) card.MoveAndRotate(this.deskPosition.AlphaTheSource, Location.in_source);
+                if (card == null) continue;
+                card.SetOwner(Owner.alpha);
+                card.MoveAndRotate(this.deskPosition.AlphaTheSource, Location.in_source);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -284,7 +286,9 @@ namespace SG03
             for (int i = 0; i < count; i++)
             {
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
-                if (card != null) card.MoveAndRotate(this.deskPosition.OmegaTheSource, Location.in_source);
+                if (card == null) continue;
+                card.SetOwner(Owner.omega);
+                card.MoveAndRotate(this.deskPosition.OmegaTheSource, Location.in_source);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -301,7 +305,9 @@ namespace SG03
                 Transform target = this.deskPosition.GetOmegaHand(i);
                 if (target == null) target = this.deskPosition.OmegaSpawnPoint;
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
-                if (card != null) card.MoveAndRotate(target, Location.in_hand);
+                if (card == null) continue;
+                card.SetOwner(Owner.omega);
+                card.MoveAndRotate(target, Location.in_hand);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -320,15 +326,14 @@ namespace SG03
                     ? this.deskPosition.AlphaHand[i]
                     : this.deskPosition.AlphaSpawnPoint;
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
-                if (card != null)
-                {
-                    string code = handSlots[i].item_definition_code_name;
-                    card.SetCodeName(code);
-                    card.SetFallbackName(handSlots[i].item_definition_name);
-                    card.LoadCardByCodeName(code);
-                    card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
-                    card.MoveAndRotate(target, Location.in_hand);
-                }
+                if (card == null) continue;
+                card.SetOwner(Owner.alpha);
+                string code = handSlots[i].item_definition_code_name;
+                card.SetCodeName(code);
+                card.SetFallbackName(handSlots[i].item_definition_name);
+                card.LoadCardByCodeName(code);
+                card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+                card.MoveAndRotate(target, Location.in_hand);
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -362,6 +367,7 @@ namespace SG03
                 Transform targetPos = i < positions.Length ? positions[i] : this.deskPosition.AlphaSpawnPoint;
                 Card3DCtrl card = this.cardPool.Spawn(prefab, targetPos.position);
                 card.transform.rotation = targetPos.rotation;
+                card.SetOwner(Owner.alpha);
                 card.SetFallbackName(slots[i].item_definition_name);
                 card.LoadCardByCodeName(slots[i].item_definition_code_name);
                 card.gameObject.SetActive(true);

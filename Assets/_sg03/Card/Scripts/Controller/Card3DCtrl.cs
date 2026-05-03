@@ -161,6 +161,9 @@ namespace SG03
         /// <summary>The type of this card (character or support), derived from Definition.Metadata.type.</summary>
         public CardType CardType => Enum.TryParse(this.definition?.metadata?.type, out CardType t) ? t : default;
 
+        /// <summary>Sets the owner of this card (alpha or omega).</summary>
+        public void SetOwner(Owner owner) => this.cardOwner = owner;
+
         /// <summary>The owner (alpha or omega) of this card.</summary>
         public Owner CardOwner => this.cardOwner;
 
