@@ -9,10 +9,6 @@ namespace SG03.UI
 {
     public class GamePanelUI : SaiBehaviour
     {
-        private const string BattleStartScriptName = "battle_start";
-        private const string BattleEndScriptName = "battle_end";
-        private const string BattleStatusScriptName = "battle_status";
-        private const string InitCardScriptName = "init_cards";
         private const string BattleModeNormal = "normal";
 
         public string PanelId => "Game";
@@ -23,7 +19,7 @@ namespace SG03.UI
         [Header("References")]
         [SerializeField] private SaiServer saiServer;
         [SerializeField] private ItemPreset itemPreset;
-        [SerializeField] private BattleScript battleScript;
+        [SerializeField] private BattleScripts battleScripts;
         [SerializeField] private BattleStateCtrl battleStateCtrl;
         [SerializeField] private UIDocument uiDocument;
 
@@ -80,7 +76,7 @@ namespace SG03.UI
             this.UnsubscribeFromAuthEvents();
             this.saiServer = instance;
             this.itemPreset = null;
-            this.battleScript = null;
+            this.battleScripts = null;
             Debug.LogWarning(this.transform.name + ": LoadSaiServer", this.gameObject);
         }
 
@@ -96,11 +92,9 @@ namespace SG03.UI
 
         private void LoadBattleScript()
         {
-            if (this.saiServer == null) return;
-            BattleScript serverBattleScript = this.saiServer.BattleScript;
-            if (serverBattleScript == null) return;
-            if (this.battleScript == serverBattleScript) return;
-            this.battleScript = serverBattleScript;
+            if (this.battleScripts != null) return;
+            this.battleScripts = GameObject.FindAnyObjectByType<BattleScripts>();
+            if (this.battleScripts == null) return;
             Debug.LogWarning(this.transform.name + ": LoadBattleScript", this.gameObject);
         }
 
@@ -190,7 +184,7 @@ namespace SG03.UI
             this.UnsubscribeFromAuthEvents();
             this.saiServer = instance;
             this.itemPreset = null;
-            this.battleScript = null;
+            this.battleScripts = null;
         }
 
         private void EnsureItemPresetReference()
@@ -204,11 +198,8 @@ namespace SG03.UI
 
         private void EnsureBattleScriptReference()
         {
-            if (this.saiServer == null) return;
-            BattleScript serverBattleScript = this.saiServer.BattleScript;
-            if (serverBattleScript == null) return;
-            if (this.battleScript == serverBattleScript) return;
-            this.battleScript = serverBattleScript;
+            if (this.battleScripts != null) return;
+            this.battleScripts = GameObject.FindAnyObjectByType<BattleScripts>();
         }
 
         private void EnsureBattleStateCtrlReference()
@@ -551,16 +542,14 @@ namespace SG03.UI
             this.EnsureServiceReferences();
             if (!this.CanInitCard()) return;
             this.SetInitCardLoading(true);
-            this.battleScript.RunScript(
-                InitCardScriptName,
-                null,
+            this.battleScripts.RunInitCards(
                 this.OnInitCardSucceeded,
                 this.OnInitCardFailed);
         }
 
         private bool CanInitCard()
         {
-            if (this.battleScript != null) return true;
+            if (this.battleScripts != null) return true;
             this.SetInitCardButtonText("No Script");
             return false;
         }
@@ -598,9 +587,7 @@ namespace SG03.UI
             if (!this.CanCheckBattleStatus()) return;
             this.TriggerGetAllCardDefinitionsOnFirstBattleStatus();
             this.SetCheckStatusLoading(true);
-            this.battleScript.RunScript(
-                BattleStatusScriptName,
-                null,
+            this.battleScripts.RunBattleStatus(
                 this.OnBattleStatusSucceeded,
                 this.OnBattleStatusFailed);
         }
@@ -614,7 +601,7 @@ namespace SG03.UI
 
         private bool CanCheckBattleStatus()
         {
-            if (this.battleScript != null) return true;
+            if (this.battleScripts != null) return true;
             this.SetCheckStatusButtonText("No Script");
             return false;
         }
@@ -675,16 +662,14 @@ namespace SG03.UI
             this.EnsureServiceReferences();
             if (!this.CanEndBattle()) return;
             this.SetEndBattleLoading(true);
-            this.battleScript.RunScript(
-                BattleEndScriptName,
-                null,
+            this.battleScripts.RunBattleEnd(
                 this.OnBattleEndSucceeded,
                 this.OnBattleEndFailed);
         }
 
         private bool CanEndBattle()
         {
-            if (this.battleScript != null) return true;
+            if (this.battleScripts != null) return true;
             this.SetEndBattleButtonText("No Script");
             return false;
         }
@@ -724,8 +709,7 @@ namespace SG03.UI
             string presetInstanceId = this.selectedPreset.id;
             string requestBody = this.BuildBattleStartRequestBody(enemyCodeName, presetInstanceId);
             this.SetStartBattleLoading(true);
-            this.battleScript.RunScript(
-                BattleStartScriptName,
+            this.battleScripts.RunBattleStart(
                 requestBody,
                 this.OnBattleStartSucceeded,
                 this.OnBattleStartFailed);
@@ -751,7 +735,7 @@ namespace SG03.UI
                 return false;
             }
 
-            if (this.battleScript != null) return true;
+            if (this.battleScripts != null) return true;
             this.SetStartBattleButtonText("No Script");
             return false;
         }

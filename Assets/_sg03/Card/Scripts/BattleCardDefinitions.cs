@@ -5,9 +5,12 @@ using UnityEngine;
 
 namespace SG03
 {
-    public class BattleCardDefinitions : BattleScript
+    public class BattleCardDefinitions : SaiBehaviour
     {
         public static event Action OnDefinitionsLoaded;
+
+        [Header("Battle Script")]
+        [SerializeField] private BattleScripts battleScripts;
 
         [Header("Card Definitions Cache")]
         [SerializeField] private List<string> codes = new List<string>();
@@ -17,16 +20,25 @@ namespace SG03
         public IReadOnlyList<CardDefinitionData> Definitions => this.definitions;
         public bool IsLoaded => this.definitions.Count > 0;
 
-        protected override void ResetValue()
+        protected override void LoadComponents()
         {
-            base.ResetValue();
-            this.scriptName = "get_card_definitions";
+            base.LoadComponents();
+            this.LoadBattleScripts();
+        }
+
+        protected virtual void LoadBattleScripts()
+        {
+            if (this.battleScripts != null) return;
+            this.battleScripts = GameObject.FindAnyObjectByType<BattleScripts>();
+            if (this.battleScripts == null) return;
+            Debug.LogWarning(this.transform.name + ": LoadBattleScripts", this.gameObject);
         }
 
         public void GetAll()
         {
             Debug.Log("<color=#FFD700>[BattleCardDefinitions] GetAll — calling RunScript</color>", this);
-            this.RunScript(onSuccess: this.ParseResponse);
+            if (this.battleScripts == null) return;
+            this.battleScripts.RunGetCardDefinitions(this.ParseResponse, null);
         }
 
         public CardDefinitionData GetDefinitionByCode(string code)
