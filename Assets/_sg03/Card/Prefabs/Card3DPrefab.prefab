@@ -1070,6 +1070,7 @@ MonoBehaviour:
   card: {fileID: 1279015152172670498}
   loader: {fileID: 7980353759426569992}
   movement: {fileID: 4719509819920680533}
+  cardHolder: {fileID: 0}
 --- !u!114 &4719509819920680533
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1085,6 +1086,18 @@ MonoBehaviour:
   ctrl: {fileID: 724914520211398535}
   duration: 1
   ease: 6
+  hoverOffsetY: 0.3
+  hoverDuration: 0.15
+  hoverEase: 6
+  selectedOffsetY: 1.5
+  selectedDuration: 0.25
+  selectedEase: 27
+  fullDetailDuration: 0.5
+  fullDetailEase: 6
+  fullDetailReturnDuration: 0.4
+  fullDetailReturnEase: 7
+  faceUpRotation: {x: 90, y: 0, z: 0}
+  faceDownRotation: {x: -90, y: 0, z: 0}
   location: 0
 --- !u!65 &2260832097321709496
 BoxCollider:

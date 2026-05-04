@@ -1,0 +1,153 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: CardData
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: CardData
+  m_GUID: 23f565229de3a5e479ee3849d00fd09c
+  m_SerializeEntries:
+  - m_GUID: 0c0eb85feafe74a459900e7e7f8c886f
+    m_Address: Assets/_sg03/Card/Data/Character/Undead/skeleton.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0fd00c6a0911c63439351264592baf5d
+    m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 19813d66ce1892f47bc3d58d7e0dfd7e
+    m_Address: Assets/_sg03/Card/Data/Character/LightElf/volt_heart.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a554768c0af93b4cbce70957352a99d
+    m_Address: Assets/_sg03/Card/Data/Ability/Human/AzureBlade/spinning_slash.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 282a862c3062e2f4bb6094fe43bb2f47
+    m_Address: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e0ea6a6744e096489d7cd1b48c77da9
+    m_Address: Assets/_sg03/CardHolder/Materials/Omega/OmegaCardHolderDefault.mat
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 325981bf9ef75574993ed66f351f820f
+    m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34016b5d7f4437240bc9e76d6281c068
+    m_Address: Assets/_sg03/Card/Data/Ability/Goblin/back_stab.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3fe1da2b2c760aa4680679499fce77fd
+    m_Address: Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54b73085f240c714e91a9f87491d14bf
+    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/king_return.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 55a3dfc83811bee45b54ee5ccb994fe9
+    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/skeleton_shield.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6afd6f7305243ca49b6994795e032089
+    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c511028519219e489397271c6c2e6f2
+    m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_grunt.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c9191ef9875b3e4eae0e4a6123c74cc
+    m_Address: Assets/_sg03/Card/Data/Ability/LightElf/holy_glow.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f274126714bab941a9c9c9f1aa0f9cd
+    m_Address: Assets/_sg03/Card/Data/Env/abyssal_mist.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8a5ca88c7387f444689e985478c535b0
+    m_Address: Assets/_sg03/Card/Data/Env/graveyard.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a1dbcb8f49ff902448d783578bd455c0
+    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/animate_dead.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b54d7ce8ddf795a46b14aa2c5ba7b894
+    m_Address: Assets/_sg03/Card/Data/Ability/Goblin/goblin_shaman/totem_pulse.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c47dbeb3327fdd64aaf74f8835c734b9
+    m_Address: Assets/_sg03/Card/Data/Character/LightElf/zelene.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc20ad589d414bd49b44b0917ff99adc
+    m_Address: Assets/_sg03/Card/Data/Ability/Human/AzureBlade/cross_guard.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7b3a1d2f007ace4e86c6b864f3c33b7
+    m_Address: Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e313158a88c9caa4abb2ee8ce2e810ee
+    m_Address: Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fb951131c1f83df4596191934e87c025
+    m_Address: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/lightning_strike.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fc5a9563796479348a81847d039f777d
+    m_Address: Assets/_sg03/Card/Data/Env/gright_forest.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fec84290bc9f9f24f9ece1d96e52b213
+    m_Address: Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fee7b29290278e84bba6252d78c1e8ed
+    m_Address: Assets/_sg03/Card/Data/Env/iron_citadel.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: a79ea93b48339834fb8c48357bb9e901, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: efef45a64f8690640912c0cb8961b238, type: 2}
+    - {fileID: 11400000, guid: a8c77c7f933def1469de67d070aad5bd, type: 2}

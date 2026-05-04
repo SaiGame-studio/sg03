@@ -27,6 +27,11 @@
 - **Never** use `[ContextMenu]` to expose buttons.
 - Always create Inspector buttons via a dedicated `[CustomEditor]` script.
 
+## Editor Scripts Must Live in an `Editor` Folder
+- Any script that uses `UnityEditor` APIs (e.g. `CustomEditor`, `EditorWindow`, `PropertyDrawer`, `MenuItem`) **must** be placed inside a folder named exactly `Editor` (e.g. `Assets/_sg03/SomeFeature/Editor/MyEditor.cs`).
+- **Never** place Editor-only scripts outside an `Editor` folder — Unity strips `UnityEditor` from runtime builds and the build will fail.
+- The `Editor` folder can be at any depth under `Assets/_sg03/`, but the folder name must be exactly `Editor` (case-sensitive).
+
 ## Code Comments Language
 - All code comments (inline, block, and XML doc comments) must be written in **English**.
 - Do **not** write comments in Vietnamese or any other language unless the user explicitly requests a translation task.

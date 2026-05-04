@@ -28,6 +28,18 @@ namespace SG03
         [SerializeField] private CardLoader loader;
         [SerializeField] private CardMovement movement;
 
+        // ─── Identity ─────────────────────────────────────────────────────────────
+
+        [Header("Identity")]
+        [SerializeField] private Owner              cardOwner;
+        [SerializeField] private string             codeName;
+        [SerializeField] private CardDefinitionData definition;
+
+        // ─── Optional external references ─────────────────────────────────────────
+
+        [Header("Optional References")]
+        [SerializeField] private CardHolderCtrl cardHolder;
+
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         public override string GetName() => this.name;
@@ -114,7 +126,22 @@ namespace SG03
         /// </summary>
         public void SetFallbackDescription(string description) => this.card.SetFallbackDescription(description);
 
+        /// <summary>Links a <see cref="CardHolderCtrl"/> to this card and moves the card to the holder's position.</summary>
+        public void SetCardHolder(CardHolderCtrl holder)
+        {
+            if (this.movement.IsFlipping) return;
+            bool hadHolder = this.cardHolder != null;
+            this.cardHolder = holder;
+            if (this.cardHolder == null) return;
+            Location destination = this.cardHolder.HolderLink == Link.front ? Location.in_front : Location.in_back;
+            this.movement.MoveTo(this.cardHolder.transform, destination);
+            if (!hadHolder) this.movement.FaceUpUnknown();
+        }
+
         /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
+        public void MoveAndRotate(Transform target, Location destination) => this.movement.MoveAndRotate(target, destination);
+
+        /// <summary>Smoothly moves the card to the specified transform, position only (no rotation change).</summary>
         public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
 
         /// <summary>Moves the card to the full-detail point without changing its logical location.</summary>
@@ -123,7 +150,38 @@ namespace SG03
         /// <summary>Returns the card from full-detail back to its selected position in hand.</summary>
         public void ReturnFromFullDetail() => this.movement.ReturnFromFullDetail();
 
+        /// <summary>Toggles the card between face-up and face-down.</summary>
+        public void ToggleFace() => this.movement.ToggleFace();
+
         /// <summary>Current logical location of this card.</summary>
-        public Location Location => this.movement.Location;
+        public Location Location  => this.movement.Location;
+        public bool    IsFlipping => this.movement.IsFlipping;
+
+        /// <summary>The holder this card is currently assigned to, or null if none.</summary>
+        public CardHolderCtrl CardHolder => this.cardHolder;
+
+        /// <summary>The type of this card (character or support), derived from Definition.Metadata.type.</summary>
+        public CardType CardType => Enum.TryParse(this.definition?.metadata?.type, out CardType t) ? t : default;
+
+        /// <summary>Sets the owner of this card (alpha or omega).</summary>
+        public void SetOwner(Owner owner) => this.cardOwner = owner;
+
+        /// <summary>The owner (alpha or omega) of this card.</summary>
+        public Owner CardOwner => this.cardOwner;
+
+        /// <summary>Returns true if this card's type is character.</summary>
+        public bool IsCharacter() => this.CardType == CardType.character;
+
+        /// <summary>Stores the definition data looked up by code name from BattleCardDefinitions.</summary>
+        public void SetDefinition(CardDefinitionData def) => this.definition = def;
+
+        /// <summary>The definition data currently assigned to this card.</summary>
+        public CardDefinitionData Definition => this.definition;
+
+        /// <summary>Stores the code name used to look up this card's definition.</summary>
+        public void SetCodeName(string code) => this.codeName = code;
+
+        /// <summary>The code name assigned to this card.</summary>
+        public string CodeName => this.codeName;
     }
 }

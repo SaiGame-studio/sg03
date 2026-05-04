@@ -65,15 +65,42 @@ namespace SG03
         [Tooltip("Ease curve for returning from FullDetailPoint.")]
         [SerializeField] private Ease fullDetailReturnEase = Ease.InOutQuad;
 
+        // ─── Face Rotation ────────────────────────────────────────────────────────
+
+        [Header("Face Rotation")]
+        [Tooltip("World-space euler angles when the card is face-up.")]
+        [SerializeField] private Vector3 faceUpRotation = new Vector3(90f, 0f, 0f);
+
+        [Tooltip("World-space euler angles when the card is face-down.")]
+        [SerializeField] private Vector3 faceDownRotation = new Vector3(-90f, 0f, 0f);
+
+        [Tooltip("World-space axis used when FaceState is Unknown (first-time flip).")]
+        [SerializeField] private Vector3 flipAxisUnknown = new Vector3(1f, 0f, 0f);
+
+        [Tooltip("World-space axis used when flipping between FaceUp and FaceDown.")]
+        [SerializeField] private Vector3 flipAxisUpDown = new Vector3(0f, 0f, 1f);
+
+        [Tooltip("World units the card rises during the flip.")]
+        [SerializeField] private float flipRiseHeight = 5f;
+
+        [Tooltip("Duration of each flip phase in seconds.")]
+        [SerializeField] private float flipDuration = 0.4f;
+
+        [Tooltip("Ease curve for the flip.")]
+        [SerializeField] private Ease flipEase = Ease.InOutQuad;
+
         // ─── Runtime state ────────────────────────────────────────────────────────
 
         [Header("State")]
         [SerializeField] private Location location;
+        [SerializeField] private FaceState faceState = FaceState.Unknown;
 
         private float handAnchorY;
         private bool  isSelected;
+        private bool  isFlipping;
         private Tween yTween;
         private Tween moveTween;
+        private Sequence faceTween;
         private Vector3    preFullDetailPosition;
         private Quaternion preFullDetailRotation;
 
@@ -119,14 +146,16 @@ namespace SG03
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
-        public Location Location => this.location;
+        public Location Location   => this.location;
+        public bool    IsFlipping  => this.isFlipping;
 
         /// <summary>
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position.
         /// Any in-progress tween is cancelled before starting the new one.
         /// </summary>
-        public void MoveTo(Transform target, Location destination)
+        public void MoveAndRotate(Transform target, Location destination)
         {
+            if (this.isFlipping) return;
             this.location = destination;
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
@@ -135,11 +164,114 @@ namespace SG03
         }
 
         /// <summary>
+        /// Smoothly moves the card to the specified world-space <paramref name="target"/> position
+        /// without changing its rotation. Any in-progress tween is cancelled before starting the new one.
+        /// </summary>
+        public void MoveTo(Transform target, Location destination)
+        {
+            if (this.isFlipping) return;
+            this.location = destination;
+            this.RecordHandAnchor(target, destination);
+            this.KillAllTweens();
+            this.StartMoveTween(target.position, this.duration, this.ease);
+        }
+
+        /// <summary>Smoothly rotates the card to face-up using global euler angles.</summary>
+        public void FaceUp()
+        {
+            if (this.isFlipping) return;
+            this.faceState = FaceState.FaceUp;
+            this.DoFaceFlip(this.faceUpRotation, this.flipAxisUpDown);
+        }
+
+        /// <summary>Smoothly rotates the card to face-down using global euler angles.</summary>
+        public void FaceDown()
+        {
+            if (this.isFlipping) return;
+            this.faceState = FaceState.FaceDown;
+            this.DoFaceFlip(this.faceDownRotation, this.flipAxisUpDown);
+        }
+
+        /// <summary>Rotates the card to face-up using the Unknown axis, without rising.</summary>
+        public void FaceUpUnknown()
+        {
+            if (this.isFlipping) return;
+            this.faceState = FaceState.FaceUp;
+            this.DoFaceFlipNoRise(this.faceUpRotation, this.flipAxisUnknown);
+        }
+
+        /// <summary>Rotates the card to face-down using the Unknown axis, without rising.</summary>
+        public void FaceDownUnknown()
+        {
+            if (this.isFlipping) return;
+            this.faceState = FaceState.FaceDown;
+            this.DoFaceFlipNoRise(this.faceDownRotation, this.flipAxisUnknown);
+        }
+
+        /// <summary>Toggles between FaceUp and FaceDown. Defaults to FaceUp when Unknown.</summary>
+        public void ToggleFace()
+        {
+            if (this.faceState == FaceState.FaceUp)
+            {
+                this.FaceDown();
+                return;
+            }
+            this.FaceUp();
+        }
+
+        private void DoFaceFlipNoRise(Vector3 targetEulers, Vector3 axis)
+        {
+            float totalTime = this.flipDuration * 2f;
+            float angle     = this.ComputeFlipAngle(targetEulers, axis);
+
+            this.isFlipping = true;
+            this.faceTween?.Kill();
+            this.faceTween = DOTween.Sequence();
+            this.faceTween.Insert(0f,
+                this.transform.DORotate(axis.normalized * angle, totalTime, RotateMode.WorldAxisAdd)
+                    .SetEase(this.flipEase));
+            this.faceTween.OnKill(() => this.isFlipping = false);
+        }
+
+        private void DoFaceFlip(Vector3 targetEulers, Vector3 axis)
+        {
+            Vector3 origin    = this.transform.position;
+            Vector3 risen     = origin + Vector3.up * this.flipRiseHeight;
+            float   totalTime = this.flipDuration * 2f;
+            float   angle     = this.ComputeFlipAngle(targetEulers, axis);
+
+            this.isFlipping = true;
+            this.faceTween?.Kill();
+            this.faceTween = DOTween.Sequence();
+            this.faceTween.OnKill(() => this.isFlipping = false);
+            // Rise
+            this.faceTween.Append(
+                this.transform.DOMove(risen, this.flipDuration).SetEase(this.flipEase));
+            // Rotate around the selected axis to reach target orientation (starts simultaneously with rise)
+            this.faceTween.Insert(0f,
+                this.transform.DORotate(axis.normalized * angle, totalTime, RotateMode.WorldAxisAdd)
+                    .SetEase(this.flipEase));
+            // Descend back to origin
+            this.faceTween.Append(
+                this.transform.DOMove(origin, this.flipDuration).SetEase(this.flipEase));
+        }
+
+        private float ComputeFlipAngle(Vector3 targetEulers, Vector3 axis)
+        {
+            Quaternion from  = this.transform.rotation;
+            Quaternion to    = Quaternion.Euler(targetEulers);
+            Quaternion delta = to * Quaternion.Inverse(from);
+            delta.ToAngleAxis(out float angle, out Vector3 rotAxis);
+            return angle * Mathf.Sign(Vector3.Dot(rotAxis, axis.normalized));
+        }
+
+        /// <summary>
         /// Smoothly moves the card to <paramref name="point"/> without changing location or hand anchor.
         /// Used when the player double-clicks a selected in-hand card to view full detail.
         /// </summary>
         public void MoveToFullDetail(Transform point)
         {
+            if (this.isFlipping) return;
             this.preFullDetailPosition = this.transform.position;
             this.preFullDetailRotation = this.transform.rotation;
             this.KillAllTweens();
@@ -152,6 +284,7 @@ namespace SG03
         /// </summary>
         public void ReturnFromFullDetail()
         {
+            if (this.isFlipping) return;
             this.KillAllTweens();
             this.StartMoveTween(this.preFullDetailPosition, this.fullDetailReturnDuration, this.fullDetailReturnEase);
             this.transform.DORotateQuaternion(this.preFullDetailRotation, this.fullDetailReturnDuration).SetEase(this.fullDetailReturnEase);
@@ -236,6 +369,8 @@ namespace SG03
             this.KillMoveTween();
             this.yTween?.Kill();
             this.yTween = null;
+            this.faceTween?.Kill();
+            this.faceTween = null;
             this.transform.DOKill();
         }
     }
