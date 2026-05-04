@@ -4547,6 +4547,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.LampClickDetector
   battleStateCtrl: {fileID: 2015755444}
   mainCamera: {fileID: 330585545}
+  battleScripts: {fileID: 0}
 --- !u!21 &1061435743
 Material:
   serializedVersion: 8
@@ -6937,7 +6938,7 @@ Transform:
   m_GameObject: {fileID: 1773165127}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5, y: 0, z: -0}
+  m_LocalPosition: {x: -24, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -8012,6 +8013,7 @@ MonoBehaviour:
   scriptNameBattleStatus: battle_status
   scriptNameInitCards: init_cards
   scriptNameGetCardDefinitions: get_card_definitions
+  scriptNameCardDeploy: card_deploy
   battleScript: {fileID: 480811550}
 --- !u!1 &2028831695
 GameObject:

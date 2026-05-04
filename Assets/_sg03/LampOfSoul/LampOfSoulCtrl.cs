@@ -86,8 +86,9 @@ namespace SG03
 
         private void OnNextMoveChanged(NextMoveType nextMove)
         {
-            if (nextMove != NextMoveType.card_deploy) return;
-            this.MoveToCardDeployPosition();
+            if (nextMove == NextMoveType.card_deploy) this.MoveToCardDeployPosition();
+            if (nextMove == NextMoveType.alpha_turn)  this.MoveToAlphaLampPosition();
+            if (nextMove == NextMoveType.omega_turn)  this.MoveToOmegaLampPosition();
         }
 
         // ─── Private helpers ──────────────────────────────────────────────────────
@@ -110,6 +111,20 @@ namespace SG03
             if (this.deskPosition == null) return;
             if (this.deskPosition.CardDeployPosition == null) return;
             this.movement.MoveTo(this.deskPosition.CardDeployPosition);
+        }
+
+        private void MoveToAlphaLampPosition()
+        {
+            if (this.deskPosition == null) return;
+            if (this.deskPosition.AlphaLampPosition == null) return;
+            this.movement.MoveTo(this.deskPosition.AlphaLampPosition);
+        }
+
+        private void MoveToOmegaLampPosition()
+        {
+            if (this.deskPosition == null) return;
+            if (this.deskPosition.OmegaLampPosition == null) return;
+            this.movement.MoveTo(this.deskPosition.OmegaLampPosition);
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────

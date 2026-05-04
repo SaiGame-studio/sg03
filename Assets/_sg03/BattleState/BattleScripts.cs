@@ -19,6 +19,7 @@ namespace SG03
         [SerializeField] private string scriptNameBattleStatus       = "battle_status";
         [SerializeField] private string scriptNameInitCards          = "init_cards";
         [SerializeField] private string scriptNameGetCardDefinitions = "get_card_definitions";
+        [SerializeField] private string scriptNameCardDeploy         = "card_deploy";
 
         [SerializeField] private BattleScript battleScript;
 
@@ -102,6 +103,28 @@ namespace SG03
             if (this.battleScript == null) return;
             Debug.Log("<color=#AAFFAA><b>[BattleScripts] ► RunGetCardDefinitions</b></color>", this.gameObject);
             this.battleScript.RunScript(this.scriptNameGetCardDefinitions, null, onSuccess, onError);
+        }
+
+        public void RunCardDeploy(string[] frontLine, string[] backLine, Action<string> onSuccess, Action<string> onError)
+        {
+            if (this.battleScript == null) return;
+            string requestBody = this.BuildCardDeployRequestBody(frontLine, backLine);
+            Debug.Log("<color=#FF88FF><b>[BattleScripts] ► RunCardDeploy</b></color>", this.gameObject);
+            this.battleScript.RunScript(this.scriptNameCardDeploy, requestBody, onSuccess, onError);
+        }
+
+        private string BuildCardDeployRequestBody(string[] frontLine, string[] backLine)
+        {
+            string frontJson = this.ToJsonStringArray(frontLine);
+            string backJson  = this.ToJsonStringArray(backLine);
+            return $"{{\"payload\":{{\"front_line\":{frontJson},\"back_line\":{backJson}}}}}";
+        }
+
+        private string ToJsonStringArray(string[] items)
+        {
+            if (items == null || items.Length == 0) return "[]";
+            string joined = string.Join(",", System.Array.ConvertAll(items, id => $"\"{id}\""));
+            return $"[{joined}]";
         }
     }
 }
