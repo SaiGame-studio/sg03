@@ -23,6 +23,9 @@ namespace SG03
         [SerializeField] private Transform omegaTheVoid;
         [SerializeField] private Transform omegaSpawnPoint;
 
+        [Header("Card Deploy")]
+        [SerializeField] private Transform cardDeployPosition;
+
         [Header("Lamp Positions")]
         [SerializeField] private Transform alphaLampPosition;
         [SerializeField] private Transform omegaLampPosition;
@@ -57,6 +60,7 @@ namespace SG03
         public Transform OmegaTheVoid     => this.omegaTheVoid;
         public Transform AlphaSpawnPoint    => this.alphaSpawnPoint;
         public Transform OmegaSpawnPoint    => this.omegaSpawnPoint;
+        public Transform CardDeployPosition  => this.cardDeployPosition;
         public Transform AlphaLampPosition  => this.alphaLampPosition;
         public Transform OmegaLampPosition  => this.omegaLampPosition;
         public Transform[] AlphaHand      => this.alphaHand;
@@ -104,6 +108,7 @@ namespace SG03
             this.LoadOmegaTheVoid();
             this.LoadAlphaSpawnPoint();
             this.LoadOmegaSpawnPoint();
+            this.LoadCardDeployPosition();
             this.LoadAlphaLampPosition();
             this.LoadOmegaLampPosition();
             this.LoadAlphaHand();
@@ -162,6 +167,13 @@ namespace SG03
             if (this.omegaSpawnPoint != null) return;
             this.omegaSpawnPoint = this.FindOrCreateChild("OmegaSpawnPoint");
             Debug.LogWarning(this.transform.name + ": LoadOmegaSpawnPoint", this.gameObject);
+        }
+
+        protected virtual void LoadCardDeployPosition()
+        {
+            if (this.cardDeployPosition != null) return;
+            this.cardDeployPosition = this.FindOrCreateChild("CardDeployPosition");
+            Debug.LogWarning(this.transform.name + ": LoadCardDeployPosition", this.gameObject);
         }
 
         protected virtual void LoadAlphaLampPosition()

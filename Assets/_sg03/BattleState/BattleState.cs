@@ -41,6 +41,7 @@ namespace SG03.UI
         [SerializeField] private OmegaInitCardSlot[] omegaHand;
         [SerializeField] private int omegaHandCount;
         [SerializeField] private string sessionId;
+        [SerializeField] private NextMoveType nextMove;
 
 
         public string BattleStatusJson => this.battleStatusJson;
@@ -61,6 +62,7 @@ namespace SG03.UI
         public OmegaInitCardSlot[] OmegaHand => this.omegaHand;
         public int OmegaHandCount => this.omegaHandCount;
         public string SessionId => this.sessionId;
+        public NextMoveType NextMove => this.nextMove;
 
         public bool IsResuming => this.isResuming;
 
@@ -68,6 +70,7 @@ namespace SG03.UI
         public static event Action OnGameStart;
         public static event Action OnGameResume;
         public static event Action<InitCardsResult> OnInitCards;
+        public static event Action<NextMoveType> OnNextMoveChanged;
 
         protected override void LoadComponents()
         {
@@ -102,6 +105,7 @@ namespace SG03.UI
             this.omegaHand = null;
             this.omegaHandCount = 0;
             this.sessionId = string.Empty;
+            this.SetNextMove(string.Empty);
             this.gameStartFired = false;
             this.isResuming = false;
             this.skipAlphaHandOnce = false;
@@ -207,6 +211,7 @@ namespace SG03.UI
             this.alphaFrontLine = output.alpha_front_line;
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
             this.omegaHandCount = output.omega_hand_count;
+            this.SetNextMove(output.next_move);
             this.TryFireGameStart();
             if (!this.skipAlphaHandOnce)
                 this.cardSpawning?.SpawnAlphaHand(this.alphaHand);
@@ -232,6 +237,7 @@ namespace SG03.UI
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
             this.omegaHandCount = output.omega_hand_count;
             if (output.session_id != null) this.sessionId = output.session_id;
+            if (output.next_move != null) this.SetNextMove(output.next_move);
             this.TryFireGameStart();
             this.skipAlphaHandOnce = false;
             this.FireInitCardsEvent(output);
@@ -264,6 +270,25 @@ namespace SG03.UI
             this.skipAlphaHandOnce = true;
             Debug.Log($"<color=#00CFFF><b>[BattleState] OnGameResume fired — turn={this.turn}, action={this.action}</b></color>");
             OnGameResume?.Invoke();
+        }
+
+        private void SetNextMove(string value)
+        {
+            NextMoveType parsed = ParseNextMove(value);
+            if (this.nextMove == parsed) return;
+            this.nextMove = parsed;
+            OnNextMoveChanged?.Invoke(this.nextMove);
+        }
+
+        private static NextMoveType ParseNextMove(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return NextMoveType.unknown;
+            switch (value)
+            {
+                case "card_deploy": return NextMoveType.card_deploy;
+                case "init_cards":  return NextMoveType.init_cards;
+                default:            return NextMoveType.unknown;
+            }
         }
     }
 }

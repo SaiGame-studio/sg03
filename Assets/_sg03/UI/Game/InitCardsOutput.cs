@@ -16,5 +16,6 @@ namespace SG03.UI
         public string             session_id;
         public int                alpha_the_source_count;
         public int                omega_the_source_count;
+        public string             next_move;
     }
 }

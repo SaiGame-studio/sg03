@@ -2,7 +2,7 @@ namespace SG03
 {
     public enum CardType
     {
-        character,
-        ability
+        character = 0,
+        ability   = 1
     }
 }

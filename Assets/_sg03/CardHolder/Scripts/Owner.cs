@@ -2,7 +2,7 @@ namespace SG03
 {
     public enum Owner
     {
-        alpha,
-        omega
+        alpha = 0,
+        omega = 1
     }
 }

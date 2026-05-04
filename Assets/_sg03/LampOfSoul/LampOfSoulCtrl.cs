@@ -60,14 +60,16 @@ namespace SG03
 
         private void Subscribe()
         {
-            BattleState.OnGameStart  += this.OnGameStart;
-            BattleState.OnGameResume += this.OnGameResume;
+            BattleState.OnGameStart      += this.OnGameStart;
+            BattleState.OnGameResume     += this.OnGameResume;
+            BattleState.OnNextMoveChanged += this.OnNextMoveChanged;
         }
 
         private void Unsubscribe()
         {
-            BattleState.OnGameStart  -= this.OnGameStart;
-            BattleState.OnGameResume -= this.OnGameResume;
+            BattleState.OnGameStart      -= this.OnGameStart;
+            BattleState.OnGameResume     -= this.OnGameResume;
+            BattleState.OnNextMoveChanged -= this.OnNextMoveChanged;
         }
 
         // ─── Event handlers ───────────────────────────────────────────────────────
@@ -82,11 +84,18 @@ namespace SG03
             this.CallInitPosition();
         }
 
+        private void OnNextMoveChanged(NextMoveType nextMove)
+        {
+            if (nextMove != NextMoveType.card_deploy) return;
+            this.MoveToCardDeployPosition();
+        }
+
         // ─── Private helpers ──────────────────────────────────────────────────────
 
         private void CallInitPosition()
         {
             if (this.battleState == null) return;
+            if (this.battleState.Turn == 0) return;
             if (this.deskPosition == null) return;
             if (this.deskPosition.AlphaLampPosition == null) return;
             if (this.deskPosition.OmegaLampPosition == null) return;
@@ -94,6 +103,13 @@ namespace SG03
                 this.battleState.Turn,
                 this.deskPosition.AlphaLampPosition,
                 this.deskPosition.OmegaLampPosition);
+        }
+
+        private void MoveToCardDeployPosition()
+        {
+            if (this.deskPosition == null) return;
+            if (this.deskPosition.CardDeployPosition == null) return;
+            this.movement.MoveTo(this.deskPosition.CardDeployPosition);
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────

@@ -2,8 +2,8 @@ namespace SG03
 {
     public enum FaceState
     {
-        Unknown,
-        FaceUp,
-        FaceDown,
+        Unknown  = 0,
+        FaceUp   = 1,
+        FaceDown = 2,
     }
 }

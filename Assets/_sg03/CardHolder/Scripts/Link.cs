@@ -2,7 +2,7 @@ namespace SG03
 {
     public enum Link
     {
-        front,
-        back
+        front = 0,
+        back  = 1
     }
 }

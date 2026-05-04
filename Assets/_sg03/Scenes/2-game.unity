@@ -775,6 +775,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ae79fc8a26efbc4aa4a82d278ebe81d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.Card3DCtrl
+--- !u!1 &142583022
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 142583023}
+  m_Layer: 0
+  m_Name: CardDeployPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 5721338939258241955, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &142583023
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142583022}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -35, y: 0, z: 7}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 948749803}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &160706165
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4208,6 +4239,7 @@ MonoBehaviour:
   omegaTheSource: {fileID: 1223347816}
   omegaTheVoid: {fileID: 871735553}
   omegaSpawnPoint: {fileID: 1222428132}
+  cardDeployPosition: {fileID: 142583023}
   alphaLampPosition: {fileID: 828455034}
   omegaLampPosition: {fileID: 636339023}
   alphaHand:
@@ -4309,6 +4341,7 @@ Transform:
   - {fileID: 585805520}
   - {fileID: 828455034}
   - {fileID: 636339023}
+  - {fileID: 142583023}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &964028821
@@ -4393,6 +4426,7 @@ GameObject:
   - component: {fileID: 1043868440}
   - component: {fileID: 1043868439}
   - component: {fileID: 1043868438}
+  - component: {fileID: 1043868441}
   m_Layer: 0
   m_Name: Cylinder
   m_TagString: Untagged
@@ -4430,7 +4464,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -4495,6 +4529,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1043868436}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1043868441
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043868436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1894787f6454424484d47c8c61ed201, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.LampClickDetector
+  battleStateCtrl: {fileID: 2015755444}
+  mainCamera: {fileID: 0}
 --- !u!21 &1061435743
 Material:
   serializedVersion: 8
@@ -6885,7 +6933,7 @@ Transform:
   m_GameObject: {fileID: 1773165127}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -34.63, y: 0, z: -0}
+  m_LocalPosition: {x: -5, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
