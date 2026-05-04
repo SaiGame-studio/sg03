@@ -1,4 +1,5 @@
 using SaiGame.Services;
+using SG03.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,6 +13,7 @@ namespace SG03
         [Header("Linked Components")]
         [SerializeField] private BattleStateCtrl battleStateCtrl;
         [SerializeField] private Camera mainCamera;
+        [SerializeField] private BattleScripts battleScripts;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -20,6 +22,7 @@ namespace SG03
             base.LoadComponents();
             this.LoadBattleStateCtrl();
             this.LoadMainCamera();
+            this.LoadBattleScripts();
         }
 
         protected virtual void LoadBattleStateCtrl()
@@ -36,6 +39,13 @@ namespace SG03
             Debug.LogWarning(this.transform.name + ": LoadMainCamera", this.gameObject);
         }
 
+        protected virtual void LoadBattleScripts()
+        {
+            if (this.battleScripts != null) return;
+            this.battleScripts = Object.FindFirstObjectByType<BattleScripts>(FindObjectsInactive.Include);
+            Debug.LogWarning(this.transform.name + ": LoadBattleScripts", this.gameObject);
+        }
+
         // ─── Unity lifecycle ──────────────────────────────────────────────────────
 
         private void Update()
@@ -49,7 +59,7 @@ namespace SG03
         {
             if (!this.IsMouseButtonPressed()) return;
             if (!this.IsLampHit()) return;
-            this.LogLampClicked();
+            this.OnLampClicked();
         }
 
         private bool IsMouseButtonPressed()
@@ -70,6 +80,46 @@ namespace SG03
         }
 
         // ─── Private helpers ─────────────────────────────────────────────────────
+
+        private void OnLampClicked()
+        {
+            this.LogLampClicked();
+            this.DispatchByNextMove();
+        }
+
+        private void DispatchByNextMove()
+        {
+            if (this.battleStateCtrl?.BattleState == null) return;
+            NextMoveType nextMove = this.battleStateCtrl.BattleState.NextMove;
+            if (nextMove == NextMoveType.card_deploy) this.HandleCardDeploy();
+        }
+
+        private void HandleCardDeploy()
+        {
+            if (this.battleScripts == null) return;
+            string[] frontLine = this.CollectInventoryIds(this.battleStateCtrl.BattleState.AlphaFrontLine);
+            string[] backLine  = this.CollectInventoryIds(this.battleStateCtrl.BattleState.AlphaBackLine);
+            this.battleScripts.RunCardDeploy(frontLine, backLine, this.OnCardDeploySuccess, this.OnCardDeployError);
+        }
+
+        private string[] CollectInventoryIds(BattleCardSlot[] slots)
+        {
+            if (slots == null) return new string[0];
+            string[] ids = new string[slots.Length];
+            for (int i = 0; i < slots.Length; i++)
+                ids[i] = slots[i]?.inventory_item_id ?? string.Empty;
+            return ids;
+        }
+
+        private void OnCardDeploySuccess(string response)
+        {
+            Debug.Log("<color=#FF88FF><b>[LampClickDetector] Card deploy success</b></color> " + response);
+        }
+
+        private void OnCardDeployError(string error)
+        {
+            Debug.LogError("[LampClickDetector] Card deploy error: " + error);
+        }
 
         private void LogLampClicked()
         {

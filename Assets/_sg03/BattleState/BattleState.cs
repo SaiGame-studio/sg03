@@ -42,6 +42,7 @@ namespace SG03.UI
         [SerializeField] private int omegaHandCount;
         [SerializeField] private string sessionId;
         [SerializeField] private NextMoveType nextMove;
+        [SerializeField] private int alphaHandRemaining;
 
 
         public string BattleStatusJson => this.battleStatusJson;
@@ -63,6 +64,7 @@ namespace SG03.UI
         public int OmegaHandCount => this.omegaHandCount;
         public string SessionId => this.sessionId;
         public NextMoveType NextMove => this.nextMove;
+        public int AlphaHandRemaining => this.alphaHandRemaining;
 
         public bool IsResuming => this.isResuming;
 
@@ -131,6 +133,32 @@ namespace SG03.UI
         {
             if (string.IsNullOrWhiteSpace(rawJson)) return;
             this.ParseAndApplyInitCards(rawJson);
+        }
+
+        /// <summary>
+        /// Called by any script that receives a raw card_deploy JSON response.
+        /// Applies next_move first, then remaining fields.
+        /// </summary>
+        public void UpdateFromCardDeploy(string rawJson)
+        {
+            if (string.IsNullOrWhiteSpace(rawJson)) return;
+            this.ParseAndApplyCardDeploy(rawJson);
+        }
+
+        private void ParseAndApplyCardDeploy(string rawJson)
+        {
+            CardDeployScriptResponse response = JsonUtility.FromJson<CardDeployScriptResponse>(rawJson);
+            if (response == null) return;
+            if (response.output == null) return;
+            this.ApplyCardDeployOutput(response.output);
+        }
+
+        private void ApplyCardDeployOutput(CardDeployOutput output)
+        {
+            this.SetNextMove(output.next_move);
+            if (!string.IsNullOrEmpty(output.session_id)) this.sessionId = output.session_id;
+            this.alphaHandRemaining = output.alpha_hand_remaining;
+            this.OnBattleStatusChanged?.Invoke();
         }
 
         private static string BeautifyJson(string json)
@@ -287,6 +315,8 @@ namespace SG03.UI
             {
                 case "card_deploy": return NextMoveType.card_deploy;
                 case "init_cards":  return NextMoveType.init_cards;
+                case "alpha_turn":  return NextMoveType.alpha_turn;
+                case "omega_turn":  return NextMoveType.omega_turn;
                 default:            return NextMoveType.unknown;
             }
         }

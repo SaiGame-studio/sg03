@@ -3040,6 +3040,10 @@ PrefabInstance:
       propertyPath: autoLogin
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: battleTurnScriptName
+      value: battle_debug_turn
+      objectReference: {fileID: 0}
     - target: {fileID: 6971719431293405431, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: m_Name
       value: SaiServer
@@ -4542,7 +4546,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.LampClickDetector
   battleStateCtrl: {fileID: 2015755444}
-  mainCamera: {fileID: 0}
+  mainCamera: {fileID: 330585545}
+  battleScripts: {fileID: 0}
 --- !u!21 &1061435743
 Material:
   serializedVersion: 8
@@ -6933,7 +6938,7 @@ Transform:
   m_GameObject: {fileID: 1773165127}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5, y: 0, z: -0}
+  m_LocalPosition: {x: -24, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7835,6 +7840,7 @@ GameObject:
   - component: {fileID: 2015755442}
   - component: {fileID: 2015755443}
   - component: {fileID: 2015755444}
+  - component: {fileID: 2015755445}
   m_Layer: 0
   m_Name: BattleState
   m_TagString: Untagged
@@ -7909,6 +7915,7 @@ MonoBehaviour:
   omegaHand: []
   omegaHandCount: 0
   sessionId: 
+  nextMove: 0
 --- !u!114 &2015755440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7968,9 +7975,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af523903f48ecbe418fb62848b9c8750, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.BattleCardDefinitions
-  scriptName: get_card_definitions
-  requestBody: "{\n    \"payload\": {\n\n    }\n}"
-  jsonResponse: 
+  battleScripts: {fileID: 2015755445}
   codes: []
   definitions: []
 --- !u!114 &2015755444
@@ -7991,6 +7996,25 @@ MonoBehaviour:
   cardHoverDetector: {fileID: 2015755441}
   cardHolderHoverDetector: {fileID: 2015755442}
   battleCardDefinitions: {fileID: 2015755443}
+--- !u!114 &2015755445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2015755436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae7e65a5c95e65d48a07730cf98b6c8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.BattleScripts
+  scriptNameBattleStart: battle_start
+  scriptNameBattleEnd: battle_end
+  scriptNameBattleStatus: battle_status
+  scriptNameInitCards: init_cards
+  scriptNameGetCardDefinitions: get_card_definitions
+  scriptNameCardDeploy: card_deploy
+  battleScript: {fileID: 480811550}
 --- !u!1 &2028831695
 GameObject:
   m_ObjectHideFlags: 0
@@ -8112,7 +8136,7 @@ MonoBehaviour:
   panelAsset: {fileID: 9197481963319205126, guid: a715fe8f068e4b14ac9d7262278af840, type: 3}
   saiServer: {fileID: 706587910}
   itemPreset: {fileID: 1147895069}
-  battleScript: {fileID: 480811550}
+  battleScripts: {fileID: 2015755445}
   battleStateCtrl: {fileID: 2015755444}
   uiDocument: {fileID: 2030001003}
   selectedPreset:

@@ -1,4 +1,3 @@
-using SaiGame.Services;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,17 +7,13 @@ namespace SG03.Editor
     public class BattleCardDefinitionsEditor : UnityEditor.Editor
     {
         private BattleCardDefinitions battleCardDefinitions;
-        private SerializedProperty jsonResponse;
         private SerializedProperty codes;
         private SerializedProperty definitions;
-        private Vector2 jsonScroll;
-        private bool showJson = true;
         private bool showDefinitions = true;
 
         private void OnEnable()
         {
             this.battleCardDefinitions = (BattleCardDefinitions)this.target;
-            this.jsonResponse = this.serializedObject.FindProperty("jsonResponse");
             this.codes = this.serializedObject.FindProperty("codes");
             this.definitions = this.serializedObject.FindProperty("definitions");
         }
@@ -37,50 +32,10 @@ namespace SG03.Editor
             }
             GUI.backgroundColor = Color.white;
 
-            EditorGUILayout.Space(10);
-            this.DrawJsonResponse();
-
             EditorGUILayout.Space(6);
             this.DrawDefinitionsCache();
 
             this.serializedObject.ApplyModifiedProperties();
-        }
-
-        private void DrawJsonResponse()
-        {
-            this.showJson = EditorGUILayout.Foldout(this.showJson, "Raw JSON Response", true);
-            if (!this.showJson) return;
-
-            if (string.IsNullOrEmpty(this.jsonResponse.stringValue))
-            {
-                EditorGUILayout.HelpBox("No data yet. Click \"Get All\" to fetch card definitions.", MessageType.None);
-                return;
-            }
-
-            GUIStyle jsonStyle = new GUIStyle(EditorStyles.textArea)
-            {
-                wordWrap = false,
-                fontSize = 11,
-                richText = false
-            };
-
-            GUIContent content = new GUIContent(this.jsonResponse.stringValue);
-            Vector2 contentSize = jsonStyle.CalcSize(content);
-            float scrollHeight = Mathf.Min(contentSize.y + 6f, 300f);
-
-            this.jsonScroll = EditorGUILayout.BeginScrollView(
-                this.jsonScroll,
-                alwaysShowHorizontal: true,
-                alwaysShowVertical: false,
-                GUILayout.Height(scrollHeight));
-
-            EditorGUILayout.SelectableLabel(
-                this.jsonResponse.stringValue,
-                jsonStyle,
-                GUILayout.Height(contentSize.y),
-                GUILayout.Width(contentSize.x));
-
-            EditorGUILayout.EndScrollView();
         }
 
         private void DrawDefinitionsCache()
