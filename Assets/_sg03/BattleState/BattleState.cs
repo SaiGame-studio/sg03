@@ -35,6 +35,8 @@ namespace SG03.UI
         [SerializeField] private BattleCardSlot[] alphaFrontLine;
 
         [SerializeField] private BattleCardSlot[] omegaHand;
+        [SerializeField] private BattleCardSlot[] omegaFrontLine;
+        [SerializeField] private BattleCardSlot[] omegaBackLine;
         [SerializeField] private int omegaHandCount;
         [SerializeField] private string sessionId;
         [SerializeField] private NextMoveType nextMove;
@@ -55,6 +57,8 @@ namespace SG03.UI
         public BattleCardSlot[] AlphaBackLine => this.alphaBackLine;
         public BattleCardSlot[] AlphaFrontLine => this.alphaFrontLine;
         public BattleCardSlot[] OmegaHand => this.omegaHand;
+        public BattleCardSlot[] OmegaFrontLine => this.omegaFrontLine;
+        public BattleCardSlot[] OmegaBackLine  => this.omegaBackLine;
         public int OmegaHandCount => this.omegaHandCount;
         public string SessionId => this.sessionId;
         public NextMoveType NextMove => this.nextMove;
@@ -125,6 +129,8 @@ namespace SG03.UI
             this.alphaBackLine = null;
             this.alphaFrontLine = null;
             this.omegaHand = null;
+            this.omegaFrontLine = null;
+            this.omegaBackLine = null;
             this.omegaHandCount = 0;
             this.sessionId = string.Empty;
             this.SetNextMove(string.Empty);
@@ -247,6 +253,8 @@ namespace SG03.UI
             this.alphaBackLine = output.alpha_back_line;
             this.alphaFrontLine = output.alpha_front_line;
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
+            if (output.omega_front_line != null) this.omegaFrontLine = output.omega_front_line;
+            if (output.omega_back_line  != null) this.omegaBackLine  = output.omega_back_line;
             this.omegaHandCount = output.omega_hand_count;
             this.SetNextMove(output.next_move);
             this.TryFireGameStart();
@@ -256,7 +264,9 @@ namespace SG03.UI
 
         private void SpawnStatusDelta()
         {
-            this.cardSpawning?.SpawnStatusDelta(this.alphaHand, this.alphaFrontLine, this.alphaBackLine);
+            this.cardSpawning?.SpawnStatusDelta(
+                this.alphaHand, this.alphaFrontLine, this.alphaBackLine,
+                this.omegaFrontLine, this.omegaBackLine);
         }
 
         private void TryFireGameStart()

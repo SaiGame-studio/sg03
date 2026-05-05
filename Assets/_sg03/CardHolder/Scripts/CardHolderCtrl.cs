@@ -30,6 +30,12 @@ namespace SG03
         protected override void ResetValue()
         {
             this.ParseName();
+            this.SetScale();
+        }
+
+        private void SetScale()
+        {
+            this.transform.localScale = new Vector3(7.5f, 0.5f, 10.5f);
         }
 
         // ─── Name parsing ─────────────────────────────────────────────────────────
