@@ -20,6 +20,7 @@ namespace SG03
         public static event Action<Card3DCtrl> HoverEntered;
         public static event Action<Card3DCtrl> HoverExited;
         public static event Action<Card3DCtrl> CardSelected;
+        public static event Action<Card3DCtrl, bool> FaceStateChanged;
 
         // ─── Linked components ────────────────────────────────────────────────────
 
@@ -33,6 +34,7 @@ namespace SG03
         [Header("Identity")]
         [SerializeField] private Owner              cardOwner;
         [SerializeField] private string             codeName;
+        [SerializeField] private string             inventoryItemId;
         [SerializeField] private CardDefinitionData definition;
 
         // ─── Optional external references ─────────────────────────────────────────
@@ -134,8 +136,11 @@ namespace SG03
             this.cardHolder = holder;
             if (this.cardHolder == null) return;
             Location destination = this.cardHolder.HolderLink == Link.front ? Location.in_front : Location.in_back;
-            this.movement.MoveTo(this.cardHolder.transform, destination);
-            if (!hadHolder) this.movement.FaceUpUnknown();
+            if (!hadHolder)
+                this.movement.MoveTo(this.cardHolder.transform, destination, this.RotateZ180);
+            else
+                this.movement.MoveTo(this.cardHolder.transform, destination, null);
+            if (!hadHolder) this.FaceDownUnknown();
         }
 
         /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
@@ -144,6 +149,30 @@ namespace SG03
         /// <summary>Smoothly moves the card to the specified transform, position only (no rotation change).</summary>
         public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
 
+        /// <summary>Rotates the card 180 degrees around the world Z axis.</summary>
+        public void RotateZ180() => this.movement.RotateY180();
+
+        /// <summary>Smoothly rotates the card to face-down using the Unknown axis, without rising.</summary>
+        public void FaceDownUnknown()
+        {
+            this.movement.FaceDownUnknown();
+            FaceStateChanged?.Invoke(this, false);
+        }
+
+        /// <summary>Smoothly rotates the card to face-up.</summary>
+        public void FaceUp()
+        {
+            this.movement.FaceUp();
+            FaceStateChanged?.Invoke(this, true);
+        }
+
+        /// <summary>Smoothly rotates the card to face-down.</summary>
+        public void FaceDown()
+        {
+            this.movement.FaceDown();
+            FaceStateChanged?.Invoke(this, false);
+        }
+
         /// <summary>Moves the card to the full-detail point without changing its logical location.</summary>
         public void MoveToFullDetail(Transform point) => this.movement.MoveToFullDetail(point);
 
@@ -151,11 +180,22 @@ namespace SG03
         public void ReturnFromFullDetail() => this.movement.ReturnFromFullDetail();
 
         /// <summary>Toggles the card between face-up and face-down.</summary>
-        public void ToggleFace() => this.movement.ToggleFace();
+        public void ToggleFace()
+        {
+            if (this.movement.FaceState == FaceState.FaceUp)
+            {
+                this.FaceDown();
+                return;
+            }
+            this.FaceUp();
+        }
 
         /// <summary>Current logical location of this card.</summary>
         public Location Location  => this.movement.Location;
         public bool    IsFlipping => this.movement.IsFlipping;
+        public string  InventoryItemId => this.inventoryItemId;
+
+        public void SetInventoryItemId(string id) { this.inventoryItemId = id; }
 
         /// <summary>The holder this card is currently assigned to, or null if none.</summary>
         public CardHolderCtrl CardHolder => this.cardHolder;

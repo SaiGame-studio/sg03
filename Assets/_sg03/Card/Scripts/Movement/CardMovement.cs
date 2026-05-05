@@ -89,6 +89,12 @@ namespace SG03
         [Tooltip("Ease curve for the flip.")]
         [SerializeField] private Ease flipEase = Ease.InOutQuad;
 
+        [Tooltip("Duration of the Y-axis 180 rotation when a card is placed into a line.")]
+        [SerializeField] private float rotateY180Duration = 0.4f;
+
+        [Tooltip("Ease curve for the Y-axis 180 rotation.")]
+        [SerializeField] private Ease rotateY180Ease = Ease.InOutQuad;
+
         // ─── Runtime state ────────────────────────────────────────────────────────
 
         [Header("State")]
@@ -146,8 +152,9 @@ namespace SG03
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
-        public Location Location   => this.location;
-        public bool    IsFlipping  => this.isFlipping;
+        public Location  Location   => this.location;
+        public bool      IsFlipping  => this.isFlipping;
+        public FaceState FaceState   => this.faceState;
 
         /// <summary>
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position.
@@ -159,7 +166,7 @@ namespace SG03
             this.location = destination;
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
-            this.StartMoveTween(target.position, this.duration, this.ease);
+            this.StartMoveTween(target.position, this.duration, this.ease, null);
             this.transform.DORotateQuaternion(target.rotation, this.duration).SetEase(this.ease);
         }
 
@@ -173,7 +180,20 @@ namespace SG03
             this.location = destination;
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
-            this.StartMoveTween(target.position, this.duration, this.ease);
+            this.StartMoveTween(target.position, this.duration, this.ease, null);
+        }
+
+        /// <summary>
+        /// Smoothly moves the card to the specified world-space <paramref name="target"/> position
+        /// without changing its rotation, then invokes <paramref name="onComplete"/> when the move finishes.
+        /// </summary>
+        public void MoveTo(Transform target, Location destination, System.Action onComplete)
+        {
+            if (this.isFlipping) return;
+            this.location = destination;
+            this.RecordHandAnchor(target, destination);
+            this.KillAllTweens();
+            this.StartMoveTween(target.position, this.duration, this.ease, onComplete);
         }
 
         /// <summary>Smoothly rotates the card to face-up using global euler angles.</summary>
@@ -217,6 +237,13 @@ namespace SG03
                 return;
             }
             this.FaceUp();
+        }
+
+        /// <summary>Rotates the card 180 degrees around the world Y axis.</summary>
+        public void RotateY180()
+        {
+            this.transform.DORotate(new Vector3(0f, 180f, 0f), this.rotateY180Duration, RotateMode.WorldAxisAdd)
+                .SetEase(this.rotateY180Ease);
         }
 
         private void DoFaceFlipNoRise(Vector3 targetEulers, Vector3 axis)
@@ -275,7 +302,7 @@ namespace SG03
             this.preFullDetailPosition = this.transform.position;
             this.preFullDetailRotation = this.transform.rotation;
             this.KillAllTweens();
-            this.StartMoveTween(point.position, this.fullDetailDuration, this.fullDetailEase);
+            this.StartMoveTween(point.position, this.fullDetailDuration, this.fullDetailEase, null);
             this.transform.DORotateQuaternion(point.rotation, this.fullDetailDuration).SetEase(this.fullDetailEase);
         }
 
@@ -286,7 +313,7 @@ namespace SG03
         {
             if (this.isFlipping) return;
             this.KillAllTweens();
-            this.StartMoveTween(this.preFullDetailPosition, this.fullDetailReturnDuration, this.fullDetailReturnEase);
+            this.StartMoveTween(this.preFullDetailPosition, this.fullDetailReturnDuration, this.fullDetailReturnEase, null);
             this.transform.DORotateQuaternion(this.preFullDetailRotation, this.fullDetailReturnDuration).SetEase(this.fullDetailReturnEase);
         }
 
@@ -349,11 +376,12 @@ namespace SG03
             this.yTween = this.transform.DOMoveY(targetY, dur).SetEase(easeType);
         }
 
-        private void StartMoveTween(Vector3 target, float dur, Ease easeType)
+        private void StartMoveTween(Vector3 target, float dur, Ease easeType, System.Action onComplete)
         {
             movingCount++;
             this.moveTween = this.transform.DOMove(target, dur)
                 .SetEase(easeType)
+                .OnComplete(() => onComplete?.Invoke())
                 .OnKill(() => movingCount--);
         }
 

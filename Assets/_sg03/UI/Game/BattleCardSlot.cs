@@ -19,5 +19,6 @@ namespace SG03.UI
         public string inventory_item_id;
         public string item_definition_id;
         public string item_definition_name;
+        public bool   face_up = false;
     }
 }

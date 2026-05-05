@@ -19,7 +19,6 @@ namespace SG03.UI
         [Header("Flags")]
         private bool gameStartFired;
         [SerializeField] private bool isResuming;
-        private bool skipAlphaHandOnce;
 
         [Header("Battle Status Cache — Read Only")]
         [SerializeField][TextArea(5, 20)] private string battleStatusJson;
@@ -31,14 +30,14 @@ namespace SG03.UI
         [SerializeField] private int omegaTheSourceCount;
         [SerializeField] private int alphaTheVoidCount;
         [SerializeField] private int omegaTheVoidCount;
-        [SerializeField] private string[] alphaTheSource;
+        [SerializeField] private BattleCardSlot[] alphaTheSource;
         [SerializeField] private BattleCardSlot[] alphaHand;
         [SerializeField] private BattleCardSlot[] alphaBackLine;
         [SerializeField] private BattleCardSlot[] alphaFrontLine;
 
         [SerializeField] private int alphaCardsDrawn;
         [SerializeField] private int omegaCardsDrawn;
-        [SerializeField] private OmegaInitCardSlot[] omegaHand;
+        [SerializeField] private BattleCardSlot[] omegaHand;
         [SerializeField] private int omegaHandCount;
         [SerializeField] private string sessionId;
         [SerializeField] private NextMoveType nextMove;
@@ -54,13 +53,13 @@ namespace SG03.UI
         public int OmegaTheSourceCount => this.omegaTheSourceCount;
         public int AlphaTheVoidCount => this.alphaTheVoidCount;
         public int OmegaTheVoidCount => this.omegaTheVoidCount;
-        public string[] AlphaTheSource => this.alphaTheSource;
+        public BattleCardSlot[] AlphaTheSource => this.alphaTheSource;
         public BattleCardSlot[] AlphaHand => this.alphaHand;
         public BattleCardSlot[] AlphaBackLine => this.alphaBackLine;
         public BattleCardSlot[] AlphaFrontLine => this.alphaFrontLine;
         public int AlphaCardsDrawn => this.alphaCardsDrawn;
         public int OmegaCardsDrawn => this.omegaCardsDrawn;
-        public OmegaInitCardSlot[] OmegaHand => this.omegaHand;
+        public BattleCardSlot[] OmegaHand => this.omegaHand;
         public int OmegaHandCount => this.omegaHandCount;
         public string SessionId => this.sessionId;
         public NextMoveType NextMove => this.nextMove;
@@ -87,6 +86,38 @@ namespace SG03.UI
             Debug.LogWarning(this.transform.name + ": LoadCardSpawning", this.gameObject);
         }
 
+        private void OnEnable()  => this.SubscribeEvents();
+        private void OnDisable() => this.UnsubscribeEvents();
+
+        private void SubscribeEvents()
+        {
+            Card3DCtrl.FaceStateChanged += this.OnCardFaceStateChanged;
+        }
+
+        private void UnsubscribeEvents()
+        {
+            Card3DCtrl.FaceStateChanged -= this.OnCardFaceStateChanged;
+        }
+
+        private void OnCardFaceStateChanged(Card3DCtrl card, bool faceUp)
+        {
+            this.UpdateSlotFaceUp(this.alphaFrontLine, card.InventoryItemId, faceUp);
+            this.UpdateSlotFaceUp(this.alphaBackLine,  card.InventoryItemId, faceUp);
+        }
+
+        private void UpdateSlotFaceUp(BattleCardSlot[] slots, string inventoryItemId, bool faceUp)
+        {
+            if (slots == null) return;
+            if (string.IsNullOrEmpty(inventoryItemId)) return;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot == null) continue;
+                if (slot.inventory_item_id != inventoryItemId) continue;
+                slot.face_up = faceUp;
+                return;
+            }
+        }
+
         public void ClearData()
         {
             this.battleStatusJson = string.Empty;
@@ -110,7 +141,6 @@ namespace SG03.UI
             this.SetNextMove(string.Empty);
             this.gameStartFired = false;
             this.isResuming = false;
-            this.skipAlphaHandOnce = false;
             this.OnBattleStatusChanged?.Invoke();
         }
 
@@ -240,10 +270,9 @@ namespace SG03.UI
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
             this.omegaHandCount = output.omega_hand_count;
             this.SetNextMove(output.next_move);
+            bool isFirstStatus = !this.gameStartFired;
             this.TryFireGameStart();
-            if (!this.skipAlphaHandOnce)
-                this.cardSpawning?.SpawnAlphaHand(this.alphaHand);
-            this.skipAlphaHandOnce = false;
+            this.cardSpawning?.SpawnBattleStatus(isFirstStatus);
             this.OnBattleStatusChanged?.Invoke();
         }
 
@@ -267,7 +296,6 @@ namespace SG03.UI
             if (output.session_id != null) this.sessionId = output.session_id;
             if (output.next_move != null) this.SetNextMove(output.next_move);
             this.TryFireGameStart();
-            this.skipAlphaHandOnce = false;
             this.FireInitCardsEvent(output);
             this.OnBattleStatusChanged?.Invoke();
         }
@@ -295,7 +323,6 @@ namespace SG03.UI
                 return;
             }
             this.isResuming = true;
-            this.skipAlphaHandOnce = true;
             Debug.Log($"<color=#00CFFF><b>[BattleState] OnGameResume fired — turn={this.turn}, action={this.action}</b></color>");
             OnGameResume?.Invoke();
         }
@@ -319,6 +346,103 @@ namespace SG03.UI
                 case "omega_turn":  return NextMoveType.omega_turn;
                 default:            return NextMoveType.unknown;
             }
+        }
+
+        // ─── Local placement update ───────────────────────────────────────────────
+
+        /// <summary>
+        /// Updates alpha hand, front line, and back line when the player drags a card
+        /// from hand to a front or back line holder on the board.
+        /// </summary>
+        public void MoveCardFromHandToLine(string codeName, Link link, int slotIndex)
+        {
+            BattleCardSlot slot = this.RemoveFromHand(codeName);
+            if (slot == null) return;
+            if (link == Link.front) this.InsertIntoFrontLine(slot, slotIndex);
+            else this.InsertIntoBackLine(slot, slotIndex);
+            this.OnBattleStatusChanged?.Invoke();
+        }
+
+        private BattleCardSlot RemoveFromHand(string codeName)
+        {
+            if (this.alphaHand == null) return null;
+            for (int i = 0; i < this.alphaHand.Length; i++)
+            {
+                if (this.alphaHand[i]?.item_definition_code_name != codeName) continue;
+                BattleCardSlot slot = this.alphaHand[i];
+                this.alphaHand[i] = null;
+                return slot;
+            }
+            return null;
+        }
+
+        private BattleCardSlot RemoveFromLine(Link link, int slotIndex)
+        {
+            BattleCardSlot[] line = link == Link.front ? this.alphaFrontLine : this.alphaBackLine;
+            if (line == null || slotIndex >= line.Length) return null;
+            BattleCardSlot slot = line[slotIndex];
+            line[slotIndex] = null;
+            return slot;
+        }
+
+        private BattleCardSlot GetLineSlot(Link link, int slotIndex)
+        {
+            BattleCardSlot[] line = link == Link.front ? this.alphaFrontLine : this.alphaBackLine;
+            if (line == null || slotIndex >= line.Length) return null;
+            return line[slotIndex];
+        }
+
+        private void SetLineSlot(Link link, int slotIndex, BattleCardSlot slot)
+        {
+            if (link == Link.front)
+                this.alphaFrontLine = this.EnsureSlotCapacity(this.alphaFrontLine, slotIndex);
+            else
+                this.alphaBackLine = this.EnsureSlotCapacity(this.alphaBackLine, slotIndex);
+            BattleCardSlot[] line = link == Link.front ? this.alphaFrontLine : this.alphaBackLine;
+            line[slotIndex] = slot;
+        }
+
+        private void InsertIntoFrontLine(BattleCardSlot slot, int slotIndex)
+        {
+            this.alphaFrontLine = this.EnsureSlotCapacity(this.alphaFrontLine, slotIndex);
+            slot.slot_index = slotIndex;
+            this.alphaFrontLine[slotIndex] = slot;
+        }
+
+        private void InsertIntoBackLine(BattleCardSlot slot, int slotIndex)
+        {
+            this.alphaBackLine = this.EnsureSlotCapacity(this.alphaBackLine, slotIndex);
+            slot.slot_index = slotIndex;
+            this.alphaBackLine[slotIndex] = slot;
+        }
+
+        private BattleCardSlot[] EnsureSlotCapacity(BattleCardSlot[] array, int requiredIndex)
+        {
+            if (array != null && array.Length > requiredIndex) return array;
+            int needed = requiredIndex + 1;
+            BattleCardSlot[] result = new BattleCardSlot[needed];
+            if (array != null) System.Array.Copy(array, result, Mathf.Min(array.Length, needed));
+            return result;
+        }
+
+        /// <summary>Moves a card already on the board from one line slot to an empty slot.</summary>
+        public void MoveCardOnLine(string codeName, Link fromLink, int fromIndex, Link toLink, int toIndex)
+        {
+            BattleCardSlot slot = this.RemoveFromLine(fromLink, fromIndex);
+            if (slot == null) return;
+            if (toLink == Link.front) this.InsertIntoFrontLine(slot, toIndex);
+            else this.InsertIntoBackLine(slot, toIndex);
+            this.OnBattleStatusChanged?.Invoke();
+        }
+
+        /// <summary>Swaps two card slots on the board (front or back line).</summary>
+        public void SwapCardsOnLine(Link linkA, int indexA, Link linkB, int indexB)
+        {
+            BattleCardSlot slotA = this.GetLineSlot(linkA, indexA);
+            BattleCardSlot slotB = this.GetLineSlot(linkB, indexB);
+            this.SetLineSlot(linkA, indexA, slotB);
+            this.SetLineSlot(linkB, indexB, slotA);
+            this.OnBattleStatusChanged?.Invoke();
         }
     }
 }

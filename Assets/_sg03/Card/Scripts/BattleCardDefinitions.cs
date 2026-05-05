@@ -43,6 +43,7 @@ namespace SG03
 
         public CardDefinitionData GetDefinitionByCode(string code)
         {
+            if (string.IsNullOrEmpty(code)) return null;
             CardDefinitionData result = this.definitions.Find(d => d.item_code == code);
             if (result == null) Debug.LogWarning($"<color=#FF4444>[BattleCardDefinitions] Definition NOT FOUND for code '<b>{code}</b>'. Total definitions loaded: {this.definitions.Count}</color>", this);
             return result;

@@ -1,4 +1,5 @@
 using SaiGame.Services;
+using SG03.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,6 +13,9 @@ namespace SG03
         [Header("Holders")]
         [SerializeField] private CardHolderCtrl holderSelected;
         [SerializeField] private CardHolderCtrl holderHover;
+
+        [Header("Battle State")]
+        [SerializeField] private BattleState battleState;
 
         [Header("Full Detail")]
         [SerializeField] private DeskPositionCtrl deskPositions;
@@ -27,9 +31,19 @@ namespace SG03
         protected override void LoadComponents()
         {
             base.LoadComponents();
+            this.LoadBattleState();
             this.LoadDeskPositions();
             this.LoadMarkSelected();
             this.LoadMarkIdlePosition();
+        }
+
+        protected virtual void LoadBattleState()
+        {
+            if (this.battleState != null) return;
+            BattleStateCtrl ctrl = this.GetComponentInParent<BattleStateCtrl>(true);
+            if (ctrl == null) return;
+            this.battleState = ctrl.BattleState;
+            Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
         }
 
         protected virtual void LoadMarkIdlePosition()
@@ -151,7 +165,10 @@ namespace SG03
             if (this.hovered == this.selected) return false;
             if (!this.IsLocationFlippable(this.hovered.Location)) return false;
             if (!this.IsSwapValid()) return false;
+            CardHolderCtrl selectedHolder = this.selected.CardHolder;
+            CardHolderCtrl hoveredHolder  = this.hovered.CardHolder;
             this.SwapSelectedWithHovered();
+            this.NotifyBattleStateOnSwap(selectedHolder, hoveredHolder);
             return true;
         }
 
@@ -292,7 +309,30 @@ namespace SG03
             if (this.selected == null) return;
             if (holder.HeldCard != null) return;
             if (!this.IsPlacementValid(this.selected, holder)) return;
+            Location fromLocation = this.selected.Location;
+            CardHolderCtrl fromHolder = this.selected.CardHolder;
             this.PlaceSelectedIntoEmptyHolder(holder);
+            this.NotifyBattleStateOnPlacement(fromLocation, fromHolder, holder);
+        }
+
+        private void NotifyBattleStateOnPlacement(Location fromLocation, CardHolderCtrl fromHolder, CardHolderCtrl targetHolder)
+        {
+            if (this.battleState == null) return;
+            if (fromLocation == Location.in_hand)
+            {
+                this.battleState.MoveCardFromHandToLine(this.selected.CodeName, targetHolder.HolderLink, targetHolder.Index);
+                return;
+            }
+            if (fromLocation != Location.in_front && fromLocation != Location.in_back) return;
+            if (fromHolder == null) return;
+            this.battleState.MoveCardOnLine(this.selected.CodeName, fromHolder.HolderLink, fromHolder.Index, targetHolder.HolderLink, targetHolder.Index);
+        }
+
+        private void NotifyBattleStateOnSwap(CardHolderCtrl holderA, CardHolderCtrl holderB)
+        {
+            if (this.battleState == null) return;
+            if (holderA == null || holderB == null) return;
+            this.battleState.SwapCardsOnLine(holderA.HolderLink, holderA.Index, holderB.HolderLink, holderB.Index);
         }
 
         private void PlaceSelectedIntoEmptyHolder(CardHolderCtrl targetHolder)
