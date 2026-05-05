@@ -239,11 +239,12 @@ namespace SG03
             this.FaceUp();
         }
 
-        /// <summary>Rotates the card 180 degrees around the world Y axis.</summary>
-        public void RotateY180()
+        /// <summary>Rotates the card 180 degrees around the world Y axis, then invokes <paramref name="onComplete"/>.</summary>
+        public void RotateY180(System.Action onComplete = null)
         {
-            this.transform.DORotate(new Vector3(0f, 180f, 0f), this.rotateY180Duration, RotateMode.WorldAxisAdd)
+            Tween t = this.transform.DORotate(new Vector3(0f, 180f, 0f), this.rotateY180Duration, RotateMode.WorldAxisAdd)
                 .SetEase(this.rotateY180Ease);
+            if (onComplete != null) t.OnComplete(() => onComplete());
         }
 
         private void DoFaceFlipNoRise(Vector3 targetEulers, Vector3 axis)

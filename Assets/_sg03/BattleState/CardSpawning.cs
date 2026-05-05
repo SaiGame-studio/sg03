@@ -24,27 +24,6 @@ namespace SG03
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
-        public void SpawnBattleStatus(bool spawnSource)
-        {
-            if (this.spawnRoutine != null) this.StopCoroutine(this.spawnRoutine);
-            this.spawnRoutine = this.StartCoroutine(this.SpawnBattleStatusRoutine(spawnSource));
-        }
-
-        public void SpawnAlphaHand(BattleCardSlot[] slots)
-        {
-            this.SpawnSlots(slots, this.deskPosition.AlphaHand);
-        }
-
-        public void SpawnAlphaFrontLine(BattleCardSlot[] slots)
-        {
-            this.SpawnSlots(slots, this.deskPosition.AlphaFrontLine);
-        }
-
-        public void SpawnAlphaBackLine(BattleCardSlot[] slots)
-        {
-            this.SpawnSlots(slots, this.deskPosition.AlphaBackLine);
-        }
-
         public void SpawnStatusDelta(BattleCardSlot[] newHand, BattleCardSlot[] newFrontLine, BattleCardSlot[] newBackLine)
         {
             if (this.spawnRoutine != null) this.StopCoroutine(this.spawnRoutine);
@@ -175,10 +154,11 @@ namespace SG03
             card.SetFallbackName(slot.item_definition_name);
             card.LoadCardByCodeName(code);
             card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
-            card.SetCardHolder(holder);
+            card.SetExpose(slot.expose);
+            card.SetCardHolder(holder, () => this.ApplyFaceState(card, slot));
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
-            Debug.Log($"<color=#00FF88><b>[CardSpawning] card_action=<i>{slot.card_action}</i></b> | code=<b>{code}</b> | slot={idx} | location={location}</color>");
+            Debug.Log($"<color=#00FF88><b>[CardSpawning] card_action=<i>{slot.card_action}</i></b> | code=<b>{code}</b> | slot={idx} | location={location} | face_up={slot.face_up} | expose={slot.expose}</color>");
             return true;
         }
 
@@ -217,13 +197,6 @@ namespace SG03
         private Transform ResolveHandTarget(int slotIndex, Transform[] handTargets)
         {
             return slotIndex < handTargets.Length ? handTargets[slotIndex] : this.deskPosition.AlphaSpawnPoint;
-        }
-
-        private CardHolderCtrl FindAlphaHolderByLocation(Location location, int slotIndex)
-        {
-            if (location == Location.in_front) return this.deskPosition.GetAlphaFrontLine(slotIndex);
-            if (location == Location.in_back)  return this.deskPosition.GetAlphaBackLine(slotIndex);
-            return null;
         }
 
         private IEnumerator SpawnNewSourceCardsRoutine(Card3DCtrl prefab)
@@ -287,163 +260,22 @@ namespace SG03
             if (keyToRemove != null) this.slotOccupancy.Remove(keyToRemove);
         }
 
-        private IEnumerator SpawnBattleStatusRoutine(bool spawnSource)
+        private void ApplyFaceState(Card3DCtrl card, BattleCardSlot slot)
         {
-            Card3DCtrl prefab = this.ResolvePrefab();
-            if (prefab == null) yield break;
-            yield return this.WaitForDefinitions();
-            if (spawnSource)
-                yield return this.RunParallel(this.SpawnAlphaSourceRoutine(prefab), this.SpawnOmegaSourceRoutine(prefab));
-            yield return this.RunParallel(
-                this.SpawnAlphaLineRoutine(prefab, this.battleState.AlphaHand, this.deskPosition.AlphaHand, Location.in_hand),
-                this.SpawnOmegaHandRoutine(prefab));
-            yield return this.SpawnAlphaLineRoutine(prefab, this.battleState.AlphaFrontLine, this.deskPosition.AlphaFrontLine, Location.in_front);
-            yield return this.SpawnAlphaLineRoutine(prefab, this.battleState.AlphaBackLine, this.deskPosition.AlphaBackLine, Location.in_back);
-            this.spawnRoutine = null;
+            if (!slot.face_up && !slot.expose) return;
+            this.StartCoroutine(this.WaitForFlipThenFaceUp(card));
         }
 
-        private IEnumerator RunParallel(IEnumerator a, IEnumerator b)
+        private IEnumerator WaitForFlipThenFaceUp(Card3DCtrl card)
         {
-            Coroutine ca = this.StartCoroutine(a);
-            Coroutine cb = this.StartCoroutine(b);
-            yield return ca;
-            yield return cb;
+            yield return new UnityEngine.WaitUntil(() => !card.IsFlipping);
+            card.FaceUp();
         }
 
         private Card3DCtrl ResolvePrefab()
         {
             if (this.cardPool == null) return null;
             return this.cardPool.PoolPrefabs.GetByName(this.prefabName);
-        }
-
-        private IEnumerator SpawnAlphaSourceRoutine(Card3DCtrl prefab)
-        {
-            int count = this.battleState.AlphaTheSourceCount;
-            int spawnedThisFrame = 0;
-            for (int i = 0; i < count; i++)
-            {
-                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
-                if (card == null) continue;
-                card.SetOwner(Owner.alpha);
-                card.MoveAndRotate(this.deskPosition.AlphaTheSource, Location.in_source);
-                spawnedThisFrame++;
-                if (spawnedThisFrame < this.spawnPerFrame) continue;
-                spawnedThisFrame = 0;
-                yield return this.WaitAfterSpawn();
-            }
-        }
-
-        private IEnumerator SpawnOmegaSourceRoutine(Card3DCtrl prefab)
-        {
-            int count = this.battleState.OmegaTheSourceCount;
-            int spawnedThisFrame = 0;
-            for (int i = 0; i < count; i++)
-            {
-                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
-                if (card == null) continue;
-                card.SetOwner(Owner.omega);
-                card.MoveAndRotate(this.deskPosition.OmegaTheSource, Location.in_source);
-                spawnedThisFrame++;
-                if (spawnedThisFrame < this.spawnPerFrame) continue;
-                spawnedThisFrame = 0;
-                yield return this.WaitAfterSpawn();
-            }
-        }
-
-        private IEnumerator SpawnOmegaHandRoutine(Card3DCtrl prefab)
-        {
-            int count = this.battleState.OmegaHandCount;
-            int spawnedThisFrame = 0;
-            for (int i = 0; i < count; i++)
-            {
-                Transform target = this.deskPosition.GetOmegaHand(i);
-                if (target == null) target = this.deskPosition.OmegaSpawnPoint;
-                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
-                if (card == null) continue;
-                card.SetOwner(Owner.omega);
-                card.MoveAndRotate(target, Location.in_hand);
-                spawnedThisFrame++;
-                if (spawnedThisFrame < this.spawnPerFrame) continue;
-                spawnedThisFrame = 0;
-                yield return this.WaitAfterSpawn();
-            }
-        }
-
-        private IEnumerator SpawnAlphaLineRoutine(Card3DCtrl prefab, BattleCardSlot[] slots, Transform[] targets, Location location)
-        {
-            if (slots == null) yield break;
-            int spawnedThisFrame = 0;
-            for (int i = 0; i < slots.Length; i++)
-            {
-                BattleCardSlot slot = slots[i];
-                if (slot == null || string.IsNullOrEmpty(slot.item_definition_code_name)) continue;
-                CardHolderCtrl holder = this.FindAlphaHolderByLocation(location, i);
-                Transform target = holder != null ? holder.transform : (i < targets.Length ? targets[i] : this.deskPosition.AlphaSpawnPoint);
-                if (this.IsSlotOccupied(target)) continue;
-                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
-                if (card == null) continue;
-                card.SetOwner(Owner.alpha);
-                string code = slot.item_definition_code_name;
-                card.SetCodeName(code);
-                card.SetInventoryItemId(slot.inventory_item_id);
-                card.SetFallbackName(slot.item_definition_name);
-                card.LoadCardByCodeName(code);
-                card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
-                card.MoveAndRotate(target, location);
-                this.slotOccupancy[target] = card;
-                if (holder != null) holder.SetCard(card);
-                this.ApplyFaceState(card, slot, location);
-                spawnedThisFrame++;
-                if (spawnedThisFrame < this.spawnPerFrame) continue;
-                spawnedThisFrame = 0;
-                yield return this.WaitAfterSpawn();
-            }
-        }
-
-        private IEnumerator SpawnAlphaLineRoutine(Card3DCtrl prefab, BattleCardSlot[] slots, CardHolderCtrl[] holders, Location location)
-        {
-            if (slots == null) yield break;
-            int spawnedThisFrame = 0;
-            for (int i = 0; i < slots.Length; i++)
-            {
-                BattleCardSlot slot = slots[i];
-                if (slot == null || string.IsNullOrEmpty(slot.item_definition_code_name)) continue;
-                if (i >= holders.Length) continue;
-                CardHolderCtrl holder = holders[i];
-                if (holder == null) continue;
-                Transform target = holder.transform;
-                if (this.IsSlotOccupied(target)) continue;
-                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
-                if (card == null) continue;
-                card.SetOwner(Owner.alpha);
-                string code = slot.item_definition_code_name;
-                card.SetCodeName(code);
-                card.SetInventoryItemId(slot.inventory_item_id);
-                card.SetFallbackName(slot.item_definition_name);
-                card.LoadCardByCodeName(code);
-                card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
-                card.MoveAndRotate(target, location);
-                this.slotOccupancy[target] = card;
-                holder.SetCard(card);
-                this.ApplyFaceState(card, slot, location);
-                spawnedThisFrame++;
-                if (spawnedThisFrame < this.spawnPerFrame) continue;
-                spawnedThisFrame = 0;
-                yield return this.WaitAfterSpawn();
-            }
-        }
-
-        private void ApplyFaceState(Card3DCtrl card, BattleCardSlot slot, Location location)
-        {
-            if (location != Location.in_front && location != Location.in_back) return;
-            this.ApplyFaceState(card, slot.face_up, false);
-        }
-
-        private void ApplyFaceState(Card3DCtrl card, bool faceUp, bool expose)
-        {
-            if (expose) { card.FaceUpUnknown(); return; }
-            if (faceUp) { card.FaceUpUnknown(); return; }
-            card.FaceDownUnknown();
         }
 
         private YieldInstruction WaitAfterSpawn()
@@ -461,52 +293,5 @@ namespace SG03
             return card;
         }
 
-        private void SpawnSlots(BattleCardSlot[] slots, Transform[] positions)
-        {
-            if (this.cardPool == null) return;
-            if (slots == null) return;
-            Card3DCtrl prefab = this.cardPool.PoolPrefabs.GetByName(this.prefabName);
-            if (prefab == null) return;
-            for (int i = 0; i < slots.Length; i++)
-            {
-                Transform targetPos = i < positions.Length ? positions[i] : this.deskPosition.AlphaSpawnPoint;
-                Card3DCtrl card = this.cardPool.Spawn(prefab, targetPos.position);
-                card.transform.rotation = targetPos.rotation;
-                card.SetOwner(Owner.alpha);
-                BattleCardSlot deploySlot = slots[i];
-                if (deploySlot != null)
-                {
-                    card.SetFallbackName(deploySlot.item_definition_name);
-                    card.LoadCardByCodeName(deploySlot.item_definition_code_name);
-                }
-                card.gameObject.SetActive(true);
-            }
-        }
-        private void SpawnSlots(BattleCardSlot[] slots, CardHolderCtrl[] holders)
-        {
-            if (this.cardPool == null) return;
-            if (slots == null) return;
-            Card3DCtrl prefab = this.cardPool.PoolPrefabs.GetByName(this.prefabName);
-            if (prefab == null) return;
-            for (int i = 0; i < slots.Length; i++)
-            {
-                if (i >= holders.Length) break;
-                CardHolderCtrl holder = holders[i];
-                if (holder == null) continue;
-                Transform targetPos = holder.transform;
-                Card3DCtrl card = this.cardPool.Spawn(prefab, targetPos.position);
-                card.transform.rotation = targetPos.rotation;
-                card.SetOwner(Owner.alpha);
-                BattleCardSlot deploySlot = slots[i];
-                if (deploySlot != null)
-                {
-                    card.SetFallbackName(deploySlot.item_definition_name);
-                    card.LoadCardByCodeName(deploySlot.item_definition_code_name);
-                }
-                holder.SetCard(card);
-                if (deploySlot != null) this.ApplyFaceState(card, deploySlot.face_up, false);
-                card.gameObject.SetActive(true);
-            }
-        }
     }
 }

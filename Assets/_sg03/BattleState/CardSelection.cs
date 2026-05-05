@@ -251,6 +251,7 @@ namespace SG03
             if (this.selected == null) return;
             if (this.hovered != this.selected) return;
             if (!this.IsLocationFlippable(this.selected.Location)) return;
+            if (this.selected.Expose && this.selected.FaceState == FaceState.FaceUp) return;
             this.selected.ToggleFace();
         }
 

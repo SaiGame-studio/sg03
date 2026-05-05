@@ -21,6 +21,7 @@ namespace SG03.UI
         public string item_definition_name;
         public string card_action;
         public bool   face_up = false;
+        public bool   expose  = false;
 
         public CardActionType CardAction => ParseCardAction(this.card_action);
 
