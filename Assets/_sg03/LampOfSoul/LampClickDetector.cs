@@ -103,6 +103,7 @@ namespace SG03
         private void OnCardDeploySuccess(string response)
         {
             Debug.Log("<color=#FF88FF><b>[LampClickDetector] Card deploy success</b></color> " + response);
+            this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
         }
 
         private void OnCardDeployError(string error)

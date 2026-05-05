@@ -48,6 +48,12 @@ namespace SG03
         [Header("Omega Back Line")]
         [SerializeField] private Transform[] omegaBackLine = new Transform[LineSize];
 
+        [Header("Alpha Front Line Holders")]
+        [SerializeField] private CardHolderCtrl[] alphaFrontHolders = new CardHolderCtrl[LineSize];
+
+        [Header("Alpha Back Line Holders")]
+        [SerializeField] private CardHolderCtrl[] alphaBackHolders = new CardHolderCtrl[LineSize];
+
         [Header("Test Cards")]
         [SerializeField] private List<Card3DCtrl> testCards = new();
 
@@ -95,6 +101,8 @@ namespace SG03
         public Transform GetAlphaBackLine(int index)  => this.GetSlot(this.alphaBackLine, index);
         public Transform GetOmegaFrontLine(int index) => this.GetSlot(this.omegaFrontLine, index);
         public Transform GetOmegaBackLine(int index)  => this.GetSlot(this.omegaBackLine, index);
+        public CardHolderCtrl GetAlphaFrontHolder(int index) => this.GetHolder(this.alphaFrontHolders, index);
+        public CardHolderCtrl GetAlphaBackHolder(int index)  => this.GetHolder(this.alphaBackHolders, index);
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -117,6 +125,8 @@ namespace SG03
             this.LoadAlphaBackLine();
             this.LoadOmegaFrontLine();
             this.LoadOmegaBackLine();
+            this.LoadAlphaFrontHolders();
+            this.LoadAlphaBackHolders();
             this.LoadTestCards();
         }
 
@@ -232,6 +242,42 @@ namespace SG03
             Debug.LogWarning(this.transform.name + ": LoadOmegaBackLine", this.gameObject);
         }
 
+        protected virtual void LoadAlphaFrontHolders()
+        {
+            if (this.IsHoldersFilled(this.alphaFrontHolders)) return;
+            this.LoadHoldersByOwnerAndLink(this.alphaFrontHolders, Owner.alpha, Link.front);
+            Debug.LogWarning(this.transform.name + ": LoadAlphaFrontHolders", this.gameObject);
+        }
+
+        protected virtual void LoadAlphaBackHolders()
+        {
+            if (this.IsHoldersFilled(this.alphaBackHolders)) return;
+            this.LoadHoldersByOwnerAndLink(this.alphaBackHolders, Owner.alpha, Link.back);
+            Debug.LogWarning(this.transform.name + ": LoadAlphaBackHolders", this.gameObject);
+        }
+
+        private void LoadHoldersByOwnerAndLink(CardHolderCtrl[] holders, Owner owner, Link link)
+        {
+            CardHolderCtrl[] all = Object.FindObjectsByType<CardHolderCtrl>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (CardHolderCtrl holder in all)
+            {
+                if (holder.HolderOwner != owner) continue;
+                if (holder.HolderLink != link) continue;
+                int idx = holder.Index;
+                if (idx < 0 || idx >= holders.Length) continue;
+                holders[idx] = holder;
+            }
+        }
+
+        private bool IsHoldersFilled(CardHolderCtrl[] holders)
+        {
+            foreach (CardHolderCtrl h in holders)
+            {
+                if (h == null) return false;
+            }
+            return true;
+        }
+
         protected virtual void LoadTestCards()
         {
             if (this.testCards.Count > 0) return;
@@ -281,6 +327,12 @@ namespace SG03
         {
             if (index < 0 || index >= slots.Length) return null;
             return slots[index];
+        }
+
+        private CardHolderCtrl GetHolder(CardHolderCtrl[] holders, int index)
+        {
+            if (index < 0 || index >= holders.Length) return null;
+            return holders[index];
         }
     }
 }

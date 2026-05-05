@@ -60,26 +60,19 @@ namespace SG03
 
         private void Subscribe()
         {
-            BattleState.OnGameStart      += this.OnGameStart;
-            BattleState.OnGameResume     += this.OnGameResume;
-            BattleState.OnNextMoveChanged += this.OnNextMoveChanged;
+            BattleState.OnGameStart       += this.OnGameStart;
+            BattleState.OnNextMoveChanged  += this.OnNextMoveChanged;
         }
 
         private void Unsubscribe()
         {
-            BattleState.OnGameStart      -= this.OnGameStart;
-            BattleState.OnGameResume     -= this.OnGameResume;
-            BattleState.OnNextMoveChanged -= this.OnNextMoveChanged;
+            BattleState.OnGameStart       -= this.OnGameStart;
+            BattleState.OnNextMoveChanged  -= this.OnNextMoveChanged;
         }
 
         // ─── Event handlers ───────────────────────────────────────────────────────
 
         private void OnGameStart()
-        {
-            this.CallInitPosition();
-        }
-
-        private void OnGameResume()
         {
             this.CallInitPosition();
         }

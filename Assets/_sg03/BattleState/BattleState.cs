@@ -18,7 +18,6 @@ namespace SG03.UI
         
         [Header("Flags")]
         private bool gameStartFired;
-        [SerializeField] private bool isResuming;
 
         [Header("Battle Status Cache — Read Only")]
         [SerializeField][TextArea(5, 20)] private string battleStatusJson;
@@ -35,8 +34,6 @@ namespace SG03.UI
         [SerializeField] private BattleCardSlot[] alphaBackLine;
         [SerializeField] private BattleCardSlot[] alphaFrontLine;
 
-        [SerializeField] private int alphaCardsDrawn;
-        [SerializeField] private int omegaCardsDrawn;
         [SerializeField] private BattleCardSlot[] omegaHand;
         [SerializeField] private int omegaHandCount;
         [SerializeField] private string sessionId;
@@ -57,20 +54,14 @@ namespace SG03.UI
         public BattleCardSlot[] AlphaHand => this.alphaHand;
         public BattleCardSlot[] AlphaBackLine => this.alphaBackLine;
         public BattleCardSlot[] AlphaFrontLine => this.alphaFrontLine;
-        public int AlphaCardsDrawn => this.alphaCardsDrawn;
-        public int OmegaCardsDrawn => this.omegaCardsDrawn;
         public BattleCardSlot[] OmegaHand => this.omegaHand;
         public int OmegaHandCount => this.omegaHandCount;
         public string SessionId => this.sessionId;
         public NextMoveType NextMove => this.nextMove;
         public int AlphaHandRemaining => this.alphaHandRemaining;
 
-        public bool IsResuming => this.isResuming;
-
         public event Action OnBattleStatusChanged;
         public static event Action OnGameStart;
-        public static event Action OnGameResume;
-        public static event Action<InitCardsResult> OnInitCards;
         public static event Action<NextMoveType> OnNextMoveChanged;
 
         protected override void LoadComponents()
@@ -133,14 +124,12 @@ namespace SG03.UI
             this.alphaHand = null;
             this.alphaBackLine = null;
             this.alphaFrontLine = null;
-            this.alphaCardsDrawn = 0;
-            this.omegaCardsDrawn = 0;
             this.omegaHand = null;
             this.omegaHandCount = 0;
             this.sessionId = string.Empty;
             this.SetNextMove(string.Empty);
             this.gameStartFired = false;
-            this.isResuming = false;
+            this.cardSpawning?.ClearSourceRegistry();
             this.OnBattleStatusChanged?.Invoke();
         }
 
@@ -153,16 +142,6 @@ namespace SG03.UI
             if (string.IsNullOrWhiteSpace(rawJson)) return;
             this.battleStatusJson = BeautifyJson(rawJson);
             this.ParseAndApplyBattleStatus(rawJson);
-        }
-
-        /// <summary>
-        /// Called by any script that receives a raw init_cards JSON response.
-        /// Parses and caches all returned fields. Fields absent from the response are left unchanged.
-        /// </summary>
-        public void UpdateFromInitCards(string rawJson)
-        {
-            if (string.IsNullOrWhiteSpace(rawJson)) return;
-            this.ParseAndApplyInitCards(rawJson);
         }
 
         /// <summary>
@@ -270,61 +249,22 @@ namespace SG03.UI
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
             this.omegaHandCount = output.omega_hand_count;
             this.SetNextMove(output.next_move);
-            bool isFirstStatus = !this.gameStartFired;
             this.TryFireGameStart();
-            this.cardSpawning?.SpawnBattleStatus(isFirstStatus);
+            this.SpawnStatusDelta();
             this.OnBattleStatusChanged?.Invoke();
         }
 
-        private void ParseAndApplyInitCards(string rawJson)
+        private void SpawnStatusDelta()
         {
-            InitCardsScriptResponse response = JsonUtility.FromJson<InitCardsScriptResponse>(rawJson);
-            if (response == null) return;
-            if (response.output == null) return;
-            this.ApplyInitCardsOutput(response.output);
-        }
-
-        private void ApplyInitCardsOutput(InitCardsOutput output)
-        {
-            this.alphaCardsDrawn = output.alpha_cards_drawn;
-            this.omegaCardsDrawn = output.omega_cards_drawn;
-            this.alphaTheSourceCount = output.alpha_the_source_count;
-            this.omegaTheSourceCount = output.omega_the_source_count;
-            if (output.alpha_hand != null) this.alphaHand = output.alpha_hand;
-            if (output.omega_hand != null) this.omegaHand = output.omega_hand;
-            this.omegaHandCount = output.omega_hand_count;
-            if (output.session_id != null) this.sessionId = output.session_id;
-            if (output.next_move != null) this.SetNextMove(output.next_move);
-            this.TryFireGameStart();
-            this.FireInitCardsEvent(output);
-            this.OnBattleStatusChanged?.Invoke();
-        }
-
-        private void FireInitCardsEvent(InitCardsOutput output)
-        {
-            InitCardsResult result = new InitCardsResult
-            {
-                AlphaCardsAddedToHand = output.alpha_cards_drawn,
-                AlphaCardsRemovedFromSource = output.alpha_cards_drawn,
-                OmegaCardsAddedToHand = output.omega_cards_drawn,
-                OmegaCardsRemovedFromSource = output.omega_cards_drawn
-            };
-            OnInitCards?.Invoke(result);
+            this.cardSpawning?.SpawnStatusDelta(this.alphaHand, this.alphaFrontLine, this.alphaBackLine);
         }
 
         private void TryFireGameStart()
         {
             if (this.gameStartFired) return;
             this.gameStartFired = true;
-            if (this.turn == 1 && this.action == 1)
-            {
-                Debug.Log("<color=#00FF88><b>[BattleState] OnGameStart fired — turn=1, action=1</b></color>");
-                OnGameStart?.Invoke();
-                return;
-            }
-            this.isResuming = true;
-            Debug.Log($"<color=#00CFFF><b>[BattleState] OnGameResume fired — turn={this.turn}, action={this.action}</b></color>");
-            OnGameResume?.Invoke();
+            Debug.Log($"<color=#00FF88><b>[BattleState] OnGameStart fired — turn={this.turn}, action={this.action}</b></color>");
+            OnGameStart?.Invoke();
         }
 
         private void SetNextMove(string value)

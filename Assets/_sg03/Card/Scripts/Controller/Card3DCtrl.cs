@@ -159,6 +159,13 @@ namespace SG03
             FaceStateChanged?.Invoke(this, false);
         }
 
+        /// <summary>Smoothly rotates the card to face-up using the Unknown axis, without rising.</summary>
+        public void FaceUpUnknown()
+        {
+            this.movement.FaceUpUnknown();
+            FaceStateChanged?.Invoke(this, true);
+        }
+
         /// <summary>Smoothly rotates the card to face-up.</summary>
         public void FaceUp()
         {
