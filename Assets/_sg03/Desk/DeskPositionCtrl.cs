@@ -23,32 +23,23 @@ namespace SG03
         [SerializeField] private Transform omegaTheVoid;
         [SerializeField] private Transform omegaSpawnPoint;
 
-        [Header("Card Deploy")]
-        [SerializeField] private Transform cardDeployPosition;
-
         [Header("Lamp Positions")]
         [SerializeField] private Transform alphaLampPosition;
         [SerializeField] private Transform omegaLampPosition;
+        [SerializeField] private Transform cardDeployPosition;
 
-        [Header("Alpha Hand")]
         [SerializeField] private Transform[] alphaHand = new Transform[LineSize];
 
-        [Header("Omega Hand")]
         [SerializeField] private Transform[] omegaHand = new Transform[LineSize];
 
-        [Header("Alpha Front Line")]
         [SerializeField] private CardHolderCtrl[] alphaFrontLine = new CardHolderCtrl[LineSize];
 
-        [Header("Alpha Back Line")]
         [SerializeField] private CardHolderCtrl[] alphaBackLine = new CardHolderCtrl[LineSize];
 
-        [Header("Omega Front Line")]
         [SerializeField] private CardHolderCtrl[] omegaFrontLine = new CardHolderCtrl[LineSize];
 
-        [Header("Omega Back Line")]
         [SerializeField] private CardHolderCtrl[] omegaBackLine = new CardHolderCtrl[LineSize];
 
-        [Header("Test Cards")]
         [SerializeField] private List<Card3DCtrl> testCards = new();
 
         // ─── Public API ───────────────────────────────────────────────────────────
