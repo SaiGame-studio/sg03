@@ -37,22 +37,16 @@ namespace SG03
         [SerializeField] private Transform[] omegaHand = new Transform[LineSize];
 
         [Header("Alpha Front Line")]
-        [SerializeField] private Transform[] alphaFrontLine = new Transform[LineSize];
+        [SerializeField] private CardHolderCtrl[] alphaFrontLine = new CardHolderCtrl[LineSize];
 
         [Header("Alpha Back Line")]
-        [SerializeField] private Transform[] alphaBackLine = new Transform[LineSize];
+        [SerializeField] private CardHolderCtrl[] alphaBackLine = new CardHolderCtrl[LineSize];
 
         [Header("Omega Front Line")]
-        [SerializeField] private Transform[] omegaFrontLine = new Transform[LineSize];
+        [SerializeField] private CardHolderCtrl[] omegaFrontLine = new CardHolderCtrl[LineSize];
 
         [Header("Omega Back Line")]
-        [SerializeField] private Transform[] omegaBackLine = new Transform[LineSize];
-
-        [Header("Alpha Front Line Holders")]
-        [SerializeField] private CardHolderCtrl[] alphaFrontHolders = new CardHolderCtrl[LineSize];
-
-        [Header("Alpha Back Line Holders")]
-        [SerializeField] private CardHolderCtrl[] alphaBackHolders = new CardHolderCtrl[LineSize];
+        [SerializeField] private CardHolderCtrl[] omegaBackLine = new CardHolderCtrl[LineSize];
 
         [Header("Test Cards")]
         [SerializeField] private List<Card3DCtrl> testCards = new();
@@ -71,10 +65,10 @@ namespace SG03
         public Transform OmegaLampPosition  => this.omegaLampPosition;
         public Transform[] AlphaHand      => this.alphaHand;
         public Transform[] OmegaHand      => this.omegaHand;
-        public Transform[] AlphaFrontLine => this.alphaFrontLine;
-        public Transform[] AlphaBackLine  => this.alphaBackLine;
-        public Transform[] OmegaFrontLine => this.omegaFrontLine;
-        public Transform[] OmegaBackLine  => this.omegaBackLine;
+        public CardHolderCtrl[] AlphaFrontLine => this.alphaFrontLine;
+        public CardHolderCtrl[] AlphaBackLine  => this.alphaBackLine;
+        public CardHolderCtrl[] OmegaFrontLine => this.omegaFrontLine;
+        public CardHolderCtrl[] OmegaBackLine  => this.omegaBackLine;
         public List<Card3DCtrl> TestCards  => this.testCards;
 
         public void ToggleTestCards()
@@ -97,12 +91,10 @@ namespace SG03
 
         public Transform GetAlphaHand(int index)      => this.GetSlot(this.alphaHand, index);
         public Transform GetOmegaHand(int index)      => this.GetSlot(this.omegaHand, index);
-        public Transform GetAlphaFrontLine(int index) => this.GetSlot(this.alphaFrontLine, index);
-        public Transform GetAlphaBackLine(int index)  => this.GetSlot(this.alphaBackLine, index);
-        public Transform GetOmegaFrontLine(int index) => this.GetSlot(this.omegaFrontLine, index);
-        public Transform GetOmegaBackLine(int index)  => this.GetSlot(this.omegaBackLine, index);
-        public CardHolderCtrl GetAlphaFrontHolder(int index) => this.GetHolder(this.alphaFrontHolders, index);
-        public CardHolderCtrl GetAlphaBackHolder(int index)  => this.GetHolder(this.alphaBackHolders, index);
+        public CardHolderCtrl GetAlphaFrontLine(int index) => this.GetHolder(this.alphaFrontLine, index);
+        public CardHolderCtrl GetAlphaBackLine(int index)  => this.GetHolder(this.alphaBackLine, index);
+        public CardHolderCtrl GetOmegaFrontLine(int index) => this.GetHolder(this.omegaFrontLine, index);
+        public CardHolderCtrl GetOmegaBackLine(int index)  => this.GetHolder(this.omegaBackLine, index);
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -125,8 +117,6 @@ namespace SG03
             this.LoadAlphaBackLine();
             this.LoadOmegaFrontLine();
             this.LoadOmegaBackLine();
-            this.LoadAlphaFrontHolders();
-            this.LoadAlphaBackHolders();
             this.LoadTestCards();
         }
 
@@ -216,44 +206,30 @@ namespace SG03
 
         protected virtual void LoadAlphaFrontLine()
         {
-            if (this.IsSlotsFilled(this.alphaFrontLine)) return;
-            this.LoadOrCreateSlots(this.alphaFrontLine, "AlphaFrontLine");
+            if (this.IsHoldersFilled(this.alphaFrontLine)) return;
+            this.LoadHoldersByOwnerAndLink(this.alphaFrontLine, Owner.alpha, Link.front);
             Debug.LogWarning(this.transform.name + ": LoadAlphaFrontLine", this.gameObject);
         }
 
         protected virtual void LoadAlphaBackLine()
         {
-            if (this.IsSlotsFilled(this.alphaBackLine)) return;
-            this.LoadOrCreateSlots(this.alphaBackLine, "AlphaBackLine");
+            if (this.IsHoldersFilled(this.alphaBackLine)) return;
+            this.LoadHoldersByOwnerAndLink(this.alphaBackLine, Owner.alpha, Link.back);
             Debug.LogWarning(this.transform.name + ": LoadAlphaBackLine", this.gameObject);
         }
 
         protected virtual void LoadOmegaFrontLine()
         {
-            if (this.IsSlotsFilled(this.omegaFrontLine)) return;
-            this.LoadOrCreateSlots(this.omegaFrontLine, "OmegaFrontLine");
+            if (this.IsHoldersFilled(this.omegaFrontLine)) return;
+            this.LoadHoldersByOwnerAndLink(this.omegaFrontLine, Owner.omega, Link.front);
             Debug.LogWarning(this.transform.name + ": LoadOmegaFrontLine", this.gameObject);
         }
 
         protected virtual void LoadOmegaBackLine()
         {
-            if (this.IsSlotsFilled(this.omegaBackLine)) return;
-            this.LoadOrCreateSlots(this.omegaBackLine, "OmegaBackLine");
+            if (this.IsHoldersFilled(this.omegaBackLine)) return;
+            this.LoadHoldersByOwnerAndLink(this.omegaBackLine, Owner.omega, Link.back);
             Debug.LogWarning(this.transform.name + ": LoadOmegaBackLine", this.gameObject);
-        }
-
-        protected virtual void LoadAlphaFrontHolders()
-        {
-            if (this.IsHoldersFilled(this.alphaFrontHolders)) return;
-            this.LoadHoldersByOwnerAndLink(this.alphaFrontHolders, Owner.alpha, Link.front);
-            Debug.LogWarning(this.transform.name + ": LoadAlphaFrontHolders", this.gameObject);
-        }
-
-        protected virtual void LoadAlphaBackHolders()
-        {
-            if (this.IsHoldersFilled(this.alphaBackHolders)) return;
-            this.LoadHoldersByOwnerAndLink(this.alphaBackHolders, Owner.alpha, Link.back);
-            Debug.LogWarning(this.transform.name + ": LoadAlphaBackHolders", this.gameObject);
         }
 
         private void LoadHoldersByOwnerAndLink(CardHolderCtrl[] holders, Owner owner, Link link)
