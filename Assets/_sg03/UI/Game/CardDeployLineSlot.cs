@@ -11,5 +11,6 @@ namespace SG03.UI
     {
         public string inventory_item_id;
         public bool   face_up;
+        public int    slot_index;
     }
 }

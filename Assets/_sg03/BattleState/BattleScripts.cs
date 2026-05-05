@@ -156,7 +156,8 @@ namespace SG03
                 result[i] = new CardDeployLineSlot
                 {
                     inventory_item_id = slot?.inventory_item_id ?? string.Empty,
-                    face_up           = slot?.face_up ?? false
+                    face_up           = slot?.face_up ?? false,
+                    slot_index        = slot?.slot_index ?? i
                 };
             }
             return result;
@@ -170,7 +171,7 @@ namespace SG03
             {
                 if (i > 0) sb.Append(",");
                 string faceUpStr = slots[i].face_up ? "true" : "false";
-                sb.Append($"{{\"inventory_item_id\":\"{slots[i].inventory_item_id}\",\"face_up\":{faceUpStr}}}");
+                sb.Append($"{{\"inventory_item_id\":\"{slots[i].inventory_item_id}\",\"face_up\":{faceUpStr},\"slot_index\":{slots[i].slot_index}}}");
             }
             sb.Append("]");
             return sb.ToString();
