@@ -21,6 +21,8 @@ namespace SG03
         private readonly Dictionary<string, Card3DCtrl>    sourceCardRegistry = new Dictionary<string, Card3DCtrl>();
         private readonly Dictionary<string, Card3DCtrl>    handCardRegistry   = new Dictionary<string, Card3DCtrl>();
         private readonly Dictionary<Transform, Card3DCtrl> slotOccupancy      = new Dictionary<Transform, Card3DCtrl>();
+        private int omegaSourceSpawnedCount = 0;
+        private int omegaVoidSpawnedCount   = 0;
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
@@ -35,6 +37,8 @@ namespace SG03
             this.sourceCardRegistry.Clear();
             this.handCardRegistry.Clear();
             this.slotOccupancy.Clear();
+            this.omegaSourceSpawnedCount = 0;
+            this.omegaVoidSpawnedCount   = 0;
         }
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
@@ -97,7 +101,9 @@ namespace SG03
             Card3DCtrl prefab = this.ResolvePrefab();
             if (prefab == null) yield break;
             yield return this.WaitForDefinitions();
-            yield return this.SpawnNewSourceCardsRoutine(prefab);
+            yield return this.RunConcurrent(
+                this.SpawnNewSourceCardsRoutine(prefab),
+                this.SpawnOmegaSequentialRoutine(prefab));
             BattleCardSlot[] allSlots = this.CombineSlots(newHand, newFrontLine, newBackLine);
             yield return this.DispatchSlotsByAction(prefab, allSlots);
             this.spawnRoutine = null;
@@ -225,6 +231,100 @@ namespace SG03
                 spawnedThisFrame = 0;
                 yield return this.WaitAfterSpawn();
             }
+        }
+
+        private IEnumerator SpawnOmegaSequentialRoutine(Card3DCtrl prefab)
+        {
+            yield return this.SpawnOmegaSourceCardsRoutine(prefab);
+            yield return this.SpawnOmegaVoidCardsRoutine(prefab);
+            yield return this.SpawnOmegaHandSlotsRoutine(prefab);
+        }
+
+        private IEnumerator RunConcurrent(IEnumerator routineA, IEnumerator routineB)
+        {
+            int remaining = 2;
+            this.StartCoroutine(this.WrapDone(routineA, () => remaining--));
+            this.StartCoroutine(this.WrapDone(routineB, () => remaining--));
+            yield return new UnityEngine.WaitUntil(() => remaining <= 0);
+        }
+
+        private IEnumerator WrapDone(IEnumerator routine, System.Action onComplete)
+        {
+            yield return this.StartCoroutine(routine);
+            onComplete();
+        }
+
+        private IEnumerator SpawnOmegaSourceCardsRoutine(Card3DCtrl prefab)
+        {
+            int count = this.battleState?.OmegaTheSourceCount ?? 0;
+            int spawnedThisFrame = 0;
+            while (this.omegaSourceSpawnedCount < count)
+            {
+                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+                if (card == null) break;
+                card.SetOwner(Owner.omega);
+                card.MoveAndRotate(this.deskPosition.OmegaTheSource, Location.in_source);
+                this.omegaSourceSpawnedCount++;
+                spawnedThisFrame++;
+                if (spawnedThisFrame < this.spawnPerFrame) continue;
+                spawnedThisFrame = 0;
+                yield return this.WaitAfterSpawn();
+            }
+        }
+
+        private IEnumerator SpawnOmegaVoidCardsRoutine(Card3DCtrl prefab)
+        {
+            int count = this.battleState?.OmegaTheVoidCount ?? 0;
+            int spawnedThisFrame = 0;
+            while (this.omegaVoidSpawnedCount < count)
+            {
+                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+                if (card == null) break;
+                card.SetOwner(Owner.omega);
+                card.MoveAndRotate(this.deskPosition.OmegaTheVoid, Location.in_void);
+                this.omegaVoidSpawnedCount++;
+                spawnedThisFrame++;
+                if (spawnedThisFrame < this.spawnPerFrame) continue;
+                spawnedThisFrame = 0;
+                yield return this.WaitAfterSpawn();
+            }
+        }
+
+        private IEnumerator SpawnOmegaHandSlotsRoutine(Card3DCtrl prefab)
+        {
+            BattleCardSlot[] slots = this.battleState?.OmegaHand;
+            if (slots == null) yield break;
+            int spawnedThisFrame = 0;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot == null) continue;
+                if (slot.CardAction != CardActionType.draw_from_source_to_hand) continue;
+                bool spawned = this.DrawOmegaSlotToHand(prefab, slot);
+                if (!spawned) continue;
+                spawnedThisFrame++;
+                if (spawnedThisFrame < this.spawnPerFrame) continue;
+                spawnedThisFrame = 0;
+                yield return this.WaitAfterSpawn();
+            }
+        }
+
+        private bool DrawOmegaSlotToHand(Card3DCtrl prefab, BattleCardSlot slot)
+        {
+            int idx = slot.slot_index;
+            Transform target = this.ResolveHandTarget(idx, this.deskPosition.OmegaHand);
+            if (this.IsSlotOccupied(target)) return false;
+            Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+            if (card == null) return false;
+            card.SetOwner(Owner.omega);
+            string code = slot.item_definition_code_name;
+            card.SetCodeName(code);
+            card.SetInventoryItemId(slot.inventory_item_id);
+            card.SetFallbackName(slot.item_definition_name);
+            card.LoadCardByCodeName(code);
+            card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+            card.MoveAndRotate(target, Location.in_hand);
+            this.slotOccupancy[target] = card;
+            return true;
         }
 
         private Card3DCtrl ResolveOrSpawnCard(Card3DCtrl prefab, BattleCardSlot slot)
