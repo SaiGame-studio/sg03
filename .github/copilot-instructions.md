@@ -52,6 +52,7 @@
 - Ctrl classes (`SaiBehaviour` subclasses ending in `Ctrl`) must follow the `LoadComponents()` + `Load<X>()` pattern with null guard and `Debug.LogWarning`.
 - Do not aggregate multiple unrelated classes into one generic loader (for example `LoadManagers`, `LoadAll`, `LoadChildComponents`).
 - Each `[SerializeField]` reference must have its own dedicated `Load<X>()` method (one reference -> one loader method).
+- **Never resolve a reference via a Singleton** (e.g. `SaiServer.Instance`) inside any `Load<X>()` method. Use scene hierarchy APIs only (`GetComponent`, `GetComponentInChildren`, `GetComponentInParent`, `FindFirstObjectByType`).
 - See skill: `unity-ctrl-pattern`.
 
 ## C# Compile Check Before Delivery

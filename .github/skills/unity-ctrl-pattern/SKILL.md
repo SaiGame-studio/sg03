@@ -55,6 +55,7 @@ protected virtual void LoadCardLoader()
 - `LoadComponents()` may orchestrate many `Load<X>()` calls, but each `Load<X>()` must assign only one reference type.
 - Sibling components must **not** resolve each other. The Ctrl class is the single owner of all links.
 - `GetComponent` is only called inside `Load<X>()` — never anywhere else.
+- **Never resolve a reference via a Singleton** (e.g. `SaiServer.Instance`, `GameManager.Instance`) inside any `Load<X>()` method. All references must come from the scene hierarchy (`GetComponent`, `GetComponentInChildren`, `GetComponentInParent`, `FindFirstObjectByType`). Singleton access belongs in runtime methods, not in component wiring.
 
 ## Checklist
 
@@ -66,6 +67,7 @@ protected virtual void LoadCardLoader()
 - [ ] No generic loader method that assigns multiple unrelated references in one method.
 - [ ] No `GetComponent` call outside a `Load<X>()` method.
 - [ ] No sibling component resolves its own references at runtime.
+- [ ] No Singleton access (e.g. `X.Instance`) inside any `Load<X>()` method.
 
 ## WRONG — Direct wiring without pattern
 

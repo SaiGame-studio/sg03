@@ -23,32 +23,23 @@ namespace SG03
         [SerializeField] private Transform omegaTheVoid;
         [SerializeField] private Transform omegaSpawnPoint;
 
-        [Header("Card Deploy")]
-        [SerializeField] private Transform cardDeployPosition;
-
         [Header("Lamp Positions")]
         [SerializeField] private Transform alphaLampPosition;
         [SerializeField] private Transform omegaLampPosition;
+        [SerializeField] private Transform cardDeployPosition;
 
-        [Header("Alpha Hand")]
         [SerializeField] private Transform[] alphaHand = new Transform[LineSize];
 
-        [Header("Omega Hand")]
         [SerializeField] private Transform[] omegaHand = new Transform[LineSize];
 
-        [Header("Alpha Front Line")]
-        [SerializeField] private Transform[] alphaFrontLine = new Transform[LineSize];
+        [SerializeField] private CardHolderCtrl[] alphaFrontLine = new CardHolderCtrl[LineSize];
 
-        [Header("Alpha Back Line")]
-        [SerializeField] private Transform[] alphaBackLine = new Transform[LineSize];
+        [SerializeField] private CardHolderCtrl[] alphaBackLine = new CardHolderCtrl[LineSize];
 
-        [Header("Omega Front Line")]
-        [SerializeField] private Transform[] omegaFrontLine = new Transform[LineSize];
+        [SerializeField] private CardHolderCtrl[] omegaFrontLine = new CardHolderCtrl[LineSize];
 
-        [Header("Omega Back Line")]
-        [SerializeField] private Transform[] omegaBackLine = new Transform[LineSize];
+        [SerializeField] private CardHolderCtrl[] omegaBackLine = new CardHolderCtrl[LineSize];
 
-        [Header("Test Cards")]
         [SerializeField] private List<Card3DCtrl> testCards = new();
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -65,10 +56,10 @@ namespace SG03
         public Transform OmegaLampPosition  => this.omegaLampPosition;
         public Transform[] AlphaHand      => this.alphaHand;
         public Transform[] OmegaHand      => this.omegaHand;
-        public Transform[] AlphaFrontLine => this.alphaFrontLine;
-        public Transform[] AlphaBackLine  => this.alphaBackLine;
-        public Transform[] OmegaFrontLine => this.omegaFrontLine;
-        public Transform[] OmegaBackLine  => this.omegaBackLine;
+        public CardHolderCtrl[] AlphaFrontLine => this.alphaFrontLine;
+        public CardHolderCtrl[] AlphaBackLine  => this.alphaBackLine;
+        public CardHolderCtrl[] OmegaFrontLine => this.omegaFrontLine;
+        public CardHolderCtrl[] OmegaBackLine  => this.omegaBackLine;
         public List<Card3DCtrl> TestCards  => this.testCards;
 
         public void ToggleTestCards()
@@ -91,10 +82,10 @@ namespace SG03
 
         public Transform GetAlphaHand(int index)      => this.GetSlot(this.alphaHand, index);
         public Transform GetOmegaHand(int index)      => this.GetSlot(this.omegaHand, index);
-        public Transform GetAlphaFrontLine(int index) => this.GetSlot(this.alphaFrontLine, index);
-        public Transform GetAlphaBackLine(int index)  => this.GetSlot(this.alphaBackLine, index);
-        public Transform GetOmegaFrontLine(int index) => this.GetSlot(this.omegaFrontLine, index);
-        public Transform GetOmegaBackLine(int index)  => this.GetSlot(this.omegaBackLine, index);
+        public CardHolderCtrl GetAlphaFrontLine(int index) => this.GetHolder(this.alphaFrontLine, index);
+        public CardHolderCtrl GetAlphaBackLine(int index)  => this.GetHolder(this.alphaBackLine, index);
+        public CardHolderCtrl GetOmegaFrontLine(int index) => this.GetHolder(this.omegaFrontLine, index);
+        public CardHolderCtrl GetOmegaBackLine(int index)  => this.GetHolder(this.omegaBackLine, index);
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -206,30 +197,52 @@ namespace SG03
 
         protected virtual void LoadAlphaFrontLine()
         {
-            if (this.IsSlotsFilled(this.alphaFrontLine)) return;
-            this.LoadOrCreateSlots(this.alphaFrontLine, "AlphaFrontLine");
+            if (this.IsHoldersFilled(this.alphaFrontLine)) return;
+            this.LoadHoldersByOwnerAndLink(this.alphaFrontLine, Owner.alpha, Link.front);
             Debug.LogWarning(this.transform.name + ": LoadAlphaFrontLine", this.gameObject);
         }
 
         protected virtual void LoadAlphaBackLine()
         {
-            if (this.IsSlotsFilled(this.alphaBackLine)) return;
-            this.LoadOrCreateSlots(this.alphaBackLine, "AlphaBackLine");
+            if (this.IsHoldersFilled(this.alphaBackLine)) return;
+            this.LoadHoldersByOwnerAndLink(this.alphaBackLine, Owner.alpha, Link.back);
             Debug.LogWarning(this.transform.name + ": LoadAlphaBackLine", this.gameObject);
         }
 
         protected virtual void LoadOmegaFrontLine()
         {
-            if (this.IsSlotsFilled(this.omegaFrontLine)) return;
-            this.LoadOrCreateSlots(this.omegaFrontLine, "OmegaFrontLine");
+            if (this.IsHoldersFilled(this.omegaFrontLine)) return;
+            this.LoadHoldersByOwnerAndLink(this.omegaFrontLine, Owner.omega, Link.front);
             Debug.LogWarning(this.transform.name + ": LoadOmegaFrontLine", this.gameObject);
         }
 
         protected virtual void LoadOmegaBackLine()
         {
-            if (this.IsSlotsFilled(this.omegaBackLine)) return;
-            this.LoadOrCreateSlots(this.omegaBackLine, "OmegaBackLine");
+            if (this.IsHoldersFilled(this.omegaBackLine)) return;
+            this.LoadHoldersByOwnerAndLink(this.omegaBackLine, Owner.omega, Link.back);
             Debug.LogWarning(this.transform.name + ": LoadOmegaBackLine", this.gameObject);
+        }
+
+        private void LoadHoldersByOwnerAndLink(CardHolderCtrl[] holders, Owner owner, Link link)
+        {
+            CardHolderCtrl[] all = Object.FindObjectsByType<CardHolderCtrl>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (CardHolderCtrl holder in all)
+            {
+                if (holder.HolderOwner != owner) continue;
+                if (holder.HolderLink != link) continue;
+                int idx = holder.Index;
+                if (idx < 0 || idx >= holders.Length) continue;
+                holders[idx] = holder;
+            }
+        }
+
+        private bool IsHoldersFilled(CardHolderCtrl[] holders)
+        {
+            foreach (CardHolderCtrl h in holders)
+            {
+                if (h == null) return false;
+            }
+            return true;
         }
 
         protected virtual void LoadTestCards()
@@ -281,6 +294,12 @@ namespace SG03
         {
             if (index < 0 || index >= slots.Length) return null;
             return slots[index];
+        }
+
+        private CardHolderCtrl GetHolder(CardHolderCtrl[] holders, int index)
+        {
+            if (index < 0 || index >= holders.Length) return null;
+            return holders[index];
         }
     }
 }

@@ -571,7 +571,7 @@ namespace SG03.UI
         {
             this.SetInitCardLoading(false);
             this.SetInitCardButtonText("Init OK");
-            this.battleStateCtrl?.BattleState?.UpdateFromInitCards(response);
+            this.ApplyBattleStatusResponse(response);
         }
 
         private void OnInitCardFailed(string error)
@@ -779,6 +779,7 @@ namespace SG03.UI
         {
             this.SetStartBattleLoading(false);
             this.SetStartBattleButtonText("Battle Started");
+            this.ApplyBattleStatusResponse(response);
             this.GetAllCardDefinitions();
         }
 

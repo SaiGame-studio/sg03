@@ -1,5 +1,6 @@
 using System;
 using SaiGame.Services;
+using SG03.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,11 +23,16 @@ namespace SG03
         [SerializeField] private string scriptNameCardDeploy         = "card_deploy";
 
         [SerializeField] private BattleScript battleScript;
+        [SerializeField] private BattleState  battleState;
+
+        [Header("Debug")]
+        [SerializeField] private bool logPayload = true;
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
             this.LoadBattleScript();
+            this.LoadBattleState();
         }
 
         protected virtual void OnEnable()
@@ -51,73 +57,133 @@ namespace SG03
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            this.ResetBattleScriptReference();
-            this.LoadBattleScript();
+            this.RefreshBattleScript();
         }
 
-        private void ResetBattleScriptReference()
+        private void RefreshBattleScript()
         {
             this.battleScript = null;
+            this.LoadBattleScript();
         }
 
         protected virtual void LoadBattleScript()
         {
             if (this.battleScript != null) return;
-            SaiServer server = SaiServer.Instance;
-            if (server == null) return;
-            this.battleScript = server.BattleScript;
-            if (this.battleScript == null) return;
+            GameObject saiServerObj = GameObject.Find("SaiServer");
+            if (saiServerObj == null) return;
+            Transform battleTransform = saiServerObj.transform.Find("Battle");
+            if (battleTransform == null) return;
+            this.battleScript = battleTransform.GetComponent<BattleScript>();
             Debug.LogWarning(this.transform.name + ": LoadBattleScript", this.gameObject);
+        }
+
+        protected virtual void LoadBattleState()
+        {
+            if (this.battleState != null) return;
+            this.battleState = UnityEngine.Object.FindFirstObjectByType<BattleState>(FindObjectsInactive.Include);
+            Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
         }
 
         public void RunBattleStart(string requestBody, Action<string> onSuccess, Action<string> onError)
         {
             if (this.battleScript == null) return;
-            Debug.Log("<color=#00FFCC><b>[BattleScripts] ► RunBattleStart</b></color>", this.gameObject);
+            this.LogPayload("RunBattleStart", "#00FFCC", requestBody);
             this.battleScript.RunScript(this.scriptNameBattleStart, requestBody, onSuccess, onError);
         }
 
         public void RunBattleEnd(Action<string> onSuccess, Action<string> onError)
         {
             if (this.battleScript == null) return;
-            Debug.Log("<color=#FF6B6B><b>[BattleScripts] ► RunBattleEnd</b></color>", this.gameObject);
+            this.LogPayload("RunBattleEnd", "#FF6B6B", null);
             this.battleScript.RunScript(this.scriptNameBattleEnd, null, onSuccess, onError);
         }
 
         public void RunBattleStatus(Action<string> onSuccess, Action<string> onError)
         {
             if (this.battleScript == null) return;
-            Debug.Log("<color=#FFD700><b>[BattleScripts] ► RunBattleStatus</b></color>", this.gameObject);
+            this.LogPayload("RunBattleStatus", "#FFD700", null);
             this.battleScript.RunScript(this.scriptNameBattleStatus, null, onSuccess, onError);
         }
 
         public void RunInitCards(Action<string> onSuccess, Action<string> onError)
         {
             if (this.battleScript == null) return;
-            Debug.Log("<color=#88DDFF><b>[BattleScripts] ► RunInitCards</b></color>", this.gameObject);
+            this.LogPayload("RunInitCards", "#88DDFF", null);
             this.battleScript.RunScript(this.scriptNameInitCards, null, onSuccess, onError);
         }
 
         public void RunGetCardDefinitions(Action<string> onSuccess, Action<string> onError)
         {
             if (this.battleScript == null) return;
-            Debug.Log("<color=#AAFFAA><b>[BattleScripts] ► RunGetCardDefinitions</b></color>", this.gameObject);
+            this.LogPayload("RunGetCardDefinitions", "#AAFFAA", null);
             this.battleScript.RunScript(this.scriptNameGetCardDefinitions, null, onSuccess, onError);
         }
 
-        public void RunCardDeploy(string[] frontLine, string[] backLine, Action<string> onSuccess, Action<string> onError)
+        public void RunCardDeploy(Action<string> onSuccess, Action<string> onError)
         {
             if (this.battleScript == null) return;
-            string requestBody = this.BuildCardDeployRequestBody(frontLine, backLine);
-            Debug.Log("<color=#FF88FF><b>[BattleScripts] ► RunCardDeploy</b></color>", this.gameObject);
+            string requestBody = this.BuildCardDeployRequestBody();
+            this.LogPayload("RunCardDeploy", "#FF88FF", requestBody);
             this.battleScript.RunScript(this.scriptNameCardDeploy, requestBody, onSuccess, onError);
         }
 
-        private string BuildCardDeployRequestBody(string[] frontLine, string[] backLine)
+        private void LogPayload(string methodName, string color, string payload)
         {
-            string frontJson = this.ToJsonStringArray(frontLine);
-            string backJson  = this.ToJsonStringArray(backLine);
-            return $"{{\"payload\":{{\"front_line\":{frontJson},\"back_line\":{backJson}}}}}";
+            if (!this.logPayload) return;
+            string payloadPart = string.IsNullOrEmpty(payload) ? string.Empty : "\n" + payload;
+            Debug.Log($"<color={color}><b>[BattleScripts] \u25ba {methodName}</b></color>{payloadPart}", this.gameObject);
+        }
+
+        private string BuildCardDeployRequestBody()
+        {
+            string sessionId  = this.battleState != null ? this.battleState.SessionId : string.Empty;
+            string[] hand      = this.CollectInventoryIds(this.battleState?.AlphaHand);
+            CardDeployLineSlot[] frontLine = this.CollectLineSlots(this.battleState?.AlphaFrontLine);
+            CardDeployLineSlot[] backLine  = this.CollectLineSlots(this.battleState?.AlphaBackLine);
+            string handJson  = this.ToJsonStringArray(hand);
+            string frontJson = this.ToJsonLineSlotArray(frontLine);
+            string backJson  = this.ToJsonLineSlotArray(backLine);
+            return $"{{\"payload\":{{\"session_id\":\"{sessionId}\",\"hand\":{handJson},\"front_line\":{frontJson},\"back_line\":{backJson}}}}}";
+        }
+
+        private CardDeployLineSlot[] CollectLineSlots(BattleCardSlot[] slots)
+        {
+            if (slots == null) return new CardDeployLineSlot[0];
+            CardDeployLineSlot[] result = new CardDeployLineSlot[slots.Length];
+            for (int i = 0; i < slots.Length; i++)
+            {
+                BattleCardSlot slot = slots[i];
+                result[i] = new CardDeployLineSlot
+                {
+                    inventory_item_id = slot?.inventory_item_id ?? string.Empty,
+                    face_up           = slot?.face_up ?? false,
+                    slot_index        = slot?.slot_index ?? i
+                };
+            }
+            return result;
+        }
+
+        private string ToJsonLineSlotArray(CardDeployLineSlot[] slots)
+        {
+            if (slots == null || slots.Length == 0) return "[]";
+            System.Text.StringBuilder sb = new System.Text.StringBuilder("[");
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (i > 0) sb.Append(",");
+                string faceUpStr = slots[i].face_up ? "true" : "false";
+                sb.Append($"{{\"inventory_item_id\":\"{slots[i].inventory_item_id}\",\"face_up\":{faceUpStr},\"slot_index\":{slots[i].slot_index}}}");
+            }
+            sb.Append("]");
+            return sb.ToString();
+        }
+
+        private string[] CollectInventoryIds(BattleCardSlot[] slots)
+        {
+            if (slots == null) return new string[0];
+            string[] ids = new string[slots.Length];
+            for (int i = 0; i < slots.Length; i++)
+                ids[i] = slots[i]?.inventory_item_id ?? string.Empty;
+            return ids;
         }
 
         private string ToJsonStringArray(string[] items)

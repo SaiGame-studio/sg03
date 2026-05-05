@@ -97,23 +97,13 @@ namespace SG03
         private void HandleCardDeploy()
         {
             if (this.battleScripts == null) return;
-            string[] frontLine = this.CollectInventoryIds(this.battleStateCtrl.BattleState.AlphaFrontLine);
-            string[] backLine  = this.CollectInventoryIds(this.battleStateCtrl.BattleState.AlphaBackLine);
-            this.battleScripts.RunCardDeploy(frontLine, backLine, this.OnCardDeploySuccess, this.OnCardDeployError);
-        }
-
-        private string[] CollectInventoryIds(BattleCardSlot[] slots)
-        {
-            if (slots == null) return new string[0];
-            string[] ids = new string[slots.Length];
-            for (int i = 0; i < slots.Length; i++)
-                ids[i] = slots[i]?.inventory_item_id ?? string.Empty;
-            return ids;
+            this.battleScripts.RunCardDeploy(this.OnCardDeploySuccess, this.OnCardDeployError);
         }
 
         private void OnCardDeploySuccess(string response)
         {
             Debug.Log("<color=#FF88FF><b>[LampClickDetector] Card deploy success</b></color> " + response);
+            this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
         }
 
         private void OnCardDeployError(string error)

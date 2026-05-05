@@ -19,5 +19,17 @@ namespace SG03.UI
         public string inventory_item_id;
         public string item_definition_id;
         public string item_definition_name;
+        public string card_action;
+        public bool   face_up = false;
+        public bool   expose  = false;
+
+        public CardActionType CardAction => ParseCardAction(this.card_action);
+
+        private static CardActionType ParseCardAction(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return CardActionType.unknown;
+            if (System.Enum.TryParse(value, out CardActionType result)) return result;
+            return CardActionType.unknown;
+        }
     }
 }
