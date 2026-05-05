@@ -119,37 +119,36 @@ namespace SG03
             if (prefab == null) yield break;
             yield return this.WaitForDefinitions();
             yield return this.SpawnNewSourceCardsRoutine(prefab);
-            yield return this.SpawnDeltaLineRoutine(prefab, newHand,      this.deskPosition.AlphaHand,      Location.in_hand);
-            yield return this.DeployCardToLineRoutine(prefab, newFrontLine, this.deskPosition.AlphaFrontLine, Location.in_front);
-            yield return this.DeployCardToLineRoutine(prefab, newBackLine,  this.deskPosition.AlphaBackLine,  Location.in_back);
+            BattleCardSlot[] allSlots = this.CombineSlots(newHand, newFrontLine, newBackLine);
+            yield return this.DispatchSlotsByAction(prefab, allSlots);
             this.spawnRoutine = null;
         }
 
-        private IEnumerator SpawnDeltaLineRoutine(Card3DCtrl prefab, BattleCardSlot[] slots, Transform[] targets, Location location)
+        private BattleCardSlot[] CombineSlots(BattleCardSlot[] hand, BattleCardSlot[] frontLine, BattleCardSlot[] backLine)
         {
-            if (slots == null) yield break;
+            int total = (hand?.Length ?? 0) + (frontLine?.Length ?? 0) + (backLine?.Length ?? 0);
+            BattleCardSlot[] combined = new BattleCardSlot[total];
+            int offset = 0;
+            if (hand      != null) { System.Array.Copy(hand,      0, combined, offset, hand.Length);      offset += hand.Length; }
+            if (frontLine != null) { System.Array.Copy(frontLine, 0, combined, offset, frontLine.Length); offset += frontLine.Length; }
+            if (backLine  != null) { System.Array.Copy(backLine,  0, combined, offset, backLine.Length); }
+            return combined;
+        }
+
+        private IEnumerator DispatchSlotsByAction(Card3DCtrl prefab, BattleCardSlot[] slots)
+        {
             int spawnedThisFrame = 0;
             foreach (BattleCardSlot slot in slots)
             {
                 if (slot == null) continue;
-                if (slot.CardAction == CardActionType.unknown) continue;
-                int idx = slot.slot_index;
-                Transform target = this.ResolveHandTarget(idx, targets);
-                if (this.IsSlotOccupied(target)) continue;
-                Card3DCtrl card = this.ResolveOrSpawnCard(prefab, slot);
-                if (card == null) continue;
-                card.SetOwner(Owner.alpha);
-                string code = slot.item_definition_code_name;
-                card.SetCodeName(code);
-                card.SetInventoryItemId(slot.inventory_item_id);
-                card.SetFallbackName(slot.item_definition_name);
-                card.LoadCardByCodeName(code);
-                card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
-                card.MoveAndRotate(target, location);
-                this.slotOccupancy[target] = card;
-                if (!string.IsNullOrEmpty(slot.inventory_item_id))
-                    this.handCardRegistry[slot.inventory_item_id] = card;
-                this.ApplyFaceState(card, slot, location);
+                CardActionType action = slot.CardAction;
+                if (action == CardActionType.unknown) continue;
+                bool spawned = false;
+                if (action == CardActionType.in_front_line || action == CardActionType.in_back_line)
+                    spawned = this.DeploySlotToLine(prefab, slot);
+                else if (action == CardActionType.draw_from_source_to_hand)
+                    spawned = this.DrawSlotToHand(prefab, slot);
+                if (!spawned) continue;
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
@@ -157,39 +156,51 @@ namespace SG03
             }
         }
 
-        private IEnumerator DeployCardToLineRoutine(Card3DCtrl prefab, BattleCardSlot[] slots, CardHolderCtrl[] holders, Location location)
+        private bool DeploySlotToLine(Card3DCtrl prefab, BattleCardSlot slot)
         {
-            if (slots == null) yield break;
-            int spawnedThisFrame = 0;
-            foreach (BattleCardSlot slot in slots)
-            {
-                if (slot == null) continue;
-                if (slot.CardAction == CardActionType.unknown) continue;
-                int idx = slot.slot_index;
-                if (idx < 0 || idx >= holders.Length) continue;
-                CardHolderCtrl holder = holders[idx];
-                if (holder == null) continue;
-                Transform target = holder.transform;
-                if (this.IsSlotOccupied(target)) continue;
-                Card3DCtrl card = this.ResolveOrSpawnFromHand(prefab, slot);
-                if (card == null) continue;
-                card.SetOwner(Owner.alpha);
-                string code = slot.item_definition_code_name;
-                card.SetCodeName(code);
-                card.SetInventoryItemId(slot.inventory_item_id);
-                card.SetFallbackName(slot.item_definition_name);
-                card.LoadCardByCodeName(code);
-                card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
-                card.SetCardHolder(holder);
-                this.slotOccupancy[target] = card;
-                holder.SetCard(card);
-                this.ApplyFaceState(card, slot, location);
-                Debug.Log($"<color=#00FF88><b>[CardSpawning] card_action=<i>{slot.card_action}</i></b> | code=<b>{code}</b> | slot={idx} | location={location}</color>");
-                spawnedThisFrame++;
-                if (spawnedThisFrame < this.spawnPerFrame) continue;
-                spawnedThisFrame = 0;
-                yield return this.WaitAfterSpawn();
-            }
+            Location location          = slot.CardAction == CardActionType.in_front_line ? Location.in_front : Location.in_back;
+            CardHolderCtrl[] holders   = slot.CardAction == CardActionType.in_front_line ? this.deskPosition.AlphaFrontLine : this.deskPosition.AlphaBackLine;
+            int idx = slot.slot_index;
+            if (idx < 0 || idx >= holders.Length) return false;
+            CardHolderCtrl holder = holders[idx];
+            if (holder == null) return false;
+            Transform target = holder.transform;
+            if (this.IsSlotOccupied(target)) return false;
+            Card3DCtrl card = this.ResolveOrSpawnFromHand(prefab, slot);
+            if (card == null) return false;
+            card.SetOwner(Owner.alpha);
+            string code = slot.item_definition_code_name;
+            card.SetCodeName(code);
+            card.SetInventoryItemId(slot.inventory_item_id);
+            card.SetFallbackName(slot.item_definition_name);
+            card.LoadCardByCodeName(code);
+            card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+            card.SetCardHolder(holder);
+            this.slotOccupancy[target] = card;
+            holder.SetCard(card);
+            Debug.Log($"<color=#00FF88><b>[CardSpawning] card_action=<i>{slot.card_action}</i></b> | code=<b>{code}</b> | slot={idx} | location={location}</color>");
+            return true;
+        }
+
+        private bool DrawSlotToHand(Card3DCtrl prefab, BattleCardSlot slot)
+        {
+            int idx = slot.slot_index;
+            Transform target = this.ResolveHandTarget(idx, this.deskPosition.AlphaHand);
+            if (this.IsSlotOccupied(target)) return false;
+            Card3DCtrl card = this.ResolveOrSpawnCard(prefab, slot);
+            if (card == null) return false;
+            card.SetOwner(Owner.alpha);
+            string code = slot.item_definition_code_name;
+            card.SetCodeName(code);
+            card.SetInventoryItemId(slot.inventory_item_id);
+            card.SetFallbackName(slot.item_definition_name);
+            card.LoadCardByCodeName(code);
+            card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+            card.MoveAndRotate(target, Location.in_hand);
+            this.slotOccupancy[target] = card;
+            if (!string.IsNullOrEmpty(slot.inventory_item_id))
+                this.handCardRegistry[slot.inventory_item_id] = card;
+            return true;
         }
 
         private bool IsSlotOccupied(Transform target)
