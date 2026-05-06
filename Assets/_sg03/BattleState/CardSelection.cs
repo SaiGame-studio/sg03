@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SaiGame.Services;
 using SG03.UI;
 using UnityEngine;
@@ -36,6 +37,9 @@ namespace SG03
         [SerializeField] private Card3DCtrl targeted;
         private Card3DCtrl targetingSource;
 
+        [Header("Front Line Holders")]
+        [SerializeField] private CardHolderCtrl[] alphaFrontLineHolders;
+
         private bool IsTargeting => this.targetingSource != null;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
@@ -48,6 +52,22 @@ namespace SG03
             this.LoadMarkSelected();
             this.LoadMarkIdlePosition();
             this.LoadArrowIndicator();
+            this.LoadAlphaFrontLineHolders();
+        }
+
+        protected virtual void LoadAlphaFrontLineHolders()
+        {
+            if (this.alphaFrontLineHolders != null && this.alphaFrontLineHolders.Length > 0) return;
+            CardHolderCtrl[] all = Object.FindObjectsByType<CardHolderCtrl>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            List<CardHolderCtrl> result = new List<CardHolderCtrl>();
+            foreach (CardHolderCtrl h in all)
+            {
+                if (h.HolderOwner != Owner.alpha) continue;
+                if (h.HolderLink != Link.front) continue;
+                result.Add(h);
+            }
+            this.alphaFrontLineHolders = result.ToArray();
+            Debug.LogWarning(this.transform.name + ": LoadAlphaFrontLineHolders", this.gameObject);
         }
 
         protected virtual void LoadArrowIndicator()
@@ -493,7 +513,20 @@ namespace SG03
             if (card.CardOwner != holder.HolderOwner) return false;
             if (card.IsCharacter() && holder.HolderLink != Link.front) return false;
             if (!card.IsCharacter() && holder.HolderLink != Link.back) return false;
+            if (card.IsCharacter() && this.IsCharacterAlreadyOnFrontLine(card)) return false;
             return true;
+        }
+
+        private bool IsCharacterAlreadyOnFrontLine(Card3DCtrl excludeCard)
+        {
+            if (this.alphaFrontLineHolders == null) return false;
+            foreach (CardHolderCtrl h in this.alphaFrontLineHolders)
+            {
+                if (h.HeldCard == null) continue;
+                if (h.HeldCard == excludeCard) continue;
+                if (h.HeldCard.IsCharacter()) return true;
+            }
+            return false;
         }
 
         private bool IsSwapValid()

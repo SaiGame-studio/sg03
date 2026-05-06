@@ -6730,6 +6730,12 @@ MonoBehaviour:
   markIdlePosition: {fileID: 533533499}
   arrowIndicator: {fileID: 632999079}
   targeted: {fileID: 0}
+  alphaFrontLineHolders:
+  - {fileID: 1590047878}
+  - {fileID: 1980872446}
+  - {fileID: 2141663913}
+  - {fileID: 2034349439}
+  - {fileID: 909222237}
 --- !u!114 &2015755441
 MonoBehaviour:
   m_ObjectHideFlags: 0
