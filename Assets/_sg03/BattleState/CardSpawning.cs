@@ -175,7 +175,6 @@ namespace SG03
             card.SetCardHolder(holder, () => this.ApplyFaceState(card, slot));
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
-            Debug.Log($"<color=#00FF88><b>[CardSpawning] card_action=<i>{slot.card_action}</i></b> | code=<b>{code}</b> | slot={idx} | location={location} | face_up={slot.face_up} | expose={slot.expose}</color>");
             return true;
         }
 
@@ -365,7 +364,6 @@ namespace SG03
                 card.SetCardHolder(holder, () => this.ApplyFaceState(card, slot));
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
-            Debug.Log($"<color=#FF8800><b>[CardSpawning] omega card_action=<i>{slot.card_action}</i></b> | code=<b>{code}</b> | slot={idx} | location={location} | face_up={slot.face_up} | expose={slot.expose}</color>");
             return true;
         }
 
