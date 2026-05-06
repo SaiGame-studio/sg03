@@ -349,7 +349,7 @@ namespace SG03
             if (holder == null) return false;
             Transform target = holder.transform;
             if (this.IsSlotOccupied(target)) return false;
-            Card3DCtrl card = this.ResolveOmegaLineCard(prefab);
+            Card3DCtrl card = this.ResolveOmegaLineCard(prefab, out bool fromHand);
             if (card == null) return false;
             card.SetOwner(Owner.omega);
             string code = slot.item_definition_code_name;
@@ -359,7 +359,10 @@ namespace SG03
             card.LoadCardByCodeName(code);
             card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
             card.SetExpose(slot.expose);
-            card.SetCardHolder(holder, () => this.ApplyFaceState(card, slot));
+            if (fromHand)
+                card.MoveToUnknow(holder, () => this.ApplyFaceState(card, slot));
+            else
+                card.SetCardHolder(holder, () => this.ApplyFaceState(card, slot));
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
             Debug.Log($"<color=#FF8800><b>[CardSpawning] omega card_action=<i>{slot.card_action}</i></b> | code=<b>{code}</b> | slot={idx} | location={location} | face_up={slot.face_up} | expose={slot.expose}</color>");
@@ -403,14 +406,16 @@ namespace SG03
             return this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
         }
 
-        private Card3DCtrl ResolveOmegaLineCard(Card3DCtrl prefab)
+        private Card3DCtrl ResolveOmegaLineCard(Card3DCtrl prefab, out bool fromHand)
         {
             if (this.previousOmegaHand != null && this.previousOmegaHand.Length > 0 && this.omegaHandCardQueue.Count > 0)
             {
+                fromHand = true;
                 Card3DCtrl handCard = this.omegaHandCardQueue.Dequeue();
                 this.RemoveFromSlotOccupancy(handCard);
                 return handCard;
             }
+            fromHand = false;
             return this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
         }
 

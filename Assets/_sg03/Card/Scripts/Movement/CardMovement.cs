@@ -196,6 +196,23 @@ namespace SG03
             this.StartMoveTween(target.position, this.duration, this.ease, onComplete);
         }
 
+        /// <summary>
+        /// Moves the card to <paramref name="holder"/>'s position and simultaneously flips
+        /// face-down using the Unknown axis. Intended for hand → line transitions.
+        /// </summary>
+        public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null)
+        {
+            if (holder == null) return;
+            this.ctrl.AssignCardHolder(holder);
+            Location destination = holder.HolderLink == Link.front ? Location.in_front : Location.in_back;
+            this.location = destination;
+            this.RecordHandAnchor(holder.transform, destination);
+            this.KillAllTweens();
+            this.StartMoveTween(holder.transform.position, this.duration, this.ease, null);
+            this.FaceDownUnknown();
+            onReady?.Invoke();
+        }
+
         /// <summary>Smoothly rotates the card to face-up using global euler angles.</summary>
         public void FaceUp()
         {
