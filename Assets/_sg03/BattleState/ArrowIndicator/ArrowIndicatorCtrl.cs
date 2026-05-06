@@ -18,16 +18,33 @@ namespace SG03
         [SerializeField] private LineRenderer lineHead;
 
         [Header("Arrow Head Settings")]
-        [SerializeField] private float headLength = 0.4f;
-        [SerializeField] private float headAngle  = 25f;
+        [SerializeField] private float headLength = 2f;
+        [SerializeField] private float headAngle  = 40f;
+
+        [Header("Material")]
+        [SerializeField] private Material arrowMaterial;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
+            this.LoadArrowMaterial();
             this.LoadLineBody();
             this.LoadLineHead();
+        }
+
+        protected virtual void LoadArrowMaterial()
+        {
+            if (this.arrowMaterial != null) return;
+#if UNITY_EDITOR
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("ArrowIndicatorMat t:Material");
+            if (guids.Length == 0) return;
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+            this.arrowMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (this.arrowMaterial == null) return;
+            Debug.LogWarning(this.transform.name + ": LoadArrowMaterial", this.gameObject);
+#endif
         }
 
         protected override void ResetValue()
@@ -43,6 +60,7 @@ namespace SG03
             Transform child = this.transform.Find("LineBody");
             if (child == null) return;
             this.lineBody = child.GetComponent<LineRenderer>();
+            this.ApplyMaterial(this.lineBody);
             Debug.LogWarning(this.transform.name + ": LoadLineBody", this.gameObject);
         }
 
@@ -52,6 +70,7 @@ namespace SG03
             Transform child = this.transform.Find("LineHead");
             if (child == null) return;
             this.lineHead = child.GetComponent<LineRenderer>();
+            this.ApplyMaterial(this.lineHead);
             Debug.LogWarning(this.transform.name + ": LoadLineHead", this.gameObject);
         }
 
@@ -60,6 +79,7 @@ namespace SG03
             if (this.lineBody != null) return;
             GameObject child = this.GetOrCreateChildObject("LineBody");
             this.lineBody = this.GetOrAddLineRenderer(child);
+            this.ApplyMaterial(this.lineBody);
         }
 
         private void CreateLineHead()
@@ -67,6 +87,7 @@ namespace SG03
             if (this.lineHead != null) return;
             GameObject child = this.GetOrCreateChildObject("LineHead");
             this.lineHead = this.GetOrAddLineRenderer(child);
+            this.ApplyMaterial(this.lineHead);
         }
 
         private GameObject GetOrCreateChildObject(string childName)
@@ -83,6 +104,26 @@ namespace SG03
             LineRenderer lr = go.GetComponent<LineRenderer>();
             if (lr != null) return lr;
             return go.AddComponent<LineRenderer>();
+        }
+
+        private void ApplyMaterial(LineRenderer lr)
+        {
+            if (lr == null) return;
+            this.ClearPositions(lr);
+            if (this.arrowMaterial != null)
+            {
+                lr.material = this.arrowMaterial;
+                return;
+            }
+            Shader shader = Shader.Find("SG03/ArrowIndicator");
+            if (shader == null) return;
+            lr.material = new Material(shader);
+        }
+
+        private void ClearPositions(LineRenderer lr)
+        {
+            if (lr == null) return;
+            lr.positionCount = 0;
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -109,6 +150,8 @@ namespace SG03
         /// <summary>Deactivates the arrow.</summary>
         public void Hide()
         {
+            this.ClearPositions(this.lineBody);
+            this.ClearPositions(this.lineHead);
             this.gameObject.SetActive(false);
         }
 

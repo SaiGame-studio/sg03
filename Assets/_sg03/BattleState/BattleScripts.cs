@@ -2,7 +2,6 @@ using System;
 using SaiGame.Services;
 using SG03.UI;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace SG03
 {
@@ -22,8 +21,9 @@ namespace SG03
         [SerializeField] private string scriptNameGetCardDefinitions = "get_card_definitions";
         [SerializeField] private string scriptNameCardDeploy         = "card_deploy";
 
-        [SerializeField] private BattleScript battleScript;
-        [SerializeField] private BattleState  battleState;
+        private BattleScript battleScript => SaiServer.Instance != null ? SaiServer.Instance.BattleScript : null;
+
+        [SerializeField] private BattleState battleState;
 
         [Header("Debug")]
         [SerializeField] private bool logPayload = true;
@@ -31,50 +31,7 @@ namespace SG03
         protected override void LoadComponents()
         {
             base.LoadComponents();
-            this.LoadBattleScript();
             this.LoadBattleState();
-        }
-
-        protected virtual void OnEnable()
-        {
-            this.SubscribeSceneLoaded();
-        }
-
-        protected virtual void OnDisable()
-        {
-            this.UnsubscribeSceneLoaded();
-        }
-
-        private void SubscribeSceneLoaded()
-        {
-            SceneManager.sceneLoaded += this.OnSceneLoaded;
-        }
-
-        private void UnsubscribeSceneLoaded()
-        {
-            SceneManager.sceneLoaded -= this.OnSceneLoaded;
-        }
-
-        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            this.RefreshBattleScript();
-        }
-
-        private void RefreshBattleScript()
-        {
-            this.battleScript = null;
-            this.LoadBattleScript();
-        }
-
-        protected virtual void LoadBattleScript()
-        {
-            if (this.battleScript != null) return;
-            GameObject saiServerObj = GameObject.Find("SaiServer");
-            if (saiServerObj == null) return;
-            Transform battleTransform = saiServerObj.transform.Find("Battle");
-            if (battleTransform == null) return;
-            this.battleScript = battleTransform.GetComponent<BattleScript>();
-            Debug.LogWarning(this.transform.name + ": LoadBattleScript", this.gameObject);
         }
 
         protected virtual void LoadBattleState()
