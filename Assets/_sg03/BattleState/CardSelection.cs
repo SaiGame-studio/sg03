@@ -173,6 +173,7 @@ namespace SG03
             if (this.selected == null) return false;
             if (this.hovered == null) return false;
             if (this.hovered == this.selected) return false;
+            if (!this.IsCardDeployPhase()) return false;
             if (!this.IsLocationFlippable(this.hovered.Location)) return false;
             if (!this.IsSwapValid()) return false;
             CardHolderCtrl selectedHolder = this.selected.CardHolder;
@@ -319,6 +320,7 @@ namespace SG03
         {
             this.holderSelected = holder;
             if (this.selected == null) return;
+            if (!this.IsCardDeployPhase()) return;
             if (holder.HeldCard != null) return;
             if (!this.IsPlacementValid(this.selected, holder)) return;
             Location fromLocation = this.selected.Location;
@@ -356,6 +358,12 @@ namespace SG03
         }
 
         // ─── Placement validation ─────────────────────────────────────────────────
+
+        private bool IsCardDeployPhase()
+        {
+            if (this.battleState == null) return false;
+            return this.battleState.NextMove == NextMoveType.card_deploy;
+        }
 
         private bool IsPlacementValid(Card3DCtrl card, CardHolderCtrl holder)
         {
