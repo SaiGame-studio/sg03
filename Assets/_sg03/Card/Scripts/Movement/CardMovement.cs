@@ -74,9 +74,6 @@ namespace SG03
         [Tooltip("World-space euler angles when the card is face-down.")]
         [SerializeField] private Vector3 faceDownRotation = new Vector3(-90f, 0f, 0f);
 
-        [Tooltip("World-space axis used when FaceState is Unknown (first-time flip).")]
-        [SerializeField] private Vector3 flipAxisUnknown = new Vector3(1f, 0f, 0f);
-
         [Tooltip("World-space axis used when flipping between FaceUp and FaceDown.")]
         [SerializeField] private Vector3 flipAxisUpDown = new Vector3(0f, 0f, 1f);
 
@@ -106,6 +103,7 @@ namespace SG03
         private bool  isFlipping;
         private Tween yTween;
         private Tween moveTween;
+        private Tween rotateY180Tween;
         private Sequence faceTween;
         private Vector3    preFullDetailPosition;
         private Quaternion preFullDetailRotation;
@@ -202,6 +200,7 @@ namespace SG03
         /// </summary>
         public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null)
         {
+            if (this.isFlipping) return;
             if (holder == null) return;
             this.ctrl.AssignCardHolder(holder);
             Location destination = holder.HolderLink == Link.front ? Location.in_front : Location.in_back;
@@ -234,7 +233,7 @@ namespace SG03
         {
             if (this.isFlipping) return;
             this.faceState = FaceState.FaceUp;
-            this.DoFaceFlipNoRise(this.faceUpRotation, this.flipAxisUnknown);
+            this.DoFaceFlipNoRise(this.faceUpRotation);
         }
 
         /// <summary>Rotates the card to face-down using the Unknown axis, without rising.</summary>
@@ -242,7 +241,7 @@ namespace SG03
         {
             if (this.isFlipping) return;
             this.faceState = FaceState.FaceDown;
-            this.DoFaceFlipNoRise(this.faceDownRotation, this.flipAxisUnknown);
+            this.DoFaceFlipNoRise(this.faceDownRotation);
         }
 
         /// <summary>Toggles between FaceUp and FaceDown. Defaults to FaceUp when Unknown.</summary>
@@ -259,22 +258,29 @@ namespace SG03
         /// <summary>Rotates the card 180 degrees around the world Y axis, then invokes <paramref name="onComplete"/>.</summary>
         public void RotateY180(System.Action onComplete = null)
         {
-            Tween t = this.transform.DORotate(new Vector3(0f, 180f, 0f), this.rotateY180Duration, RotateMode.WorldAxisAdd)
-                .SetEase(this.rotateY180Ease);
-            if (onComplete != null) t.OnComplete(() => onComplete());
+            if (this.isFlipping) return;
+            this.isFlipping = true;
+            this.rotateY180Tween?.Kill();
+            this.rotateY180Tween = this.transform.DORotate(new Vector3(0f, 180f, 0f), this.rotateY180Duration, RotateMode.WorldAxisAdd)
+                .SetEase(this.rotateY180Ease)
+                .OnComplete(() => { this.isFlipping = false; onComplete?.Invoke(); })
+                .OnKill(() => this.isFlipping = false);
         }
 
-        private void DoFaceFlipNoRise(Vector3 targetEulers, Vector3 axis)
+        // Rotates the card directly to the global target orientation without rising.
+        // Uses DORotateQuaternion so the card always lands at the correct world-space
+        // rotation regardless of the card's starting orientation (e.g. Omega cards with Y rotation).
+        private void DoFaceFlipNoRise(Vector3 targetEulers)
         {
             float totalTime = this.flipDuration * 2f;
-            float angle     = this.ComputeFlipAngle(targetEulers, axis);
 
             this.isFlipping = true;
             this.faceTween?.Kill();
             this.faceTween = DOTween.Sequence();
             this.faceTween.Insert(0f,
-                this.transform.DORotate(axis.normalized * angle, totalTime, RotateMode.WorldAxisAdd)
+                this.transform.DORotateQuaternion(Quaternion.Euler(targetEulers), totalTime)
                     .SetEase(this.flipEase));
+            this.faceTween.OnComplete(() => this.isFlipping = false);
             this.faceTween.OnKill(() => this.isFlipping = false);
         }
 
@@ -417,6 +423,8 @@ namespace SG03
             this.yTween = null;
             this.faceTween?.Kill();
             this.faceTween = null;
+            this.rotateY180Tween?.Kill();
+            this.rotateY180Tween = null;
             this.transform.DOKill();
         }
     }
