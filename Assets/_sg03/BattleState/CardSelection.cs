@@ -13,6 +13,8 @@ namespace SG03
         /// <summary>Fired when the player confirms a targeting selection (source → target).</summary>
         public static event System.Action<Card3DCtrl, Card3DCtrl> TargetSelected;
 
+        [SerializeField] private BattleStateCtrl battleStateCtrl;
+
         [SerializeField] private Card3DCtrl selected;
         [SerializeField] private Card3DCtrl hovered;
 
@@ -20,8 +22,6 @@ namespace SG03
         [SerializeField] private CardHolderCtrl holderSelected;
         [SerializeField] private CardHolderCtrl holderHover;
 
-        [Header("Battle State")]
-        [SerializeField] private BattleState battleState;
 
         [Header("Full Detail")]
         [SerializeField] private DeskPositionCtrl deskPositions;
@@ -47,7 +47,7 @@ namespace SG03
         protected override void LoadComponents()
         {
             base.LoadComponents();
-            this.LoadBattleState();
+            this.LoadBattleStateCtrl();
             this.LoadDeskPositions();
             this.LoadMarkSelected();
             this.LoadMarkIdlePosition();
@@ -79,13 +79,11 @@ namespace SG03
             Debug.LogWarning(this.transform.name + ": FindArrowIndicator", this.gameObject);
         }
 
-        protected virtual void LoadBattleState()
+        protected virtual void LoadBattleStateCtrl()
         {
-            if (this.battleState != null) return;
-            BattleStateCtrl ctrl = this.GetComponentInParent<BattleStateCtrl>(true);
-            if (ctrl == null) return;
-            this.battleState = ctrl.BattleState;
-            Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
+            if (this.battleStateCtrl != null) return;
+            this.battleStateCtrl = this.GetComponentInParent<BattleStateCtrl>(true);
+            Debug.LogWarning(this.transform.name + ": LoadBattleStateCtrl", this.gameObject);
         }
 
         protected virtual void LoadMarkIdlePosition()
@@ -221,7 +219,7 @@ namespace SG03
             if (!this.IsLocationFlippable(this.hovered.Location)) return false;
             if (!this.IsSwapValid()) return false;
             CardHolderCtrl selectedHolder = this.selected.CardHolder;
-            CardHolderCtrl hoveredHolder  = this.hovered.CardHolder;
+            CardHolderCtrl hoveredHolder = this.hovered.CardHolder;
             this.SwapSelectedWithHovered();
             this.NotifyBattleStateOnSwap(selectedHolder, hoveredHolder);
             return true;
@@ -229,11 +227,11 @@ namespace SG03
 
         private void SwapSelectedWithHovered()
         {
-            Card3DCtrl     otherCard    = this.hovered;
+            Card3DCtrl otherCard = this.hovered;
             if (this.selected.IsFlipping) return;
             if (otherCard.IsFlipping) return;
             CardHolderCtrl targetHolder = otherCard.CardHolder;
-            CardHolderCtrl prevHolder   = this.selected.CardHolder;
+            CardHolderCtrl prevHolder = this.selected.CardHolder;
             this.selected.SetCardHolder(targetHolder);
             targetHolder?.SetCard(this.selected);
             otherCard.SetCardHolder(prevHolder);
@@ -363,6 +361,12 @@ namespace SG03
             this.targeted = target;
             this.LogTargetConfirmed(source, target);
             TargetSelected?.Invoke(source, target);
+            this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(source.InventoryItemId, target.InventoryItemId, this.OnAlphaAttackingSuccess, null);
+        }
+
+        private void OnAlphaAttackingSuccess(string response)
+        {
+            this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
         }
 
         private void LogTargetConfirmed(Card3DCtrl source, Card3DCtrl target)
@@ -376,7 +380,7 @@ namespace SG03
             if (!this.IsTargeting) return;
             if (this.arrowIndicator == null) return;
             Vector3 from = this.targetingSource.transform.position;
-            Vector3 to   = this.GetArrowTarget();
+            Vector3 to = this.GetArrowTarget();
             this.arrowIndicator.UpdateTarget(from, to);
         }
 
@@ -393,8 +397,8 @@ namespace SG03
 
         private bool IsAlphaTurn()
         {
-            if (this.battleState == null) return false;
-            return this.battleState.NextMove == NextMoveType.alpha_turn;
+            if (this.battleStateCtrl?.BattleState == null) return false;
+            return this.battleStateCtrl.BattleState.NextMove == NextMoveType.alpha_turn;
         }
 
         private Vector3 GetArrowTarget()
@@ -408,7 +412,7 @@ namespace SG03
         {
             if (Camera.main == null) return this.targetingSource.transform.position;
             if (Mouse.current == null) return this.targetingSource.transform.position;
-            Ray ray     = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
             Plane plane = new Plane(Vector3.up, this.targetingSource.transform.position);
             if (!plane.Raycast(ray, out float distance)) return this.targetingSource.transform.position;
             return ray.GetPoint(distance);
@@ -418,19 +422,19 @@ namespace SG03
 
         private void Subscribe()
         {
-            Card3DCtrl.HoverEntered    += this.OnCardHoverEntered;
-            Card3DCtrl.HoverExited     += this.OnCardHoverExited;
-            CardHolderCtrl.HoverEntered  += this.OnHolderHoverEntered;
-            CardHolderCtrl.HoverExited   += this.OnHolderHoverExited;
+            Card3DCtrl.HoverEntered += this.OnCardHoverEntered;
+            Card3DCtrl.HoverExited += this.OnCardHoverExited;
+            CardHolderCtrl.HoverEntered += this.OnHolderHoverEntered;
+            CardHolderCtrl.HoverExited += this.OnHolderHoverExited;
             CardHolderCtrl.HolderSelected += this.OnHolderSelected;
         }
 
         private void Unsubscribe()
         {
-            Card3DCtrl.HoverEntered    -= this.OnCardHoverEntered;
-            Card3DCtrl.HoverExited     -= this.OnCardHoverExited;
-            CardHolderCtrl.HoverEntered  -= this.OnHolderHoverEntered;
-            CardHolderCtrl.HoverExited   -= this.OnHolderHoverExited;
+            Card3DCtrl.HoverEntered -= this.OnCardHoverEntered;
+            Card3DCtrl.HoverExited -= this.OnCardHoverExited;
+            CardHolderCtrl.HoverEntered -= this.OnHolderHoverEntered;
+            CardHolderCtrl.HoverExited -= this.OnHolderHoverExited;
             CardHolderCtrl.HolderSelected -= this.OnHolderSelected;
         }
 
@@ -473,22 +477,22 @@ namespace SG03
 
         private void NotifyBattleStateOnPlacement(Location fromLocation, CardHolderCtrl fromHolder, CardHolderCtrl targetHolder)
         {
-            if (this.battleState == null) return;
+            if (this.battleStateCtrl?.BattleState == null) return;
             if (fromLocation == Location.in_hand)
             {
-                this.battleState.MoveCardFromHandToLine(this.selected.CodeName, targetHolder.HolderLink, targetHolder.Index);
+                this.battleStateCtrl.BattleState.MoveCardFromHandToLine(this.selected.CodeName, targetHolder.HolderLink, targetHolder.Index);
                 return;
             }
             if (fromLocation != Location.in_front && fromLocation != Location.in_back) return;
             if (fromHolder == null) return;
-            this.battleState.MoveCardOnLine(this.selected.CodeName, fromHolder.HolderLink, fromHolder.Index, targetHolder.HolderLink, targetHolder.Index);
+            this.battleStateCtrl.BattleState.MoveCardOnLine(this.selected.CodeName, fromHolder.HolderLink, fromHolder.Index, targetHolder.HolderLink, targetHolder.Index);
         }
 
         private void NotifyBattleStateOnSwap(CardHolderCtrl holderA, CardHolderCtrl holderB)
         {
-            if (this.battleState == null) return;
+            if (this.battleStateCtrl?.BattleState == null) return;
             if (holderA == null || holderB == null) return;
-            this.battleState.SwapCardsOnLine(holderA.HolderLink, holderA.Index, holderB.HolderLink, holderB.Index);
+            this.battleStateCtrl.BattleState.SwapCardsOnLine(holderA.HolderLink, holderA.Index, holderB.HolderLink, holderB.Index);
         }
 
         private void PlaceSelectedIntoEmptyHolder(CardHolderCtrl targetHolder)
@@ -503,8 +507,8 @@ namespace SG03
 
         private bool IsCardDeployPhase()
         {
-            if (this.battleState == null) return false;
-            return this.battleState.NextMove == NextMoveType.card_deploy;
+            if (this.battleStateCtrl?.BattleState == null) return false;
+            return this.battleStateCtrl.BattleState.NextMove == NextMoveType.card_deploy;
         }
 
         private bool IsPlacementValid(Card3DCtrl card, CardHolderCtrl holder)

@@ -6623,13 +6623,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2015755437}
+  - component: {fileID: 2015755444}
   - component: {fileID: 2015755439}
   - component: {fileID: 2015755438}
   - component: {fileID: 2015755440}
   - component: {fileID: 2015755441}
   - component: {fileID: 2015755442}
   - component: {fileID: 2015755443}
-  - component: {fileID: 2015755444}
   - component: {fileID: 2015755445}
   m_Layer: 0
   m_Name: BattleState
@@ -6722,7 +6722,6 @@ MonoBehaviour:
   hovered: {fileID: 0}
   holderSelected: {fileID: 0}
   holderHover: {fileID: 0}
-  battleState: {fileID: 2015755439}
   deskPositions: {fileID: 948749802}
   fullDetail: 0
   markSelected: {fileID: 311934903}
@@ -6790,6 +6789,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.BattleStateCtrl
   battleState: {fileID: 2015755439}
+  battleScripts: {fileID: 2015755445}
   cardSpawning: {fileID: 2015755438}
   cardSelection: {fileID: 2015755440}
   cardHoverDetector: {fileID: 2015755441}
@@ -6813,6 +6813,7 @@ MonoBehaviour:
   scriptNameInitCards: init_cards
   scriptNameGetCardDefinitions: get_card_definitions
   scriptNameCardDeploy: card_deploy
+  scriptNameAlphaAttacking: alpha_attacking
   battleState: {fileID: 2015755439}
   logPayload: 1
 --- !u!1 &2028831695

@@ -20,6 +20,7 @@ namespace SG03
         [SerializeField] private string scriptNameInitCards          = "init_cards";
         [SerializeField] private string scriptNameGetCardDefinitions = "get_card_definitions";
         [SerializeField] private string scriptNameCardDeploy         = "card_deploy";
+        [SerializeField] private string scriptNameAlphaAttacking     = "alpha_attacking";
 
         private BattleScript battleScript => SaiServer.Instance != null ? SaiServer.Instance.BattleScript : null;
 
@@ -43,45 +44,61 @@ namespace SG03
 
         public void RunBattleStart(string requestBody, Action<string> onSuccess, Action<string> onError)
         {
-            if (this.battleScript == null) return;
+            if (this.IsBattleScriptMissing(nameof(this.RunBattleStart))) return;
             this.LogPayload("RunBattleStart", "#00FFCC", requestBody);
             this.battleScript.RunScript(this.scriptNameBattleStart, requestBody, onSuccess, onError);
         }
 
         public void RunBattleEnd(Action<string> onSuccess, Action<string> onError)
         {
-            if (this.battleScript == null) return;
+            if (this.IsBattleScriptMissing(nameof(this.RunBattleEnd))) return;
             this.LogPayload("RunBattleEnd", "#FF6B6B", null);
             this.battleScript.RunScript(this.scriptNameBattleEnd, null, onSuccess, onError);
         }
 
         public void RunBattleStatus(Action<string> onSuccess, Action<string> onError)
         {
-            if (this.battleScript == null) return;
+            if (this.IsBattleScriptMissing(nameof(this.RunBattleStatus))) return;
             this.LogPayload("RunBattleStatus", "#FFD700", null);
             this.battleScript.RunScript(this.scriptNameBattleStatus, null, onSuccess, onError);
         }
 
         public void RunInitCards(Action<string> onSuccess, Action<string> onError)
         {
-            if (this.battleScript == null) return;
+            if (this.IsBattleScriptMissing(nameof(this.RunInitCards))) return;
             this.LogPayload("RunInitCards", "#88DDFF", null);
             this.battleScript.RunScript(this.scriptNameInitCards, null, onSuccess, onError);
         }
 
         public void RunGetCardDefinitions(Action<string> onSuccess, Action<string> onError)
         {
-            if (this.battleScript == null) return;
+            if (this.IsBattleScriptMissing(nameof(this.RunGetCardDefinitions))) return;
             this.LogPayload("RunGetCardDefinitions", "#AAFFAA", null);
             this.battleScript.RunScript(this.scriptNameGetCardDefinitions, null, onSuccess, onError);
         }
 
         public void RunCardDeploy(Action<string> onSuccess, Action<string> onError)
         {
-            if (this.battleScript == null) return;
+            if (this.IsBattleScriptMissing(nameof(this.RunCardDeploy))) return;
             string requestBody = this.BuildCardDeployRequestBody();
             this.LogPayload("RunCardDeploy", "#FF88FF", requestBody);
             this.battleScript.RunScript(this.scriptNameCardDeploy, requestBody, onSuccess, onError);
+        }
+
+        public void RunAlphaAttacking(string attackerInventoryItemId, string defenderInventoryItemId, Action<string> onSuccess, Action<string> onError)
+        {
+            if (this.IsBattleScriptMissing(nameof(this.RunAlphaAttacking))) return;
+            string requestBody = this.BuildAlphaAttackingRequestBody(attackerInventoryItemId, defenderInventoryItemId);
+            this.LogPayload("RunAlphaAttacking", "#FF4444", requestBody);
+            this.battleScript.RunScript(this.scriptNameAlphaAttacking, requestBody, onSuccess, onError);
+        }
+
+        private bool IsBattleScriptMissing(string callerName)
+        {
+            if (this.battleScript != null) return false;
+            string serverState = SaiServer.Instance == null ? "SaiServer=null" : "SaiServer=ok, BattleScript=null";
+            Debug.LogWarning($"[BattleScripts] {callerName}: battleScript is null ({serverState})", this.gameObject);
+            return true;
         }
 
         private void LogPayload(string methodName, string color, string payload)
@@ -89,6 +106,11 @@ namespace SG03
             if (!this.logPayload) return;
             string payloadPart = string.IsNullOrEmpty(payload) ? string.Empty : "\n" + payload;
             Debug.Log($"<color={color}><b>[BattleScripts] \u25ba {methodName}</b></color>{payloadPart}", this.gameObject);
+        }
+
+        private string BuildAlphaAttackingRequestBody(string attackerInventoryItemId, string defenderInventoryItemId)
+        {
+            return $"{{\"payload\":{{\"attacker_inventory_item_id\":\"{attackerInventoryItemId}\",\"defender_inventory_item_id\":\"{defenderInventoryItemId}\"}}}}";
         }
 
         private string BuildCardDeployRequestBody()
