@@ -151,6 +151,13 @@ namespace SG03
         /// <summary>Smoothly moves the card to the specified transform, position only (no rotation change).</summary>
         public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
 
+        /// <summary>Moves the card to <paramref name="holder"/>'s position and flips face-down via the Unknown axis.
+        /// Intended for hand → line transitions.</summary>
+        public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null) => this.movement.MoveToUnknow(holder, onReady);
+
+        /// <summary>Assigns the card-holder reference without triggering any movement or animation.</summary>
+        public void AssignCardHolder(CardHolderCtrl holder) => this.cardHolder = holder;
+
         /// <summary>Rotates the card 180 degrees around the world Z axis, then invokes <paramref name="onComplete"/>.</summary>
         public void RotateZ180(System.Action onComplete = null) => this.movement.RotateY180(onComplete);
 

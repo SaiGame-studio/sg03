@@ -134,13 +134,14 @@ namespace SG03
                 return;
             }
             this.HandleLeftClick();
+            this.HandleMiddleClick();
             this.HandleRightClick();
         }
 
         private void HandleFullDetailClick()
         {
             if (this.hovered != this.selected) return;
-            if (!this.IsMouseClickedThisFrame() && !this.IsMouseRightClickedThisFrame()) return;
+            if (!this.IsMouseClickedThisFrame()) return;
             this.ExitFullDetail();
         }
 
@@ -149,6 +150,15 @@ namespace SG03
             if (!this.IsMouseClickedThisFrame()) return;
             this.HandleCardClick();
             this.HandleHolderClick();
+        }
+
+        private void HandleMiddleClick()
+        {
+            if (!this.IsMouseMiddleClickedThisFrame()) return;
+            if (this.hovered == null) return;
+            if (this.IsLocationNonSelectable(this.hovered.Location)) return;
+            if (!this.IsClickOnSelected()) this.SelectHovered();
+            this.EnterFullDetail();
         }
 
         private void HandleRightClick()
@@ -197,15 +207,17 @@ namespace SG03
             return Mouse.current.rightButton.wasPressedThisFrame;
         }
 
+        private bool IsMouseMiddleClickedThisFrame()
+        {
+            if (Mouse.current == null) return false;
+            return Mouse.current.middleButton.wasPressedThisFrame;
+        }
+
         private void HandleCardClick()
         {
             if (this.hovered == null) return;
             if (this.IsLocationNonSelectable(this.hovered.Location)) return;
-            if (this.IsClickOnSelected())
-            {
-                this.EnterFullDetail();
-                return;
-            }
+            if (this.IsClickOnSelected()) return;
             this.SelectHovered();
         }
 
@@ -230,7 +242,6 @@ namespace SG03
         private void EnterFullDetail()
         {
             if (this.deskPositions == null) return;
-            if (this.IsLocationFlippable(this.selected.Location)) return;
             this.fullDetail = true;
             this.selected.MoveToFullDetail(this.deskPositions.FullDetailPoint);
         }

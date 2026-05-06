@@ -18,27 +18,33 @@ namespace SG03
         [SerializeField] private float spawnInterval = 0.05f;
 
         private Coroutine spawnRoutine;
-        private readonly Dictionary<string, Card3DCtrl>    sourceCardRegistry = new Dictionary<string, Card3DCtrl>();
-        private readonly Dictionary<string, Card3DCtrl>    handCardRegistry   = new Dictionary<string, Card3DCtrl>();
-        private readonly Dictionary<Transform, Card3DCtrl> slotOccupancy      = new Dictionary<Transform, Card3DCtrl>();
+        private readonly Dictionary<string, Card3DCtrl>    sourceCardRegistry  = new Dictionary<string, Card3DCtrl>();
+        private readonly Dictionary<string, Card3DCtrl>    handCardRegistry    = new Dictionary<string, Card3DCtrl>();
+        private readonly Dictionary<Transform, Card3DCtrl> slotOccupancy       = new Dictionary<Transform, Card3DCtrl>();
+        private readonly Queue<Card3DCtrl>                  omegaSourceCardQueue = new Queue<Card3DCtrl>();
+        private readonly Queue<Card3DCtrl>                  omegaHandCardQueue   = new Queue<Card3DCtrl>();
+        private BattleCardSlot[] previousOmegaHand;
         private int omegaSourceSpawnedCount = 0;
         private int omegaVoidSpawnedCount   = 0;
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
         public void SpawnStatusDelta(BattleCardSlot[] newHand, BattleCardSlot[] newFrontLine, BattleCardSlot[] newBackLine,
-            BattleCardSlot[] newOmegaFrontLine, BattleCardSlot[] newOmegaBackLine)
+            BattleCardSlot[] newOmegaFrontLine, BattleCardSlot[] newOmegaBackLine, BattleCardSlot[] previousOmegaHand)
         {
             if (this.spawnRoutine != null) this.StopCoroutine(this.spawnRoutine);
             this.spawnRoutine = this.StartCoroutine(
-                this.SpawnStatusDeltaRoutine(newHand, newFrontLine, newBackLine, newOmegaFrontLine, newOmegaBackLine));
+                this.SpawnStatusDeltaRoutine(newHand, newFrontLine, newBackLine, newOmegaFrontLine, newOmegaBackLine, previousOmegaHand));
         }
 
         public void ClearSourceRegistry()
         {
             this.sourceCardRegistry.Clear();
             this.handCardRegistry.Clear();
+            this.omegaHandCardQueue.Clear();
             this.slotOccupancy.Clear();
+            this.omegaSourceCardQueue.Clear();
+            this.previousOmegaHand = null;
             this.omegaSourceSpawnedCount = 0;
             this.omegaVoidSpawnedCount   = 0;
         }
@@ -99,8 +105,9 @@ namespace SG03
         }
 
         private IEnumerator SpawnStatusDeltaRoutine(BattleCardSlot[] newHand, BattleCardSlot[] newFrontLine, BattleCardSlot[] newBackLine,
-            BattleCardSlot[] newOmegaFrontLine, BattleCardSlot[] newOmegaBackLine)
+            BattleCardSlot[] newOmegaFrontLine, BattleCardSlot[] newOmegaBackLine, BattleCardSlot[] previousOmegaHand)
         {
+            this.previousOmegaHand = previousOmegaHand;
             Card3DCtrl prefab = this.ResolvePrefab();
             if (prefab == null) yield break;
             yield return this.WaitForDefinitions();
@@ -109,6 +116,7 @@ namespace SG03
                 this.SpawnOmegaSequentialRoutine(prefab, newOmegaFrontLine, newOmegaBackLine));
             BattleCardSlot[] allSlots = this.CombineSlots(newHand, newFrontLine, newBackLine);
             yield return this.DispatchSlotsByAction(prefab, allSlots);
+            this.previousOmegaHand = null;
             this.spawnRoutine = null;
         }
 
@@ -268,6 +276,7 @@ namespace SG03
                 if (card == null) break;
                 card.SetOwner(Owner.omega);
                 card.MoveAndRotate(this.deskPosition.OmegaTheSource, Location.in_source);
+                this.omegaSourceCardQueue.Enqueue(card);
                 this.omegaSourceSpawnedCount++;
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
@@ -340,7 +349,7 @@ namespace SG03
             if (holder == null) return false;
             Transform target = holder.transform;
             if (this.IsSlotOccupied(target)) return false;
-            Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+            Card3DCtrl card = this.ResolveOmegaLineCard(prefab, out bool fromHand);
             if (card == null) return false;
             card.SetOwner(Owner.omega);
             string code = slot.item_definition_code_name;
@@ -350,7 +359,10 @@ namespace SG03
             card.LoadCardByCodeName(code);
             card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
             card.SetExpose(slot.expose);
-            card.SetCardHolder(holder, () => this.ApplyFaceState(card, slot));
+            if (fromHand)
+                card.MoveToUnknow(holder, () => this.ApplyFaceState(card, slot));
+            else
+                card.SetCardHolder(holder, () => this.ApplyFaceState(card, slot));
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
             Debug.Log($"<color=#FF8800><b>[CardSpawning] omega card_action=<i>{slot.card_action}</i></b> | code=<b>{code}</b> | slot={idx} | location={location} | face_up={slot.face_up} | expose={slot.expose}</color>");
@@ -362,7 +374,7 @@ namespace SG03
             int idx = slot.slot_index;
             Transform target = this.ResolveHandTarget(idx, this.deskPosition.OmegaHand);
             if (this.IsSlotOccupied(target)) return false;
-            Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+            Card3DCtrl card = this.DequeueOmegaSourceCard(prefab);
             if (card == null) return false;
             card.SetOwner(Owner.omega);
             string code = slot.item_definition_code_name;
@@ -373,6 +385,7 @@ namespace SG03
             card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
             card.MoveAndRotate(target, Location.in_hand);
             this.slotOccupancy[target] = card;
+            this.omegaHandCardQueue.Enqueue(card);
             return true;
         }
 
@@ -385,6 +398,25 @@ namespace SG03
                 return existing;
             }
             return this.SpawnCardAt(prefab, this.deskPosition.AlphaTheSource);
+        }
+
+        private Card3DCtrl DequeueOmegaSourceCard(Card3DCtrl prefab)
+        {
+            if (this.omegaSourceCardQueue.Count > 0) return this.omegaSourceCardQueue.Dequeue();
+            return this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+        }
+
+        private Card3DCtrl ResolveOmegaLineCard(Card3DCtrl prefab, out bool fromHand)
+        {
+            if (this.previousOmegaHand != null && this.previousOmegaHand.Length > 0 && this.omegaHandCardQueue.Count > 0)
+            {
+                fromHand = true;
+                Card3DCtrl handCard = this.omegaHandCardQueue.Dequeue();
+                this.RemoveFromSlotOccupancy(handCard);
+                return handCard;
+            }
+            fromHand = false;
+            return this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
         }
 
         private Card3DCtrl ResolveOrSpawnFromHand(Card3DCtrl prefab, BattleCardSlot slot)
