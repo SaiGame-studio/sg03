@@ -55,6 +55,13 @@
 - **Never resolve a reference via a Singleton** (e.g. `SaiServer.Instance`) inside any `Load<X>()` method. Use scene hierarchy APIs only (`GetComponent`, `GetComponentInChildren`, `GetComponentInParent`, `FindFirstObjectByType`).
 - See skill: `unity-ctrl-pattern`.
 
+## Reference Through Ctrl — No Direct Cross-Script Links
+- A non-Ctrl script **must never** hold a `[SerializeField]` reference directly to another non-Ctrl script that belongs to a different system.
+- Cross-system references must always go through the owning `Ctrl` class (e.g. reach `BattleScripts` via `BattleStateCtrl.BattleScripts`, not by wiring `BattleScripts` directly into an unrelated script).
+- **Cache the Ctrl, not the sub-reference.** A non-Ctrl script that needs data from another system must cache the owning `Ctrl` (e.g. `private BattleStateCtrl battleStateCtrl`) and access sub-components through it at call-sites (e.g. `this.battleStateCtrl.BattleScripts.RunX()`). Never extract and cache the sub-reference as a separate field (e.g. `private BattleScripts battleScripts` obtained from the Ctrl is forbidden).
+- Inside `Load<X>()`, resolve the Ctrl directly via hierarchy APIs (`GetComponentInParent`, etc.) — one dedicated `LoadXCtrl()` method per Ctrl dependency.
+- The only allowed exception is a script wiring its own sibling or child components on the **same** GameObject or sub-tree it directly owns.
+
 ## C# Compile Check Before Delivery
 - After every code change, **always** run `get_errors` on all modified `.cs` files.
 - Do **not** deliver the work until `get_errors` returns zero errors.

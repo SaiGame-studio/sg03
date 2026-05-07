@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SaiGame.Services;
 using SG03.UI;
 using UnityEngine;
@@ -7,6 +8,13 @@ namespace SG03
 {
     public class CardSelection : SaiBehaviour
     {
+        // ─── Static events ────────────────────────────────────────────────────────
+
+        /// <summary>Fired when the player confirms a targeting selection (source → target).</summary>
+        public static event System.Action<Card3DCtrl, Card3DCtrl> TargetSelected;
+
+        [SerializeField] private BattleStateCtrl battleStateCtrl;
+
         [SerializeField] private Card3DCtrl selected;
         [SerializeField] private Card3DCtrl hovered;
 
@@ -14,8 +22,6 @@ namespace SG03
         [SerializeField] private CardHolderCtrl holderSelected;
         [SerializeField] private CardHolderCtrl holderHover;
 
-        [Header("Battle State")]
-        [SerializeField] private BattleState battleState;
 
         [Header("Full Detail")]
         [SerializeField] private DeskPositionCtrl deskPositions;
@@ -26,24 +32,58 @@ namespace SG03
         [SerializeField] private float markFollowSpeed = 10f;
         [SerializeField] private Transform markIdlePosition;
 
+        [Header("Targeting")]
+        [SerializeField] private ArrowIndicatorCtrl arrowIndicator;
+        [SerializeField] private Card3DCtrl targeted;
+        private Card3DCtrl targetingSource;
+
+        [Header("Front Line Holders")]
+        [SerializeField] private CardHolderCtrl[] alphaFrontLineHolders;
+
+        private bool IsTargeting => this.targetingSource != null;
+
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
-            this.LoadBattleState();
+            this.LoadBattleStateCtrl();
             this.LoadDeskPositions();
             this.LoadMarkSelected();
             this.LoadMarkIdlePosition();
+            this.LoadArrowIndicator();
+            this.LoadAlphaFrontLineHolders();
         }
 
-        protected virtual void LoadBattleState()
+        protected virtual void LoadAlphaFrontLineHolders()
         {
-            if (this.battleState != null) return;
-            BattleStateCtrl ctrl = this.GetComponentInParent<BattleStateCtrl>(true);
-            if (ctrl == null) return;
-            this.battleState = ctrl.BattleState;
-            Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
+            if (this.alphaFrontLineHolders != null && this.alphaFrontLineHolders.Length > 0) return;
+            CardHolderCtrl[] all = Object.FindObjectsByType<CardHolderCtrl>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            List<CardHolderCtrl> result = new List<CardHolderCtrl>();
+            foreach (CardHolderCtrl h in all)
+            {
+                if (h.HolderOwner != Owner.alpha) continue;
+                if (h.HolderLink != Link.front) continue;
+                result.Add(h);
+            }
+            this.alphaFrontLineHolders = result.ToArray();
+            Debug.LogWarning(this.transform.name + ": LoadAlphaFrontLineHolders", this.gameObject);
+        }
+
+        protected virtual void LoadArrowIndicator()
+        {
+            if (this.arrowIndicator != null) return;
+            GameObject go = GameObject.Find("ArrowIndicatorCtrl");
+            if (go == null) return;
+            this.arrowIndicator = go.GetComponent<ArrowIndicatorCtrl>();
+            Debug.LogWarning(this.transform.name + ": FindArrowIndicator", this.gameObject);
+        }
+
+        protected virtual void LoadBattleStateCtrl()
+        {
+            if (this.battleStateCtrl != null) return;
+            this.battleStateCtrl = this.GetComponentInParent<BattleStateCtrl>(true);
+            Debug.LogWarning(this.transform.name + ": LoadBattleStateCtrl", this.gameObject);
         }
 
         protected virtual void LoadMarkIdlePosition()
@@ -76,6 +116,7 @@ namespace SG03
         {
             this.CheckClick();
             this.UpdateMarkSelected();
+            this.UpdateArrow();
         }
 
         // ─── Mark selected ────────────────────────────────────────────────────────
@@ -164,6 +205,7 @@ namespace SG03
         private void HandleRightClick()
         {
             if (!this.IsMouseRightClickedThisFrame()) return;
+            if (this.TryConfirmTargeting()) return;
             if (this.TrySwapWithHovered()) return;
             this.HandleSelectedToggleFace();
         }
@@ -173,10 +215,11 @@ namespace SG03
             if (this.selected == null) return false;
             if (this.hovered == null) return false;
             if (this.hovered == this.selected) return false;
+            if (!this.IsCardDeployPhase()) return false;
             if (!this.IsLocationFlippable(this.hovered.Location)) return false;
             if (!this.IsSwapValid()) return false;
             CardHolderCtrl selectedHolder = this.selected.CardHolder;
-            CardHolderCtrl hoveredHolder  = this.hovered.CardHolder;
+            CardHolderCtrl hoveredHolder = this.hovered.CardHolder;
             this.SwapSelectedWithHovered();
             this.NotifyBattleStateOnSwap(selectedHolder, hoveredHolder);
             return true;
@@ -184,11 +227,11 @@ namespace SG03
 
         private void SwapSelectedWithHovered()
         {
-            Card3DCtrl     otherCard    = this.hovered;
+            Card3DCtrl otherCard = this.hovered;
             if (this.selected.IsFlipping) return;
             if (otherCard.IsFlipping) return;
             CardHolderCtrl targetHolder = otherCard.CardHolder;
-            CardHolderCtrl prevHolder   = this.selected.CardHolder;
+            CardHolderCtrl prevHolder = this.selected.CardHolder;
             this.selected.SetCardHolder(targetHolder);
             targetHolder?.SetCard(this.selected);
             otherCard.SetCardHolder(prevHolder);
@@ -271,23 +314,127 @@ namespace SG03
             return location == Location.in_front || location == Location.in_back;
         }
 
+        // ─── Targeting ────────────────────────────────────────────────────────────
+
+        private bool TryBeginTargeting()
+        {
+            if (this.selected == null) return false;
+            this.BeginTargeting();
+            return true;
+        }
+
+        private bool TryCancelTargeting()
+        {
+            if (!this.IsTargeting) return false;
+            this.CancelTargeting();
+            return true;
+        }
+
+        private bool TryConfirmTargeting()
+        {
+            if (!this.IsTargeting) return false;
+            if (this.hovered == null) return false;
+            if (this.hovered == this.targetingSource) return false;
+            this.ConfirmTargeting();
+            return true;
+        }
+
+        private void BeginTargeting()
+        {
+            this.targetingSource = this.selected;
+            this.targeted = null;
+            if (this.arrowIndicator == null) return;
+            this.arrowIndicator.Show(this.targetingSource.transform.position, this.targetingSource.transform.position);
+        }
+
+        private void CancelTargeting()
+        {
+            this.targetingSource = null;
+            this.targeted = null;
+            this.arrowIndicator?.Hide();
+        }
+
+        private void ConfirmTargeting()
+        {
+            Card3DCtrl source = this.targetingSource;
+            Card3DCtrl target = this.hovered;
+            this.targeted = target;
+            this.LogTargetConfirmed(source, target);
+            TargetSelected?.Invoke(source, target);
+            this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(source.InventoryItemId, target.InventoryItemId, this.OnAlphaAttackingSuccess, null);
+        }
+
+        private void OnAlphaAttackingSuccess(string response)
+        {
+            this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
+        }
+
+        private void LogTargetConfirmed(Card3DCtrl source, Card3DCtrl target)
+        {
+            Debug.Log($"<color=#00FFAA>[Targeting] <b>{source.name}</b> → <b>{target.name}</b></color>");
+        }
+
+        private void UpdateArrow()
+        {
+            this.SyncTargetingState();
+            if (!this.IsTargeting) return;
+            if (this.arrowIndicator == null) return;
+            Vector3 from = this.targetingSource.transform.position;
+            Vector3 to = this.GetArrowTarget();
+            this.arrowIndicator.UpdateTarget(from, to);
+        }
+
+        private void SyncTargetingState()
+        {
+            if (!this.IsAlphaTurn() || this.selected == null)
+            {
+                this.TryCancelTargeting();
+                return;
+            }
+            if (this.targetingSource != this.selected)
+                this.BeginTargeting();
+        }
+
+        private bool IsAlphaTurn()
+        {
+            if (this.battleStateCtrl?.BattleState == null) return false;
+            return this.battleStateCtrl.BattleState.NextMove == NextMoveType.alpha_turn;
+        }
+
+        private Vector3 GetArrowTarget()
+        {
+            if (this.hovered != null && this.hovered != this.targetingSource)
+                return this.hovered.transform.position;
+            return this.GetMouseWorldPosition();
+        }
+
+        private Vector3 GetMouseWorldPosition()
+        {
+            if (Camera.main == null) return this.targetingSource.transform.position;
+            if (Mouse.current == null) return this.targetingSource.transform.position;
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            Plane plane = new Plane(Vector3.up, this.targetingSource.transform.position);
+            if (!plane.Raycast(ray, out float distance)) return this.targetingSource.transform.position;
+            return ray.GetPoint(distance);
+        }
+
         // ─── Event subscription ───────────────────────────────────────────────────
 
         private void Subscribe()
         {
-            Card3DCtrl.HoverEntered    += this.OnCardHoverEntered;
-            Card3DCtrl.HoverExited     += this.OnCardHoverExited;
-            CardHolderCtrl.HoverEntered  += this.OnHolderHoverEntered;
-            CardHolderCtrl.HoverExited   += this.OnHolderHoverExited;
+            Card3DCtrl.HoverEntered += this.OnCardHoverEntered;
+            Card3DCtrl.HoverExited += this.OnCardHoverExited;
+            CardHolderCtrl.HoverEntered += this.OnHolderHoverEntered;
+            CardHolderCtrl.HoverExited += this.OnHolderHoverExited;
             CardHolderCtrl.HolderSelected += this.OnHolderSelected;
         }
 
         private void Unsubscribe()
         {
-            Card3DCtrl.HoverEntered    -= this.OnCardHoverEntered;
-            Card3DCtrl.HoverExited     -= this.OnCardHoverExited;
-            CardHolderCtrl.HoverEntered  -= this.OnHolderHoverEntered;
-            CardHolderCtrl.HoverExited   -= this.OnHolderHoverExited;
+            Card3DCtrl.HoverEntered -= this.OnCardHoverEntered;
+            Card3DCtrl.HoverExited -= this.OnCardHoverExited;
+            CardHolderCtrl.HoverEntered -= this.OnHolderHoverEntered;
+            CardHolderCtrl.HoverExited -= this.OnHolderHoverExited;
             CardHolderCtrl.HolderSelected -= this.OnHolderSelected;
         }
 
@@ -319,6 +466,7 @@ namespace SG03
         {
             this.holderSelected = holder;
             if (this.selected == null) return;
+            if (!this.IsCardDeployPhase()) return;
             if (holder.HeldCard != null) return;
             if (!this.IsPlacementValid(this.selected, holder)) return;
             Location fromLocation = this.selected.Location;
@@ -329,22 +477,22 @@ namespace SG03
 
         private void NotifyBattleStateOnPlacement(Location fromLocation, CardHolderCtrl fromHolder, CardHolderCtrl targetHolder)
         {
-            if (this.battleState == null) return;
+            if (this.battleStateCtrl?.BattleState == null) return;
             if (fromLocation == Location.in_hand)
             {
-                this.battleState.MoveCardFromHandToLine(this.selected.CodeName, targetHolder.HolderLink, targetHolder.Index);
+                this.battleStateCtrl.BattleState.MoveCardFromHandToLine(this.selected.CodeName, targetHolder.HolderLink, targetHolder.Index);
                 return;
             }
             if (fromLocation != Location.in_front && fromLocation != Location.in_back) return;
             if (fromHolder == null) return;
-            this.battleState.MoveCardOnLine(this.selected.CodeName, fromHolder.HolderLink, fromHolder.Index, targetHolder.HolderLink, targetHolder.Index);
+            this.battleStateCtrl.BattleState.MoveCardOnLine(this.selected.CodeName, fromHolder.HolderLink, fromHolder.Index, targetHolder.HolderLink, targetHolder.Index);
         }
 
         private void NotifyBattleStateOnSwap(CardHolderCtrl holderA, CardHolderCtrl holderB)
         {
-            if (this.battleState == null) return;
+            if (this.battleStateCtrl?.BattleState == null) return;
             if (holderA == null || holderB == null) return;
-            this.battleState.SwapCardsOnLine(holderA.HolderLink, holderA.Index, holderB.HolderLink, holderB.Index);
+            this.battleStateCtrl.BattleState.SwapCardsOnLine(holderA.HolderLink, holderA.Index, holderB.HolderLink, holderB.Index);
         }
 
         private void PlaceSelectedIntoEmptyHolder(CardHolderCtrl targetHolder)
@@ -357,13 +505,32 @@ namespace SG03
 
         // ─── Placement validation ─────────────────────────────────────────────────
 
+        private bool IsCardDeployPhase()
+        {
+            if (this.battleStateCtrl?.BattleState == null) return false;
+            return this.battleStateCtrl.BattleState.NextMove == NextMoveType.card_deploy;
+        }
+
         private bool IsPlacementValid(Card3DCtrl card, CardHolderCtrl holder)
         {
             if (card.CardOwner == Owner.omega) return false;
             if (card.CardOwner != holder.HolderOwner) return false;
             if (card.IsCharacter() && holder.HolderLink != Link.front) return false;
             if (!card.IsCharacter() && holder.HolderLink != Link.back) return false;
+            if (card.IsCharacter() && this.IsCharacterAlreadyOnFrontLine(card)) return false;
             return true;
+        }
+
+        private bool IsCharacterAlreadyOnFrontLine(Card3DCtrl excludeCard)
+        {
+            if (this.alphaFrontLineHolders == null) return false;
+            foreach (CardHolderCtrl h in this.alphaFrontLineHolders)
+            {
+                if (h.HeldCard == null) continue;
+                if (h.HeldCard == excludeCard) continue;
+                if (h.HeldCard.IsCharacter()) return true;
+            }
+            return false;
         }
 
         private bool IsSwapValid()

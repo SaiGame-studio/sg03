@@ -49,6 +49,7 @@ namespace SG03.UI
         private Label omeraSourceCountLabel;
         private Label alphaTheVoidCountLabel;
         private Label omegaTheVoidCountLabel;
+        private Label nextMoveLabel;
         private VisualElement gameRoot;
         private VisualElement gameViewport;
         private VisualElement root;
@@ -259,6 +260,7 @@ namespace SG03.UI
             this.btnAttack?.RegisterCallback<ClickEvent>(_ => this.OnAttackClicked());
             this.enemyCodeNameInput?.RegisterValueChangedCallback(_ => this.ResetStartBattleButtonText());
             this.btnStartBattle?.RegisterCallback<ClickEvent>(_ => this.OnStartBattleClicked());
+            this.nextMoveLabel = panelRoot.Q<Label>("NextMoveLabel");
         }
 
         private void BindPlayerName(VisualElement panelRoot)
@@ -306,6 +308,7 @@ namespace SG03.UI
             this.SetBattleHp(state.AlphaHp, state.OmegaHp);
             this.SetBattleSourceCounts(state.AlphaTheSourceCount, state.OmegaTheSourceCount);
             this.SetBattleVoidCounts(state.AlphaTheVoidCount, state.OmegaTheVoidCount);
+            this.SetNextMoveLabel(state.NextMove);
         }
 
         private void OnDeskTabClicked(Button selected)
@@ -655,6 +658,12 @@ namespace SG03.UI
         {
             if (this.alphaHpLabel != null) this.alphaHpLabel.text = $"HP: {alphaHp}";
             if (this.omegaHpLabel != null) this.omegaHpLabel.text = $"HP: {omegaHp}";
+        }
+
+        private void SetNextMoveLabel(NextMoveType move)
+        {
+            if (this.nextMoveLabel == null) return;
+            this.nextMoveLabel.text = $"Move: {move}";
         }
 
         private void EndBattle()

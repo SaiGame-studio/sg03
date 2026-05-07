@@ -9,6 +9,7 @@ namespace SG03
     {
         [Header("References")]
         [SerializeField] private BattleState battleState;
+        [SerializeField] private BattleScripts battleScripts;
         [SerializeField] private CardSpawning cardSpawning;
         [SerializeField] private CardSelection cardSelection;
         [SerializeField] private CardHoverDetector cardHoverDetector;
@@ -16,6 +17,7 @@ namespace SG03
         [SerializeField] private BattleCardDefinitions battleCardDefinitions;
 
         public BattleState BattleState => this.battleState;
+        public BattleScripts BattleScripts => this.battleScripts;
         public CardSpawning CardSpawning => this.cardSpawning;
         public CardSelection CardSelection => this.cardSelection;
         public CardHoverDetector CardHoverDetector => this.cardHoverDetector;
@@ -26,11 +28,19 @@ namespace SG03
         {
             base.LoadComponents();
             this.LoadBattleState();
+            this.LoadBattleScripts();
             this.LoadCardSpawning();
             this.LoadCardSelection();
             this.LoadCardHoverDetector();
             this.LoadCardHolderHoverDetector();
             this.LoadBattleCardDefinitions();
+        }
+
+        protected virtual void LoadBattleScripts()
+        {
+            if (this.battleScripts != null) return;
+            this.battleScripts = this.GetComponentInChildren<BattleScripts>(true);
+            Debug.LogWarning(this.transform.name + ": LoadBattleScripts", this.gameObject);
         }
 
         protected virtual void LoadBattleState()

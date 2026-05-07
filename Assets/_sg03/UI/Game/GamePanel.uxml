@@ -39,6 +39,7 @@
                 <ui:Button name="BtnEndTurn" text="End Turn" class="game-bottom-btn" />
                 <ui:Button name="BtnDrawCard" text="Draw Card" class="game-bottom-btn" />
                 <ui:Button name="BtnAttack" text="Attack" class="game-bottom-btn" />
+                <ui:Label name="NextMoveLabel" text="Move: --" class="game-top-menu__title" style="margin-left: auto;" />
             </ui:VisualElement>
 
         </ui:VisualElement>
