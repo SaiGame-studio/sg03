@@ -118,6 +118,7 @@ namespace SG03
         private bool  isFlipping;
         private Tween yTween;
         private Tween moveTween;
+        private Tween rotateTween;
         private Tween rotateY180Tween;
         private Sequence faceTween;
         private Sequence damageTween;
@@ -181,7 +182,7 @@ namespace SG03
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
             this.StartMoveTween(target.position, this.duration, this.ease, null);
-            this.transform.DORotateQuaternion(target.rotation, this.duration).SetEase(this.ease);
+            this.rotateTween = this.transform.DORotateQuaternion(target.rotation, this.duration).SetEase(this.ease);
         }
 
         /// <summary>
@@ -223,9 +224,8 @@ namespace SG03
             this.location = destination;
             this.RecordHandAnchor(holder.transform, destination);
             this.KillAllTweens();
-            this.StartMoveTween(holder.transform.position, this.duration, this.ease, null);
+            this.StartMoveTween(holder.transform.position, this.duration, this.ease, onReady);
             this.FaceDownUnknown();
-            onReady?.Invoke();
         }
 
         /// <summary>Smoothly rotates the card to face-up using global euler angles.</summary>
@@ -343,7 +343,7 @@ namespace SG03
             this.preFullDetailRotation = this.transform.rotation;
             this.KillAllTweens();
             this.StartMoveTween(point.position, this.fullDetailDuration, this.fullDetailEase, null);
-            this.transform.DORotateQuaternion(point.rotation, this.fullDetailDuration).SetEase(this.fullDetailEase);
+            this.rotateTween = this.transform.DORotateQuaternion(point.rotation, this.fullDetailDuration).SetEase(this.fullDetailEase);
         }
 
         /// <summary>
@@ -354,7 +354,7 @@ namespace SG03
             if (this.isFlipping) return;
             this.KillAllTweens();
             this.StartMoveTween(this.preFullDetailPosition, this.fullDetailReturnDuration, this.fullDetailReturnEase, null);
-            this.transform.DORotateQuaternion(this.preFullDetailRotation, this.fullDetailReturnDuration).SetEase(this.fullDetailReturnEase);
+            this.rotateTween = this.transform.DORotateQuaternion(this.preFullDetailRotation, this.fullDetailReturnDuration).SetEase(this.fullDetailReturnEase);
         }
 
         public void RunUp()
@@ -447,13 +447,14 @@ namespace SG03
             this.KillMoveTween();
             this.yTween?.Kill();
             this.yTween = null;
+            this.rotateTween?.Kill();
+            this.rotateTween = null;
             this.faceTween?.Kill();
             this.faceTween = null;
             this.rotateY180Tween?.Kill();
             this.rotateY180Tween = null;
             this.damageTween?.Kill();
             this.damageTween = null;
-            this.transform.DOKill();
         }
     }
 }
