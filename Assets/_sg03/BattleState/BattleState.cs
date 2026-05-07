@@ -244,6 +244,11 @@ namespace SG03.UI
             BattleStatusScriptResponse response = JsonUtility.FromJson<BattleStatusScriptResponse>(rawJson);
             if (response == null) return;
             if (response.output == null) return;
+            if (!string.IsNullOrEmpty(response.output.error))
+            {
+                Debug.LogError($"[BattleState] Script error: {response.output.error}");
+                return;
+            }
             this.ApplyOutput(response.output);
         }
 
