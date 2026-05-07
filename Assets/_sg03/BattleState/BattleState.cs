@@ -29,6 +29,8 @@ namespace SG03.UI
         [SerializeField] private int omegaTheSourceCount;
         [SerializeField] private int alphaTheVoidCount;
         [SerializeField] private int omegaTheVoidCount;
+        [SerializeField] private BattleCardSlot[] alphaTheVoid;
+        [SerializeField] private BattleCardSlot[] omegaTheVoid;
         [SerializeField] private BattleCardSlot[] alphaTheSource;
         [SerializeField] private BattleCardSlot[] alphaHand;
         [SerializeField] private BattleCardSlot[] alphaBackLine;
@@ -53,6 +55,8 @@ namespace SG03.UI
         public int OmegaTheSourceCount => this.omegaTheSourceCount;
         public int AlphaTheVoidCount => this.alphaTheVoidCount;
         public int OmegaTheVoidCount => this.omegaTheVoidCount;
+        public BattleCardSlot[] AlphaTheVoid => this.alphaTheVoid;
+        public BattleCardSlot[] OmegaTheVoid => this.omegaTheVoid;
         public BattleCardSlot[] AlphaTheSource => this.alphaTheSource;
         public BattleCardSlot[] AlphaHand => this.alphaHand;
         public BattleCardSlot[] AlphaBackLine => this.alphaBackLine;
@@ -127,6 +131,8 @@ namespace SG03.UI
             this.omegaTheSourceCount = 0;
             this.alphaTheVoidCount = 0;
             this.omegaTheVoidCount = 0;
+            this.alphaTheVoid = null;
+            this.omegaTheVoid = null;
             this.alphaTheSource = null;
             this.alphaHand = null;
             this.alphaBackLine = null;
@@ -252,6 +258,8 @@ namespace SG03.UI
             this.omegaTheSourceCount = output.omega_the_source_count;
             this.alphaTheVoidCount = output.alpha_the_void_count;
             this.omegaTheVoidCount = output.omega_the_void_count;
+            this.alphaTheVoid = output.alpha_the_void;
+            this.omegaTheVoid = output.omega_the_void;
             this.alphaTheSource = output.alpha_the_source;
             this.alphaHand = output.alpha_hand;
             this.alphaBackLine = output.alpha_back_line;

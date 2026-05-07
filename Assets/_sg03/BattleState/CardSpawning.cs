@@ -53,7 +53,7 @@ namespace SG03
             Card3DCtrl card = this.alphaSourceCardQueue.Dequeue();
             card.SetOwner(Owner.alpha);
             card.SetInventoryItemId(inventoryItemId);
-            BattleCardSlot slot = this.FindAlphaHandSlot(inventoryItemId);
+            BattleCardSlot slot = this.FindAlphaSlotById(inventoryItemId);
             if (slot == null) return card;
             string code = slot.item_definition_code_name;
             card.SetCodeName(code);
@@ -73,16 +73,21 @@ namespace SG03
             this.handCardRegistry[inventoryItemId] = card;
         }
 
-        private BattleCardSlot FindAlphaHandSlot(string inventoryItemId)
+        private BattleCardSlot FindAlphaSlotById(string inventoryItemId)
         {
-            BattleCardSlot[] slots = this.battleState?.AlphaHand;
-            if (slots == null) return null;
-            foreach (BattleCardSlot slot in slots)
-            {
-                if (slot == null) continue;
-                if (slot.inventory_item_id == inventoryItemId) return slot;
-            }
-            return null;
+            return this.FindSlotById(this.battleState?.AlphaHand, inventoryItemId)
+                ?? this.FindSlotById(this.battleState?.AlphaFrontLine, inventoryItemId)
+                ?? this.FindSlotById(this.battleState?.AlphaBackLine, inventoryItemId)
+                ?? this.FindSlotById(this.battleState?.AlphaTheVoid, inventoryItemId)
+                ?? this.FindSlotById(this.battleState?.AlphaTheSource, inventoryItemId);
+        }
+
+        private BattleCardSlot FindOmegaSlotById(string inventoryItemId)
+        {
+            return this.FindSlotById(this.battleState?.OmegaHand, inventoryItemId)
+                ?? this.FindSlotById(this.battleState?.OmegaFrontLine, inventoryItemId)
+                ?? this.FindSlotById(this.battleState?.OmegaBackLine, inventoryItemId)
+                ?? this.FindSlotById(this.battleState?.OmegaTheVoid, inventoryItemId);
         }
 
         public void MoveOmegaSourceToHand(string inventoryItemId, int slotIndex)
@@ -96,6 +101,75 @@ namespace SG03
             card.MoveAndRotate(target, Location.in_hand);
             this.slotOccupancy[target] = card;
             this.omegaHandCardQueue.Enqueue(card);
+        }
+
+        public void MoveAlphaHandToFrontLine(string inventoryItemId, int slotIndex)
+            => this.MoveAlphaHandToLine(inventoryItemId, slotIndex, this.deskPosition.AlphaFrontLine);
+
+        public void MoveAlphaHandToBackLine(string inventoryItemId, int slotIndex)
+            => this.MoveAlphaHandToLine(inventoryItemId, slotIndex, this.deskPosition.AlphaBackLine);
+
+        private void MoveAlphaHandToLine(string inventoryItemId, int slotIndex, CardHolderCtrl[] holders)
+        {
+            if (!this.handCardRegistry.TryGetValue(inventoryItemId, out Card3DCtrl card)) return;
+            if (slotIndex < 0 || slotIndex >= holders.Length) return;
+            CardHolderCtrl holder = holders[slotIndex];
+            if (holder == null) return;
+            Transform target = holder.transform;
+            if (this.IsSlotOccupied(target)) return;
+            this.handCardRegistry.Remove(inventoryItemId);
+            this.RemoveFromSlotOccupancy(card);
+            BattleCardSlot slot = this.FindAlphaSlotById(inventoryItemId);
+            if (slot != null) card.SetExpose(slot.expose);
+            System.Action faceCallback = slot != null ? () => this.ApplyFaceState(card, slot) : null;
+            card.SetCardHolder(holder, faceCallback);
+            this.slotOccupancy[target] = card;
+            holder.SetCard(card);
+        }
+
+        public void MoveOmegaHandToFrontLine(string inventoryItemId, int slotIndex)
+            => this.MoveOmegaHandToLine(inventoryItemId, slotIndex, this.deskPosition.OmegaFrontLine);
+
+        public void MoveOmegaHandToBackLine(string inventoryItemId, int slotIndex)
+            => this.MoveOmegaHandToLine(inventoryItemId, slotIndex, this.deskPosition.OmegaBackLine);
+
+        private void MoveOmegaHandToLine(string inventoryItemId, int slotIndex, CardHolderCtrl[] holders)
+        {
+            if (this.omegaHandCardQueue.Count == 0) return;
+            if (slotIndex < 0 || slotIndex >= holders.Length) return;
+            CardHolderCtrl holder = holders[slotIndex];
+            if (holder == null) return;
+            Transform target = holder.transform;
+            if (this.IsSlotOccupied(target)) return;
+            Card3DCtrl card = this.omegaHandCardQueue.Dequeue();
+            this.RemoveFromSlotOccupancy(card);
+            BattleCardSlot slot = this.FindOmegaSlotById(inventoryItemId);
+            if (slot != null)
+            {
+                string code = slot.item_definition_code_name;
+                card.SetOwner(Owner.omega);
+                card.SetInventoryItemId(inventoryItemId);
+                card.SetCodeName(code);
+                card.SetFallbackName(slot.item_definition_name);
+                card.LoadCardByCodeName(code);
+                card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+                card.SetExpose(slot.expose);
+            }
+            System.Action faceCallback = slot != null ? () => this.ApplyFaceState(card, slot) : null;
+            card.MoveToUnknow(holder, faceCallback);
+            this.slotOccupancy[target] = card;
+            holder.SetCard(card);
+        }
+
+        private BattleCardSlot FindSlotById(BattleCardSlot[] slots, string inventoryItemId)
+        {
+            if (slots == null) return null;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot == null) continue;
+                if (slot.inventory_item_id == inventoryItemId) return slot;
+            }
+            return null;
         }
 
         public void SpawnStatusDelta(BattleCardSlot[] newHand, BattleCardSlot[] newFrontLine, BattleCardSlot[] newBackLine,

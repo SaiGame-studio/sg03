@@ -134,8 +134,12 @@ namespace SG03
             {
                 case "alpha_source_spawn_card": result = this.ExecuteAlphaSourceSpawnCard(parameters); break;
                 case "omega_source_spawn_card": result = this.ExecuteOmegaSourceSpawnCard(parameters); break;
-                case "alpha_source_to_hand":    result = this.ExecuteAlphaSourceToHand(parameters); break;
-                case "omega_source_to_hand":    this.ExecuteOmegaSourceToHand(parameters);             break;
+                case "alpha_source_to_hand":       result = this.ExecuteAlphaSourceToHand(parameters);    break;
+                case "omega_source_to_hand":       this.ExecuteOmegaSourceToHand(parameters);             break;
+                case "alpha_hand_to_front_line":   this.ExecuteAlphaHandToFrontLine(parameters);          break;
+                case "alpha_hand_to_back_line":    this.ExecuteAlphaHandToBackLine(parameters);           break;
+                case "omega_hand_to_front_line":   this.ExecuteOmegaHandToFrontLine(parameters);          break;
+                case "omega_hand_to_back_line":    this.ExecuteOmegaHandToBackLine(parameters);           break;
                 default:
                     Debug.LogWarning($"[ClientActions] Unknown action: {log.ActionName}", this.gameObject);
                     handled = false;
@@ -174,6 +178,30 @@ namespace SG03
         {
             if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
             this.cardSpawning?.MoveOmegaSourceToHand(inventoryItemId, slotIndex);
+        }
+
+        private void ExecuteAlphaHandToFrontLine(string[] parameters)
+        {
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
+            this.cardSpawning?.MoveAlphaHandToFrontLine(inventoryItemId, slotIndex);
+        }
+
+        private void ExecuteAlphaHandToBackLine(string[] parameters)
+        {
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
+            this.cardSpawning?.MoveAlphaHandToBackLine(inventoryItemId, slotIndex);
+        }
+
+        private void ExecuteOmegaHandToFrontLine(string[] parameters)
+        {
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
+            this.cardSpawning?.MoveOmegaHandToFrontLine(inventoryItemId, slotIndex);
+        }
+
+        private void ExecuteOmegaHandToBackLine(string[] parameters)
+        {
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
+            this.cardSpawning?.MoveOmegaHandToBackLine(inventoryItemId, slotIndex);
         }
 
         private bool TryParseSourceToHand(string[] parameters, out string inventoryItemId, out int slotIndex)
