@@ -22,5 +22,6 @@ namespace SG03.UI
         public BattleCardSlot[] omega_front_line;
         public BattleCardSlot[] omega_back_line;
         public string              next_move;
+        public string[]            client_actions;
     }
 }

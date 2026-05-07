@@ -41,6 +41,7 @@ namespace SG03.UI
         [SerializeField] private string sessionId;
         [SerializeField] private NextMoveType nextMove;
         [SerializeField] private int alphaHandRemaining;
+        [SerializeField] private string[] clientActions;
 
 
         public string BattleStatusJson => this.battleStatusJson;
@@ -63,6 +64,7 @@ namespace SG03.UI
         public string SessionId => this.sessionId;
         public NextMoveType NextMove => this.nextMove;
         public int AlphaHandRemaining => this.alphaHandRemaining;
+        public string[] ClientActions => this.clientActions;
 
         public event Action OnBattleStatusChanged;
         public static event Action OnGameStart;
@@ -257,6 +259,7 @@ namespace SG03.UI
             if (output.omega_front_line != null) this.omegaFrontLine = output.omega_front_line;
             if (output.omega_back_line  != null) this.omegaBackLine  = output.omega_back_line;
             this.omegaHandCount = output.omega_hand_count;
+            this.clientActions = output.client_actions;
             this.SetNextMove(output.next_move);
             this.TryFireGameStart();
             this.SpawnStatusDelta(previousOmegaHand);
