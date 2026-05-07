@@ -13,14 +13,10 @@ namespace SG03
         [SerializeField] private CardSpawning cardSpawning;
         [SerializeField] private float actionInterval = 0.1f;
 
-        [Header("Alpha Action Log")]
-        [SerializeField] private List<ClientActionLog> alphaActionLog = new List<ClientActionLog>();
+        [Header("Action Log")]
+        [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
 
-        [Header("Omega Action Log")]
-        [SerializeField] private List<ClientActionLog> omegaActionLog = new List<ClientActionLog>();
-
-        private Coroutine alphaDispatchRoutine;
-        private Coroutine omegaDispatchRoutine;
+        private Coroutine dispatchRoutine;
 
         protected override void LoadComponents()
         {
@@ -66,8 +62,7 @@ namespace SG03
         {
             if (actions == null) return;
             this.BuildActionLogs(actions);
-            this.StartAlphaDispatch();
-            this.StartOmegaDispatch();
+            this.StartDispatch();
         }
 
         private void BuildActionLogs(string[] actions)
@@ -79,58 +74,76 @@ namespace SG03
                 int colonIndex = entry.IndexOf(':');
                 string name    = colonIndex >= 0 ? entry.Substring(0, colonIndex) : entry;
                 string @params = colonIndex >= 0 ? entry.Substring(colonIndex + 1) : string.Empty;
-                if (this.IsDuplicateAction(name, @params)) continue;
-                ClientActionLog log = new ClientActionLog(name, @params);
-                if (name.StartsWith("alpha_")) this.alphaActionLog.Add(log);
-                else if (name.StartsWith("omega_")) this.omegaActionLog.Add(log);
-                else Debug.LogWarning($"[ClientActions] Cannot categorize action: {name}", this.gameObject);
+                Debug.Log($"[ClientActions] Parsed action: <b>{name}</b> | params: {(@params.Length > 0 ? @params : "(none)")}", this.gameObject);
+                if (this.IsDuplicateAction(name, @params))
+                {
+                    Debug.Log($"[ClientActions] Skipped duplicate: <b>{name}</b> | {(@params.Length > 0 ? @params : "(none)")}", this.gameObject);
+                    continue;
+                }
+                if (!name.StartsWith("alpha_") && !name.StartsWith("omega_"))
+                {
+                    Debug.LogWarning($"[ClientActions] Cannot categorize action: {name}", this.gameObject);
+                    continue;
+                }
+                this.actionLog.Add(new ClientActionLog(name, @params));
             }
         }
 
         private bool IsDuplicateAction(string actionName, string parameters)
         {
-            List<ClientActionLog> list = actionName.StartsWith("alpha_") ? this.alphaActionLog : this.omegaActionLog;
-            foreach (ClientActionLog existing in list)
+            foreach (ClientActionLog existing in this.actionLog)
             {
                 if (existing.ActionName == actionName && existing.Parameters == parameters) return true;
             }
             return false;
         }
 
-        private void StartAlphaDispatch()
+        private void StartDispatch()
         {
-            if (this.alphaDispatchRoutine != null) this.StopCoroutine(this.alphaDispatchRoutine);
-            this.alphaDispatchRoutine = this.StartCoroutine(this.AlphaDispatchRoutine());
+            if (this.dispatchRoutine != null) this.StopCoroutine(this.dispatchRoutine);
+            this.dispatchRoutine = this.StartCoroutine(this.DispatchRoutine());
         }
 
-        private void StartOmegaDispatch()
+        private IEnumerator DispatchRoutine()
         {
-            if (this.omegaDispatchRoutine != null) this.StopCoroutine(this.omegaDispatchRoutine);
-            this.omegaDispatchRoutine = this.StartCoroutine(this.OmegaDispatchRoutine());
+            yield return this.StartCoroutine(this.DispatchParallelFirstTwo());
+            yield return this.StartCoroutine(this.DispatchSequentialRemaining());
+            this.dispatchRoutine = null;
         }
 
-        private IEnumerator AlphaDispatchRoutine()
+        private IEnumerator DispatchParallelFirstTwo()
         {
-            foreach (ClientActionLog log in this.alphaActionLog)
+            int launched = 0;
+            int done = 0;
+            foreach (ClientActionLog log in this.actionLog)
+            {
+                if (log.Executed) continue;
+                if (launched >= 2) break;
+                Coroutine actionRoutine = this.ExecuteAction(log);
+                launched++;
+                if (actionRoutine != null)
+                    this.StartCoroutine(this.WaitThenSignal(actionRoutine, () => done++));
+                else
+                    done++;
+            }
+            yield return new UnityEngine.WaitUntil(() => done >= launched);
+        }
+
+        private IEnumerator WaitThenSignal(Coroutine routine, System.Action onDone)
+        {
+            yield return routine;
+            onDone();
+        }
+
+        private IEnumerator DispatchSequentialRemaining()
+        {
+            foreach (ClientActionLog log in this.actionLog)
             {
                 if (log.Executed) continue;
                 Coroutine actionRoutine = this.ExecuteAction(log);
                 if (actionRoutine != null) yield return actionRoutine;
                 yield return new WaitForSeconds(this.actionInterval);
             }
-            this.alphaDispatchRoutine = null;
-        }
-
-        private IEnumerator OmegaDispatchRoutine()
-        {
-            foreach (ClientActionLog log in this.omegaActionLog)
-            {
-                if (log.Executed) continue;
-                Coroutine actionRoutine = this.ExecuteAction(log);
-                if (actionRoutine != null) yield return actionRoutine;
-                yield return new WaitForSeconds(this.actionInterval);
-            }
-            this.omegaDispatchRoutine = null;
         }
 
         private Coroutine ExecuteAction(ClientActionLog log)
