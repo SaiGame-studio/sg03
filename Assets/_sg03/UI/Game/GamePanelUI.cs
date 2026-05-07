@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,8 +7,6 @@ namespace SG03.UI
 {
     public class GamePanelUI : SaiBehaviour
     {
-        private const string BattleModeNormal = "normal";
-
         public string PanelId => "Game";
 
         [Header("Panel")]
@@ -23,39 +19,19 @@ namespace SG03.UI
         [SerializeField] private BattleStateCtrl battleStateCtrl;
         [SerializeField] private UIDocument uiDocument;
 
-        [Header("Selection")]
-        [SerializeField] private PresetData selectedPreset;
-
         [Header("Scene Navigation")]
         [SerializeField] private string lobbySceneName = "1-lobby";
 
-        private Button btnLoadAddDesk;
-        private VisualElement deskTabs;
-        private readonly List<Button> deskButtons = new List<Button>();
         private Button btnBackToLobby;
-        private Button btnEndBattle;
-        private Button btnCheckStatus;
-        private Button btnInitCard;
-        private Button btnEndTurn;
-        private Button btnDrawCard;
-        private Button btnAttack;
-        private Button btnStartBattle;
-        private TextField enemyCodeNameInput;
-        private Label cardCountLabel;
         private Label playerNameLabel;
-        private Label alphaHpLabel;
-        private Label omegaHpLabel;
-        private Label alphaSourceCountLabel;
-        private Label omeraSourceCountLabel;
-        private Label alphaTheVoidCountLabel;
-        private Label omegaTheVoidCountLabel;
-        private Label nextMoveLabel;
         private VisualElement gameRoot;
         private VisualElement gameViewport;
         private VisualElement root;
         private bool authEventsSubscribed;
-        private bool battleStateEventsSubscribed;
-        private bool battleStatusFirstCallDone;
+
+        private GameDeskTabsUI deskTabsUI;
+        private GameBattleStatusUI battleStatusUI;
+        private GameBattleActionsUI battleActionsUI;
 
         protected override void LoadComponents()
         {
@@ -225,42 +201,14 @@ namespace SG03.UI
 
         private void BindFromRoot(VisualElement panelRoot)
         {
-            this.BindTopMenu(panelRoot);
-            this.BindBottomMenu(panelRoot);
             this.BindPlayerName(panelRoot);
+            this.BindNavigation(panelRoot);
             this.BindViewport(panelRoot);
+            this.BindDeskTabs(panelRoot);
+            this.BindBattleStatus(panelRoot);
+            this.BindBattleActions(panelRoot);
+            this.WirePresetEventsToBattleActions();
             this.SubscribeToAuthEvents();
-        }
-
-        private void BindTopMenu(VisualElement panelRoot)
-        {
-            this.deskTabs = panelRoot.Q("DeskTabs");
-            this.btnLoadAddDesk = panelRoot.Q<Button>("BtnLoadAddDesk");
-            this.cardCountLabel = panelRoot.Q<Label>("CardCountLabel");
-            this.btnLoadAddDesk?.RegisterCallback<ClickEvent>(_ => this.OnLoadAddDeskClicked());
-        }
-
-        private void BindBottomMenu(VisualElement panelRoot)
-        {
-            this.btnBackToLobby = panelRoot.Q<Button>("BtnBackToLobby");
-            this.btnEndBattle = panelRoot.Q<Button>("BtnEndBattle");
-            this.btnCheckStatus = panelRoot.Q<Button>("BtnCheckStatus");
-            this.btnInitCard = panelRoot.Q<Button>("BtnInitCard");
-            this.btnEndTurn = panelRoot.Q<Button>("BtnEndTurn");
-            this.btnDrawCard = panelRoot.Q<Button>("BtnDrawCard");
-            this.btnAttack = panelRoot.Q<Button>("BtnAttack");
-            this.enemyCodeNameInput = panelRoot.Q<TextField>("EnemyCodeNameInput");
-            this.btnStartBattle = panelRoot.Q<Button>("BtnStartBattle");
-            this.btnBackToLobby?.RegisterCallback<ClickEvent>(_ => this.OnBackToLobbyClicked());
-            this.btnEndBattle?.RegisterCallback<ClickEvent>(_ => this.OnEndBattleClicked());
-            this.btnCheckStatus?.RegisterCallback<ClickEvent>(_ => this.OnCheckStatusClicked());
-            this.btnInitCard?.RegisterCallback<ClickEvent>(_ => this.OnInitCardClicked());
-            this.btnEndTurn?.RegisterCallback<ClickEvent>(_ => this.OnEndTurnClicked());
-            this.btnDrawCard?.RegisterCallback<ClickEvent>(_ => this.OnDrawCardClicked());
-            this.btnAttack?.RegisterCallback<ClickEvent>(_ => this.OnAttackClicked());
-            this.enemyCodeNameInput?.RegisterValueChangedCallback(_ => this.ResetStartBattleButtonText());
-            this.btnStartBattle?.RegisterCallback<ClickEvent>(_ => this.OnStartBattleClicked());
-            this.nextMoveLabel = panelRoot.Q<Label>("NextMoveLabel");
         }
 
         private void BindPlayerName(VisualElement panelRoot)
@@ -269,212 +217,65 @@ namespace SG03.UI
             this.RefreshPlayerName();
         }
 
+        private void BindNavigation(VisualElement panelRoot)
+        {
+            this.btnBackToLobby = panelRoot.Q<Button>("BtnBackToLobby");
+            this.btnBackToLobby?.RegisterCallback<ClickEvent>(_ => this.OnBackToLobbyClicked());
+        }
+
         private void BindViewport(VisualElement panelRoot)
         {
             this.gameRoot = panelRoot.Q("GameRoot");
             this.gameViewport = panelRoot.Q("GameViewport");
-            this.alphaHpLabel = panelRoot.Q<Label>("AlphaHpLabel");
-            this.omegaHpLabel = panelRoot.Q<Label>("OmegaHpLabel");
-            this.alphaSourceCountLabel = panelRoot.Q<Label>("AlphaSourceCountLabel");
-            this.omeraSourceCountLabel = panelRoot.Q<Label>("OmeraSourceCountLabel");
-            this.alphaTheVoidCountLabel = panelRoot.Q<Label>("AlphaTheVoidCountLabel");
-            this.omegaTheVoidCountLabel = panelRoot.Q<Label>("OmegaTheVoidCountLabel");
-            this.SubscribeToBattleStateEvents();
             if (this.gameRoot == null) return;
             if (this.gameViewport == null) return;
             _ = new LobbyAspectRatioKeeper(this.gameRoot, this.gameViewport);
         }
 
-        private void SubscribeToBattleStateEvents()
+        private void BindDeskTabs(VisualElement panelRoot)
         {
-            if (this.battleStateEventsSubscribed) return;
-            if (this.battleStateCtrl?.BattleState == null) return;
-            this.battleStateCtrl.BattleState.OnBattleStatusChanged += this.RefreshBattleStatusUI;
-            this.battleStateEventsSubscribed = true;
+            this.deskTabsUI = new GameDeskTabsUI(this.GetCurrentItemPreset);
+            this.deskTabsUI.Bind(panelRoot);
         }
 
-        private void UnsubscribeFromBattleStateEvents()
+        private void BindBattleStatus(VisualElement panelRoot)
         {
-            if (!this.battleStateEventsSubscribed) return;
-            if (this.battleStateCtrl?.BattleState == null) return;
-            this.battleStateCtrl.BattleState.OnBattleStatusChanged -= this.RefreshBattleStatusUI;
-            this.battleStateEventsSubscribed = false;
+            this.battleStatusUI = new GameBattleStatusUI(this.GetCurrentBattleStateCtrl);
+            this.battleStatusUI.Bind(panelRoot);
         }
 
-        private void RefreshBattleStatusUI()
+        private void BindBattleActions(VisualElement panelRoot)
         {
-            BattleState state = this.battleStateCtrl?.BattleState;
-            if (state == null) return;
-            this.SetBattleHp(state.AlphaHp, state.OmegaHp);
-            this.SetBattleSourceCounts(state.AlphaTheSourceCount, state.OmegaTheSourceCount);
-            this.SetBattleVoidCounts(state.AlphaTheVoidCount, state.OmegaTheVoidCount);
-            this.SetNextMoveLabel(state.NextMove);
+            this.battleActionsUI = new GameBattleActionsUI(
+                this.GetCurrentBattleScripts,
+                this.GetCurrentBattleStateCtrl);
+            this.battleActionsUI.Bind(panelRoot);
         }
 
-        private void OnDeskTabClicked(Button selected)
+        private void WirePresetEventsToBattleActions()
         {
-            if (selected == null) return;
-            this.ClearDeskSelection();
-            selected.AddToClassList("game-tab--active");
+            if (this.deskTabsUI == null) return;
+            if (this.battleActionsUI == null) return;
+            this.deskTabsUI.OnPresetTabSelected += this.battleActionsUI.HandlePresetTabSelected;
+            this.deskTabsUI.OnPresetSlotsLoaded += this.battleActionsUI.HandlePresetSlotsLoaded;
         }
 
-        private void OnPresetDeskTabClicked(PresetData preset, Button selected)
+        private ItemPreset GetCurrentItemPreset()
         {
             this.EnsureServiceReferences();
-            this.OnDeskTabClicked(selected);
-            this.selectedPreset = preset;
-            this.ResetStartBattleButtonText();
-            if (preset == null) return;
-            if (this.itemPreset == null) return;
-            if (string.IsNullOrWhiteSpace(preset.id)) return;
-            this.SetCardCountLoading();
-            this.itemPreset.GetPreset(preset.id, this.OnPresetSlotsLoaded, this.OnPresetSlotsLoadFailed);
+            return this.itemPreset;
         }
 
-        private void ClearDeskSelection()
-        {
-            foreach (Button deskButton in this.deskButtons)
-            {
-                deskButton.RemoveFromClassList("game-tab--active");
-            }
-        }
-
-        private void OnLoadAddDeskClicked()
+        private BattleScripts GetCurrentBattleScripts()
         {
             this.EnsureServiceReferences();
-            if (this.itemPreset == null) return;
-            this.SetLoadAddDeskLoading(true);
-            this.itemPreset.GetPresets(this.OnPresetsLoaded, this.OnPresetsLoadFailed);
+            return this.battleScripts;
         }
 
-        private void OnPresetsLoaded(PresetResponse response)
+        private BattleStateCtrl GetCurrentBattleStateCtrl()
         {
-            this.SetLoadAddDeskLoading(false);
-            this.RenderDeskTabs(response?.containers);
-        }
-
-        private void OnPresetsLoadFailed(string error)
-        {
-            this.SetLoadAddDeskLoading(false);
-            this.RenderDeskTabs(null);
-        }
-
-        private void SetLoadAddDeskLoading(bool isLoading)
-        {
-            if (this.btnLoadAddDesk == null) return;
-            this.btnLoadAddDesk.SetEnabled(!isLoading);
-            this.btnLoadAddDesk.text = isLoading ? "Loading..." : "Load Add Desk";
-        }
-
-        private void RenderDeskTabs(PresetData[] presets)
-        {
-            if (this.deskTabs == null) return;
-            this.ClearDeskTabs();
-            if (presets == null) return;
-
-            for (int index = 0; index < presets.Length; index++)
-            {
-                PresetData preset = presets[index];
-                if (preset == null) continue;
-                this.AddDeskTab(preset, index);
-            }
-        }
-
-        private void ClearDeskTabs()
-        {
-            foreach (Button deskButton in this.deskButtons)
-            {
-                deskButton.RemoveFromHierarchy();
-            }
-
-            this.deskButtons.Clear();
-        }
-
-        private void AddDeskTab(PresetData preset, int index)
-        {
-            Button deskButton = new Button();
-            deskButton.name = $"preset-desk-tab-{index + 1}";
-            deskButton.text = this.GetPresetDisplayName(preset, index);
-            deskButton.AddToClassList("game-tab");
-            PresetData capturedPreset = preset;
-            deskButton.RegisterCallback<ClickEvent>(_ => this.OnPresetDeskTabClicked(capturedPreset, deskButton));
-            this.deskButtons.Add(deskButton);
-            this.deskTabs.Add(deskButton);
-        }
-
-        private string GetPresetDisplayName(PresetData preset, int index)
-        {
-            if (preset == null) return $"Desk {index + 1}";
-            if (!string.IsNullOrWhiteSpace(preset.name)) return preset.name;
-            if (preset.definition != null && !string.IsNullOrWhiteSpace(preset.definition.name)) return preset.definition.name;
-            return $"Desk {index + 1}";
-        }
-
-        private void OnPresetSlotsLoaded(PresetData preset)
-        {
-            this.selectedPreset = preset;
-            this.UpdatePresetInspectorData(preset);
-            this.SetCardCount(this.GetFilledSlotCount(preset));
-        }
-
-        private void UpdatePresetInspectorData(PresetData updatedPreset)
-        {
-            if (updatedPreset == null) return;
-            if (this.itemPreset == null) return;
-            PresetResponse currentPresets = this.itemPreset.CurrentPresets;
-            if (currentPresets == null) return;
-            if (currentPresets.containers == null) return;
-
-            for (int index = 0; index < currentPresets.containers.Length; index++)
-            {
-                PresetData preset = currentPresets.containers[index];
-                if (preset == null) continue;
-                if (preset.id != updatedPreset.id) continue;
-                currentPresets.containers[index] = updatedPreset;
-                this.MarkItemPresetDirty();
-                return;
-            }
-        }
-
-        private void MarkItemPresetDirty()
-        {
-#if UNITY_EDITOR
-            if (this.itemPreset == null) return;
-            UnityEditor.EditorUtility.SetDirty(this.itemPreset);
-#endif
-        }
-
-        private void OnPresetSlotsLoadFailed(string error)
-        {
-            this.SetCardCount(0);
-        }
-
-        private int GetFilledSlotCount(PresetData preset)
-        {
-            if (preset == null) return 0;
-            if (preset.slots == null) return 0;
-
-            int count = 0;
-            foreach (PresetSlotData slot in preset.slots)
-            {
-                if (slot == null) continue;
-                if (string.IsNullOrWhiteSpace(slot.inventory_item_id)) continue;
-                count++;
-            }
-
-            return count;
-        }
-
-        private void SetCardCountLoading()
-        {
-            if (this.cardCountLabel == null) return;
-            this.cardCountLabel.text = "Card Count: ...";
-        }
-
-        private void SetCardCount(int count)
-        {
-            if (this.cardCountLabel == null) return;
-            this.cardCountLabel.text = $"Card Count: {count}";
+            this.EnsureServiceReferences();
+            return this.battleStateCtrl;
         }
 
         private void SubscribeToAuthEvents()
@@ -508,303 +309,6 @@ namespace SG03.UI
             this.playerNameLabel.text = string.IsNullOrEmpty(displayName) ? "Guest" : displayName;
         }
 
-        protected virtual void OnInitCardClicked()
-        {
-            this.InitCard();
-        }
-
-        protected virtual void OnEndTurnClicked()
-        {
-        }
-
-        protected virtual void OnEndBattleClicked()
-        {
-            this.EndBattle();
-        }
-
-        protected virtual void OnCheckStatusClicked()
-        {
-            this.CheckBattleStatus();
-        }
-
-        protected virtual void OnDrawCardClicked()
-        {
-        }
-
-        protected virtual void OnAttackClicked()
-        {
-        }
-
-        protected virtual void OnStartBattleClicked()
-        {
-            this.StartBattle();
-        }
-
-        private void InitCard()
-        {
-            this.EnsureServiceReferences();
-            if (!this.CanInitCard()) return;
-            this.SetInitCardLoading(true);
-            this.battleScripts.RunInitCards(
-                this.OnInitCardSucceeded,
-                this.OnInitCardFailed);
-        }
-
-        private bool CanInitCard()
-        {
-            if (this.battleScripts != null) return true;
-            this.SetInitCardButtonText("No Script");
-            return false;
-        }
-
-        private void SetInitCardLoading(bool isLoading)
-        {
-            if (this.btnInitCard == null) return;
-            this.btnInitCard.SetEnabled(!isLoading);
-            this.btnInitCard.text = isLoading ? "Initing..." : "Init Card";
-        }
-
-        private void SetInitCardButtonText(string text)
-        {
-            if (this.btnInitCard == null) return;
-            this.btnInitCard.text = text;
-        }
-
-        private void OnInitCardSucceeded(string response)
-        {
-            this.SetInitCardLoading(false);
-            this.SetInitCardButtonText("Init OK");
-            this.ApplyBattleStatusResponse(response);
-        }
-
-        private void OnInitCardFailed(string error)
-        {
-            this.SetInitCardLoading(false);
-            this.SetInitCardButtonText("Init Failed");
-            Debug.LogWarning(this.transform.name + ": Init card failed: " + error, this.gameObject);
-        }
-
-        private void CheckBattleStatus()
-        {
-            this.EnsureServiceReferences();
-            if (!this.CanCheckBattleStatus()) return;
-            this.TriggerGetAllCardDefinitionsOnFirstBattleStatus();
-            this.SetCheckStatusLoading(true);
-            this.battleScripts.RunBattleStatus(
-                this.OnBattleStatusSucceeded,
-                this.OnBattleStatusFailed);
-        }
-
-        private void TriggerGetAllCardDefinitionsOnFirstBattleStatus()
-        {
-            if (this.battleStatusFirstCallDone) return;
-            this.battleStatusFirstCallDone = true;
-            this.GetAllCardDefinitions();
-        }
-
-        private bool CanCheckBattleStatus()
-        {
-            if (this.battleScripts != null) return true;
-            this.SetCheckStatusButtonText("No Script");
-            return false;
-        }
-
-        private void SetCheckStatusLoading(bool isLoading)
-        {
-            if (this.btnCheckStatus == null) return;
-            this.btnCheckStatus.SetEnabled(!isLoading);
-            this.btnCheckStatus.text = isLoading ? "Checking..." : "Check Status";
-        }
-
-        private void SetCheckStatusButtonText(string text)
-        {
-            if (this.btnCheckStatus == null) return;
-            this.btnCheckStatus.text = text;
-        }
-
-        private void OnBattleStatusSucceeded(string response)
-        {
-            this.SetCheckStatusLoading(false);
-            this.SetCheckStatusButtonText("Status OK");
-            this.ApplyBattleStatusResponse(response);
-        }
-
-        private void OnBattleStatusFailed(string error)
-        {
-            this.SetCheckStatusLoading(false);
-            this.SetCheckStatusButtonText("Status Failed");
-            Debug.LogWarning(this.transform.name + ": Battle status failed: " + error, this.gameObject);
-        }
-
-        private void ApplyBattleStatusResponse(string response)
-        {
-            if (string.IsNullOrWhiteSpace(response)) return;
-            this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
-        }
-
-        private void SetBattleSourceCounts(int alphaCount, int omeraCount)
-        {
-            if (this.alphaSourceCountLabel != null) this.alphaSourceCountLabel.text = $"Source: {alphaCount}";
-            if (this.omeraSourceCountLabel != null) this.omeraSourceCountLabel.text = $"Source: {omeraCount}";
-        }
-
-        private void SetBattleVoidCounts(int alphaCount, int omegaCount)
-        {
-            if (this.alphaTheVoidCountLabel != null) this.alphaTheVoidCountLabel.text = $"Void: {alphaCount}";
-            if (this.omegaTheVoidCountLabel != null) this.omegaTheVoidCountLabel.text = $"Void: {omegaCount}";
-        }
-
-        private void SetBattleHp(int alphaHp, int omegaHp)
-        {
-            if (this.alphaHpLabel != null) this.alphaHpLabel.text = $"HP: {alphaHp}";
-            if (this.omegaHpLabel != null) this.omegaHpLabel.text = $"HP: {omegaHp}";
-        }
-
-        private void SetNextMoveLabel(NextMoveType move)
-        {
-            if (this.nextMoveLabel == null) return;
-            this.nextMoveLabel.text = $"Move: {move}";
-        }
-
-        private void EndBattle()
-        {
-            this.EnsureServiceReferences();
-            if (!this.CanEndBattle()) return;
-            this.SetEndBattleLoading(true);
-            this.battleScripts.RunBattleEnd(
-                this.OnBattleEndSucceeded,
-                this.OnBattleEndFailed);
-        }
-
-        private bool CanEndBattle()
-        {
-            if (this.battleScripts != null) return true;
-            this.SetEndBattleButtonText("No Script");
-            return false;
-        }
-
-        private void SetEndBattleLoading(bool isLoading)
-        {
-            if (this.btnEndBattle == null) return;
-            this.btnEndBattle.SetEnabled(!isLoading);
-            this.btnEndBattle.text = isLoading ? "Ending..." : "End Battle";
-        }
-
-        private void SetEndBattleButtonText(string text)
-        {
-            if (this.btnEndBattle == null) return;
-            this.btnEndBattle.text = text;
-        }
-
-        private void OnBattleEndSucceeded(string response)
-        {
-            this.SetEndBattleLoading(false);
-            this.SetEndBattleButtonText("Battle Ended");
-            this.battleStateCtrl?.BattleState?.ClearData();
-        }
-
-        private void OnBattleEndFailed(string error)
-        {
-            this.SetEndBattleLoading(false);
-            this.SetEndBattleButtonText("End Failed");
-            Debug.LogWarning(this.transform.name + ": Battle end failed: " + error, this.gameObject);
-        }
-
-        private void StartBattle()
-        {
-            this.EnsureServiceReferences();
-            if (!this.CanStartBattle()) return;
-            string enemyCodeName = this.GetEnemyCodeName();
-            string presetInstanceId = this.selectedPreset.id;
-            string requestBody = this.BuildBattleStartRequestBody(enemyCodeName, presetInstanceId);
-            this.SetStartBattleLoading(true);
-            this.battleScripts.RunBattleStart(
-                requestBody,
-                this.OnBattleStartSucceeded,
-                this.OnBattleStartFailed);
-        }
-
-        private bool CanStartBattle()
-        {
-            if (this.selectedPreset == null)
-            {
-                this.SetStartBattleButtonText("Select Desk");
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(this.selectedPreset.id))
-            {
-                this.SetStartBattleButtonText("Select Desk");
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(this.GetEnemyCodeName()))
-            {
-                this.SetStartBattleButtonText("Enter Enemy");
-                return false;
-            }
-
-            if (this.battleScripts != null) return true;
-            this.SetStartBattleButtonText("No Script");
-            return false;
-        }
-
-        private string GetEnemyCodeName()
-        {
-            if (this.enemyCodeNameInput == null) return string.Empty;
-            if (this.enemyCodeNameInput.value == null) return string.Empty;
-            return this.enemyCodeNameInput.value.Trim();
-        }
-
-        private string BuildBattleStartRequestBody(string enemyCodeName, string presetInstanceId)
-        {
-            BattleStartScriptRequest request = new BattleStartScriptRequest();
-            request.payload = new BattleStartPayload();
-            request.payload.battle_mode = BattleModeNormal;
-            request.payload.enemy_entity_key = enemyCodeName;
-            request.payload.preset_instance_id = presetInstanceId;
-            return JsonUtility.ToJson(request);
-        }
-
-        private void SetStartBattleLoading(bool isLoading)
-        {
-            if (this.btnStartBattle == null) return;
-            this.btnStartBattle.SetEnabled(!isLoading);
-            this.btnStartBattle.text = isLoading ? "Starting..." : "Start Battle";
-        }
-
-        private void SetStartBattleButtonText(string text)
-        {
-            if (this.btnStartBattle == null) return;
-            this.btnStartBattle.text = text;
-        }
-
-        private void ResetStartBattleButtonText()
-        {
-            this.SetStartBattleButtonText("Start Battle");
-        }
-
-        private void OnBattleStartSucceeded(string response)
-        {
-            this.SetStartBattleLoading(false);
-            this.SetStartBattleButtonText("Battle Started");
-            this.ApplyBattleStatusResponse(response);
-            this.GetAllCardDefinitions();
-        }
-
-        private void OnBattleStartFailed(string error)
-        {
-            this.SetStartBattleLoading(false);
-            this.SetStartBattleButtonText("Battle Failed");
-            Debug.LogWarning(this.transform.name + ": Battle start failed: " + error, this.gameObject);
-        }
-
-        private void GetAllCardDefinitions()
-        {
-            if (this.battleStateCtrl?.BattleCardDefinitions == null) return;
-            this.battleStateCtrl.BattleCardDefinitions.GetAll();
-        }
-
         protected virtual void OnBackToLobbyClicked()
         {
             if (string.IsNullOrWhiteSpace(this.lobbySceneName)) return;
@@ -813,9 +317,9 @@ namespace SG03.UI
 
         protected virtual void OnDestroy()
         {
-            this.UnsubscribeFromBattleStateEvents();
+            this.battleStatusUI?.Dispose();
+            this.deskTabsUI?.Dispose();
             this.UnsubscribeFromAuthEvents();
-            this.ClearDeskTabs();
         }
     }
 }

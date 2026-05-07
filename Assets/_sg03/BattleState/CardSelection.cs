@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using SaiGame.Services;
 using SG03.UI;
@@ -168,7 +169,11 @@ namespace SG03
 
         private void CheckClick()
         {
-            if (CardMovement.IsAnyCardMoving) return;
+            if (CardMovement.IsAnyCardMoving)
+            {
+                this.HandleCardSelectionOnly();
+                return;
+            }
             if (this.fullDetail)
             {
                 this.HandleFullDetailClick();
@@ -177,6 +182,12 @@ namespace SG03
             this.HandleLeftClick();
             this.HandleMiddleClick();
             this.HandleRightClick();
+        }
+
+        private void HandleCardSelectionOnly()
+        {
+            if (!this.IsMouseClickedThisFrame()) return;
+            this.HandleCardClick();
         }
 
         private void HandleFullDetailClick()
@@ -286,12 +297,15 @@ namespace SG03
         {
             if (this.deskPositions == null) return;
             this.fullDetail = true;
+            this.arrowIndicator?.Hide();
             this.selected.MoveToFullDetail(this.deskPositions.FullDetailPoint);
         }
 
         private void ExitFullDetail()
         {
             this.fullDetail = false;
+            if (this.IsTargeting)
+                this.arrowIndicator?.Show(this.targetingSource.transform.position, this.targetingSource.transform.position);
             this.selected.ReturnFromFullDetail();
         }
 
@@ -471,7 +485,10 @@ namespace SG03
             if (!this.IsPlacementValid(this.selected, holder)) return;
             Location fromLocation = this.selected.Location;
             CardHolderCtrl fromHolder = this.selected.CardHolder;
-            this.PlaceSelectedIntoEmptyHolder(holder);
+            if (fromLocation == Location.in_hand)
+                this.PlaceFromHandIntoHolder(holder);
+            else
+                this.PlaceSelectedIntoEmptyHolder(holder);
             this.NotifyBattleStateOnPlacement(fromLocation, fromHolder, holder);
         }
 
@@ -501,6 +518,19 @@ namespace SG03
             this.selected.CardHolder?.SetCard(null);
             this.selected.SetCardHolder(targetHolder);
             targetHolder.SetCard(this.selected);
+        }
+
+        private void PlaceFromHandIntoHolder(CardHolderCtrl targetHolder)
+        {
+            if (this.selected.IsFlipping) return;
+            this.selected.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(this.selected)));
+            targetHolder.SetCard(this.selected);
+        }
+
+        private IEnumerator RotateAfterArrival(Card3DCtrl card)
+        {
+            yield return new UnityEngine.WaitUntil(() => !card.IsFlipping);
+            card.RotateZ180();
         }
 
         // ─── Placement validation ─────────────────────────────────────────────────

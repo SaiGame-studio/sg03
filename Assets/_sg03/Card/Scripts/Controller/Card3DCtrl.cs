@@ -195,6 +195,12 @@ namespace SG03
         /// <summary>Returns the card from full-detail back to its selected position in hand.</summary>
         public void ReturnFromFullDetail() => this.movement.ReturnFromFullDetail();
 
+        /// <summary>Plays the damage run-up animation: card rises then returns to its current position.</summary>
+        public void RunUp() => this.movement.RunUp();
+
+        /// <summary>Plays the attack lunge animation: card charges toward the defender then returns.</summary>
+        public void AttackLunge(Vector3 defenderPosition) => this.movement.AttackLunge(defenderPosition);
+
         /// <summary>Toggles the card between face-up and face-down.</summary>
         public void ToggleFace()
         {
@@ -209,7 +215,11 @@ namespace SG03
         /// <summary>Current logical location of this card.</summary>
         public Location Location  => this.movement.Location;
         public bool    IsFlipping => this.movement.IsFlipping;
+        public bool    IsAnimating => this.movement.IsAnimating;
         public string  InventoryItemId => this.inventoryItemId;
+
+        public void SetMoveDuration(float d)  => this.movement.SetMoveDuration(d);
+        public void SetRotateDuration(float d) => this.movement.SetRotateDuration(d);
 
         public void SetInventoryItemId(string id) { this.inventoryItemId = id; }
 

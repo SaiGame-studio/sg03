@@ -26,6 +26,11 @@ namespace SG03
 
         [SerializeField] private BattleState battleState;
 
+        private bool isRunning;
+
+        /// <summary>True while a script request is in-flight (waiting for server response).</summary>
+        public bool IsRunning => this.isRunning;
+
         [Header("Debug")]
         [SerializeField] private bool logPayload = true;
 
@@ -46,35 +51,35 @@ namespace SG03
         {
             if (this.IsBattleScriptMissing(nameof(this.RunBattleStart))) return;
             this.LogPayload("RunBattleStart", "#00FFCC", requestBody);
-            this.battleScript.RunScript(this.scriptNameBattleStart, requestBody, onSuccess, onError);
+            this.RunWithLock(this.scriptNameBattleStart, requestBody, onSuccess, onError);
         }
 
         public void RunBattleEnd(Action<string> onSuccess, Action<string> onError)
         {
             if (this.IsBattleScriptMissing(nameof(this.RunBattleEnd))) return;
             this.LogPayload("RunBattleEnd", "#FF6B6B", null);
-            this.battleScript.RunScript(this.scriptNameBattleEnd, null, onSuccess, onError);
+            this.RunWithLock(this.scriptNameBattleEnd, null, onSuccess, onError);
         }
 
         public void RunBattleStatus(Action<string> onSuccess, Action<string> onError)
         {
             if (this.IsBattleScriptMissing(nameof(this.RunBattleStatus))) return;
             this.LogPayload("RunBattleStatus", "#FFD700", null);
-            this.battleScript.RunScript(this.scriptNameBattleStatus, null, onSuccess, onError);
+            this.RunWithLock(this.scriptNameBattleStatus, null, onSuccess, onError);
         }
 
         public void RunInitCards(Action<string> onSuccess, Action<string> onError)
         {
             if (this.IsBattleScriptMissing(nameof(this.RunInitCards))) return;
             this.LogPayload("RunInitCards", "#88DDFF", null);
-            this.battleScript.RunScript(this.scriptNameInitCards, null, onSuccess, onError);
+            this.RunWithLock(this.scriptNameInitCards, null, onSuccess, onError);
         }
 
         public void RunGetCardDefinitions(Action<string> onSuccess, Action<string> onError)
         {
             if (this.IsBattleScriptMissing(nameof(this.RunGetCardDefinitions))) return;
             this.LogPayload("RunGetCardDefinitions", "#AAFFAA", null);
-            this.battleScript.RunScript(this.scriptNameGetCardDefinitions, null, onSuccess, onError);
+            this.RunWithLock(this.scriptNameGetCardDefinitions, null, onSuccess, onError);
         }
 
         public void RunCardDeploy(Action<string> onSuccess, Action<string> onError)
@@ -82,7 +87,7 @@ namespace SG03
             if (this.IsBattleScriptMissing(nameof(this.RunCardDeploy))) return;
             string requestBody = this.BuildCardDeployRequestBody();
             this.LogPayload("RunCardDeploy", "#FF88FF", requestBody);
-            this.battleScript.RunScript(this.scriptNameCardDeploy, requestBody, onSuccess, onError);
+            this.RunWithLock(this.scriptNameCardDeploy, requestBody, onSuccess, onError);
         }
 
         public void RunAlphaAttacking(string attackerInventoryItemId, string defenderInventoryItemId, Action<string> onSuccess, Action<string> onError)
@@ -90,7 +95,30 @@ namespace SG03
             if (this.IsBattleScriptMissing(nameof(this.RunAlphaAttacking))) return;
             string requestBody = this.BuildAlphaAttackingRequestBody(attackerInventoryItemId, defenderInventoryItemId);
             this.LogPayload("RunAlphaAttacking", "#FF4444", requestBody);
-            this.battleScript.RunScript(this.scriptNameAlphaAttacking, requestBody, onSuccess, onError);
+            this.RunWithLock(this.scriptNameAlphaAttacking, requestBody, onSuccess, onError);
+        }
+
+        /// <summary>Guards against concurrent requests; acquires the lock and dispatches the script call.</summary>
+        private void RunWithLock(string scriptName, string requestBody, Action<string> onSuccess, Action<string> onError)
+        {
+            if (this.isRunning)
+            {
+                Debug.LogWarning($"[BattleScripts] '{scriptName}' blocked — a script is already in-flight.", this.gameObject);
+                return;
+            }
+
+            this.isRunning = true;
+            this.battleScript.RunScript(scriptName, requestBody, this.ReleaseLockThen(onSuccess), this.ReleaseLockThen(onError));
+        }
+
+        /// <summary>Returns a wrapper that releases the in-flight lock and then invokes the original callback.</summary>
+        private Action<string> ReleaseLockThen(Action<string> callback)
+        {
+            return result =>
+            {
+                this.isRunning = false;
+                callback?.Invoke(result);
+            };
         }
 
         private bool IsBattleScriptMissing(string callerName)

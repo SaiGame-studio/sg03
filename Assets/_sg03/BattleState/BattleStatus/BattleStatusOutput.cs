@@ -17,10 +17,14 @@ namespace SG03.UI
         public int                 omega_the_source_count;
         public int                 alpha_the_void_count;
         public int                 omega_the_void_count;
+        public BattleCardSlot[] alpha_the_void;
+        public BattleCardSlot[] omega_the_void;
         public BattleCardSlot[] omega_hand;
         public int             omega_hand_count;
         public BattleCardSlot[] omega_front_line;
         public BattleCardSlot[] omega_back_line;
         public string              next_move;
+        public string[]            client_actions;
+        public string              error;
     }
 }

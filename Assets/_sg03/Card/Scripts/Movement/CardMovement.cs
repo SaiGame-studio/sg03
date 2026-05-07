@@ -92,6 +92,39 @@ namespace SG03
         [Tooltip("Ease curve for the Y-axis 180 rotation.")]
         [SerializeField] private Ease rotateY180Ease = Ease.InOutQuad;
 
+        // ─── Damaged ──────────────────────────────────────────────────────────────
+
+        [Header("Damaged")]
+        [Tooltip("World units the card rises when taking damage.")]
+        [SerializeField] private float damagedRiseHeight = 1.5f;
+
+        [Tooltip("Duration of each phase (rise + fall) of the damage animation.")]
+        [SerializeField] private float damagedPhaseDuration = 0.15f;
+
+        [Tooltip("Ease for the rise phase of the damage animation.")]
+        [SerializeField] private Ease damagedRiseEase = Ease.OutQuad;
+
+        [Tooltip("Ease for the fall phase of the damage animation.")]
+        [SerializeField] private Ease damagedFallEase = Ease.InQuad;
+
+        // ─── Attack ───────────────────────────────────────────────────────────────
+
+        [Header("Attack")]
+        [Tooltip("Fraction (0-1) of the distance toward the defender the attacker travels.")]
+        [SerializeField] private float attackLungeRatio = 0.4f;
+
+        [Tooltip("Duration of the lunge-forward phase in seconds.")]
+        [SerializeField] private float attackLungeDuration = 0.15f;
+
+        [Tooltip("Duration of the return phase in seconds.")]
+        [SerializeField] private float attackReturnDuration = 0.25f;
+
+        [Tooltip("Ease for the lunge-forward phase.")]
+        [SerializeField] private Ease attackLungeEase = Ease.OutQuad;
+
+        [Tooltip("Ease for the return phase.")]
+        [SerializeField] private Ease attackReturnEase = Ease.InQuad;
+
         // ─── Runtime state ────────────────────────────────────────────────────────
 
         [Header("State")]
@@ -103,8 +136,11 @@ namespace SG03
         private bool  isFlipping;
         private Tween yTween;
         private Tween moveTween;
+        private Tween rotateTween;
         private Tween rotateY180Tween;
         private Sequence faceTween;
+        private Sequence damageTween;
+        private Sequence attackTween;
         private Vector3    preFullDetailPosition;
         private Quaternion preFullDetailRotation;
 
@@ -152,7 +188,15 @@ namespace SG03
 
         public Location  Location   => this.location;
         public bool      IsFlipping  => this.isFlipping;
+        public bool      IsAnimating =>
+            (this.moveTween != null && this.moveTween.IsActive()) ||
+            this.isFlipping ||
+            (this.damageTween != null && this.damageTween.IsActive()) ||
+            (this.attackTween != null && this.attackTween.IsActive());
         public FaceState FaceState   => this.faceState;
+
+        public void SetMoveDuration(float d)   { this.duration          = d; }
+        public void SetRotateDuration(float d)  { this.rotateY180Duration = d; }
 
         /// <summary>
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position.
@@ -165,7 +209,7 @@ namespace SG03
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
             this.StartMoveTween(target.position, this.duration, this.ease, null);
-            this.transform.DORotateQuaternion(target.rotation, this.duration).SetEase(this.ease);
+            this.rotateTween = this.transform.DORotateQuaternion(target.rotation, this.duration).SetEase(this.ease);
         }
 
         /// <summary>
@@ -207,9 +251,8 @@ namespace SG03
             this.location = destination;
             this.RecordHandAnchor(holder.transform, destination);
             this.KillAllTweens();
-            this.StartMoveTween(holder.transform.position, this.duration, this.ease, null);
+            this.StartMoveTween(holder.transform.position, this.duration, this.ease, onReady);
             this.FaceDownUnknown();
-            onReady?.Invoke();
         }
 
         /// <summary>Smoothly rotates the card to face-up using global euler angles.</summary>
@@ -327,7 +370,7 @@ namespace SG03
             this.preFullDetailRotation = this.transform.rotation;
             this.KillAllTweens();
             this.StartMoveTween(point.position, this.fullDetailDuration, this.fullDetailEase, null);
-            this.transform.DORotateQuaternion(point.rotation, this.fullDetailDuration).SetEase(this.fullDetailEase);
+            this.rotateTween = this.transform.DORotateQuaternion(point.rotation, this.fullDetailDuration).SetEase(this.fullDetailEase);
         }
 
         /// <summary>
@@ -338,7 +381,27 @@ namespace SG03
             if (this.isFlipping) return;
             this.KillAllTweens();
             this.StartMoveTween(this.preFullDetailPosition, this.fullDetailReturnDuration, this.fullDetailReturnEase, null);
-            this.transform.DORotateQuaternion(this.preFullDetailRotation, this.fullDetailReturnDuration).SetEase(this.fullDetailReturnEase);
+            this.rotateTween = this.transform.DORotateQuaternion(this.preFullDetailRotation, this.fullDetailReturnDuration).SetEase(this.fullDetailReturnEase);
+        }
+
+        public void RunUp()
+        {
+            Vector3 origin = this.transform.position;
+            Vector3 risen  = origin + Vector3.up * this.damagedRiseHeight;
+            this.damageTween?.Kill();
+            this.damageTween = DOTween.Sequence();
+            this.damageTween.Append(this.transform.DOMove(risen,   this.damagedPhaseDuration).SetEase(this.damagedRiseEase));
+            this.damageTween.Append(this.transform.DOMove(origin,  this.damagedPhaseDuration).SetEase(this.damagedFallEase));
+        }
+
+        public void AttackLunge(Vector3 defenderPosition)
+        {
+            Vector3 origin = this.transform.position;
+            Vector3 lunged = Vector3.Lerp(origin, defenderPosition, this.attackLungeRatio);
+            this.attackTween?.Kill();
+            this.attackTween = DOTween.Sequence();
+            this.attackTween.Append(this.transform.DOMove(lunged, this.attackLungeDuration).SetEase(this.attackLungeEase));
+            this.attackTween.Append(this.transform.DOMove(origin, this.attackReturnDuration).SetEase(this.attackReturnEase));
         }
 
         // ─── Hover handlers ───────────────────────────────────────────────────────
@@ -421,11 +484,16 @@ namespace SG03
             this.KillMoveTween();
             this.yTween?.Kill();
             this.yTween = null;
+            this.rotateTween?.Kill();
+            this.rotateTween = null;
             this.faceTween?.Kill();
             this.faceTween = null;
             this.rotateY180Tween?.Kill();
             this.rotateY180Tween = null;
-            this.transform.DOKill();
+            this.damageTween?.Kill();
+            this.damageTween = null;
+            this.attackTween?.Kill();
+            this.attackTween = null;
         }
     }
 }

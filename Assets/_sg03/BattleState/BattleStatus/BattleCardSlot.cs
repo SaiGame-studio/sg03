@@ -14,7 +14,6 @@ namespace SG03.UI
         public string container_id;
         public string created_at;
         public int    slot_index;
-        [Tooltip("Lookup key")]
         public string item_definition_code_name;
         public string inventory_item_id;
         public string item_definition_id;
@@ -22,6 +21,8 @@ namespace SG03.UI
         public string card_action;
         public bool   face_up = false;
         public bool   expose  = false;
+        public int    final_def;
+        public int    total_damage_received;
 
         public CardActionType CardAction => ParseCardAction(this.card_action);
 

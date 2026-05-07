@@ -29,6 +29,8 @@ namespace SG03.UI
         [SerializeField] private int omegaTheSourceCount;
         [SerializeField] private int alphaTheVoidCount;
         [SerializeField] private int omegaTheVoidCount;
+        [SerializeField] private BattleCardSlot[] alphaTheVoid;
+        [SerializeField] private BattleCardSlot[] omegaTheVoid;
         [SerializeField] private BattleCardSlot[] alphaTheSource;
         [SerializeField] private BattleCardSlot[] alphaHand;
         [SerializeField] private BattleCardSlot[] alphaBackLine;
@@ -41,6 +43,7 @@ namespace SG03.UI
         [SerializeField] private string sessionId;
         [SerializeField] private NextMoveType nextMove;
         [SerializeField] private int alphaHandRemaining;
+        [SerializeField] private string[] clientActions;
 
 
         public string BattleStatusJson => this.battleStatusJson;
@@ -52,6 +55,8 @@ namespace SG03.UI
         public int OmegaTheSourceCount => this.omegaTheSourceCount;
         public int AlphaTheVoidCount => this.alphaTheVoidCount;
         public int OmegaTheVoidCount => this.omegaTheVoidCount;
+        public BattleCardSlot[] AlphaTheVoid => this.alphaTheVoid;
+        public BattleCardSlot[] OmegaTheVoid => this.omegaTheVoid;
         public BattleCardSlot[] AlphaTheSource => this.alphaTheSource;
         public BattleCardSlot[] AlphaHand => this.alphaHand;
         public BattleCardSlot[] AlphaBackLine => this.alphaBackLine;
@@ -63,8 +68,10 @@ namespace SG03.UI
         public string SessionId => this.sessionId;
         public NextMoveType NextMove => this.nextMove;
         public int AlphaHandRemaining => this.alphaHandRemaining;
+        public string[] ClientActions => this.clientActions;
 
         public event Action OnBattleStatusChanged;
+        public event Action<string[]> OnClientActionsChanged;
         public static event Action OnGameStart;
         public static event Action<NextMoveType> OnNextMoveChanged;
 
@@ -124,6 +131,8 @@ namespace SG03.UI
             this.omegaTheSourceCount = 0;
             this.alphaTheVoidCount = 0;
             this.omegaTheVoidCount = 0;
+            this.alphaTheVoid = null;
+            this.omegaTheVoid = null;
             this.alphaTheSource = null;
             this.alphaHand = null;
             this.alphaBackLine = null;
@@ -235,12 +244,16 @@ namespace SG03.UI
             BattleStatusScriptResponse response = JsonUtility.FromJson<BattleStatusScriptResponse>(rawJson);
             if (response == null) return;
             if (response.output == null) return;
+            if (!string.IsNullOrEmpty(response.output.error))
+            {
+                Debug.LogError($"[BattleState] Script error: {response.output.error}");
+                return;
+            }
             this.ApplyOutput(response.output);
         }
 
         private void ApplyOutput(BattleStatusOutput output)
         {
-            BattleCardSlot[] previousOmegaHand = this.omegaHand;
             this.turn = output.turn;
             this.action = output.action;
             this.alphaHp = output.alpha_hp;
@@ -249,6 +262,8 @@ namespace SG03.UI
             this.omegaTheSourceCount = output.omega_the_source_count;
             this.alphaTheVoidCount = output.alpha_the_void_count;
             this.omegaTheVoidCount = output.omega_the_void_count;
+            this.alphaTheVoid = output.alpha_the_void;
+            this.omegaTheVoid = output.omega_the_void;
             this.alphaTheSource = output.alpha_the_source;
             this.alphaHand = output.alpha_hand;
             this.alphaBackLine = output.alpha_back_line;
@@ -257,17 +272,17 @@ namespace SG03.UI
             if (output.omega_front_line != null) this.omegaFrontLine = output.omega_front_line;
             if (output.omega_back_line  != null) this.omegaBackLine  = output.omega_back_line;
             this.omegaHandCount = output.omega_hand_count;
+            this.clientActions = output.client_actions;
             this.SetNextMove(output.next_move);
             this.TryFireGameStart();
-            this.SpawnStatusDelta(previousOmegaHand);
             this.OnBattleStatusChanged?.Invoke();
+            this.NotifyClientActions();
         }
 
-        private void SpawnStatusDelta(BattleCardSlot[] previousOmegaHand)
+        private void NotifyClientActions()
         {
-            this.cardSpawning?.SpawnStatusDelta(
-                this.alphaHand, this.alphaFrontLine, this.alphaBackLine,
-                this.omegaFrontLine, this.omegaBackLine, previousOmegaHand);
+            if (this.clientActions == null || this.clientActions.Length == 0) return;
+            this.OnClientActionsChanged?.Invoke(this.clientActions);
         }
 
         private void TryFireGameStart()
