@@ -1,0 +1,20 @@
+.tooltip-root {
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(10, 14, 28, 0);
+    border: none;
+    padding: 20px 40px;
+}
+
+.tooltip-label {
+    font-size: 200px;
+    color: rgb(210, 225, 255);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 11px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+}
+
+.tooltip-label--damage {
+    color: rgb(255, 30, 0);
+}

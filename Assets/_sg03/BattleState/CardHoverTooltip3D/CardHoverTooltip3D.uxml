@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="CardHoverTooltip3D.uss" />
+
+    <ui:VisualElement name="TooltipRoot" class="tooltip-root">
+        <ui:Label name="FinalDefLabel"       text="DEF: 0" class="tooltip-label" />
+        <ui:Label name="DamageReceivedLabel" text="DMG: 0" class="tooltip-label tooltip-label--damage" />
+    </ui:VisualElement>
+
+</ui:UXML>
