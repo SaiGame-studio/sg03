@@ -152,7 +152,6 @@ namespace SG03.UI
         {
             BattleScripts scripts = this.getBattleScripts();
             if (!this.CanCheckBattleStatus(scripts)) return;
-            this.TriggerGetAllCardDefinitionsOnFirstStatus();
             this.SetCheckStatusLoading(true);
             scripts.RunBattleStatus(this.OnBattleStatusSucceeded, this.OnBattleStatusFailed);
         }
@@ -189,6 +188,7 @@ namespace SG03.UI
             this.SetCheckStatusLoading(false);
             this.SetCheckStatusButtonText("Status OK");
             this.ApplyBattleStatusResponse(response);
+            this.TriggerGetAllCardDefinitionsOnFirstStatus();
         }
 
         private void OnBattleStatusFailed(string error)

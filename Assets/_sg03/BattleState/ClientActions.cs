@@ -12,6 +12,8 @@ namespace SG03
         [SerializeField] private BattleState  battleState;
         [SerializeField] private CardSpawning cardSpawning;
         [SerializeField] private float actionInterval = 0.1f;
+        [SerializeField] private float actionMoveDuration   = 1f;
+        [SerializeField] private float actionRotateDuration = 0.4f;
 
         [Header("Action Log")]
         [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
@@ -148,6 +150,7 @@ namespace SG03
 
         private Coroutine ExecuteAction(ClientActionLog log)
         {
+            this.SyncActionMoveDuration();
             Debug.Log($"[ClientActions] <color=#88FFFF>Executing:</color> <b>{log.ActionName}</b> | {(string.IsNullOrEmpty(log.Parameters) ? "(no params)" : log.Parameters)} | executed={log.Executed}", this.gameObject);
             string[] parameters = string.IsNullOrEmpty(log.Parameters)
                 ? System.Array.Empty<string>()
@@ -159,15 +162,16 @@ namespace SG03
                 case "alpha_source_spawn_card": result = this.ExecuteAlphaSourceSpawnCard(parameters); break;
                 case "omega_source_spawn_card": result = this.ExecuteOmegaSourceSpawnCard(parameters); break;
                 case "alpha_source_to_hand":       result = this.ExecuteAlphaSourceToHand(parameters);    break;
-                case "omega_source_to_hand":       this.ExecuteOmegaSourceToHand(parameters);             break;
-                case "alpha_hand_to_front_line":   this.ExecuteAlphaHandToFrontLine(parameters);          break;
-                case "alpha_hand_to_back_line":    this.ExecuteAlphaHandToBackLine(parameters);           break;
-                case "omega_hand_to_front_line":   this.ExecuteOmegaHandToFrontLine(parameters);          break;
-                case "omega_hand_to_back_line":    this.ExecuteOmegaHandToBackLine(parameters);           break;
-                case "alpha_card_damaged":         this.ExecuteCardDamaged(parameters);                   break;
-                case "omega_card_damaged":         this.ExecuteCardDamaged(parameters);                   break;
-                case "alpha_card_sent_to_void":    this.ExecuteAlphaCardSentToVoid(parameters);           break;
-                case "omega_card_sent_to_void":    this.ExecuteOmegaCardSentToVoid(parameters);           break;
+                case "omega_source_to_hand":       result = this.ExecuteOmegaSourceToHand(parameters);    break;
+                case "alpha_hand_to_front_line":   result = this.ExecuteAlphaHandToFrontLine(parameters); break;
+                case "alpha_hand_to_back_line":    result = this.ExecuteAlphaHandToBackLine(parameters);  break;
+                case "omega_hand_to_front_line":   result = this.ExecuteOmegaHandToFrontLine(parameters); break;
+                case "omega_hand_to_back_line":    result = this.ExecuteOmegaHandToBackLine(parameters);  break;
+                case "alpha_card_damaged":         result = this.ExecuteCardDamaged(parameters);           break;
+                case "omega_card_damaged":         result = this.ExecuteCardDamaged(parameters);           break;
+                case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
+                case "omega_card_sent_to_void":    result = this.ExecuteOmegaCardSentToVoid(parameters);  break;
+                case "alpha_attack":               result = this.ExecuteAlphaAttack(parameters);           break;
                 default:
                     Debug.LogWarning($"[ClientActions] Unknown action: {log.ActionName}", this.gameObject);
                     handled = false;
@@ -202,59 +206,100 @@ namespace SG03
             this.cardSpawning?.CommitAlphaSourceToHand(card, inventoryItemId, slotIndex);
         }
 
-        private void ExecuteOmegaSourceToHand(string[] parameters)
+        private Coroutine ExecuteOmegaSourceToHand(string[] parameters)
         {
-            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
-            this.cardSpawning?.MoveOmegaSourceToHand(inventoryItemId, slotIndex);
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
+            Card3DCtrl card = this.cardSpawning?.MoveOmegaSourceToHand(inventoryItemId, slotIndex);
+            if (card == null) return null;
+            return this.StartCoroutine(this.WaitForCard(card));
         }
 
-        private void ExecuteAlphaHandToFrontLine(string[] parameters)
+        private Coroutine ExecuteAlphaHandToFrontLine(string[] parameters)
         {
-            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
-            this.cardSpawning?.MoveAlphaHandToFrontLine(inventoryItemId, slotIndex);
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
+            Card3DCtrl card = this.cardSpawning?.MoveAlphaHandToFrontLine(inventoryItemId, slotIndex);
+            if (card == null) return null;
+            return this.StartCoroutine(this.WaitForCard(card));
         }
 
-        private void ExecuteAlphaHandToBackLine(string[] parameters)
+        private Coroutine ExecuteAlphaHandToBackLine(string[] parameters)
         {
-            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
-            this.cardSpawning?.MoveAlphaHandToBackLine(inventoryItemId, slotIndex);
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
+            Card3DCtrl card = this.cardSpawning?.MoveAlphaHandToBackLine(inventoryItemId, slotIndex);
+            if (card == null) return null;
+            return this.StartCoroutine(this.WaitForCard(card));
         }
 
-        private void ExecuteOmegaHandToFrontLine(string[] parameters)
+        private Coroutine ExecuteOmegaHandToFrontLine(string[] parameters)
         {
-            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
-            this.cardSpawning?.MoveOmegaHandToFrontLine(inventoryItemId, slotIndex);
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
+            Card3DCtrl card = this.cardSpawning?.MoveOmegaHandToFrontLine(inventoryItemId, slotIndex);
+            if (card == null) return null;
+            return this.StartCoroutine(this.WaitForCard(card));
         }
 
-        private void ExecuteOmegaHandToBackLine(string[] parameters)
+        private Coroutine ExecuteOmegaHandToBackLine(string[] parameters)
         {
-            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
-            this.cardSpawning?.MoveOmegaHandToBackLine(inventoryItemId, slotIndex);
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
+            Card3DCtrl card = this.cardSpawning?.MoveOmegaHandToBackLine(inventoryItemId, slotIndex);
+            if (card == null) return null;
+            return this.StartCoroutine(this.WaitForCard(card));
         }
 
-        private void ExecuteCardDamaged(string[] parameters)
+        private Coroutine ExecuteCardDamaged(string[] parameters)
         {
-            if (parameters == null || parameters.Length == 0) return;
+            if (parameters == null || parameters.Length == 0) return null;
             string inventoryItemId = parameters[0].Trim();
-            if (string.IsNullOrEmpty(inventoryItemId)) return;
+            if (string.IsNullOrEmpty(inventoryItemId)) return null;
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
-            card?.RunUp();
+            if (card == null) return null;
+            card.RunUp();
+            return this.StartCoroutine(this.WaitForCard(card));
         }
 
-        private void ExecuteAlphaCardSentToVoid(string[] parameters)
+        private Coroutine ExecuteAlphaCardSentToVoid(string[] parameters)
         {
-            if (parameters == null || parameters.Length == 0) return;
+            if (parameters == null || parameters.Length == 0) return null;
             string inventoryItemId = parameters[0].Trim();
-            if (string.IsNullOrEmpty(inventoryItemId)) return;
-            this.cardSpawning?.MoveAlphaCardToVoid(inventoryItemId);
+            if (string.IsNullOrEmpty(inventoryItemId)) return null;
+            Card3DCtrl card = this.cardSpawning?.MoveAlphaCardToVoid(inventoryItemId);
+            if (card == null) return null;
+            return this.StartCoroutine(this.WaitForCard(card));
         }
 
-        private void ExecuteOmegaCardSentToVoid(string[] parameters)
+        private Coroutine ExecuteOmegaCardSentToVoid(string[] parameters)
         {
-            if (parameters == null || parameters.Length == 0) return;
+            if (parameters == null || parameters.Length == 0) return null;
             string inventoryItemId = parameters[0].Trim();
-            if (string.IsNullOrEmpty(inventoryItemId)) return;
-            this.cardSpawning?.MoveOmegaCardToVoid(inventoryItemId);
+            if (string.IsNullOrEmpty(inventoryItemId)) return null;
+            Card3DCtrl card = this.cardSpawning?.MoveOmegaCardToVoid(inventoryItemId);
+            if (card == null) return null;
+            return this.StartCoroutine(this.WaitForCard(card));
+        }
+
+        private Coroutine ExecuteAlphaAttack(string[] parameters)
+        {
+            if (parameters == null || parameters.Length < 2) return null;
+            string attackerId = parameters[0].Trim();
+            string defenderId = parameters[1].Trim();
+            if (string.IsNullOrEmpty(attackerId) || string.IsNullOrEmpty(defenderId)) return null;
+            Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
+            Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
+            if (attacker == null || defender == null) return null;
+            attacker.AttackLunge(defender.transform.position);
+            return this.StartCoroutine(this.WaitForCard(attacker));
+        }
+
+        private void SyncActionMoveDuration()
+        {
+            if (this.cardSpawning == null) return;
+            this.cardSpawning.ActionMoveDuration   = this.actionMoveDuration;
+            this.cardSpawning.ActionRotateDuration = this.actionRotateDuration;
+        }
+
+        private IEnumerator WaitForCard(Card3DCtrl card)
+        {
+            yield return new WaitUntil(() => !card.IsAnimating);
         }
 
         private bool TryParseSourceToHand(string[] parameters, out string inventoryItemId, out int slotIndex)

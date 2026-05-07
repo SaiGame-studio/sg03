@@ -107,6 +107,24 @@ namespace SG03
         [Tooltip("Ease for the fall phase of the damage animation.")]
         [SerializeField] private Ease damagedFallEase = Ease.InQuad;
 
+        // ─── Attack ───────────────────────────────────────────────────────────────
+
+        [Header("Attack")]
+        [Tooltip("Fraction (0-1) of the distance toward the defender the attacker travels.")]
+        [SerializeField] private float attackLungeRatio = 0.4f;
+
+        [Tooltip("Duration of the lunge-forward phase in seconds.")]
+        [SerializeField] private float attackLungeDuration = 0.15f;
+
+        [Tooltip("Duration of the return phase in seconds.")]
+        [SerializeField] private float attackReturnDuration = 0.25f;
+
+        [Tooltip("Ease for the lunge-forward phase.")]
+        [SerializeField] private Ease attackLungeEase = Ease.OutQuad;
+
+        [Tooltip("Ease for the return phase.")]
+        [SerializeField] private Ease attackReturnEase = Ease.InQuad;
+
         // ─── Runtime state ────────────────────────────────────────────────────────
 
         [Header("State")]
@@ -122,6 +140,7 @@ namespace SG03
         private Tween rotateY180Tween;
         private Sequence faceTween;
         private Sequence damageTween;
+        private Sequence attackTween;
         private Vector3    preFullDetailPosition;
         private Quaternion preFullDetailRotation;
 
@@ -169,7 +188,15 @@ namespace SG03
 
         public Location  Location   => this.location;
         public bool      IsFlipping  => this.isFlipping;
+        public bool      IsAnimating =>
+            (this.moveTween != null && this.moveTween.IsActive()) ||
+            this.isFlipping ||
+            (this.damageTween != null && this.damageTween.IsActive()) ||
+            (this.attackTween != null && this.attackTween.IsActive());
         public FaceState FaceState   => this.faceState;
+
+        public void SetMoveDuration(float d)   { this.duration          = d; }
+        public void SetRotateDuration(float d)  { this.rotateY180Duration = d; }
 
         /// <summary>
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position.
@@ -367,6 +394,16 @@ namespace SG03
             this.damageTween.Append(this.transform.DOMove(origin,  this.damagedPhaseDuration).SetEase(this.damagedFallEase));
         }
 
+        public void AttackLunge(Vector3 defenderPosition)
+        {
+            Vector3 origin = this.transform.position;
+            Vector3 lunged = Vector3.Lerp(origin, defenderPosition, this.attackLungeRatio);
+            this.attackTween?.Kill();
+            this.attackTween = DOTween.Sequence();
+            this.attackTween.Append(this.transform.DOMove(lunged, this.attackLungeDuration).SetEase(this.attackLungeEase));
+            this.attackTween.Append(this.transform.DOMove(origin, this.attackReturnDuration).SetEase(this.attackReturnEase));
+        }
+
         // ─── Hover handlers ───────────────────────────────────────────────────────
 
         private void OnHoverEntered(Card3DCtrl card)
@@ -455,6 +492,8 @@ namespace SG03
             this.rotateY180Tween = null;
             this.damageTween?.Kill();
             this.damageTween = null;
+            this.attackTween?.Kill();
+            this.attackTween = null;
         }
     }
 }

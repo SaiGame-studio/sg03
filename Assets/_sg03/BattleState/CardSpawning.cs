@@ -30,6 +30,9 @@ namespace SG03
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
+        public float ActionMoveDuration   { get; set; } = 1f;
+        public float ActionRotateDuration { get; set; } = 0.4f;
+
         public Coroutine SpawnAlphaSourceCards(int count)
         {
             if (this.alphaSourceRoutine != null) this.StopCoroutine(this.alphaSourceRoutine);
@@ -65,6 +68,8 @@ namespace SG03
             if (card == null) return;
             Transform target = this.ResolveHandTarget(slotIndex, this.deskPosition.AlphaHand);
             if (this.IsSlotOccupied(target)) return;
+            card.SetMoveDuration(this.ActionMoveDuration);
+            card.SetRotateDuration(this.ActionRotateDuration);
             card.MoveAndRotate(target, Location.in_hand);
             this.slotOccupancy[target] = card;
             this.handCardRegistry[inventoryItemId] = card;
@@ -87,57 +92,63 @@ namespace SG03
                 ?? this.FindSlotById(this.battleState?.OmegaTheVoid, inventoryItemId);
         }
 
-        public void MoveOmegaSourceToHand(string inventoryItemId, int slotIndex)
+        public Card3DCtrl MoveOmegaSourceToHand(string inventoryItemId, int slotIndex)
         {
             Card3DCtrl prefab = this.ResolvePrefab();
-            if (prefab == null) return;
+            if (prefab == null) return null;
             Transform target = this.ResolveHandTarget(slotIndex, this.deskPosition.OmegaHand);
-            if (this.IsSlotOccupied(target)) return;
+            if (this.IsSlotOccupied(target)) return null;
             Card3DCtrl card = this.DequeueOmegaSourceCard(prefab);
-            if (card == null) return;
+            if (card == null) return null;
+            card.SetMoveDuration(this.ActionMoveDuration);
+            card.SetRotateDuration(this.ActionRotateDuration);
             card.MoveAndRotate(target, Location.in_hand);
             this.slotOccupancy[target] = card;
             this.omegaHandCardQueue.Enqueue(card);
+            return card;
         }
 
-        public void MoveAlphaHandToFrontLine(string inventoryItemId, int slotIndex)
+        public Card3DCtrl MoveAlphaHandToFrontLine(string inventoryItemId, int slotIndex)
             => this.MoveAlphaHandToLine(inventoryItemId, slotIndex, this.deskPosition.AlphaFrontLine);
 
-        public void MoveAlphaHandToBackLine(string inventoryItemId, int slotIndex)
+        public Card3DCtrl MoveAlphaHandToBackLine(string inventoryItemId, int slotIndex)
             => this.MoveAlphaHandToLine(inventoryItemId, slotIndex, this.deskPosition.AlphaBackLine);
 
-        private void MoveAlphaHandToLine(string inventoryItemId, int slotIndex, CardHolderCtrl[] holders)
+        private Card3DCtrl MoveAlphaHandToLine(string inventoryItemId, int slotIndex, CardHolderCtrl[] holders)
         {
-            if (!this.handCardRegistry.TryGetValue(inventoryItemId, out Card3DCtrl card)) return;
-            if (slotIndex < 0 || slotIndex >= holders.Length) return;
+            if (!this.handCardRegistry.TryGetValue(inventoryItemId, out Card3DCtrl card)) return null;
+            if (slotIndex < 0 || slotIndex >= holders.Length) return null;
             CardHolderCtrl holder = holders[slotIndex];
-            if (holder == null) return;
+            if (holder == null) return null;
             Transform target = holder.transform;
-            if (this.IsSlotOccupied(target)) return;
+            if (this.IsSlotOccupied(target)) return null;
             this.handCardRegistry.Remove(inventoryItemId);
             this.RemoveFromSlotOccupancy(card);
             BattleCardSlot slot = this.FindAlphaSlotById(inventoryItemId);
             if (slot != null) card.SetExpose(slot.expose);
             System.Action faceCallback = slot != null ? () => this.ApplyFaceState(card, slot) : null;
+            card.SetMoveDuration(this.ActionMoveDuration);
+            card.SetRotateDuration(this.ActionRotateDuration);
             card.SetCardHolder(holder, faceCallback);
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
+            return card;
         }
 
-        public void MoveOmegaHandToFrontLine(string inventoryItemId, int slotIndex)
+        public Card3DCtrl MoveOmegaHandToFrontLine(string inventoryItemId, int slotIndex)
             => this.MoveOmegaHandToLine(inventoryItemId, slotIndex, this.deskPosition.OmegaFrontLine);
 
-        public void MoveOmegaHandToBackLine(string inventoryItemId, int slotIndex)
+        public Card3DCtrl MoveOmegaHandToBackLine(string inventoryItemId, int slotIndex)
             => this.MoveOmegaHandToLine(inventoryItemId, slotIndex, this.deskPosition.OmegaBackLine);
 
-        private void MoveOmegaHandToLine(string inventoryItemId, int slotIndex, CardHolderCtrl[] holders)
+        private Card3DCtrl MoveOmegaHandToLine(string inventoryItemId, int slotIndex, CardHolderCtrl[] holders)
         {
-            if (this.omegaHandCardQueue.Count == 0) return;
-            if (slotIndex < 0 || slotIndex >= holders.Length) return;
+            if (this.omegaHandCardQueue.Count == 0) return null;
+            if (slotIndex < 0 || slotIndex >= holders.Length) return null;
             CardHolderCtrl holder = holders[slotIndex];
-            if (holder == null) return;
+            if (holder == null) return null;
             Transform target = holder.transform;
-            if (this.IsSlotOccupied(target)) return;
+            if (this.IsSlotOccupied(target)) return null;
             Card3DCtrl card = this.omegaHandCardQueue.Dequeue();
             this.RemoveFromSlotOccupancy(card);
             BattleCardSlot slot = this.FindOmegaSlotById(inventoryItemId);
@@ -153,9 +164,12 @@ namespace SG03
                 card.SetExpose(slot.expose);
             }
             System.Action faceCallback = slot != null ? () => this.ApplyFaceState(card, slot) : null;
+            card.SetMoveDuration(this.ActionMoveDuration);
+            card.SetRotateDuration(this.ActionRotateDuration);
             card.MoveToUnknow(holder, faceCallback);
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
+            return card;
         }
 
         private BattleCardSlot FindSlotById(BattleCardSlot[] slots, string inventoryItemId)
@@ -192,19 +206,22 @@ namespace SG03
             return null;
         }
 
-        public void MoveAlphaCardToVoid(string inventoryItemId)
+        public Card3DCtrl MoveAlphaCardToVoid(string inventoryItemId)
             => this.MoveCardToVoid(inventoryItemId, this.deskPosition.AlphaTheVoid);
 
-        public void MoveOmegaCardToVoid(string inventoryItemId)
+        public Card3DCtrl MoveOmegaCardToVoid(string inventoryItemId)
             => this.MoveCardToVoid(inventoryItemId, this.deskPosition.OmegaTheVoid);
 
-        private void MoveCardToVoid(string inventoryItemId, Transform voidPoint)
+        private Card3DCtrl MoveCardToVoid(string inventoryItemId, Transform voidPoint)
         {
             Card3DCtrl card = this.FindCardById(inventoryItemId);
-            if (card == null) return;
+            if (card == null) return null;
             this.handCardRegistry.Remove(inventoryItemId);
             this.RemoveFromSlotOccupancy(card);
+            card.SetMoveDuration(this.ActionMoveDuration);
+            card.SetRotateDuration(this.ActionRotateDuration);
             card.MoveAndRotate(voidPoint, Location.in_void);
+            return card;
         }
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────

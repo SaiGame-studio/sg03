@@ -6696,6 +6696,8 @@ MonoBehaviour:
   omegaTheSourceCount: 0
   alphaTheVoidCount: 0
   omegaTheVoidCount: 0
+  alphaTheVoid: []
+  omegaTheVoid: []
   alphaTheSource: []
   alphaHand: []
   alphaBackLine: []
@@ -6834,6 +6836,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.ClientActions
   battleState: {fileID: 2015755439}
   cardSpawning: {fileID: 2015755438}
+  actionInterval: 0.1
+  actionMoveDuration: 0.5
   actionLog: []
 --- !u!1 &2028831695
 GameObject:
