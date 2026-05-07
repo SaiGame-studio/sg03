@@ -6631,6 +6631,7 @@ GameObject:
   - component: {fileID: 2015755442}
   - component: {fileID: 2015755443}
   - component: {fileID: 2015755445}
+  - component: {fileID: 2015755446}
   m_Layer: 0
   m_Name: BattleState
   m_TagString: Untagged
@@ -6706,6 +6707,7 @@ MonoBehaviour:
   sessionId: 
   nextMove: 0
   alphaHandRemaining: 0
+  clientActions: []
 --- !u!114 &2015755440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6796,6 +6798,7 @@ MonoBehaviour:
   cardHoverDetector: {fileID: 2015755441}
   cardHolderHoverDetector: {fileID: 2015755442}
   battleCardDefinitions: {fileID: 2015755443}
+  clientActions: {fileID: 0}
 --- !u!114 &2015755445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6817,6 +6820,21 @@ MonoBehaviour:
   scriptNameAlphaAttacking: alpha_attacking
   battleState: {fileID: 2015755439}
   logPayload: 1
+--- !u!114 &2015755446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2015755436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 181cf2f657432784390858ff85560072, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.ClientActions
+  battleState: {fileID: 2015755439}
+  cardSpawning: {fileID: 2015755438}
+  actionLog: []
 --- !u!1 &2028831695
 GameObject:
   m_ObjectHideFlags: 0
@@ -6941,24 +6959,6 @@ MonoBehaviour:
   battleScripts: {fileID: 2015755445}
   battleStateCtrl: {fileID: 2015755444}
   uiDocument: {fileID: 2030001003}
-  selectedPreset:
-    id: 
-    definition_id: 
-    definition:
-      id: 
-      code_name: 
-      preset_type: 
-      name: 
-      max_slots: 0
-      created_at: 
-      updated_at: 
-    preset_type: 
-    name: 
-    max_slots: 0
-    is_temp: 0
-    slots: []
-    created_at: 
-    updated_at: 
   lobbySceneName: 1-lobby
 --- !u!114 &2034349439 stripped
 MonoBehaviour:

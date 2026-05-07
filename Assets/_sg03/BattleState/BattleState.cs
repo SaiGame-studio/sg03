@@ -67,6 +67,7 @@ namespace SG03.UI
         public string[] ClientActions => this.clientActions;
 
         public event Action OnBattleStatusChanged;
+        public event Action<string[]> OnClientActionsChanged;
         public static event Action OnGameStart;
         public static event Action<NextMoveType> OnNextMoveChanged;
 
@@ -264,6 +265,13 @@ namespace SG03.UI
             this.TryFireGameStart();
             this.SpawnStatusDelta(previousOmegaHand);
             this.OnBattleStatusChanged?.Invoke();
+            this.NotifyClientActions();
+        }
+
+        private void NotifyClientActions()
+        {
+            if (this.clientActions == null || this.clientActions.Length == 0) return;
+            this.OnClientActionsChanged?.Invoke(this.clientActions);
         }
 
         private void SpawnStatusDelta(BattleCardSlot[] previousOmegaHand)

@@ -15,6 +15,7 @@ namespace SG03
         [SerializeField] private CardHoverDetector cardHoverDetector;
         [SerializeField] private CardHolderHoverDetector cardHolderHoverDetector;
         [SerializeField] private BattleCardDefinitions battleCardDefinitions;
+        [SerializeField] private ClientActions clientActions;
 
         public BattleState BattleState => this.battleState;
         public BattleScripts BattleScripts => this.battleScripts;
@@ -23,6 +24,7 @@ namespace SG03
         public CardHoverDetector CardHoverDetector => this.cardHoverDetector;
         public CardHolderHoverDetector CardHolderHoverDetector => this.cardHolderHoverDetector;
         public BattleCardDefinitions BattleCardDefinitions => this.battleCardDefinitions;
+        public ClientActions ClientActions => this.clientActions;
 
         protected override void LoadComponents()
         {
@@ -34,6 +36,7 @@ namespace SG03
             this.LoadCardHoverDetector();
             this.LoadCardHolderHoverDetector();
             this.LoadBattleCardDefinitions();
+            this.LoadClientActions();
         }
 
         protected virtual void LoadBattleScripts()
@@ -83,6 +86,13 @@ namespace SG03
             if (this.battleCardDefinitions != null) return;
             this.battleCardDefinitions = this.GetComponentInChildren<BattleCardDefinitions>(true);
             Debug.LogWarning(this.transform.name + ": LoadBattleCardDefinitions", this.gameObject);
+        }
+
+        protected virtual void LoadClientActions()
+        {
+            if (this.clientActions != null) return;
+            this.clientActions = this.GetComponentInChildren<ClientActions>(true);
+            Debug.LogWarning(this.transform.name + ": LoadClientActions", this.gameObject);
         }
     }
 }

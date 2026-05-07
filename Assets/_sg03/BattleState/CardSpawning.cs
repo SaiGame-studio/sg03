@@ -18,6 +18,8 @@ namespace SG03
         [SerializeField] private float spawnInterval = 0.05f;
 
         private Coroutine spawnRoutine;
+        private Coroutine alphaSourceRoutine;
+        private Coroutine omegaSourceRoutine;
         private readonly Dictionary<string, Card3DCtrl>    sourceCardRegistry  = new Dictionary<string, Card3DCtrl>();
         private readonly Dictionary<string, Card3DCtrl>    handCardRegistry    = new Dictionary<string, Card3DCtrl>();
         private readonly Dictionary<Transform, Card3DCtrl> slotOccupancy       = new Dictionary<Transform, Card3DCtrl>();
@@ -28,6 +30,18 @@ namespace SG03
         private int omegaVoidSpawnedCount   = 0;
 
         // ─── Public API ───────────────────────────────────────────────────────────
+
+        public void SpawnAlphaSourceCards(int count)
+        {
+            if (this.alphaSourceRoutine != null) this.StopCoroutine(this.alphaSourceRoutine);
+            this.alphaSourceRoutine = this.StartCoroutine(this.SpawnAlphaSourceCardsRoutine(count));
+        }
+
+        public void SpawnOmegaSourceCards(int count)
+        {
+            if (this.omegaSourceRoutine != null) this.StopCoroutine(this.omegaSourceRoutine);
+            this.omegaSourceRoutine = this.StartCoroutine(this.SpawnOmegaSourceCardsRoutine(count));
+        }
 
         public void SpawnStatusDelta(BattleCardSlot[] newHand, BattleCardSlot[] newFrontLine, BattleCardSlot[] newBackLine,
             BattleCardSlot[] newOmegaFrontLine, BattleCardSlot[] newOmegaBackLine, BattleCardSlot[] previousOmegaHand)
@@ -111,9 +125,7 @@ namespace SG03
             Card3DCtrl prefab = this.ResolvePrefab();
             if (prefab == null) yield break;
             yield return this.WaitForDefinitions();
-            yield return this.RunConcurrent(
-                this.SpawnNewSourceCardsRoutine(prefab),
-                this.SpawnOmegaSequentialRoutine(prefab, newOmegaFrontLine, newOmegaBackLine));
+            yield return this.SpawnOmegaSequentialRoutine(prefab, newOmegaFrontLine, newOmegaBackLine);
             BattleCardSlot[] allSlots = this.CombineSlots(newHand, newFrontLine, newBackLine);
             yield return this.DispatchSlotsByAction(prefab, allSlots);
             this.previousOmegaHand = null;
@@ -215,13 +227,18 @@ namespace SG03
             return slotIndex < handTargets.Length ? handTargets[slotIndex] : this.deskPosition.AlphaSpawnPoint;
         }
 
-        private IEnumerator SpawnNewSourceCardsRoutine(Card3DCtrl prefab)
+        private IEnumerator SpawnAlphaSourceCardsRoutine(int count)
         {
+            Card3DCtrl prefab = this.ResolvePrefab();
+            if (prefab == null) yield break;
+            yield return this.WaitForDefinitions();
             BattleCardSlot[] sourceSlots = this.battleState?.AlphaTheSource;
             if (sourceSlots == null) yield break;
+            int spawned = 0;
             int spawnedThisFrame = 0;
             foreach (BattleCardSlot slot in sourceSlots)
             {
+                if (spawned >= count) break;
                 if (slot == null) continue;
                 if (string.IsNullOrEmpty(slot.inventory_item_id)) continue;
                 if (this.sourceCardRegistry.ContainsKey(slot.inventory_item_id)) continue;
@@ -236,16 +253,39 @@ namespace SG03
                 card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
                 card.MoveAndRotate(this.deskPosition.AlphaTheSource, Location.in_source);
                 this.sourceCardRegistry[slot.inventory_item_id] = card;
+                spawned++;
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
                 yield return this.WaitAfterSpawn();
             }
+            this.alphaSourceRoutine = null;
+        }
+
+        private IEnumerator SpawnOmegaSourceCardsRoutine(int count)
+        {
+            Card3DCtrl prefab = this.ResolvePrefab();
+            if (prefab == null) yield break;
+            yield return this.WaitForDefinitions();
+            int spawnedThisFrame = 0;
+            while (this.omegaSourceSpawnedCount < count)
+            {
+                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+                if (card == null) break;
+                card.SetOwner(Owner.omega);
+                card.MoveAndRotate(this.deskPosition.OmegaTheSource, Location.in_source);
+                this.omegaSourceCardQueue.Enqueue(card);
+                this.omegaSourceSpawnedCount++;
+                spawnedThisFrame++;
+                if (spawnedThisFrame < this.spawnPerFrame) continue;
+                spawnedThisFrame = 0;
+                yield return this.WaitAfterSpawn();
+            }
+            this.omegaSourceRoutine = null;
         }
 
         private IEnumerator SpawnOmegaSequentialRoutine(Card3DCtrl prefab, BattleCardSlot[] omegaFrontLine, BattleCardSlot[] omegaBackLine)
         {
-            yield return this.SpawnOmegaSourceCardsRoutine(prefab);
             yield return this.SpawnOmegaVoidCardsRoutine(prefab);
             yield return this.SpawnOmegaHandSlotsRoutine(prefab);
             yield return this.SpawnOmegaLineCardsRoutine(prefab, omegaFrontLine, omegaBackLine);
@@ -263,25 +303,6 @@ namespace SG03
         {
             yield return this.StartCoroutine(routine);
             onComplete();
-        }
-
-        private IEnumerator SpawnOmegaSourceCardsRoutine(Card3DCtrl prefab)
-        {
-            int count = this.battleState?.OmegaTheSourceCount ?? 0;
-            int spawnedThisFrame = 0;
-            while (this.omegaSourceSpawnedCount < count)
-            {
-                Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
-                if (card == null) break;
-                card.SetOwner(Owner.omega);
-                card.MoveAndRotate(this.deskPosition.OmegaTheSource, Location.in_source);
-                this.omegaSourceCardQueue.Enqueue(card);
-                this.omegaSourceSpawnedCount++;
-                spawnedThisFrame++;
-                if (spawnedThisFrame < this.spawnPerFrame) continue;
-                spawnedThisFrame = 0;
-                yield return this.WaitAfterSpawn();
-            }
         }
 
         private IEnumerator SpawnOmegaVoidCardsRoutine(Card3DCtrl prefab)
