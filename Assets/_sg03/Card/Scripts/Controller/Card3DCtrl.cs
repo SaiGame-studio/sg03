@@ -195,6 +195,9 @@ namespace SG03
         /// <summary>Returns the card from full-detail back to its selected position in hand.</summary>
         public void ReturnFromFullDetail() => this.movement.ReturnFromFullDetail();
 
+        /// <summary>Plays the damage run-up animation: card rises then returns to its current position.</summary>
+        public void RunUp() => this.movement.RunUp();
+
         /// <summary>Toggles the card between face-up and face-down.</summary>
         public void ToggleFace()
         {

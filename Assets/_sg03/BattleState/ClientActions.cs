@@ -164,6 +164,10 @@ namespace SG03
                 case "alpha_hand_to_back_line":    this.ExecuteAlphaHandToBackLine(parameters);           break;
                 case "omega_hand_to_front_line":   this.ExecuteOmegaHandToFrontLine(parameters);          break;
                 case "omega_hand_to_back_line":    this.ExecuteOmegaHandToBackLine(parameters);           break;
+                case "alpha_card_damaged":         this.ExecuteCardDamaged(parameters);                   break;
+                case "omega_card_damaged":         this.ExecuteCardDamaged(parameters);                   break;
+                case "alpha_card_sent_to_void":    this.ExecuteAlphaCardSentToVoid(parameters);           break;
+                case "omega_card_sent_to_void":    this.ExecuteOmegaCardSentToVoid(parameters);           break;
                 default:
                     Debug.LogWarning($"[ClientActions] Unknown action: {log.ActionName}", this.gameObject);
                     handled = false;
@@ -226,6 +230,31 @@ namespace SG03
         {
             if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return;
             this.cardSpawning?.MoveOmegaHandToBackLine(inventoryItemId, slotIndex);
+        }
+
+        private void ExecuteCardDamaged(string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return;
+            string inventoryItemId = parameters[0].Trim();
+            if (string.IsNullOrEmpty(inventoryItemId)) return;
+            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
+            card?.RunUp();
+        }
+
+        private void ExecuteAlphaCardSentToVoid(string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return;
+            string inventoryItemId = parameters[0].Trim();
+            if (string.IsNullOrEmpty(inventoryItemId)) return;
+            this.cardSpawning?.MoveAlphaCardToVoid(inventoryItemId);
+        }
+
+        private void ExecuteOmegaCardSentToVoid(string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return;
+            string inventoryItemId = parameters[0].Trim();
+            if (string.IsNullOrEmpty(inventoryItemId)) return;
+            this.cardSpawning?.MoveOmegaCardToVoid(inventoryItemId);
         }
 
         private bool TryParseSourceToHand(string[] parameters, out string inventoryItemId, out int slotIndex)

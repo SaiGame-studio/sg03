@@ -92,6 +92,21 @@ namespace SG03
         [Tooltip("Ease curve for the Y-axis 180 rotation.")]
         [SerializeField] private Ease rotateY180Ease = Ease.InOutQuad;
 
+        // ─── Damaged ──────────────────────────────────────────────────────────────
+
+        [Header("Damaged")]
+        [Tooltip("World units the card rises when taking damage.")]
+        [SerializeField] private float damagedRiseHeight = 1.5f;
+
+        [Tooltip("Duration of each phase (rise + fall) of the damage animation.")]
+        [SerializeField] private float damagedPhaseDuration = 0.15f;
+
+        [Tooltip("Ease for the rise phase of the damage animation.")]
+        [SerializeField] private Ease damagedRiseEase = Ease.OutQuad;
+
+        [Tooltip("Ease for the fall phase of the damage animation.")]
+        [SerializeField] private Ease damagedFallEase = Ease.InQuad;
+
         // ─── Runtime state ────────────────────────────────────────────────────────
 
         [Header("State")]
@@ -105,6 +120,7 @@ namespace SG03
         private Tween moveTween;
         private Tween rotateY180Tween;
         private Sequence faceTween;
+        private Sequence damageTween;
         private Vector3    preFullDetailPosition;
         private Quaternion preFullDetailRotation;
 
@@ -341,6 +357,16 @@ namespace SG03
             this.transform.DORotateQuaternion(this.preFullDetailRotation, this.fullDetailReturnDuration).SetEase(this.fullDetailReturnEase);
         }
 
+        public void RunUp()
+        {
+            Vector3 origin = this.transform.position;
+            Vector3 risen  = origin + Vector3.up * this.damagedRiseHeight;
+            this.damageTween?.Kill();
+            this.damageTween = DOTween.Sequence();
+            this.damageTween.Append(this.transform.DOMove(risen,   this.damagedPhaseDuration).SetEase(this.damagedRiseEase));
+            this.damageTween.Append(this.transform.DOMove(origin,  this.damagedPhaseDuration).SetEase(this.damagedFallEase));
+        }
+
         // ─── Hover handlers ───────────────────────────────────────────────────────
 
         private void OnHoverEntered(Card3DCtrl card)
@@ -425,6 +451,8 @@ namespace SG03
             this.faceTween = null;
             this.rotateY180Tween?.Kill();
             this.rotateY180Tween = null;
+            this.damageTween?.Kill();
+            this.damageTween = null;
             this.transform.DOKill();
         }
     }

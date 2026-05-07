@@ -181,6 +181,32 @@ namespace SG03
             this.alphaSourceSpawnedCount = 0;
         }
 
+        public Card3DCtrl FindCardById(string inventoryItemId)
+        {
+            if (string.IsNullOrEmpty(inventoryItemId)) return null;
+            if (this.handCardRegistry.TryGetValue(inventoryItemId, out Card3DCtrl handCard)) return handCard;
+            foreach (Card3DCtrl card in this.slotOccupancy.Values)
+            {
+                if (card != null && card.InventoryItemId == inventoryItemId) return card;
+            }
+            return null;
+        }
+
+        public void MoveAlphaCardToVoid(string inventoryItemId)
+            => this.MoveCardToVoid(inventoryItemId, this.deskPosition.AlphaTheVoid);
+
+        public void MoveOmegaCardToVoid(string inventoryItemId)
+            => this.MoveCardToVoid(inventoryItemId, this.deskPosition.OmegaTheVoid);
+
+        private void MoveCardToVoid(string inventoryItemId, Transform voidPoint)
+        {
+            Card3DCtrl card = this.FindCardById(inventoryItemId);
+            if (card == null) return;
+            this.handCardRegistry.Remove(inventoryItemId);
+            this.RemoveFromSlotOccupancy(card);
+            card.MoveAndRotate(voidPoint, Location.in_void);
+        }
+
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         protected override void LoadComponents()
