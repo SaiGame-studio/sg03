@@ -72,19 +72,29 @@ namespace SG03
 
         private void BuildActionLogs(string[] actions)
         {
-            this.alphaActionLog.Clear();
-            this.omegaActionLog.Clear();
+            Debug.Log($"<color=#FFD700><b>[ClientActions] Received {actions.Length} action(s)</b></color>", this.gameObject);
             foreach (string entry in actions)
             {
                 if (string.IsNullOrWhiteSpace(entry)) continue;
                 int colonIndex = entry.IndexOf(':');
                 string name    = colonIndex >= 0 ? entry.Substring(0, colonIndex) : entry;
                 string @params = colonIndex >= 0 ? entry.Substring(colonIndex + 1) : string.Empty;
+                if (this.IsDuplicateAction(name, @params)) continue;
                 ClientActionLog log = new ClientActionLog(name, @params);
                 if (name.StartsWith("alpha_")) this.alphaActionLog.Add(log);
                 else if (name.StartsWith("omega_")) this.omegaActionLog.Add(log);
                 else Debug.LogWarning($"[ClientActions] Cannot categorize action: {name}", this.gameObject);
             }
+        }
+
+        private bool IsDuplicateAction(string actionName, string parameters)
+        {
+            List<ClientActionLog> list = actionName.StartsWith("alpha_") ? this.alphaActionLog : this.omegaActionLog;
+            foreach (ClientActionLog existing in list)
+            {
+                if (existing.ActionName == actionName && existing.Parameters == parameters) return true;
+            }
+            return false;
         }
 
         private void StartAlphaDispatch()
@@ -125,6 +135,7 @@ namespace SG03
 
         private Coroutine ExecuteAction(ClientActionLog log)
         {
+            Debug.Log($"[ClientActions] <color=#88FFFF>Executing:</color> <b>{log.ActionName}</b> | {(string.IsNullOrEmpty(log.Parameters) ? "(no params)" : log.Parameters)} | executed={log.Executed}", this.gameObject);
             string[] parameters = string.IsNullOrEmpty(log.Parameters)
                 ? System.Array.Empty<string>()
                 : log.Parameters.Split(',');

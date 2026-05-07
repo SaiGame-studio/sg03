@@ -249,7 +249,6 @@ namespace SG03.UI
 
         private void ApplyOutput(BattleStatusOutput output)
         {
-            BattleCardSlot[] previousOmegaHand = this.omegaHand;
             this.turn = output.turn;
             this.action = output.action;
             this.alphaHp = output.alpha_hp;
@@ -271,7 +270,6 @@ namespace SG03.UI
             this.clientActions = output.client_actions;
             this.SetNextMove(output.next_move);
             this.TryFireGameStart();
-            this.SpawnStatusDelta(previousOmegaHand);
             this.OnBattleStatusChanged?.Invoke();
             this.NotifyClientActions();
         }
@@ -280,13 +278,6 @@ namespace SG03.UI
         {
             if (this.clientActions == null || this.clientActions.Length == 0) return;
             this.OnClientActionsChanged?.Invoke(this.clientActions);
-        }
-
-        private void SpawnStatusDelta(BattleCardSlot[] previousOmegaHand)
-        {
-            this.cardSpawning?.SpawnStatusDelta(
-                this.alphaHand, this.alphaFrontLine, this.alphaBackLine,
-                this.omegaFrontLine, this.omegaBackLine, previousOmegaHand);
         }
 
         private void TryFireGameStart()
