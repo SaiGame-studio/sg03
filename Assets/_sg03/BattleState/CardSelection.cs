@@ -286,12 +286,15 @@ namespace SG03
         {
             if (this.deskPositions == null) return;
             this.fullDetail = true;
+            this.arrowIndicator?.Hide();
             this.selected.MoveToFullDetail(this.deskPositions.FullDetailPoint);
         }
 
         private void ExitFullDetail()
         {
             this.fullDetail = false;
+            if (this.IsTargeting)
+                this.arrowIndicator?.Show(this.targetingSource.transform.position, this.targetingSource.transform.position);
             this.selected.ReturnFromFullDetail();
         }
 
