@@ -25,22 +25,77 @@ namespace SG03
         private readonly Dictionary<Transform, Card3DCtrl> slotOccupancy       = new Dictionary<Transform, Card3DCtrl>();
         private readonly Queue<Card3DCtrl>                  omegaSourceCardQueue = new Queue<Card3DCtrl>();
         private readonly Queue<Card3DCtrl>                  omegaHandCardQueue   = new Queue<Card3DCtrl>();
+        private readonly Queue<Card3DCtrl>                  alphaSourceCardQueue = new Queue<Card3DCtrl>();
         private BattleCardSlot[] previousOmegaHand;
         private int omegaSourceSpawnedCount = 0;
         private int omegaVoidSpawnedCount   = 0;
+        private int alphaSourceSpawnedCount = 0;
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
-        public void SpawnAlphaSourceCards(int count)
+        public Coroutine SpawnAlphaSourceCards(int count)
         {
             if (this.alphaSourceRoutine != null) this.StopCoroutine(this.alphaSourceRoutine);
             this.alphaSourceRoutine = this.StartCoroutine(this.SpawnAlphaSourceCardsRoutine(count));
+            return this.alphaSourceRoutine;
         }
 
-        public void SpawnOmegaSourceCards(int count)
+        public Coroutine SpawnOmegaSourceCards(int count)
         {
             if (this.omegaSourceRoutine != null) this.StopCoroutine(this.omegaSourceRoutine);
             this.omegaSourceRoutine = this.StartCoroutine(this.SpawnOmegaSourceCardsRoutine(count));
+            return this.omegaSourceRoutine;
+        }
+
+        public Card3DCtrl SetAlphaSourceCardData(string inventoryItemId)
+        {
+            if (this.alphaSourceCardQueue.Count == 0) return null;
+            Card3DCtrl card = this.alphaSourceCardQueue.Dequeue();
+            card.SetOwner(Owner.alpha);
+            card.SetInventoryItemId(inventoryItemId);
+            BattleCardSlot slot = this.FindAlphaHandSlot(inventoryItemId);
+            if (slot == null) return card;
+            string code = slot.item_definition_code_name;
+            card.SetCodeName(code);
+            card.SetFallbackName(slot.item_definition_name);
+            card.LoadCardByCodeName(code);
+            card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+            return card;
+        }
+
+        public void CommitAlphaSourceToHand(Card3DCtrl card, string inventoryItemId, int slotIndex)
+        {
+            if (card == null) return;
+            Transform target = this.ResolveHandTarget(slotIndex, this.deskPosition.AlphaHand);
+            if (this.IsSlotOccupied(target)) return;
+            card.MoveAndRotate(target, Location.in_hand);
+            this.slotOccupancy[target] = card;
+            this.handCardRegistry[inventoryItemId] = card;
+        }
+
+        private BattleCardSlot FindAlphaHandSlot(string inventoryItemId)
+        {
+            BattleCardSlot[] slots = this.battleState?.AlphaHand;
+            if (slots == null) return null;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot == null) continue;
+                if (slot.inventory_item_id == inventoryItemId) return slot;
+            }
+            return null;
+        }
+
+        public void MoveOmegaSourceToHand(string inventoryItemId, int slotIndex)
+        {
+            Card3DCtrl prefab = this.ResolvePrefab();
+            if (prefab == null) return;
+            Transform target = this.ResolveHandTarget(slotIndex, this.deskPosition.OmegaHand);
+            if (this.IsSlotOccupied(target)) return;
+            Card3DCtrl card = this.DequeueOmegaSourceCard(prefab);
+            if (card == null) return;
+            card.MoveAndRotate(target, Location.in_hand);
+            this.slotOccupancy[target] = card;
+            this.omegaHandCardQueue.Enqueue(card);
         }
 
         public void SpawnStatusDelta(BattleCardSlot[] newHand, BattleCardSlot[] newFrontLine, BattleCardSlot[] newBackLine,
@@ -58,9 +113,11 @@ namespace SG03
             this.omegaHandCardQueue.Clear();
             this.slotOccupancy.Clear();
             this.omegaSourceCardQueue.Clear();
+            this.alphaSourceCardQueue.Clear();
             this.previousOmegaHand = null;
             this.omegaSourceSpawnedCount = 0;
             this.omegaVoidSpawnedCount   = 0;
+            this.alphaSourceSpawnedCount = 0;
         }
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
@@ -232,28 +289,15 @@ namespace SG03
             Card3DCtrl prefab = this.ResolvePrefab();
             if (prefab == null) yield break;
             yield return this.WaitForDefinitions();
-            BattleCardSlot[] sourceSlots = this.battleState?.AlphaTheSource;
-            if (sourceSlots == null) yield break;
-            int spawned = 0;
             int spawnedThisFrame = 0;
-            foreach (BattleCardSlot slot in sourceSlots)
+            while (this.alphaSourceSpawnedCount < count)
             {
-                if (spawned >= count) break;
-                if (slot == null) continue;
-                if (string.IsNullOrEmpty(slot.inventory_item_id)) continue;
-                if (this.sourceCardRegistry.ContainsKey(slot.inventory_item_id)) continue;
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
-                if (card == null) continue;
+                if (card == null) break;
                 card.SetOwner(Owner.alpha);
-                string code = slot.item_definition_code_name;
-                card.SetCodeName(code);
-                card.SetInventoryItemId(slot.inventory_item_id);
-                card.SetFallbackName(slot.item_definition_name);
-                card.LoadCardByCodeName(code);
-                card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
                 card.MoveAndRotate(this.deskPosition.AlphaTheSource, Location.in_source);
-                this.sourceCardRegistry[slot.inventory_item_id] = card;
-                spawned++;
+                this.alphaSourceCardQueue.Enqueue(card);
+                this.alphaSourceSpawnedCount++;
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
                 spawnedThisFrame = 0;
