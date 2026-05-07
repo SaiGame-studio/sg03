@@ -168,7 +168,11 @@ namespace SG03
 
         private void CheckClick()
         {
-            if (CardMovement.IsAnyCardMoving) return;
+            if (CardMovement.IsAnyCardMoving)
+            {
+                this.HandleCardSelectionOnly();
+                return;
+            }
             if (this.fullDetail)
             {
                 this.HandleFullDetailClick();
@@ -177,6 +181,12 @@ namespace SG03
             this.HandleLeftClick();
             this.HandleMiddleClick();
             this.HandleRightClick();
+        }
+
+        private void HandleCardSelectionOnly()
+        {
+            if (!this.IsMouseClickedThisFrame()) return;
+            this.HandleCardClick();
         }
 
         private void HandleFullDetailClick()
