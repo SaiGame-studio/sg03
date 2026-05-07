@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using SaiGame.Services;
 using SG03.UI;
@@ -484,7 +485,10 @@ namespace SG03
             if (!this.IsPlacementValid(this.selected, holder)) return;
             Location fromLocation = this.selected.Location;
             CardHolderCtrl fromHolder = this.selected.CardHolder;
-            this.PlaceSelectedIntoEmptyHolder(holder);
+            if (fromLocation == Location.in_hand)
+                this.PlaceFromHandIntoHolder(holder);
+            else
+                this.PlaceSelectedIntoEmptyHolder(holder);
             this.NotifyBattleStateOnPlacement(fromLocation, fromHolder, holder);
         }
 
@@ -514,6 +518,19 @@ namespace SG03
             this.selected.CardHolder?.SetCard(null);
             this.selected.SetCardHolder(targetHolder);
             targetHolder.SetCard(this.selected);
+        }
+
+        private void PlaceFromHandIntoHolder(CardHolderCtrl targetHolder)
+        {
+            if (this.selected.IsFlipping) return;
+            this.selected.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(this.selected)));
+            targetHolder.SetCard(this.selected);
+        }
+
+        private IEnumerator RotateAfterArrival(Card3DCtrl card)
+        {
+            yield return new UnityEngine.WaitUntil(() => !card.IsFlipping);
+            card.RotateZ180();
         }
 
         // ─── Placement validation ─────────────────────────────────────────────────

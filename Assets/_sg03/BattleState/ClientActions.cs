@@ -76,12 +76,7 @@ namespace SG03
                 int colonIndex = entry.IndexOf(':');
                 string name    = colonIndex >= 0 ? entry.Substring(0, colonIndex) : entry;
                 string @params = colonIndex >= 0 ? entry.Substring(colonIndex + 1) : string.Empty;
-                Debug.Log($"[ClientActions] Parsed action: <b>{name}</b> | params: {(@params.Length > 0 ? @params : "(none)")}", this.gameObject);
-                if (this.IsDuplicateAction(name, @params))
-                {
-                    Debug.Log($"[ClientActions] Skipped duplicate: <b>{name}</b> | {(@params.Length > 0 ? @params : "(none)")}", this.gameObject);
-                    continue;
-                }
+                if (this.IsDuplicateAction(name, @params)) continue;
                 if (!name.StartsWith("alpha_") && !name.StartsWith("omega_"))
                 {
                     Debug.LogWarning($"[ClientActions] Cannot categorize action: {name}", this.gameObject);
@@ -169,6 +164,8 @@ namespace SG03
                 case "omega_hand_to_back_line":    result = this.ExecuteOmegaHandToBackLine(parameters);  break;
                 case "alpha_card_damaged":         result = this.ExecuteCardDamaged(parameters);           break;
                 case "omega_card_damaged":         result = this.ExecuteCardDamaged(parameters);           break;
+                case "alpha_card_expose":          result = this.ExecuteCardExpose(parameters);            break;
+                case "omega_card_expose":          result = this.ExecuteCardExpose(parameters);            break;
                 case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
                 case "omega_card_sent_to_void":    result = this.ExecuteOmegaCardSentToVoid(parameters);  break;
                 case "alpha_attack":               result = this.ExecuteAlphaAttack(parameters);           break;
@@ -254,6 +251,18 @@ namespace SG03
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card == null) return null;
             card.RunUp();
+            return this.StartCoroutine(this.WaitForCard(card));
+        }
+
+        private Coroutine ExecuteCardExpose(string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return null;
+            string inventoryItemId = parameters[0].Trim();
+            if (string.IsNullOrEmpty(inventoryItemId)) return null;
+            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
+            if (card == null) return null;
+            if (card.FaceState == FaceState.FaceUp) return null;
+            card.FaceUp();
             return this.StartCoroutine(this.WaitForCard(card));
         }
 

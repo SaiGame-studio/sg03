@@ -117,6 +117,7 @@ namespace SG03
         private Card3DCtrl MoveAlphaHandToLine(string inventoryItemId, int slotIndex, CardHolderCtrl[] holders)
         {
             if (!this.handCardRegistry.TryGetValue(inventoryItemId, out Card3DCtrl card)) return null;
+            if (card.Location == Location.in_front || card.Location == Location.in_back) return null;
             if (slotIndex < 0 || slotIndex >= holders.Length) return null;
             CardHolderCtrl holder = holders[slotIndex];
             if (holder == null) return null;
@@ -126,10 +127,10 @@ namespace SG03
             this.RemoveFromSlotOccupancy(card);
             BattleCardSlot slot = this.FindAlphaSlotById(inventoryItemId);
             if (slot != null) card.SetExpose(slot.expose);
-            System.Action faceCallback = slot != null ? () => this.ApplyFaceState(card, slot) : null;
+            System.Action faceCallback = slot != null ? () => this.ApplyAlphaFaceState(card, slot) : null;
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
-            card.SetCardHolder(holder, faceCallback);
+            card.MoveToUnknow(holder, faceCallback);
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
             return card;
@@ -328,6 +329,8 @@ namespace SG03
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
                 if (card == null) break;
                 card.SetOwner(Owner.omega);
+                card.SetMoveDuration(this.ActionMoveDuration);
+                card.SetRotateDuration(this.ActionRotateDuration);
                 card.MoveAndRotate(this.deskPosition.OmegaTheSource, Location.in_source);
                 this.omegaSourceCardQueue.Enqueue(card);
                 this.omegaSourceSpawnedCount++;
@@ -366,6 +369,20 @@ namespace SG03
         private IEnumerator WaitForFlipThenFaceUp(Card3DCtrl card)
         {
             yield return new UnityEngine.WaitUntil(() => !card.IsFlipping);
+            card.FaceUp();
+        }
+
+        private void ApplyAlphaFaceState(Card3DCtrl card, BattleCardSlot slot)
+        {
+            this.StartCoroutine(this.RotateY180ThenFaceState(card, slot));
+        }
+
+        private IEnumerator RotateY180ThenFaceState(Card3DCtrl card, BattleCardSlot slot)
+        {
+            yield return new UnityEngine.WaitUntil(() => !card.IsFlipping);
+            card.RotateZ180(null);
+            yield return new UnityEngine.WaitUntil(() => !card.IsFlipping);
+            if (!slot.face_up && !slot.expose) yield break;
             card.FaceUp();
         }
 
