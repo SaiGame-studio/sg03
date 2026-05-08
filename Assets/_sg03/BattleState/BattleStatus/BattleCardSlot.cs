@@ -21,6 +21,7 @@ namespace SG03.UI
         public string card_action;
         public bool   face_up = false;
         public bool   expose  = false;
+        public bool   trigger = false;
         public int    final_def;
         public int    total_damage_received;
 

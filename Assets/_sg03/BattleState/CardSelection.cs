@@ -405,8 +405,53 @@ namespace SG03
                 this.TryCancelTargeting();
                 return;
             }
+            if (this.IsSelectedCardTriggered())
+            {
+                this.TryCancelTargeting();
+                return;
+            }
+            if (this.selected.Location == Location.in_hand)
+            {
+                this.TryCancelTargeting();
+                return;
+            }
             if (this.targetingSource != this.selected)
                 this.BeginTargeting();
+        }
+
+        private bool IsSelectedCardTriggered()
+        {
+            BattleCardSlot slot = this.FindSlotForCard(this.selected);
+            if (slot == null) return false;
+            return slot.trigger;
+        }
+
+        private BattleCardSlot FindSlotForCard(Card3DCtrl card)
+        {
+            BattleState state = this.battleStateCtrl?.BattleState;
+            if (state == null) return null;
+            return this.FindSlotInState(state, card.InventoryItemId);
+        }
+
+        private BattleCardSlot FindSlotInState(BattleState state, string inventoryItemId)
+        {
+            return this.FindInArray(state.AlphaHand,      inventoryItemId)
+                ?? this.FindInArray(state.AlphaFrontLine, inventoryItemId)
+                ?? this.FindInArray(state.AlphaBackLine,  inventoryItemId)
+                ?? this.FindInArray(state.AlphaTheVoid,   inventoryItemId)
+                ?? this.FindInArray(state.AlphaTheSource, inventoryItemId);
+        }
+
+        private BattleCardSlot FindInArray(BattleCardSlot[] slots, string inventoryItemId)
+        {
+            if (slots == null) return null;
+            if (string.IsNullOrEmpty(inventoryItemId)) return null;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot == null) continue;
+                if (slot.inventory_item_id == inventoryItemId) return slot;
+            }
+            return null;
         }
 
         private bool IsAlphaTurn()
