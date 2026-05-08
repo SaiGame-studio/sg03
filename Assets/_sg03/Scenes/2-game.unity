@@ -6781,6 +6781,7 @@ MonoBehaviour:
   nextMove: 0
   alphaHandRemaining: 0
   clientActions: []
+  debugLog: []
 --- !u!114 &2015755440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6871,7 +6872,7 @@ MonoBehaviour:
   cardHoverDetector: {fileID: 2015755441}
   cardHolderHoverDetector: {fileID: 2015755442}
   battleCardDefinitions: {fileID: 2015755443}
-  clientActions: {fileID: 0}
+  clientActions: {fileID: 2015755446}
 --- !u!114 &2015755445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6907,8 +6908,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.ClientActions
   battleState: {fileID: 2015755439}
   cardSpawning: {fileID: 2015755438}
+  battleCardDefinitions: {fileID: 2015755443}
   actionInterval: 0.1
-  actionMoveDuration: 0.5
+  actionMoveDuration: 1
   actionRotateDuration: 0.4
   actionLog: []
 --- !u!1 &2028831695

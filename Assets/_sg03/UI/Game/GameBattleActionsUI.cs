@@ -187,8 +187,8 @@ namespace SG03.UI
         {
             this.SetCheckStatusLoading(false);
             this.SetCheckStatusButtonText("Status OK");
-            this.ApplyBattleStatusResponse(response);
             this.TriggerGetAllCardDefinitionsOnFirstStatus();
+            this.ApplyBattleStatusResponse(response);
         }
 
         private void OnBattleStatusFailed(string error)
@@ -312,8 +312,8 @@ namespace SG03.UI
         {
             this.SetStartBattleLoading(false);
             this.SetStartBattleButtonText("Battle Started");
-            this.ApplyBattleStatusResponse(response);
             this.GetAllCardDefinitions();
+            this.ApplyBattleStatusResponse(response);
         }
 
         private void OnBattleStartFailed(string error)

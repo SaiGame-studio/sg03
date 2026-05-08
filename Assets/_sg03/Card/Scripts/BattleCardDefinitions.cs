@@ -36,9 +36,16 @@ namespace SG03
 
         public void GetAll()
         {
+            this.ClearDefinitions();
             Debug.Log("<color=#FFD700>[BattleCardDefinitions] GetAll — calling RunScript</color>", this);
             if (this.battleScripts == null) return;
             this.battleScripts.RunGetCardDefinitions(this.ParseResponse, null);
+        }
+
+        private void ClearDefinitions()
+        {
+            this.codes.Clear();
+            this.definitions.Clear();
         }
 
         public CardDefinitionData GetDefinitionByCode(string code)
