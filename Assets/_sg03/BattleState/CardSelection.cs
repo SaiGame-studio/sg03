@@ -193,7 +193,7 @@ namespace SG03
         private void HandleFullDetailClick()
         {
             if (this.hovered != this.selected) return;
-            if (!this.IsMouseClickedThisFrame()) return;
+            if (!this.IsMouseClickedThisFrame() && !this.IsMouseMiddleClickedThisFrame()) return;
             this.ExitFullDetail();
         }
 
@@ -568,8 +568,9 @@ namespace SG03
         private void PlaceFromHandIntoHolder(CardHolderCtrl targetHolder)
         {
             if (this.selected.IsFlipping) return;
-            this.selected.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(this.selected)));
-            targetHolder.SetCard(this.selected);
+            Card3DCtrl cardToRotate = this.selected;
+            cardToRotate.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(cardToRotate)));
+            targetHolder.SetCard(cardToRotate);
         }
 
         private IEnumerator RotateAfterArrival(Card3DCtrl card)
