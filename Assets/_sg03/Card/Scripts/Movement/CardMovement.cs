@@ -251,7 +251,8 @@ namespace SG03
             this.location = destination;
             this.RecordHandAnchor(holder.transform, destination);
             this.KillAllTweens();
-            this.StartMoveTween(holder.transform.position, this.duration, this.ease, onReady);
+            Vector3 lineDestination = holder.transform.position + new Vector3(0f, 0.2f, 0f);
+            this.StartMoveTween(lineDestination, this.duration, this.ease, onReady);
             this.FaceDownUnknown();
         }
 

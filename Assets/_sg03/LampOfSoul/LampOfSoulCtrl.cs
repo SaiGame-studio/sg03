@@ -89,14 +89,7 @@ namespace SG03
         private void CallInitPosition()
         {
             if (this.battleState == null) return;
-            if (this.battleState.Turn == 0) return;
-            if (this.deskPosition == null) return;
-            if (this.deskPosition.AlphaLampPosition == null) return;
-            if (this.deskPosition.OmegaLampPosition == null) return;
-            this.movement.InitPosition(
-                this.battleState.Turn,
-                this.deskPosition.AlphaLampPosition,
-                this.deskPosition.OmegaLampPosition);
+            this.OnNextMoveChanged(this.battleState.NextMove);
         }
 
         private void MoveToCardDeployPosition()

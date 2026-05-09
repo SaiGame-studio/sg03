@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using SaiGame.Services;
@@ -9,8 +10,9 @@ namespace SG03
     [AddComponentMenu("SG03/Battle/Client Actions")]
     public class ClientActions : SaiBehaviour
     {
-        [SerializeField] private BattleState  battleState;
-        [SerializeField] private CardSpawning cardSpawning;
+        [SerializeField] private BattleState          battleState;
+        [SerializeField] private CardSpawning         cardSpawning;
+        [SerializeField] private BattleCardDefinitions battleCardDefinitions;
         [SerializeField] private float actionInterval = 0.1f;
         [SerializeField] private float actionMoveDuration   = 1f;
         [SerializeField] private float actionRotateDuration = 0.4f;
@@ -25,6 +27,7 @@ namespace SG03
             base.LoadComponents();
             this.LoadBattleState();
             this.LoadCardSpawning();
+            this.LoadBattleCardDefinitions();
         }
 
         protected virtual void LoadBattleState()
@@ -45,6 +48,15 @@ namespace SG03
             Debug.LogWarning(this.transform.name + ": LoadCardSpawning", this.gameObject);
         }
 
+        protected virtual void LoadBattleCardDefinitions()
+        {
+            if (this.battleCardDefinitions != null) return;
+            BattleStateCtrl ctrl = this.GetComponent<BattleStateCtrl>();
+            if (ctrl == null) return;
+            this.battleCardDefinitions = ctrl.BattleCardDefinitions;
+            Debug.LogWarning(this.transform.name + ": LoadBattleCardDefinitions", this.gameObject);
+        }
+
         private void OnEnable()  => this.SubscribeEvents();
         private void OnDisable() => this.UnsubscribeEvents();
 
@@ -56,6 +68,7 @@ namespace SG03
 
         private void UnsubscribeEvents()
         {
+            BattleCardDefinitions.OnDefinitionsLoaded -= this.OnDefinitionsLoaded;
             if (this.battleState == null) return;
             this.battleState.OnClientActionsChanged -= this.HandleClientActions;
         }
@@ -64,6 +77,24 @@ namespace SG03
         {
             if (actions == null) return;
             this.BuildActionLogs(actions);
+            this.TryStartDispatchWhenDefinitionsLoaded();
+        }
+
+        private void TryStartDispatchWhenDefinitionsLoaded()
+        {
+            if (this.battleCardDefinitions != null && this.battleCardDefinitions.IsLoaded)
+            {
+                this.StartDispatch();
+                return;
+            }
+            Debug.Log("<color=#FFD700>[ClientActions] Waiting for BattleCardDefinitions to load before dispatching actions...</color>", this.gameObject);
+            BattleCardDefinitions.OnDefinitionsLoaded -= this.OnDefinitionsLoaded;
+            BattleCardDefinitions.OnDefinitionsLoaded += this.OnDefinitionsLoaded;
+        }
+
+        private void OnDefinitionsLoaded()
+        {
+            BattleCardDefinitions.OnDefinitionsLoaded -= this.OnDefinitionsLoaded;
             this.StartDispatch();
         }
 
@@ -103,19 +134,65 @@ namespace SG03
 
         private IEnumerator DispatchRoutine()
         {
-            yield return this.StartCoroutine(this.DispatchParallelFirstTwo());
-            yield return this.StartCoroutine(this.DispatchSequentialRemaining());
+            int i = 0;
+            while (i < this.actionLog.Count)
+            {
+                ClientActionLog log = this.actionLog[i];
+                if (log.Executed) { i++; continue; }
+                if (this.TryGetParallelGroupMatcher(log.ActionName, out Func<string, bool> matcher))
+                {
+                    int groupEnd = this.FindConsecutiveParallelGroupEnd(i, matcher);
+                    yield return this.StartCoroutine(this.DispatchParallelGroup(i, groupEnd));
+                    i = groupEnd;
+                }
+                else
+                {
+                    Coroutine actionRoutine = this.ExecuteAction(log);
+                    if (actionRoutine != null) yield return actionRoutine;
+                    yield return new WaitForSeconds(this.actionInterval);
+                    i++;
+                }
+            }
             this.dispatchRoutine = null;
         }
 
-        private IEnumerator DispatchParallelFirstTwo()
+        private bool TryGetParallelGroupMatcher(string actionName, out Func<string, bool> matcher)
+        {
+            if (actionName == "alpha_source_spawn_card" || actionName == "omega_source_spawn_card")
+            {
+                matcher = static n => n == "alpha_source_spawn_card" || n == "omega_source_spawn_card";
+                return true;
+            }
+            if (actionName == "alpha_source_to_hand")
+            {
+                matcher = static n => n == "alpha_source_to_hand";
+                return true;
+            }
+            if (actionName == "omega_source_to_hand")
+            {
+                matcher = static n => n == "omega_source_to_hand";
+                return true;
+            }
+            matcher = null;
+            return false;
+        }
+
+        private int FindConsecutiveParallelGroupEnd(int from, Func<string, bool> matcher)
+        {
+            int end = from;
+            while (end < this.actionLog.Count && !this.actionLog[end].Executed && matcher(this.actionLog[end].ActionName))
+                end++;
+            return end;
+        }
+
+        private IEnumerator DispatchParallelGroup(int from, int to)
         {
             int launched = 0;
             int done = 0;
-            foreach (ClientActionLog log in this.actionLog)
+            for (int i = from; i < to; i++)
             {
+                ClientActionLog log = this.actionLog[i];
                 if (log.Executed) continue;
-                if (launched >= 2) break;
                 Coroutine actionRoutine = this.ExecuteAction(log);
                 launched++;
                 if (actionRoutine != null)
@@ -123,24 +200,13 @@ namespace SG03
                 else
                     done++;
             }
-            yield return new UnityEngine.WaitUntil(() => done >= launched);
+            yield return new WaitUntil(() => done >= launched);
         }
 
         private IEnumerator WaitThenSignal(Coroutine routine, System.Action onDone)
         {
             yield return routine;
             onDone();
-        }
-
-        private IEnumerator DispatchSequentialRemaining()
-        {
-            foreach (ClientActionLog log in this.actionLog)
-            {
-                if (log.Executed) continue;
-                Coroutine actionRoutine = this.ExecuteAction(log);
-                if (actionRoutine != null) yield return actionRoutine;
-                yield return new WaitForSeconds(this.actionInterval);
-            }
         }
 
         private Coroutine ExecuteAction(ClientActionLog log)
@@ -181,13 +247,19 @@ namespace SG03
         private Coroutine ExecuteAlphaSourceSpawnCard(string[] parameters)
         {
             if (!this.TryParseCount(parameters, out int count)) return null;
-            return this.cardSpawning?.SpawnAlphaSourceCards(count);
+            return this.StartCoroutine(this.WaitDefinitionsThenSpawn(() => this.cardSpawning?.SpawnAlphaSourceCards(count)));
         }
 
         private Coroutine ExecuteOmegaSourceSpawnCard(string[] parameters)
         {
             if (!this.TryParseCount(parameters, out int count)) return null;
-            return this.cardSpawning?.SpawnOmegaSourceCards(count);
+            return this.StartCoroutine(this.WaitDefinitionsThenSpawn(() => this.cardSpawning?.SpawnOmegaSourceCards(count)));
+        }
+
+        private IEnumerator WaitDefinitionsThenSpawn(Func<Coroutine> spawnAction)
+        {
+            yield return new WaitUntil(() => this.battleCardDefinitions != null && this.battleCardDefinitions.IsLoaded);
+            yield return spawnAction();
         }
 
         private Coroutine ExecuteAlphaSourceToHand(string[] parameters)

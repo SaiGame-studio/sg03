@@ -92,12 +92,30 @@ namespace SG03
             if (this.battleStateCtrl?.BattleState == null) return;
             NextMoveType nextMove = this.battleStateCtrl.BattleState.NextMove;
             if (nextMove == NextMoveType.card_deploy) this.HandleCardDeploy();
+            if (nextMove == NextMoveType.alpha_turn) this.HandleAlphaTurnEnd();
         }
 
         private void HandleCardDeploy()
         {
             if (this.battleScripts == null) return;
             this.battleScripts.RunCardDeploy(this.OnCardDeploySuccess, this.OnCardDeployError);
+        }
+
+        private void HandleAlphaTurnEnd()
+        {
+            if (this.battleScripts == null) return;
+            this.battleScripts.RunAlphaTurnEnd(this.OnAlphaTurnEndSuccess, this.OnAlphaTurnEndError);
+        }
+
+        private void OnAlphaTurnEndSuccess(string response)
+        {
+            Debug.Log("<color=#FFAA33><b>[LampClickDetector] Alpha turn end success</b></color> " + response);
+            this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
+        }
+
+        private void OnAlphaTurnEndError(string error)
+        {
+            Debug.LogError("[LampClickDetector] Alpha turn end error: " + error);
         }
 
         private void OnCardDeploySuccess(string response)

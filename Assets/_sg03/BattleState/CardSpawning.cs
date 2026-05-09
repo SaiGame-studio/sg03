@@ -152,12 +152,12 @@ namespace SG03
             if (this.IsSlotOccupied(target)) return null;
             Card3DCtrl card = this.omegaHandCardQueue.Dequeue();
             this.RemoveFromSlotOccupancy(card);
+            card.SetOwner(Owner.omega);
+            card.SetInventoryItemId(inventoryItemId);
             BattleCardSlot slot = this.FindOmegaSlotById(inventoryItemId);
             if (slot != null)
             {
                 string code = slot.item_definition_code_name;
-                card.SetOwner(Owner.omega);
-                card.SetInventoryItemId(inventoryItemId);
                 card.SetCodeName(code);
                 card.SetFallbackName(slot.item_definition_name);
                 card.LoadCardByCodeName(code);

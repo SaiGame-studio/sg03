@@ -21,6 +21,7 @@ namespace SG03
         [SerializeField] private string scriptNameGetCardDefinitions = "get_card_definitions";
         [SerializeField] private string scriptNameCardDeploy         = "card_deploy";
         [SerializeField] private string scriptNameAlphaAttacking     = "alpha_attacking";
+        [SerializeField] private string scriptNameAlphaTurnEnd       = "alpha_turn_end";
 
         private BattleScript battleScript => SaiServer.Instance != null ? SaiServer.Instance.BattleScript : null;
 
@@ -96,6 +97,13 @@ namespace SG03
             string requestBody = this.BuildAlphaAttackingRequestBody(attackerInventoryItemId, defenderInventoryItemId);
             this.LogPayload("RunAlphaAttacking", "#FF4444", requestBody);
             this.RunWithLock(this.scriptNameAlphaAttacking, requestBody, onSuccess, onError);
+        }
+
+        public void RunAlphaTurnEnd(Action<string> onSuccess, Action<string> onError)
+        {
+            if (this.IsBattleScriptMissing(nameof(this.RunAlphaTurnEnd))) return;
+            this.LogPayload("RunAlphaTurnEnd", "#FFAA33", null);
+            this.RunWithLock(this.scriptNameAlphaTurnEnd, null, onSuccess, onError);
         }
 
         /// <summary>Guards against concurrent requests; acquires the lock and dispatches the script call.</summary>

@@ -39,11 +39,10 @@ namespace SG03.UI
         [SerializeField] private BattleCardSlot[] omegaHand;
         [SerializeField] private BattleCardSlot[] omegaFrontLine;
         [SerializeField] private BattleCardSlot[] omegaBackLine;
-        [SerializeField] private int omegaHandCount;
         [SerializeField] private string sessionId;
         [SerializeField] private NextMoveType nextMove;
-        [SerializeField] private int alphaHandRemaining;
         [SerializeField] private string[] clientActions;
+        [SerializeField] private string[] debugLog;
 
 
         public string BattleStatusJson => this.battleStatusJson;
@@ -64,11 +63,10 @@ namespace SG03.UI
         public BattleCardSlot[] OmegaHand => this.omegaHand;
         public BattleCardSlot[] OmegaFrontLine => this.omegaFrontLine;
         public BattleCardSlot[] OmegaBackLine  => this.omegaBackLine;
-        public int OmegaHandCount => this.omegaHandCount;
         public string SessionId => this.sessionId;
         public NextMoveType NextMove => this.nextMove;
-        public int AlphaHandRemaining => this.alphaHandRemaining;
         public string[] ClientActions => this.clientActions;
+        public string[] DebugLog => this.debugLog;
 
         public event Action OnBattleStatusChanged;
         public event Action<string[]> OnClientActionsChanged;
@@ -140,8 +138,8 @@ namespace SG03.UI
             this.omegaHand = null;
             this.omegaFrontLine = null;
             this.omegaBackLine = null;
-            this.omegaHandCount = 0;
             this.sessionId = string.Empty;
+            this.debugLog = null;
             this.SetNextMove(string.Empty);
             this.gameStartFired = false;
             this.cardSpawning?.ClearSourceRegistry();
@@ -181,7 +179,6 @@ namespace SG03.UI
         {
             this.SetNextMove(output.next_move);
             if (!string.IsNullOrEmpty(output.session_id)) this.sessionId = output.session_id;
-            this.alphaHandRemaining = output.alpha_hand_remaining;
             this.OnBattleStatusChanged?.Invoke();
         }
 
@@ -271,8 +268,8 @@ namespace SG03.UI
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
             if (output.omega_front_line != null) this.omegaFrontLine = output.omega_front_line;
             if (output.omega_back_line  != null) this.omegaBackLine  = output.omega_back_line;
-            this.omegaHandCount = output.omega_hand_count;
             this.clientActions = output.client_actions;
+            this.debugLog = output.debug_log;
             this.SetNextMove(output.next_move);
             this.TryFireGameStart();
             this.OnBattleStatusChanged?.Invoke();

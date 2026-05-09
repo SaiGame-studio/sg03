@@ -14,6 +14,12 @@ namespace SG03
         /// <summary>Fired when the player confirms a targeting selection (source → target).</summary>
         public static event System.Action<Card3DCtrl, Card3DCtrl> TargetSelected;
 
+        /// <summary>Fired when the player enters full-detail view for a card.</summary>
+        public static event System.Action OnFullDetailEntered;
+
+        /// <summary>Fired when the player exits full-detail view.</summary>
+        public static event System.Action OnFullDetailExited;
+
         [SerializeField] private BattleStateCtrl battleStateCtrl;
 
         [SerializeField] private Card3DCtrl selected;
@@ -193,7 +199,7 @@ namespace SG03
         private void HandleFullDetailClick()
         {
             if (this.hovered != this.selected) return;
-            if (!this.IsMouseClickedThisFrame()) return;
+            if (!this.IsMouseClickedThisFrame() && !this.IsMouseMiddleClickedThisFrame()) return;
             this.ExitFullDetail();
         }
 
@@ -298,6 +304,7 @@ namespace SG03
             if (this.deskPositions == null) return;
             this.fullDetail = true;
             this.arrowIndicator?.Hide();
+            OnFullDetailEntered?.Invoke();
             this.selected.MoveToFullDetail(this.deskPositions.FullDetailPoint);
         }
 
@@ -306,6 +313,7 @@ namespace SG03
             this.fullDetail = false;
             if (this.IsTargeting)
                 this.arrowIndicator?.Show(this.targetingSource.transform.position, this.targetingSource.transform.position);
+            OnFullDetailExited?.Invoke();
             this.selected.ReturnFromFullDetail();
         }
 
@@ -405,8 +413,58 @@ namespace SG03
                 this.TryCancelTargeting();
                 return;
             }
+            if (this.selected.CardOwner == Owner.omega)
+            {
+                this.TryCancelTargeting();
+                return;
+            }
+            if (this.IsSelectedCardTriggered())
+            {
+                this.TryCancelTargeting();
+                return;
+            }
+            if (this.selected.Location == Location.in_hand)
+            {
+                this.TryCancelTargeting();
+                return;
+            }
             if (this.targetingSource != this.selected)
                 this.BeginTargeting();
+        }
+
+        private bool IsSelectedCardTriggered()
+        {
+            BattleCardSlot slot = this.FindSlotForCard(this.selected);
+            if (slot == null) return false;
+            return slot.trigger;
+        }
+
+        private BattleCardSlot FindSlotForCard(Card3DCtrl card)
+        {
+            BattleState state = this.battleStateCtrl?.BattleState;
+            if (state == null) return null;
+            return this.FindSlotInState(state, card.InventoryItemId);
+        }
+
+        private BattleCardSlot FindSlotInState(BattleState state, string inventoryItemId)
+        {
+            return this.FindInArray(state.AlphaHand,      inventoryItemId)
+                ?? this.FindInArray(state.AlphaFrontLine, inventoryItemId)
+                ?? this.FindInArray(state.AlphaBackLine,  inventoryItemId)
+                ?? this.FindInArray(state.AlphaTheVoid,   inventoryItemId)
+                ?? this.FindInArray(state.AlphaTheSource, inventoryItemId);
+        }
+
+        private BattleCardSlot FindInArray(BattleCardSlot[] slots, string inventoryItemId)
+        {
+            if (slots == null) return null;
+            if (string.IsNullOrEmpty(inventoryItemId)) return null;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot == null) continue;
+                if (slot.inventory_item_id == inventoryItemId) return slot;
+            }
+            return null;
         }
 
         private bool IsAlphaTurn()
@@ -523,8 +581,9 @@ namespace SG03
         private void PlaceFromHandIntoHolder(CardHolderCtrl targetHolder)
         {
             if (this.selected.IsFlipping) return;
-            this.selected.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(this.selected)));
-            targetHolder.SetCard(this.selected);
+            Card3DCtrl cardToRotate = this.selected;
+            cardToRotate.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(cardToRotate)));
+            targetHolder.SetCard(cardToRotate);
         }
 
         private IEnumerator RotateAfterArrival(Card3DCtrl card)
