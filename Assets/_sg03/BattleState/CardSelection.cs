@@ -405,6 +405,11 @@ namespace SG03
                 this.TryCancelTargeting();
                 return;
             }
+            if (this.selected.CardOwner == Owner.omega)
+            {
+                this.TryCancelTargeting();
+                return;
+            }
             if (this.IsSelectedCardTriggered())
             {
                 this.TryCancelTargeting();
