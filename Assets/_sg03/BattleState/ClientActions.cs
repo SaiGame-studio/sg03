@@ -139,9 +139,9 @@ namespace SG03
             {
                 ClientActionLog log = this.actionLog[i];
                 if (log.Executed) { i++; continue; }
-                if (this.IsParallelGroupAction(log.ActionName))
+                if (this.TryGetParallelGroupMatcher(log.ActionName, out Func<string, bool> matcher))
                 {
-                    int groupEnd = this.FindConsecutiveParallelGroupEnd(i);
+                    int groupEnd = this.FindConsecutiveParallelGroupEnd(i, matcher);
                     yield return this.StartCoroutine(this.DispatchParallelGroup(i, groupEnd));
                     i = groupEnd;
                 }
@@ -156,18 +156,31 @@ namespace SG03
             this.dispatchRoutine = null;
         }
 
-        private bool IsParallelGroupAction(string actionName)
+        private bool TryGetParallelGroupMatcher(string actionName, out Func<string, bool> matcher)
         {
-            return actionName == "alpha_source_to_hand"
-                || actionName == "omega_source_to_hand"
-                || actionName == "alpha_source_spawn_card"
-                || actionName == "omega_source_spawn_card";
+            if (actionName == "alpha_source_spawn_card" || actionName == "omega_source_spawn_card")
+            {
+                matcher = static n => n == "alpha_source_spawn_card" || n == "omega_source_spawn_card";
+                return true;
+            }
+            if (actionName == "alpha_source_to_hand")
+            {
+                matcher = static n => n == "alpha_source_to_hand";
+                return true;
+            }
+            if (actionName == "omega_source_to_hand")
+            {
+                matcher = static n => n == "omega_source_to_hand";
+                return true;
+            }
+            matcher = null;
+            return false;
         }
 
-        private int FindConsecutiveParallelGroupEnd(int from)
+        private int FindConsecutiveParallelGroupEnd(int from, Func<string, bool> matcher)
         {
             int end = from;
-            while (end < this.actionLog.Count && !this.actionLog[end].Executed && this.IsParallelGroupAction(this.actionLog[end].ActionName))
+            while (end < this.actionLog.Count && !this.actionLog[end].Executed && matcher(this.actionLog[end].ActionName))
                 end++;
             return end;
         }
