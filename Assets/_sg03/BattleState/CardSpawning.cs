@@ -207,6 +207,23 @@ namespace SG03
             return null;
         }
 
+        /// <summary>
+        /// Applies code name, fallback name, texture, and definition to an omega card
+        /// found by inventoryItemId. Called before flipping the card face-up on expose.
+        /// </summary>
+        public void LoadOmegaCardData(string inventoryItemId)
+        {
+            Card3DCtrl card = this.FindCardById(inventoryItemId);
+            if (card == null) return;
+            BattleCardSlot slot = this.FindOmegaSlotById(inventoryItemId);
+            if (slot == null) return;
+            string code = slot.item_definition_code_name;
+            card.SetCodeName(code);
+            card.SetFallbackName(slot.item_definition_name);
+            card.LoadCardByCodeName(code);
+            card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+        }
+
         public Card3DCtrl MoveAlphaCardToVoid(string inventoryItemId)
             => this.MoveCardToVoid(inventoryItemId, this.deskPosition.AlphaTheVoid);
 

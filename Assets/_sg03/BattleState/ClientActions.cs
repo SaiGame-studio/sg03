@@ -231,7 +231,7 @@ namespace SG03
                 case "alpha_card_damaged":         result = this.ExecuteCardDamaged(parameters);           break;
                 case "omega_card_damaged":         result = this.ExecuteCardDamaged(parameters);           break;
                 case "alpha_card_expose":          result = this.ExecuteCardExpose(parameters);            break;
-                case "omega_card_expose":          result = this.ExecuteCardExpose(parameters);            break;
+                case "omega_card_expose":          result = this.ExecuteOmegaCardExpose(parameters);      break;
                 case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
                 case "omega_card_sent_to_void":    result = this.ExecuteOmegaCardSentToVoid(parameters);  break;
                 case "alpha_attack":               result = this.ExecuteAlphaAttack(parameters);           break;
@@ -323,6 +323,19 @@ namespace SG03
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card == null) return null;
             card.RunUp();
+            return this.StartCoroutine(this.WaitForCard(card));
+        }
+
+        private Coroutine ExecuteOmegaCardExpose(string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return null;
+            string inventoryItemId = parameters[0].Trim();
+            if (string.IsNullOrEmpty(inventoryItemId)) return null;
+            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
+            if (card == null) return null;
+            if (card.FaceState == FaceState.FaceUp) return null;
+            this.cardSpawning?.LoadOmegaCardData(inventoryItemId);
+            card.FaceUp();
             return this.StartCoroutine(this.WaitForCard(card));
         }
 
