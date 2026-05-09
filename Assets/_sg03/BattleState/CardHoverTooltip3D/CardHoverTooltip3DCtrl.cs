@@ -23,6 +23,7 @@ namespace SG03
         private Label      finalDefLabel;
         private Label      damageLabel;
         private Card3DCtrl hoveredCard;
+        private bool       isFullDetail;
 
         // ─── LoadComponents ───────────────────────────────────────────────────────
 
@@ -64,14 +65,18 @@ namespace SG03
 
         private void Subscribe()
         {
-            Card3DCtrl.HoverEntered += this.OnHoverEntered;
-            Card3DCtrl.HoverExited  += this.OnHoverExited;
+            Card3DCtrl.HoverEntered          += this.OnHoverEntered;
+            Card3DCtrl.HoverExited           += this.OnHoverExited;
+            CardSelection.OnFullDetailEntered += this.OnFullDetailEntered;
+            CardSelection.OnFullDetailExited  += this.OnFullDetailExited;
         }
 
         private void Unsubscribe()
         {
-            Card3DCtrl.HoverEntered -= this.OnHoverEntered;
-            Card3DCtrl.HoverExited  -= this.OnHoverExited;
+            Card3DCtrl.HoverEntered          -= this.OnHoverEntered;
+            Card3DCtrl.HoverExited           -= this.OnHoverExited;
+            CardSelection.OnFullDetailEntered -= this.OnFullDetailEntered;
+            CardSelection.OnFullDetailExited  -= this.OnFullDetailExited;
         }
 
         // ─── Hover events ─────────────────────────────────────────────────────────
@@ -82,6 +87,7 @@ namespace SG03
             if (card.Location != Location.in_front) return;
             this.hoveredCard = card;
             this.RefreshData();
+            if (this.isFullDetail) return;
             this.Show();
         }
 
@@ -89,6 +95,17 @@ namespace SG03
         {
             // Intentionally empty: tooltip stays visible and holds its last position
             // until the player hovers over a new card.
+        }
+
+        private void OnFullDetailEntered()
+        {
+            this.isFullDetail = true;
+            this.Hide();
+        }
+
+        private void OnFullDetailExited()
+        {
+            this.isFullDetail = false;
         }
 
         // ─── Transform tick ───────────────────────────────────────────────────────

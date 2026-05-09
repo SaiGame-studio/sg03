@@ -14,6 +14,12 @@ namespace SG03
         /// <summary>Fired when the player confirms a targeting selection (source → target).</summary>
         public static event System.Action<Card3DCtrl, Card3DCtrl> TargetSelected;
 
+        /// <summary>Fired when the player enters full-detail view for a card.</summary>
+        public static event System.Action OnFullDetailEntered;
+
+        /// <summary>Fired when the player exits full-detail view.</summary>
+        public static event System.Action OnFullDetailExited;
+
         [SerializeField] private BattleStateCtrl battleStateCtrl;
 
         [SerializeField] private Card3DCtrl selected;
@@ -298,6 +304,7 @@ namespace SG03
             if (this.deskPositions == null) return;
             this.fullDetail = true;
             this.arrowIndicator?.Hide();
+            OnFullDetailEntered?.Invoke();
             this.selected.MoveToFullDetail(this.deskPositions.FullDetailPoint);
         }
 
@@ -306,6 +313,7 @@ namespace SG03
             this.fullDetail = false;
             if (this.IsTargeting)
                 this.arrowIndicator?.Show(this.targetingSource.transform.position, this.targetingSource.transform.position);
+            OnFullDetailExited?.Invoke();
             this.selected.ReturnFromFullDetail();
         }
 
