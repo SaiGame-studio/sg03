@@ -15,12 +15,10 @@ namespace SG03.UI
 
         [Header("References")]
         [SerializeField] private CardSpawning cardSpawning;
-        
+
         [Header("Flags")]
         private bool gameStartFired;
 
-        [Header("Battle Status Cache — Read Only")]
-        [SerializeField][TextArea(5, 20)] private string battleStatusJson;
         [SerializeField] private int turn;
         [SerializeField] private int action;
         [SerializeField] private int alphaHp;
@@ -29,6 +27,9 @@ namespace SG03.UI
         [SerializeField] private int omegaTheSourceCount;
         [SerializeField] private int alphaTheVoidCount;
         [SerializeField] private int omegaTheVoidCount;
+        [SerializeField] private string sessionId;
+        [SerializeField] private string battleDifficulty;
+        [SerializeField] private NextMoveType nextMove;
         [SerializeField] private BattleCardSlot[] alphaTheVoid;
         [SerializeField] private BattleCardSlot[] omegaTheVoid;
         [SerializeField] private BattleCardSlot[] alphaTheSource;
@@ -39,14 +40,13 @@ namespace SG03.UI
         [SerializeField] private BattleCardSlot[] omegaHand;
         [SerializeField] private BattleCardSlot[] omegaFrontLine;
         [SerializeField] private BattleCardSlot[] omegaBackLine;
-        [SerializeField] private string sessionId;
-        [SerializeField] private NextMoveType nextMove;
         [SerializeField] private string[] clientActions;
         [SerializeField] private string[] debugLog;
 
+        [SerializeField][TextArea(5, 20)] private string battleStatusJson;
 
         public string BattleStatusJson => this.battleStatusJson;
-        public int Turn  => this.turn;
+        public int Turn => this.turn;
         public int Action => this.action;
         public int AlphaHp => this.alphaHp;
         public int OmegaHp => this.omegaHp;
@@ -62,8 +62,9 @@ namespace SG03.UI
         public BattleCardSlot[] AlphaFrontLine => this.alphaFrontLine;
         public BattleCardSlot[] OmegaHand => this.omegaHand;
         public BattleCardSlot[] OmegaFrontLine => this.omegaFrontLine;
-        public BattleCardSlot[] OmegaBackLine  => this.omegaBackLine;
+        public BattleCardSlot[] OmegaBackLine => this.omegaBackLine;
         public string SessionId => this.sessionId;
+        public string BattleDifficulty => this.battleDifficulty;
         public NextMoveType NextMove => this.nextMove;
         public string[] ClientActions => this.clientActions;
         public string[] DebugLog => this.debugLog;
@@ -86,7 +87,7 @@ namespace SG03.UI
             Debug.LogWarning(this.transform.name + ": LoadCardSpawning", this.gameObject);
         }
 
-        private void OnEnable()  => this.SubscribeEvents();
+        private void OnEnable() => this.SubscribeEvents();
         private void OnDisable() => this.UnsubscribeEvents();
 
         private void SubscribeEvents()
@@ -102,7 +103,7 @@ namespace SG03.UI
         private void OnCardFaceStateChanged(Card3DCtrl card, bool faceUp)
         {
             this.UpdateSlotFaceUp(this.alphaFrontLine, card.InventoryItemId, faceUp);
-            this.UpdateSlotFaceUp(this.alphaBackLine,  card.InventoryItemId, faceUp);
+            this.UpdateSlotFaceUp(this.alphaBackLine, card.InventoryItemId, faceUp);
         }
 
         private void UpdateSlotFaceUp(BattleCardSlot[] slots, string inventoryItemId, bool faceUp)
@@ -139,6 +140,7 @@ namespace SG03.UI
             this.omegaFrontLine = null;
             this.omegaBackLine = null;
             this.sessionId = string.Empty;
+            this.battleDifficulty = string.Empty;
             this.debugLog = null;
             this.SetNextMove(string.Empty);
             this.gameStartFired = false;
@@ -267,9 +269,10 @@ namespace SG03.UI
             this.alphaFrontLine = output.alpha_front_line;
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
             if (output.omega_front_line != null) this.omegaFrontLine = output.omega_front_line;
-            if (output.omega_back_line  != null) this.omegaBackLine  = output.omega_back_line;
+            if (output.omega_back_line != null) this.omegaBackLine = output.omega_back_line;
             this.clientActions = output.client_actions;
             this.debugLog = output.debug_log;
+            this.battleDifficulty = output.battle_difficulty;
             this.SetNextMove(output.next_move);
             this.TryFireGameStart();
             this.OnBattleStatusChanged?.Invoke();
@@ -304,10 +307,10 @@ namespace SG03.UI
             switch (value)
             {
                 case "card_deploy": return NextMoveType.card_deploy;
-                case "init_cards":  return NextMoveType.init_cards;
-                case "alpha_turn":  return NextMoveType.alpha_turn;
-                case "omega_turn":  return NextMoveType.omega_turn;
-                default:            return NextMoveType.unknown;
+                case "init_cards": return NextMoveType.init_cards;
+                case "alpha_turn": return NextMoveType.alpha_turn;
+                case "omega_turn": return NextMoveType.omega_turn;
+                default: return NextMoveType.unknown;
             }
         }
 
