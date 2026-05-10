@@ -57,9 +57,10 @@ namespace SG03
             if (slot == null) return card;
             string code = slot.item_definition_code_name;
             card.SetCodeName(code);
-            card.SetFallbackName(slot.item_definition_name);
+            CardDefinitionData alphaDef = this.battleCardDefinitions?.GetDefinitionByCode(code);
+            this.ApplyCardFallbacks(card, slot.item_definition_name, alphaDef);
             card.LoadCardByCodeName(code);
-            card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+            card.SetDefinition(alphaDef);
             return card;
         }
 
@@ -159,9 +160,10 @@ namespace SG03
             {
                 string code = slot.item_definition_code_name;
                 card.SetCodeName(code);
-                card.SetFallbackName(slot.item_definition_name);
+                CardDefinitionData omegaDef = this.battleCardDefinitions?.GetDefinitionByCode(code);
+                this.ApplyCardFallbacks(card, slot.item_definition_name, omegaDef);
                 card.LoadCardByCodeName(code);
-                card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+                card.SetDefinition(omegaDef);
                 card.SetExpose(slot.expose);
             }
             System.Action faceCallback = slot != null ? () => this.ApplyFaceState(card, slot) : null;
@@ -217,11 +219,15 @@ namespace SG03
             if (card == null) return;
             BattleCardSlot slot = this.FindOmegaSlotById(inventoryItemId);
             if (slot == null) return;
-            string code = slot.item_definition_code_name;
+            card.SetExpose(slot.expose);
+            string code = string.IsNullOrEmpty(slot.item_definition_code_name) ? card.CodeName : slot.item_definition_code_name;
+            if (string.IsNullOrEmpty(code)) return;
             card.SetCodeName(code);
-            card.SetFallbackName(slot.item_definition_name);
+            CardDefinitionData omegaLoadDef = this.battleCardDefinitions?.GetDefinitionByCode(code);
+            this.ApplyCardFallbacks(card, slot.item_definition_name, omegaLoadDef);
+            card.ApplyTextures();
             card.LoadCardByCodeName(code);
-            card.SetDefinition(this.battleCardDefinitions?.GetDefinitionByCode(code));
+            card.SetDefinition(omegaLoadDef);
         }
 
         public Card3DCtrl MoveAlphaCardToVoid(string inventoryItemId)
@@ -422,6 +428,21 @@ namespace SG03
             card.transform.rotation = spawnPoint.rotation;
             card.gameObject.SetActive(true);
             return card;
+        }
+
+        // Applies fallback name, stats (ATK/DEF/Stars), and description from a card definition.
+        private void ApplyCardFallbacks(Card3DCtrl card, string fallbackName, CardDefinitionData def)
+        {
+            string resolvedName = string.IsNullOrEmpty(fallbackName) ? def?.name : fallbackName;
+            card.SetFallbackName(resolvedName);
+            card.SetFallbackStats(this.ToCardBaseStats(def?.base_stats));
+            card.SetFallbackDescription(def?.metadata?.description);
+        }
+
+        private CardBaseStats ToCardBaseStats(CardDefinitionBaseStats src)
+        {
+            if (src == null) return null;
+            return new CardBaseStats { atk = src.atk, def = src.def, star = src.star };
         }
 
     }

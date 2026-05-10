@@ -86,6 +86,7 @@ namespace SG03
             if (!card.IsCharacter()) return;
             if (card.Location != Location.in_front) return;
             this.hoveredCard = card;
+            if (this.hoveredCard.IsOmegaCardHidden()) return;
             this.RefreshData();
             if (this.isFullDetail) return;
             this.Show();
@@ -112,8 +113,16 @@ namespace SG03
 
         private void TickTooltipTransform()
         {
+            this.HideIfOmegaCardHidden();
             this.FollowHoveredCard();
             this.FaceCamera();
+        }
+
+        private void HideIfOmegaCardHidden()
+        {
+            if (this.hoveredCard == null) return;
+            if (!this.hoveredCard.IsOmegaCardHidden()) return;
+            this.Hide();
         }
 
         private void FollowHoveredCard()

@@ -408,7 +408,12 @@ namespace SG03
 
         private void SyncTargetingState()
         {
-            if (!this.IsAlphaTurn() || this.selected == null)
+            if (this.selected == null)
+            {
+                this.TryCancelTargeting();
+                return;
+            }
+            if (!this.IsAlphaTurn() && !this.IsAlphaDefendingBackLineSelected())
             {
                 this.TryCancelTargeting();
                 return;
@@ -430,6 +435,13 @@ namespace SG03
             }
             if (this.targetingSource != this.selected)
                 this.BeginTargeting();
+        }
+
+        private bool IsAlphaDefendingBackLineSelected()
+        {
+            if (this.battleStateCtrl?.BattleState == null) return false;
+            if (!this.battleStateCtrl.BattleState.AlphaDefending) return false;
+            return this.selected.CardOwner == Owner.alpha && this.selected.Location == Location.in_back;
         }
 
         private bool IsSelectedCardTriggered()

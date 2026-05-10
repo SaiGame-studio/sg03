@@ -57,7 +57,7 @@ namespace SG03
         [Tooltip("TextMeshPro showing the card name.")]
         [SerializeField] private TextMeshPro cardNameText;
 
-        [Tooltip("TextMeshPro showing the star rating (★ symbols).")]
+        [Tooltip("TextMeshPro showing the star rating (* symbols, LiberationSans SDF does not support U+2605).")]
         [SerializeField] private TextMeshPro starsText;
 
         [Tooltip("TextMeshPro showing the ATK value.")]
@@ -236,7 +236,7 @@ namespace SG03
                 : this.cardData.Description;
 
             this.SetTMPText(this.cardNameText,    displayName);
-            this.SetTMPText(this.starsText,       new string('\u2605', displayStars));
+            this.SetTMPText(this.starsText,       new string('*', displayStars));
             this.SetTMPText(this.atkText,         $"ATK/{displayAtk}");
             this.SetTMPText(this.defText,         $"DEF/{displayDef}");
             this.SetTMPText(this.descriptionText, displayDescription);

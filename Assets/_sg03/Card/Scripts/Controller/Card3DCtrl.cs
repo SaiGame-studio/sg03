@@ -259,6 +259,14 @@ namespace SG03
         /// <summary>Returns true if this card is exposed and must not be flipped face-down.</summary>
         public bool Expose => this.expose;
 
+        /// <summary>Returns true when this is an omega card that should not reveal its tooltip
+        /// (hidden unless both exposed and face-up).</summary>
+        public bool IsOmegaCardHidden()
+        {
+            if (this.cardOwner != Owner.omega) return false;
+            return !this.expose || this.FaceState != FaceState.FaceUp;
+        }
+
         /// <summary>The current face state of this card.</summary>
         public FaceState FaceState => this.movement.FaceState;
     }
