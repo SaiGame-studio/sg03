@@ -1189,13 +1189,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.36599812, y: 0.45315394, z: -0.2113091, w: 0.78488564}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 50, y: 60, z: 0}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1575,14 +1575,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 632999077}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 100, y: -0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 100, y: 0, z: -7.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1986520511}
   - {fileID: 772695135}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1534591526}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &632999079
 MonoBehaviour:
@@ -3818,12 +3818,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1117747785}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -7.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1534591526}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1117747788
 MonoBehaviour:
@@ -4675,6 +4675,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 632999078}
+  - {fileID: 1117747787}
   - {fileID: 487034609}
   - {fileID: 1773165128}
   m_Father: {fileID: 0}
@@ -6768,6 +6770,7 @@ MonoBehaviour:
   omegaTheVoidCount: 0
   sessionId: 
   battleDifficulty: 
+  alphaDefending: 0
   nextMove: 0
   alphaTheVoid: []
   omegaTheVoid: []
@@ -6892,6 +6895,7 @@ MonoBehaviour:
   scriptNameCardDeploy: card_deploy
   scriptNameAlphaAttacking: alpha_attacking
   scriptNameAlphaTurnEnd: alpha_turn_end
+  scriptNameAlphaDefendingEnd: alpha_defending_end
   battleState: {fileID: 2015755439}
   logPayload: 1
 --- !u!114 &2015755446
@@ -6909,6 +6913,7 @@ MonoBehaviour:
   battleState: {fileID: 2015755439}
   cardSpawning: {fileID: 2015755438}
   battleCardDefinitions: {fileID: 2015755443}
+  lampOfSoul: {fileID: 1773165130}
   actionInterval: 0.1
   actionMoveDuration: 1
   actionRotateDuration: 0.4
@@ -8029,5 +8034,3 @@ SceneRoots:
   - {fileID: 948749803}
   - {fileID: 1534591526}
   - {fileID: 2015755437}
-  - {fileID: 632999078}
-  - {fileID: 1117747787}

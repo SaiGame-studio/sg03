@@ -13,6 +13,7 @@ namespace SG03
         [SerializeField] private BattleState          battleState;
         [SerializeField] private CardSpawning         cardSpawning;
         [SerializeField] private BattleCardDefinitions battleCardDefinitions;
+        [SerializeField] private LampOfSoulCtrl       lampOfSoul;
         [SerializeField] private float actionInterval = 0.1f;
         [SerializeField] private float actionMoveDuration   = 1f;
         [SerializeField] private float actionRotateDuration = 0.4f;
@@ -28,6 +29,7 @@ namespace SG03
             this.LoadBattleState();
             this.LoadCardSpawning();
             this.LoadBattleCardDefinitions();
+            this.LoadLampOfSoul();
         }
 
         protected virtual void LoadBattleState()
@@ -55,6 +57,13 @@ namespace SG03
             if (ctrl == null) return;
             this.battleCardDefinitions = ctrl.BattleCardDefinitions;
             Debug.LogWarning(this.transform.name + ": LoadBattleCardDefinitions", this.gameObject);
+        }
+
+        protected virtual void LoadLampOfSoul()
+        {
+            if (this.lampOfSoul != null) return;
+            this.lampOfSoul = UnityEngine.Object.FindFirstObjectByType<LampOfSoulCtrl>(FindObjectsInactive.Include);
+            Debug.LogWarning(this.transform.name + ": LoadLampOfSoul", this.gameObject);
         }
 
         private void OnEnable()  => this.SubscribeEvents();
@@ -100,28 +109,31 @@ namespace SG03
 
         private void BuildActionLogs(string[] actions)
         {
-            Debug.Log($"<color=#FFD700><b>[ClientActions] Received {actions.Length} action(s)</b></color>", this.gameObject);
+            // Debug.Log($"<color=#FFD700><b>[ClientActions] Received {actions.Length} action(s)</b></color>", this.gameObject);
             foreach (string entry in actions)
             {
                 if (string.IsNullOrWhiteSpace(entry)) continue;
-                int colonIndex = entry.IndexOf(':');
-                string name    = colonIndex >= 0 ? entry.Substring(0, colonIndex) : entry;
-                string @params = colonIndex >= 0 ? entry.Substring(colonIndex + 1) : string.Empty;
-                if (this.IsDuplicateAction(name, @params)) continue;
-                if (!name.StartsWith("alpha_") && !name.StartsWith("omega_"))
-                {
-                    Debug.LogWarning($"[ClientActions] Cannot categorize action: {name}", this.gameObject);
-                    continue;
-                }
-                this.actionLog.Add(new ClientActionLog(name, @params));
+                this.ParseAndAddAction(entry);
             }
         }
 
-        private bool IsDuplicateAction(string actionName, string parameters)
+        private void ParseAndAddAction(string entry)
+        {
+            int firstColon = entry.IndexOf(':');
+            string id   = firstColon >= 0 ? entry.Substring(0, firstColon) : entry;
+            string rest = firstColon >= 0 ? entry.Substring(firstColon + 1) : string.Empty;
+            int secondColon = rest.IndexOf(':');
+            string name   = secondColon >= 0 ? rest.Substring(0, secondColon) : rest;
+            string @params = secondColon >= 0 ? rest.Substring(secondColon + 1) : string.Empty;
+            if (this.IsDuplicateAction(id)) return;
+            this.actionLog.Add(new ClientActionLog(id, name, @params));
+        }
+
+        private bool IsDuplicateAction(string actionId)
         {
             foreach (ClientActionLog existing in this.actionLog)
             {
-                if (existing.ActionName == actionName && existing.Parameters == parameters) return true;
+                if (existing.ActionId == actionId) return true;
             }
             return false;
         }
@@ -212,7 +224,7 @@ namespace SG03
         private Coroutine ExecuteAction(ClientActionLog log)
         {
             this.SyncActionMoveDuration();
-            Debug.Log($"[ClientActions] <color=#88FFFF>Executing:</color> <b>{log.ActionName}</b> | {(string.IsNullOrEmpty(log.Parameters) ? "(no params)" : log.Parameters)} | executed={log.Executed}", this.gameObject);
+            // Debug.Log($"[ClientActions] <color=#88FFFF>Executing:</color> <b>{log.ActionName}</b> | {(string.IsNullOrEmpty(log.Parameters) ? "(no params)" : log.Parameters)} | executed={log.Executed}", this.gameObject);
             string[] parameters = string.IsNullOrEmpty(log.Parameters)
                 ? System.Array.Empty<string>()
                 : log.Parameters.Split(',');
@@ -235,7 +247,9 @@ namespace SG03
                 case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
                 case "omega_card_sent_to_void":    result = this.ExecuteOmegaCardSentToVoid(parameters);  break;
                 case "alpha_attack":               result = this.ExecuteAlphaAttack(parameters);           break;
-                case "omega_planing_attack":        result = this.ExecuteOmegaPlaningAttack(parameters);    break;
+                case "omega_planing_character_attack": result = this.ExecuteOmegaPlaningCharacterAttack(parameters); break;
+                case "alpha_take_lamp":             result = this.ExecuteLampMoveToAlpha();                break;
+                case "omega_take_lamp":             result = this.ExecuteLampMoveToOmega();                break;
                 default:
                     Debug.LogWarning($"[ClientActions] Unknown action: {log.ActionName}", this.gameObject);
                     handled = false;
@@ -385,7 +399,7 @@ namespace SG03
             return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
-        private Coroutine ExecuteOmegaPlaningAttack(string[] parameters)
+        private Coroutine ExecuteOmegaPlaningCharacterAttack(string[] parameters)
         {
             if (parameters == null || parameters.Length < 2) return null;
             string attackerId = parameters[0].Trim();
@@ -398,6 +412,20 @@ namespace SG03
             // No return — waits for alpha's decision in the next server response.
             attacker.PlanningLunge(defender.transform.position);
             return this.StartCoroutine(this.WaitForCard(attacker));
+        }
+
+        private Coroutine ExecuteLampMoveToAlpha()
+        {
+            if (this.lampOfSoul == null) return null;
+            this.lampOfSoul.MoveToAlpha();
+            return null;
+        }
+
+        private Coroutine ExecuteLampMoveToOmega()
+        {
+            if (this.lampOfSoul == null) return null;
+            this.lampOfSoul.MoveToOmega();
+            return null;
         }
 
         private void SyncActionMoveDuration()

@@ -365,8 +365,6 @@ namespace SG03
         {
             this.targetingSource = this.selected;
             this.targeted = null;
-            if (this.arrowIndicator == null) return;
-            this.arrowIndicator.Show(this.targetingSource.transform.position, this.targetingSource.transform.position);
         }
 
         private void CancelTargeting()
@@ -401,14 +399,31 @@ namespace SG03
             this.SyncTargetingState();
             if (!this.IsTargeting) return;
             if (this.arrowIndicator == null) return;
+            if (!this.HasArrowTarget())
+            {
+                this.arrowIndicator.Hide();
+                return;
+            }
             Vector3 from = this.targetingSource.transform.position;
             Vector3 to = this.GetArrowTarget();
-            this.arrowIndicator.UpdateTarget(from, to);
+            this.arrowIndicator.Show(from, to);
+        }
+
+        private bool HasArrowTarget()
+        {
+            if (this.hovered != null && this.hovered != this.targetingSource) return true;
+            if (this.holderHover != null && this.holderHover.HeldCard != null) return true;
+            return false;
         }
 
         private void SyncTargetingState()
         {
-            if (!this.IsAlphaTurn() || this.selected == null)
+            if (this.selected == null)
+            {
+                this.TryCancelTargeting();
+                return;
+            }
+            if (!this.IsAlphaTurn() && !this.IsAlphaDefendingBackLineSelected())
             {
                 this.TryCancelTargeting();
                 return;
@@ -430,6 +445,13 @@ namespace SG03
             }
             if (this.targetingSource != this.selected)
                 this.BeginTargeting();
+        }
+
+        private bool IsAlphaDefendingBackLineSelected()
+        {
+            if (this.battleStateCtrl?.BattleState == null) return false;
+            if (!this.battleStateCtrl.BattleState.AlphaDefending) return false;
+            return this.selected.CardOwner == Owner.alpha && this.selected.Location == Location.in_back;
         }
 
         private bool IsSelectedCardTriggered()
@@ -477,6 +499,8 @@ namespace SG03
         {
             if (this.hovered != null && this.hovered != this.targetingSource)
                 return this.hovered.transform.position;
+            if (this.holderHover != null && this.holderHover.HeldCard != null)
+                return this.holderHover.transform.position;
             return this.GetMouseWorldPosition();
         }
 
