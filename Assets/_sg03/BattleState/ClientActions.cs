@@ -235,6 +235,7 @@ namespace SG03
                 case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
                 case "omega_card_sent_to_void":    result = this.ExecuteOmegaCardSentToVoid(parameters);  break;
                 case "alpha_attack":               result = this.ExecuteAlphaAttack(parameters);           break;
+                case "omega_planing_attack":        result = this.ExecuteOmegaPlaningAttack(parameters);    break;
                 default:
                     Debug.LogWarning($"[ClientActions] Unknown action: {log.ActionName}", this.gameObject);
                     handled = false;
@@ -381,6 +382,21 @@ namespace SG03
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
             attacker.AttackLunge(defender.transform.position);
+            return this.StartCoroutine(this.WaitForCard(attacker));
+        }
+
+        private Coroutine ExecuteOmegaPlaningAttack(string[] parameters)
+        {
+            if (parameters == null || parameters.Length < 2) return null;
+            string attackerId = parameters[0].Trim();
+            string defenderId = parameters[1].Trim();
+            if (string.IsNullOrEmpty(attackerId) || string.IsNullOrEmpty(defenderId)) return null;
+            Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
+            Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
+            if (attacker == null || defender == null) return null;
+            // Planning attack: card advances toward the defender and stays there.
+            // No return — waits for alpha's decision in the next server response.
+            attacker.PlanningLunge(defender.transform.position);
             return this.StartCoroutine(this.WaitForCard(attacker));
         }
 

@@ -45,11 +45,13 @@ namespace SG03.UI
                 h = w / Aspect;
             }
 
-            this.lobbyViewport.style.position = Position.Absolute;
-            this.lobbyViewport.style.width    = w;
-            this.lobbyViewport.style.height   = h;
-            this.lobbyViewport.style.left     = (sw - w) * 0.5f;
-            this.lobbyViewport.style.top      = (sh - h) * 0.5f;
+            // position: absolute is declared in USS — only update geometry here.
+            // Changing the position type at runtime on an overflow:hidden element
+            // corrupts the MeshGenerationContext Begin/End state mid-repaint.
+            this.lobbyViewport.style.width  = w;
+            this.lobbyViewport.style.height = h;
+            this.lobbyViewport.style.left   = (sw - w) * 0.5f;
+            this.lobbyViewport.style.top    = (sh - h) * 0.5f;
         }
     }
 }
