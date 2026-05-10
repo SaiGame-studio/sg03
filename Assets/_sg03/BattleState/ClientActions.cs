@@ -235,7 +235,7 @@ namespace SG03
                 case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
                 case "omega_card_sent_to_void":    result = this.ExecuteOmegaCardSentToVoid(parameters);  break;
                 case "alpha_attack":               result = this.ExecuteAlphaAttack(parameters);           break;
-                case "omega_planing_attack":        result = this.ExecuteOmegaPlaningAttack(parameters);    break;
+                case "omega_planing_character_attack": result = this.ExecuteOmegaPlaningCharacterAttack(parameters); break;
                 default:
                     Debug.LogWarning($"[ClientActions] Unknown action: {log.ActionName}", this.gameObject);
                     handled = false;
@@ -385,7 +385,7 @@ namespace SG03
             return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
-        private Coroutine ExecuteOmegaPlaningAttack(string[] parameters)
+        private Coroutine ExecuteOmegaPlaningCharacterAttack(string[] parameters)
         {
             if (parameters == null || parameters.Length < 2) return null;
             string attackerId = parameters[0].Trim();
