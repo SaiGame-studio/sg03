@@ -28,5 +28,6 @@ namespace SG03.UI
         public string[]            debug_log;
         public string              error;
         public string              battle_difficulty;
+        public bool                alpha_defending;
     }
 }
