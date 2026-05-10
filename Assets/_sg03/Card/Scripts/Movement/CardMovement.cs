@@ -125,6 +125,9 @@ namespace SG03
         [Tooltip("Ease for the return phase.")]
         [SerializeField] private Ease attackReturnEase = Ease.InQuad;
 
+        [Tooltip("World-space distance from the defender where PlanningLunge stops.")]
+        [SerializeField] private float planningStopDistance = 7f;
+
         // ─── Runtime state ────────────────────────────────────────────────────────
 
         [Header("State")]
@@ -403,6 +406,20 @@ namespace SG03
             this.attackTween = DOTween.Sequence();
             this.attackTween.Append(this.transform.DOMove(lunged, this.attackLungeDuration).SetEase(this.attackLungeEase));
             this.attackTween.Append(this.transform.DOMove(origin, this.attackReturnDuration).SetEase(this.attackReturnEase));
+        }
+
+        /// <summary>
+        /// Moves the card forward toward the defender and stops exactly
+        /// <see cref="planningStopDistance"/> world units away from the defender.
+        /// No return tween — the card stays there waiting for alpha's response.
+        /// </summary>
+        public void PlanningLunge(Vector3 defenderPosition)
+        {
+            Vector3 direction = (defenderPosition - this.transform.position).normalized;
+            Vector3 lunged    = defenderPosition - direction * this.planningStopDistance;
+            this.attackTween?.Kill();
+            this.attackTween = DOTween.Sequence();
+            this.attackTween.Append(this.transform.DOMove(lunged, this.attackLungeDuration).SetEase(this.attackLungeEase));
         }
 
         // ─── Hover handlers ───────────────────────────────────────────────────────

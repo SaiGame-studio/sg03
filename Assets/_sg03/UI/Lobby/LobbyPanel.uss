@@ -14,11 +14,14 @@
     background-color: rgba(0, 0, 0, 1);
 }
 
-/* 16:9 viewport — absolute position and size set at runtime by LobbyAspectRatioKeeper */
-/* flex: 1 + height: 100% ensures the column has an explicit height before the keeper fires,
-   so BottomMenu always stays at the bottom even when ContentArea is empty. */
+/* 16:9 viewport — position: absolute here from the start so LobbyAspectRatioKeeper
+   only needs to update width/height/left/top, never the position type itself.
+   Changing position type at runtime on an overflow:hidden element corrupts the
+   MeshGenerationContext Begin/End state and causes InvalidOperationException. */
 .lobby-viewport {
-    flex: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
     flex-direction: column;

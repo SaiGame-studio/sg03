@@ -201,6 +201,9 @@ namespace SG03
         /// <summary>Plays the attack lunge animation: card charges toward the defender then returns.</summary>
         public void AttackLunge(Vector3 defenderPosition) => this.movement.AttackLunge(defenderPosition);
 
+        /// <summary>Moves the card forward toward the defender and stops there (no return).</summary>
+        public void PlanningLunge(Vector3 defenderPosition) => this.movement.PlanningLunge(defenderPosition);
+
         /// <summary>Toggles the card between face-up and face-down.</summary>
         public void ToggleFace()
         {
