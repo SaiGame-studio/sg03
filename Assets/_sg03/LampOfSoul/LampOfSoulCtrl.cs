@@ -60,37 +60,22 @@ namespace SG03
 
         private void Subscribe()
         {
-            BattleState.OnGameStart       += this.OnGameStart;
-            BattleState.OnNextMoveChanged  += this.OnNextMoveChanged;
+            BattleState.OnGameStart += this.OnGameStart;
         }
 
         private void Unsubscribe()
         {
-            BattleState.OnGameStart       -= this.OnGameStart;
-            BattleState.OnNextMoveChanged  -= this.OnNextMoveChanged;
+            BattleState.OnGameStart -= this.OnGameStart;
         }
 
         // ─── Event handlers ───────────────────────────────────────────────────────
 
         private void OnGameStart()
         {
-            this.CallInitPosition();
-        }
-
-        private void OnNextMoveChanged(NextMoveType nextMove)
-        {
-            if (nextMove == NextMoveType.card_deploy) this.MoveToCardDeployPosition();
-            if (nextMove == NextMoveType.alpha_turn)  this.MoveToAlphaLampPosition();
-            if (nextMove == NextMoveType.omega_turn)  this.MoveToOmegaLampPosition();
+            this.MoveToCardDeployPosition();
         }
 
         // ─── Private helpers ──────────────────────────────────────────────────────
-
-        private void CallInitPosition()
-        {
-            if (this.battleState == null) return;
-            this.OnNextMoveChanged(this.battleState.NextMove);
-        }
 
         private void MoveToCardDeployPosition()
         {
@@ -117,6 +102,12 @@ namespace SG03
 
         /// <summary>Moves the lamp to the specified target transform.</summary>
         public void MoveTo(Transform target) => this.movement.MoveTo(target);
+
+        /// <summary>Moves the lamp to the alpha lamp position.</summary>
+        public void MoveToAlpha() => this.MoveToAlphaLampPosition();
+
+        /// <summary>Moves the lamp to the omega lamp position.</summary>
+        public void MoveToOmega() => this.MoveToOmegaLampPosition();
 
         /// <summary>Returns the movement component of this lamp.</summary>
         public LampMovement Movement => this.movement;

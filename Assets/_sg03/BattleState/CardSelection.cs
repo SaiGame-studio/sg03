@@ -365,8 +365,6 @@ namespace SG03
         {
             this.targetingSource = this.selected;
             this.targeted = null;
-            if (this.arrowIndicator == null) return;
-            this.arrowIndicator.Show(this.targetingSource.transform.position, this.targetingSource.transform.position);
         }
 
         private void CancelTargeting()
@@ -401,9 +399,21 @@ namespace SG03
             this.SyncTargetingState();
             if (!this.IsTargeting) return;
             if (this.arrowIndicator == null) return;
+            if (!this.HasArrowTarget())
+            {
+                this.arrowIndicator.Hide();
+                return;
+            }
             Vector3 from = this.targetingSource.transform.position;
             Vector3 to = this.GetArrowTarget();
-            this.arrowIndicator.UpdateTarget(from, to);
+            this.arrowIndicator.Show(from, to);
+        }
+
+        private bool HasArrowTarget()
+        {
+            if (this.hovered != null && this.hovered != this.targetingSource) return true;
+            if (this.holderHover != null && this.holderHover.HeldCard != null) return true;
+            return false;
         }
 
         private void SyncTargetingState()
@@ -489,6 +499,8 @@ namespace SG03
         {
             if (this.hovered != null && this.hovered != this.targetingSource)
                 return this.hovered.transform.position;
+            if (this.holderHover != null && this.holderHover.HeldCard != null)
+                return this.holderHover.transform.position;
             return this.GetMouseWorldPosition();
         }
 

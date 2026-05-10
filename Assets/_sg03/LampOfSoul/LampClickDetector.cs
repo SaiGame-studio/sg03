@@ -92,19 +92,26 @@ namespace SG03
             if (this.battleStateCtrl?.BattleState == null) return;
             NextMoveType nextMove = this.battleStateCtrl.BattleState.NextMove;
             if (nextMove == NextMoveType.card_deploy) this.HandleCardDeploy();
-            if (nextMove == NextMoveType.alpha_turn) this.HandleAlphaTurnEnd();
-        }
-
-        private void HandleCardDeploy()
-        {
-            if (this.battleScripts == null) return;
-            this.battleScripts.RunCardDeploy(this.OnCardDeploySuccess, this.OnCardDeployError);
+            if (nextMove == NextMoveType.alpha_turn)  this.HandleAlphaTurnEnd();
+            if (nextMove == NextMoveType.omega_turn)  this.HandleAlphaDefendingEnd();
         }
 
         private void HandleAlphaTurnEnd()
         {
             if (this.battleScripts == null) return;
             this.battleScripts.RunAlphaTurnEnd(this.OnAlphaTurnEndSuccess, this.OnAlphaTurnEndError);
+        }
+
+        private void HandleAlphaDefendingEnd()
+        {
+            if (this.battleScripts == null) return;
+            this.battleScripts.RunAlphaDefendingEnd(this.OnAlphaDefendingEndSuccess, this.OnAlphaDefendingEndError);
+        }
+
+        private void HandleCardDeploy()
+        {
+            if (this.battleScripts == null) return;
+            this.battleScripts.RunCardDeploy(this.OnCardDeploySuccess, this.OnCardDeployError);
         }
 
         private void OnAlphaTurnEndSuccess(string response)
@@ -116,6 +123,17 @@ namespace SG03
         private void OnAlphaTurnEndError(string error)
         {
             Debug.LogError("[LampClickDetector] Alpha turn end error: " + error);
+        }
+
+        private void OnAlphaDefendingEndSuccess(string response)
+        {
+            Debug.Log("<color=#88CCFF><b>[LampClickDetector] Alpha defending end success</b></color> " + response);
+            this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
+        }
+
+        private void OnAlphaDefendingEndError(string error)
+        {
+            Debug.LogError("[LampClickDetector] Alpha defending end error: " + error);
         }
 
         private void OnCardDeploySuccess(string response)
