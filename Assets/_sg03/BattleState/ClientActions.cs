@@ -247,6 +247,8 @@ namespace SG03
                 case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
                 case "omega_card_sent_to_void":    result = this.ExecuteOmegaCardSentToVoid(parameters);  break;
                 case "alpha_attack":               result = this.ExecuteAlphaAttack(parameters);           break;
+                case "omega_attack":               result = this.ExecuteOmegaAttack(parameters);           break;
+                case "omega_card_move_back_to_holder": result = this.ExecuteOmegaCardMoveBackToHolder(parameters); break;
                 case "omega_planing_character_attack": result = this.ExecuteOmegaPlaningCharacterAttack(parameters); break;
                 case "alpha_take_lamp":             result = this.ExecuteLampMoveToAlpha();                break;
                 case "omega_take_lamp":             result = this.ExecuteLampMoveToOmega();                break;
@@ -399,6 +401,30 @@ namespace SG03
             return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
+        private Coroutine ExecuteOmegaAttack(string[] parameters)
+        {
+            if (parameters == null || parameters.Length < 2) return null;
+            string attackerId = parameters[0].Trim();
+            string defenderId = parameters[1].Trim();
+            if (string.IsNullOrEmpty(attackerId) || string.IsNullOrEmpty(defenderId)) return null;
+            Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
+            Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
+            if (attacker == null || defender == null) return null;
+            attacker.AttackBackstepLunge(defender.transform.position);
+            return this.StartCoroutine(this.WaitForCard(attacker));
+        }
+
+        private Coroutine ExecuteOmegaCardMoveBackToHolder(string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return null;
+            string inventoryItemId = parameters[0].Trim();
+            if (string.IsNullOrEmpty(inventoryItemId)) return null;
+            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
+            if (card == null) return null;
+            card.MoveBackToHolder();
+            return this.StartCoroutine(this.WaitForCard(card));
+        }
+
         private Coroutine ExecuteOmegaPlaningCharacterAttack(string[] parameters)
         {
             if (parameters == null || parameters.Length < 2) return null;
@@ -408,24 +434,33 @@ namespace SG03
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
-            // Planning attack: card advances toward the defender and stays there.
+            // Planning attack: card advances next to the defender on the side it came from
+            // (target.x - 1 when attacking from the left, target.x + 1 when from the right).
             // No return — waits for alpha's decision in the next server response.
-            attacker.PlanningLunge(defender.transform.position);
+            Vector3 destination = this.BuildPlanningAttackDestination(attacker.transform.position, defender.transform.position);
+            attacker.PlanningLungeTo(destination);
             return this.StartCoroutine(this.WaitForCard(attacker));
+        }
+
+        private Vector3 BuildPlanningAttackDestination(Vector3 attackerPosition, Vector3 defenderPosition)
+        {
+            float offsetX = attackerPosition.x < defenderPosition.x ? -1f : 1f;
+            float offsetZ = attackerPosition.z < defenderPosition.z ? -9f : 9f;
+            return new Vector3(defenderPosition.x + offsetX, defenderPosition.y, defenderPosition.z + offsetZ);
         }
 
         private Coroutine ExecuteLampMoveToAlpha()
         {
             if (this.lampOfSoul == null) return null;
             this.lampOfSoul.MoveToAlpha();
-            return null;
+            return this.StartCoroutine(this.WaitForLamp());
         }
 
         private Coroutine ExecuteLampMoveToOmega()
         {
             if (this.lampOfSoul == null) return null;
             this.lampOfSoul.MoveToOmega();
-            return null;
+            return this.StartCoroutine(this.WaitForLamp());
         }
 
         private void SyncActionMoveDuration()
@@ -438,6 +473,11 @@ namespace SG03
         private IEnumerator WaitForCard(Card3DCtrl card)
         {
             yield return new WaitUntil(() => !card.IsAnimating);
+        }
+
+        private IEnumerator WaitForLamp()
+        {
+            yield return new WaitUntil(() => this.lampOfSoul == null || !this.lampOfSoul.IsAnimating);
         }
 
         private bool TryParseSourceToHand(string[] parameters, out string inventoryItemId, out int slotIndex)

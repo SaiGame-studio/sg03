@@ -55,6 +55,9 @@ namespace SG03
             this.StartMoveTween(target.position);
         }
 
+        /// <summary>True while an active move tween is playing.</summary>
+        public bool IsAnimating => this.moveTween != null && this.moveTween.IsActive();
+
         // ─── Private helpers ──────────────────────────────────────────────────────
 
         private void StartMoveTween(Vector3 destination)

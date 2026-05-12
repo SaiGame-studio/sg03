@@ -128,6 +128,15 @@ namespace SG03
         [Tooltip("World-space distance from the defender where PlanningLunge stops.")]
         [SerializeField] private float planningStopDistance = 7f;
 
+        [Tooltip("Fraction (0-1) of the lunge distance the attacker steps backward away from the defender before lunging.")]
+        [SerializeField] private float attackBackstepRatio = 0.15f;
+
+        [Tooltip("Duration of the backstep phase in seconds.")]
+        [SerializeField] private float attackBackstepDuration = 0.12f;
+
+        [Tooltip("Ease for the backstep phase.")]
+        [SerializeField] private Ease attackBackstepEase = Ease.OutQuad;
+
         // ─── Runtime state ────────────────────────────────────────────────────────
 
         [Header("State")]
@@ -409,6 +418,23 @@ namespace SG03
         }
 
         /// <summary>
+        /// Plays the attack animation with a small backstep first: card pulls back slightly away from the defender,
+        /// then lunges forward into the defender, then returns to its origin.
+        /// </summary>
+        public void AttackBackstepLunge(Vector3 defenderPosition)
+        {
+            Vector3 origin     = this.transform.position;
+            Vector3 toDefender = defenderPosition - origin;
+            Vector3 backstep   = origin - toDefender * this.attackBackstepRatio;
+            Vector3 lunged     = Vector3.Lerp(origin, defenderPosition, this.attackLungeRatio);
+            this.attackTween?.Kill();
+            this.attackTween = DOTween.Sequence();
+            this.attackTween.Append(this.transform.DOMove(backstep, this.attackBackstepDuration).SetEase(this.attackBackstepEase));
+            this.attackTween.Append(this.transform.DOMove(lunged,   this.attackLungeDuration).SetEase(this.attackLungeEase));
+            this.attackTween.Append(this.transform.DOMove(origin,   this.attackReturnDuration).SetEase(this.attackReturnEase));
+        }
+
+        /// <summary>
         /// Moves the card forward toward the defender and stops exactly
         /// <see cref="planningStopDistance"/> world units away from the defender.
         /// No return tween — the card stays there waiting for alpha's response.
@@ -420,6 +446,17 @@ namespace SG03
             this.attackTween?.Kill();
             this.attackTween = DOTween.Sequence();
             this.attackTween.Append(this.transform.DOMove(lunged, this.attackLungeDuration).SetEase(this.attackLungeEase));
+        }
+
+        /// <summary>
+        /// Moves the card directly to the given destination position (no stop-distance offset).
+        /// Used when the caller has already computed the exact world position to stop at.
+        /// </summary>
+        public void PlanningLungeTo(Vector3 destination)
+        {
+            this.attackTween?.Kill();
+            this.attackTween = DOTween.Sequence();
+            this.attackTween.Append(this.transform.DOMove(destination, this.attackLungeDuration).SetEase(this.attackLungeEase));
         }
 
         // ─── Hover handlers ───────────────────────────────────────────────────────

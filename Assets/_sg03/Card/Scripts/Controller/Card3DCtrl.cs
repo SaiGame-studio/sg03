@@ -201,8 +201,22 @@ namespace SG03
         /// <summary>Plays the attack lunge animation: card charges toward the defender then returns.</summary>
         public void AttackLunge(Vector3 defenderPosition) => this.movement.AttackLunge(defenderPosition);
 
+        /// <summary>Plays the attack animation with a small backstep before the lunge, then returns.</summary>
+        public void AttackBackstepLunge(Vector3 defenderPosition) => this.movement.AttackBackstepLunge(defenderPosition);
+
+        /// <summary>Moves the card back to its currently assigned <see cref="CardHolderCtrl"/> position (no flip).</summary>
+        public void MoveBackToHolder()
+        {
+            if (this.cardHolder == null) return;
+            Location destination = this.cardHolder.HolderLink == Link.front ? Location.in_front : Location.in_back;
+            this.movement.MoveTo(this.cardHolder.transform, destination);
+        }
+
         /// <summary>Moves the card forward toward the defender and stops there (no return).</summary>
         public void PlanningLunge(Vector3 defenderPosition) => this.movement.PlanningLunge(defenderPosition);
+
+        /// <summary>Moves the card directly to the given destination (no stop-distance offset, no return).</summary>
+        public void PlanningLungeTo(Vector3 destination) => this.movement.PlanningLungeTo(destination);
 
         /// <summary>Toggles the card between face-up and face-down.</summary>
         public void ToggleFace()
