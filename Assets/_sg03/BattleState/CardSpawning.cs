@@ -225,8 +225,8 @@ namespace SG03
             card.SetCodeName(code);
             CardDefinitionData omegaLoadDef = this.battleCardDefinitions?.GetDefinitionByCode(code);
             this.ApplyCardFallbacks(card, slot.item_definition_name, omegaLoadDef);
-            card.ApplyTextures();
             card.LoadCardByCodeName(code);
+            card.ApplyTextures();
             card.SetDefinition(omegaLoadDef);
         }
 
