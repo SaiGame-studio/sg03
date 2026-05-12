@@ -218,6 +218,9 @@ namespace SG03
         /// <summary>Moves the card directly to the given destination (no stop-distance offset, no return).</summary>
         public void PlanningLungeTo(Vector3 destination) => this.movement.PlanningLungeTo(destination);
 
+        /// <summary>Plays the ability activation animation: card rises + scales up, holds, then returns.</summary>
+        public void ActivateAbility() => this.movement.ActivateAbility();
+
         /// <summary>Toggles the card between face-up and face-down.</summary>
         public void ToggleFace()
         {

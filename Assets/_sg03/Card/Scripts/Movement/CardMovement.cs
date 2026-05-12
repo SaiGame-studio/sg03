@@ -137,6 +137,30 @@ namespace SG03
         [Tooltip("Ease for the backstep phase.")]
         [SerializeField] private Ease attackBackstepEase = Ease.OutQuad;
 
+        // ─── Ability ──────────────────────────────────────────────────────────────
+
+        [Header("Ability")]
+        [Tooltip("World units the card rises while activating its ability.")]
+        [SerializeField] private float abilityRiseHeight = 1.2f;
+
+        [Tooltip("Extra scale multiplier applied at the peak of the ability animation (1 = no change).")]
+        [SerializeField] private float abilityScalePeak = 1.15f;
+
+        [Tooltip("Duration of the rise/scale-up phase in seconds.")]
+        [SerializeField] private float abilityRiseDuration = 0.18f;
+
+        [Tooltip("Duration of the hold phase at the peak in seconds.")]
+        [SerializeField] private float abilityHoldDuration = 0.12f;
+
+        [Tooltip("Duration of the return phase in seconds.")]
+        [SerializeField] private float abilityReturnDuration = 0.22f;
+
+        [Tooltip("Ease for the rise/scale-up phase.")]
+        [SerializeField] private Ease abilityRiseEase = Ease.OutBack;
+
+        [Tooltip("Ease for the return phase.")]
+        [SerializeField] private Ease abilityReturnEase = Ease.InQuad;
+
         // ─── Runtime state ────────────────────────────────────────────────────────
 
         [Header("State")]
@@ -153,6 +177,7 @@ namespace SG03
         private Sequence faceTween;
         private Sequence damageTween;
         private Sequence attackTween;
+        private Sequence abilityTween;
         private Vector3    preFullDetailPosition;
         private Quaternion preFullDetailRotation;
 
@@ -204,7 +229,8 @@ namespace SG03
             (this.moveTween != null && this.moveTween.IsActive()) ||
             this.isFlipping ||
             (this.damageTween != null && this.damageTween.IsActive()) ||
-            (this.attackTween != null && this.attackTween.IsActive());
+            (this.attackTween != null && this.attackTween.IsActive()) ||
+            (this.abilityTween != null && this.abilityTween.IsActive());
         public FaceState FaceState   => this.faceState;
 
         public void SetMoveDuration(float d)   { this.duration          = d; }
@@ -457,6 +483,24 @@ namespace SG03
             this.attackTween?.Kill();
             this.attackTween = DOTween.Sequence();
             this.attackTween.Append(this.transform.DOMove(destination, this.attackLungeDuration).SetEase(this.attackLungeEase));
+        }
+
+        /// <summary>
+        /// Plays the ability activation animation: card rises and scales up, holds briefly, then returns.
+        /// </summary>
+        public void ActivateAbility()
+        {
+            Vector3 origin     = this.transform.position;
+            Vector3 risen      = origin + Vector3.up * this.abilityRiseHeight;
+            Vector3 baseScale  = this.transform.localScale;
+            Vector3 peakScale  = baseScale * this.abilityScalePeak;
+            this.abilityTween?.Kill();
+            this.abilityTween = DOTween.Sequence();
+            this.abilityTween.Append(this.transform.DOMove(risen, this.abilityRiseDuration).SetEase(this.abilityRiseEase));
+            this.abilityTween.Join(this.transform.DOScale(peakScale, this.abilityRiseDuration).SetEase(this.abilityRiseEase));
+            this.abilityTween.AppendInterval(this.abilityHoldDuration);
+            this.abilityTween.Append(this.transform.DOMove(origin, this.abilityReturnDuration).SetEase(this.abilityReturnEase));
+            this.abilityTween.Join(this.transform.DOScale(baseScale, this.abilityReturnDuration).SetEase(this.abilityReturnEase));
         }
 
         // ─── Hover handlers ───────────────────────────────────────────────────────
