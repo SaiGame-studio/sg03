@@ -30,6 +30,7 @@ namespace SG03.UI
         [SerializeField] private string sessionId;
         [SerializeField] private string battleDifficulty;
         [SerializeField] private bool alphaDefending;
+        [SerializeField] private bool isDevelopment;
         [SerializeField] private NextMoveType nextMove;
         [SerializeField] private BattleCardSlot[] alphaTheVoid;
         [SerializeField] private BattleCardSlot[] omegaTheVoid;
@@ -70,6 +71,7 @@ namespace SG03.UI
         public string BattleDifficulty => this.battleDifficulty;
         public NextMoveType NextMove => this.nextMove;
         public bool AlphaDefending => this.alphaDefending;
+        public bool IsDevelopment => this.isDevelopment;
         public string[] ClientActions => this.clientActions;
         public string[] DebugLog => this.debugLog;
 
@@ -147,6 +149,7 @@ namespace SG03.UI
             this.sessionId = string.Empty;
             this.battleDifficulty = string.Empty;
             this.alphaDefending = false;
+            this.isDevelopment = false;
             this.debugLog = null;
             this.SetNextMove(string.Empty);
             this.gameStartFired = false;
@@ -290,6 +293,7 @@ namespace SG03.UI
             this.debugLog = output.debug_log;
             this.battleDifficulty = output.metadata?.battle_difficulty ?? output.battle_difficulty;
             this.alphaDefending = output.alpha_defending;
+            this.isDevelopment = output.is_development;
             this.SetNextMove(output.metadata?.next_move ?? output.next_move);
             this.metadataJson = BeautifyJson(JsonUtility.ToJson(output.metadata));
             this.TryFireGameStart();
