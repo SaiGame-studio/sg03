@@ -111,5 +111,8 @@ namespace SG03
 
         /// <summary>Returns the movement component of this lamp.</summary>
         public LampMovement Movement => this.movement;
+
+        /// <summary>True while the lamp is currently animating.</summary>
+        public bool IsAnimating => this.movement != null && this.movement.IsAnimating;
     }
 }

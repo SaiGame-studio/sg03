@@ -10,6 +10,7 @@ namespace SG03
     [Serializable]
     public class CardDefinitionMetadata
     {
+        public string behavior;
         public string description;
         public string race;
         public string type;

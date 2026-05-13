@@ -128,6 +128,39 @@ namespace SG03
         [Tooltip("World-space distance from the defender where PlanningLunge stops.")]
         [SerializeField] private float planningStopDistance = 7f;
 
+        [Tooltip("Fraction (0-1) of the lunge distance the attacker steps backward away from the defender before lunging.")]
+        [SerializeField] private float attackBackstepRatio = 0.15f;
+
+        [Tooltip("Duration of the backstep phase in seconds.")]
+        [SerializeField] private float attackBackstepDuration = 0.12f;
+
+        [Tooltip("Ease for the backstep phase.")]
+        [SerializeField] private Ease attackBackstepEase = Ease.OutQuad;
+
+        // ─── Ability ──────────────────────────────────────────────────────────────
+
+        [Header("Ability")]
+        [Tooltip("World units the card rises while activating its ability.")]
+        [SerializeField] private float abilityRiseHeight = 1.2f;
+
+        [Tooltip("Extra scale multiplier applied at the peak of the ability animation (1 = no change).")]
+        [SerializeField] private float abilityScalePeak = 1.15f;
+
+        [Tooltip("Duration of the rise/scale-up phase in seconds.")]
+        [SerializeField] private float abilityRiseDuration = 0.18f;
+
+        [Tooltip("Duration of the hold phase at the peak in seconds.")]
+        [SerializeField] private float abilityHoldDuration = 0.12f;
+
+        [Tooltip("Duration of the return phase in seconds.")]
+        [SerializeField] private float abilityReturnDuration = 0.22f;
+
+        [Tooltip("Ease for the rise/scale-up phase.")]
+        [SerializeField] private Ease abilityRiseEase = Ease.OutBack;
+
+        [Tooltip("Ease for the return phase.")]
+        [SerializeField] private Ease abilityReturnEase = Ease.InQuad;
+
         // ─── Runtime state ────────────────────────────────────────────────────────
 
         [Header("State")]
@@ -144,6 +177,7 @@ namespace SG03
         private Sequence faceTween;
         private Sequence damageTween;
         private Sequence attackTween;
+        private Sequence abilityTween;
         private Vector3    preFullDetailPosition;
         private Quaternion preFullDetailRotation;
 
@@ -195,7 +229,8 @@ namespace SG03
             (this.moveTween != null && this.moveTween.IsActive()) ||
             this.isFlipping ||
             (this.damageTween != null && this.damageTween.IsActive()) ||
-            (this.attackTween != null && this.attackTween.IsActive());
+            (this.attackTween != null && this.attackTween.IsActive()) ||
+            (this.abilityTween != null && this.abilityTween.IsActive());
         public FaceState FaceState   => this.faceState;
 
         public void SetMoveDuration(float d)   { this.duration          = d; }
@@ -409,6 +444,23 @@ namespace SG03
         }
 
         /// <summary>
+        /// Plays the attack animation with a small backstep first: card pulls back slightly away from the defender,
+        /// then lunges forward into the defender, then returns to its origin.
+        /// </summary>
+        public void AttackBackstepLunge(Vector3 defenderPosition)
+        {
+            Vector3 origin     = this.transform.position;
+            Vector3 toDefender = defenderPosition - origin;
+            Vector3 backstep   = origin - toDefender * this.attackBackstepRatio;
+            Vector3 lunged     = Vector3.Lerp(origin, defenderPosition, this.attackLungeRatio);
+            this.attackTween?.Kill();
+            this.attackTween = DOTween.Sequence();
+            this.attackTween.Append(this.transform.DOMove(backstep, this.attackBackstepDuration).SetEase(this.attackBackstepEase));
+            this.attackTween.Append(this.transform.DOMove(lunged,   this.attackLungeDuration).SetEase(this.attackLungeEase));
+            this.attackTween.Append(this.transform.DOMove(origin,   this.attackReturnDuration).SetEase(this.attackReturnEase));
+        }
+
+        /// <summary>
         /// Moves the card forward toward the defender and stops exactly
         /// <see cref="planningStopDistance"/> world units away from the defender.
         /// No return tween — the card stays there waiting for alpha's response.
@@ -420,6 +472,35 @@ namespace SG03
             this.attackTween?.Kill();
             this.attackTween = DOTween.Sequence();
             this.attackTween.Append(this.transform.DOMove(lunged, this.attackLungeDuration).SetEase(this.attackLungeEase));
+        }
+
+        /// <summary>
+        /// Moves the card directly to the given destination position (no stop-distance offset).
+        /// Used when the caller has already computed the exact world position to stop at.
+        /// </summary>
+        public void PlanningLungeTo(Vector3 destination)
+        {
+            this.attackTween?.Kill();
+            this.attackTween = DOTween.Sequence();
+            this.attackTween.Append(this.transform.DOMove(destination, this.attackLungeDuration).SetEase(this.attackLungeEase));
+        }
+
+        /// <summary>
+        /// Plays the ability activation animation: card rises and scales up, holds briefly, then returns.
+        /// </summary>
+        public void ActivateAbility()
+        {
+            Vector3 origin     = this.transform.position;
+            Vector3 risen      = origin + Vector3.up * this.abilityRiseHeight;
+            Vector3 baseScale  = this.transform.localScale;
+            Vector3 peakScale  = baseScale * this.abilityScalePeak;
+            this.abilityTween?.Kill();
+            this.abilityTween = DOTween.Sequence();
+            this.abilityTween.Append(this.transform.DOMove(risen, this.abilityRiseDuration).SetEase(this.abilityRiseEase));
+            this.abilityTween.Join(this.transform.DOScale(peakScale, this.abilityRiseDuration).SetEase(this.abilityRiseEase));
+            this.abilityTween.AppendInterval(this.abilityHoldDuration);
+            this.abilityTween.Append(this.transform.DOMove(origin, this.abilityReturnDuration).SetEase(this.abilityReturnEase));
+            this.abilityTween.Join(this.transform.DOScale(baseScale, this.abilityReturnDuration).SetEase(this.abilityReturnEase));
         }
 
         // ─── Hover handlers ───────────────────────────────────────────────────────
