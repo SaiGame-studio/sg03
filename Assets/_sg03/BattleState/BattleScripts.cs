@@ -124,6 +124,7 @@ namespace SG03
             }
 
             this.isRunning = true;
+            Debug.Log($"[BattleScripts] RunScript: <color=#FFFF00>{scriptName}</color>");
             this.battleScript.RunScript(scriptName, requestBody, this.ReleaseLockThen(onSuccess), this.ReleaseLockThen(onError));
         }
 

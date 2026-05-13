@@ -30,6 +30,7 @@ namespace SG03.UI
         [SerializeField] private string sessionId;
         [SerializeField] private string battleDifficulty;
         [SerializeField] private bool alphaDefending;
+        [SerializeField] private bool isDevelopment;
         [SerializeField] private NextMoveType nextMove;
         [SerializeField] private BattleCardSlot[] alphaTheVoid;
         [SerializeField] private BattleCardSlot[] omegaTheVoid;
@@ -45,8 +46,10 @@ namespace SG03.UI
         [SerializeField] private string[] debugLog;
 
         [SerializeField][TextArea(5, 20)] private string battleStatusJson;
+        [SerializeField][TextArea(5, 20)] private string metadataJson;
 
         public string BattleStatusJson => this.battleStatusJson;
+        public string MetadataJson => this.metadataJson;
         public int Turn => this.turn;
         public int Action => this.action;
         public int AlphaHp => this.alphaHp;
@@ -68,6 +71,7 @@ namespace SG03.UI
         public string BattleDifficulty => this.battleDifficulty;
         public NextMoveType NextMove => this.nextMove;
         public bool AlphaDefending => this.alphaDefending;
+        public bool IsDevelopment => this.isDevelopment;
         public string[] ClientActions => this.clientActions;
         public string[] DebugLog => this.debugLog;
 
@@ -124,6 +128,7 @@ namespace SG03.UI
         public void ClearData()
         {
             this.battleStatusJson = string.Empty;
+            this.metadataJson = string.Empty;
             this.turn = 0;
             this.action = 0;
             this.alphaHp = 0;
@@ -144,6 +149,7 @@ namespace SG03.UI
             this.sessionId = string.Empty;
             this.battleDifficulty = string.Empty;
             this.alphaDefending = false;
+            this.isDevelopment = false;
             this.debugLog = null;
             this.SetNextMove(string.Empty);
             this.gameStartFired = false;
@@ -155,6 +161,16 @@ namespace SG03.UI
         /// Called by any script that receives a raw battle_status JSON response.
         /// Stores the raw JSON and parses all fields into the cache.
         /// </summary>
+        public void ShowMetadataJson(CardDefinitionMetadata metadata)
+        {
+            if (metadata == null)
+            {
+                this.metadataJson = string.Empty;
+                return;
+            }
+            this.metadataJson = BeautifyJson(JsonUtility.ToJson(metadata));
+        }
+
         public void UpdateFromBattleStatus(string rawJson)
         {
             if (string.IsNullOrWhiteSpace(rawJson)) return;
@@ -275,9 +291,11 @@ namespace SG03.UI
             if (output.omega_back_line != null) this.omegaBackLine = output.omega_back_line;
             this.clientActions = output.client_actions;
             this.debugLog = output.debug_log;
-            this.battleDifficulty = output.battle_difficulty;
+            this.battleDifficulty = output.metadata?.battle_difficulty ?? output.battle_difficulty;
             this.alphaDefending = output.alpha_defending;
-            this.SetNextMove(output.next_move);
+            this.isDevelopment = output.is_development;
+            this.SetNextMove(output.metadata?.next_move ?? output.next_move);
+            this.metadataJson = BeautifyJson(JsonUtility.ToJson(output.metadata));
             this.TryFireGameStart();
             this.OnBattleStatusChanged?.Invoke();
             this.NotifyClientActions();

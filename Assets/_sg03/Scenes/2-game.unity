@@ -6771,6 +6771,7 @@ MonoBehaviour:
   sessionId: 
   battleDifficulty: 
   alphaDefending: 0
+  isDevelopment: 0
   nextMove: 0
   alphaTheVoid: []
   omegaTheVoid: []
@@ -6784,6 +6785,7 @@ MonoBehaviour:
   clientActions: []
   debugLog: []
   battleStatusJson: 
+  metadataJson: 
 --- !u!114 &2015755440
 MonoBehaviour:
   m_ObjectHideFlags: 0
