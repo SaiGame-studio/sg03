@@ -134,15 +134,16 @@ namespace SG03
         public void SetCardHolder(CardHolderCtrl holder, System.Action onReady = null)
         {
             if (this.movement.IsFlipping) return;
-            bool hadHolder = this.cardHolder != null;
+            bool isNewHolder = this.cardHolder == null;
             this.cardHolder = holder;
             if (this.cardHolder == null) return;
-            Location destination = this.cardHolder.HolderLink == Link.front ? Location.in_front : Location.in_back;
-            if (!hadHolder)
-                this.movement.MoveTo(this.cardHolder.transform, destination, () => this.RotateZ180(onReady));
-            else
-                this.movement.MoveTo(this.cardHolder.transform, destination, null);
-            if (!hadHolder) this.FaceDownUnknown();
+            if (!isNewHolder)
+            {
+                this.MoveBackToHolder();
+                return;
+            }
+            this.movement.MoveTo(this.cardHolder.transform, this.cardHolder.HolderLocation, () => this.RotateZ180(onReady));
+            this.FaceDownUnknown();
         }
 
         /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
@@ -208,8 +209,7 @@ namespace SG03
         public void MoveBackToHolder()
         {
             if (this.cardHolder == null) return;
-            Location destination = this.cardHolder.HolderLink == Link.front ? Location.in_front : Location.in_back;
-            this.movement.MoveTo(this.cardHolder.transform, destination);
+            this.movement.MoveBackToLineHolder(this.cardHolder);
         }
 
         /// <summary>Moves the card forward toward the defender and stops there (no return).</summary>

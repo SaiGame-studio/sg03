@@ -75,9 +75,10 @@ namespace SG03
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
-        public Owner HolderOwner => this.owner;
-        public Link  HolderLink  => this.link;
-        public int   Index       => this.index;
+        public Owner HolderOwner    => this.owner;
+        public Link  HolderLink     => this.link;
+        public Location HolderLocation => this.link == Link.front ? Location.in_front : Location.in_back;
+        public int   Index          => this.index;
         public Card3DCtrl HeldCard => this.heldCard;
 
         /// <summary>Links a card to this holder. Pass null to clear the slot.</summary>
