@@ -26,6 +26,9 @@ namespace SG03
         [Tooltip("Ease curve applied to the move-to animation.")]
         [SerializeField] private Ease ease = Ease.OutQuad;
 
+        [Tooltip("Y offset (world units) applied when placing a card into a line slot.")]
+        [SerializeField] private float lineOffsetY = 0.2f;
+
         // ─── In-Hand Hover ────────────────────────────────────────────────────────
 
         [Header("In-Hand Hover")]
@@ -285,13 +288,23 @@ namespace SG03
             if (this.isFlipping) return;
             if (holder == null) return;
             this.ctrl.AssignCardHolder(holder);
-            Location destination = holder.HolderLink == Link.front ? Location.in_front : Location.in_back;
+            Location destination = holder.HolderLocation;
             this.location = destination;
             this.RecordHandAnchor(holder.transform, destination);
             this.KillAllTweens();
-            Vector3 lineDestination = holder.transform.position + new Vector3(0f, 0.2f, 0f);
+            Vector3 lineDestination = holder.transform.position + new Vector3(0f, this.lineOffsetY, 0f);
             this.StartMoveTween(lineDestination, this.duration, this.ease, onReady);
             this.FaceDownUnknown();
+        }
+
+        public void MoveBackToLineHolder(CardHolderCtrl holder)
+        {
+            if (holder == null) return;
+            this.location = holder.HolderLocation;
+            this.RecordHandAnchor(holder.transform, this.location);
+            this.KillAllTweens();
+            Vector3 lineDestination = holder.transform.position + new Vector3(0f, this.lineOffsetY, 0f);
+            this.StartMoveTween(lineDestination, this.duration, this.ease, null);
         }
 
         /// <summary>Smoothly rotates the card to face-up using global euler angles.</summary>
