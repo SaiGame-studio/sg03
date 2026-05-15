@@ -256,7 +256,7 @@ namespace SG03
         public Owner CardOwner => this.cardOwner;
 
         /// <summary>Returns true if this card's type is character.</summary>
-        public bool IsCharacter() => this.CardType == CardType.character;
+        public bool IsCharacter() => this.definition?.metadata?.type == "character";
 
         /// <summary>Stores the definition data looked up by code name from BattleCardDefinitions.</summary>
         public void SetDefinition(CardDefinitionData def) => this.definition = def;

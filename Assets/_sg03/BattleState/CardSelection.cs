@@ -20,6 +20,9 @@ namespace SG03
         /// <summary>Fired when the player exits full-detail view.</summary>
         public static event System.Action OnFullDetailExited;
 
+        [SerializeField] private bool debugLog;
+
+
         [SerializeField] private BattleStateCtrl battleStateCtrl;
 
         [SerializeField] private Card3DCtrl selected;
@@ -46,6 +49,11 @@ namespace SG03
 
         [Header("Front Line Holders")]
         [SerializeField] private CardHolderCtrl[] alphaFrontLineHolders;
+
+        [Header("Deploy Limit")]
+        [SerializeField] private int maxCharDeploy   = 1;
+        [SerializeField] private int countCharDeploy = 0;
+
 
         private bool IsTargeting => this.targetingSource != null;
 
@@ -561,9 +569,10 @@ namespace SG03
         private void OnHolderSelected(CardHolderCtrl holder)
         {
             this.holderSelected = holder;
-            if (this.selected == null) return;
+            if (this.selected == null) { if (this.debugLog) Debug.LogWarning("[CardSelection] OnHolderSelected — no card selected"); return; }
+            if (this.debugLog) Debug.Log($"[CardSelection] OnHolderSelected — card='{this.selected.name}' owner={this.selected.CardOwner} isCharacter={this.selected.IsCharacter()} location={this.selected.Location} → holder='{holder.name}' link={holder.HolderLink} owner={holder.HolderOwner} heldCard={holder.HeldCard?.name ?? "null"}");
             if (!this.IsCardDeployPhase()) return;
-            if (holder.HeldCard != null) return;
+            if (holder.HeldCard != null) { if (this.debugLog) Debug.LogWarning($"[CardSelection] OnHolderSelected — holder '{holder.name}' already has card '{holder.HeldCard.name}' — skipped"); return; }
             if (!this.IsPlacementValid(this.selected, holder)) return;
             Location fromLocation = this.selected.Location;
             CardHolderCtrl fromHolder = this.selected.CardHolder;
@@ -571,6 +580,7 @@ namespace SG03
                 this.PlaceFromHandIntoHolder(holder);
             else
                 this.PlaceSelectedIntoEmptyHolder(holder);
+            if (fromLocation == Location.in_hand) this.TryIncrementCharDeploy(this.selected);
             this.NotifyBattleStateOnPlacement(fromLocation, fromHolder, holder);
         }
 
@@ -604,7 +614,7 @@ namespace SG03
 
         private void PlaceFromHandIntoHolder(CardHolderCtrl targetHolder)
         {
-            if (this.selected.IsFlipping) return;
+            if (this.selected.IsFlipping) { if (this.debugLog) Debug.LogWarning($"[CardSelection] PlaceFromHandIntoHolder — card '{this.selected.name}' is still flipping — skipped"); return; }
             Card3DCtrl cardToRotate = this.selected;
             cardToRotate.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(cardToRotate)));
             targetHolder.SetCard(cardToRotate);
@@ -620,30 +630,47 @@ namespace SG03
 
         private bool IsCardDeployPhase()
         {
-            if (this.battleStateCtrl?.BattleState == null) return false;
-            return this.battleStateCtrl.BattleState.NextMove == NextMoveType.card_deploy;
+            if (this.battleStateCtrl?.BattleState == null) { if (this.debugLog) Debug.LogWarning("[CardSelection] IsCardDeployPhase — battleState is NULL"); return false; }
+            NextMoveType nextMove = this.battleStateCtrl.BattleState.NextMove;
+            bool valid = nextMove == NextMoveType.card_deploy || nextMove == NextMoveType.alpha_draw;
+            if (!valid && this.debugLog) Debug.LogWarning($"[CardSelection] IsCardDeployPhase — NextMove={nextMove} — not a deploy phase, skipped");
+            return valid;
         }
 
         private bool IsPlacementValid(Card3DCtrl card, CardHolderCtrl holder)
         {
-            if (card.CardOwner == Owner.omega) return false;
-            if (card.CardOwner != holder.HolderOwner) return false;
-            if (card.IsCharacter() && holder.HolderLink != Link.front) return false;
-            if (!card.IsCharacter() && holder.HolderLink != Link.back) return false;
-            if (card.IsCharacter() && this.IsCharacterAlreadyOnFrontLine(card)) return false;
+            if (card.CardOwner == Owner.omega) { if (this.debugLog) Debug.LogWarning($"[CardSelection] IsPlacementValid — card '{card.name}' is omega-owned — skipped"); return false; }
+            if (card.CardOwner != holder.HolderOwner) { if (this.debugLog) Debug.LogWarning($"[CardSelection] IsPlacementValid — card owner={card.CardOwner} != holder owner={holder.HolderOwner} — skipped"); return false; }
+            if (card.IsCharacter() && card.Location == Location.in_hand && this.countCharDeploy >= this.maxCharDeploy) { if (this.debugLog) Debug.LogWarning($"[CardSelection] IsPlacementValid — char deploy limit reached ({this.countCharDeploy}/{this.maxCharDeploy}) — skipped"); return false; }
+            if (card.IsCharacter() && holder.HolderLink != Link.front) { if (this.debugLog) Debug.LogWarning($"[CardSelection] IsPlacementValid — character card must go to front, but holder link={holder.HolderLink} — skipped"); return false; }
+            if (!card.IsCharacter() && holder.HolderLink != Link.back) { if (this.debugLog) Debug.LogWarning($"[CardSelection] IsPlacementValid — non-character card must go to back, but holder link={holder.HolderLink} — skipped"); return false; }
             return true;
         }
 
-        private bool IsCharacterAlreadyOnFrontLine(Card3DCtrl excludeCard)
+        private void TryIncrementCharDeploy(Card3DCtrl card)
         {
-            if (this.alphaFrontLineHolders == null) return false;
+            if (!card.IsCharacter()) return;
+            this.countCharDeploy++;
+            if (this.debugLog) Debug.Log($"[CardSelection] TryIncrementCharDeploy — countCharDeploy={this.countCharDeploy}/{this.maxCharDeploy}");
+        }
+
+        public void ResetCharDeployCount()
+        {
+            this.countCharDeploy = 0;
+            if (this.debugLog) Debug.Log($"[CardSelection] ResetCharDeployCount — reset to 0 (max={this.maxCharDeploy})");
+        }
+
+        private Card3DCtrl FindFrontLineCharacter(Card3DCtrl excludeCard)
+        {
+            if (this.alphaFrontLineHolders == null) return null;
             foreach (CardHolderCtrl h in this.alphaFrontLineHolders)
             {
                 if (h.HeldCard == null) continue;
                 if (h.HeldCard == excludeCard) continue;
-                if (h.HeldCard.IsCharacter()) return true;
+                if (string.IsNullOrEmpty(h.HeldCard.InventoryItemId)) continue;
+                if (h.HeldCard.IsCharacter()) return h.HeldCard;
             }
-            return false;
+            return null;
         }
 
         private bool IsSwapValid()

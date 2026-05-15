@@ -17,6 +17,9 @@ namespace SG03
         [SerializeField] private int spawnPerFrame = 1;
         [SerializeField] private float spawnInterval = 0.05f;
 
+        [Header("Debug")]
+        [SerializeField] private bool debugLog;
+
         private Coroutine alphaSourceRoutine;
         private Coroutine omegaSourceRoutine;
         private readonly Dictionary<string, Card3DCtrl>    sourceCardRegistry  = new Dictionary<string, Card3DCtrl>();
@@ -66,11 +69,12 @@ namespace SG03
 
         public void CommitAlphaSourceToHand(Card3DCtrl card, string inventoryItemId, int slotIndex)
         {
-            if (card == null) return;
+            if (card == null) { if (this.debugLog) Debug.LogWarning("[CommitAlphaSourceToHand] card is NULL — skipped"); return; }
             Transform target = this.ResolveHandTarget(slotIndex, this.deskPosition.AlphaHand);
-            if (this.IsSlotOccupied(target)) return;
+            if (target == null) { if (this.debugLog) Debug.LogWarning($"[CommitAlphaSourceToHand] no hand target for slot {slotIndex} — skipped"); return; }
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
+            if (this.debugLog) Debug.Log($"[CommitAlphaSourceToHand] MoveAndRotate {card.name} → '{target.name}', moveDuration={this.ActionMoveDuration}");
             card.MoveAndRotate(target, Location.in_hand);
             this.slotOccupancy[target] = card;
             this.handCardRegistry[inventoryItemId] = card;
@@ -98,6 +102,7 @@ namespace SG03
             Card3DCtrl prefab = this.ResolvePrefab();
             if (prefab == null) return null;
             Transform target = this.ResolveHandTarget(slotIndex, this.deskPosition.OmegaHand);
+            if (target == null) return null;
             if (this.IsSlotOccupied(target)) return null;
             Card3DCtrl card = this.DequeueOmegaSourceCard(prefab);
             if (card == null) return null;
@@ -225,9 +230,8 @@ namespace SG03
             card.SetCodeName(code);
             CardDefinitionData omegaLoadDef = this.battleCardDefinitions?.GetDefinitionByCode(code);
             this.ApplyCardFallbacks(card, slot.item_definition_name, omegaLoadDef);
-            card.LoadCardByCodeName(code);
-            card.ApplyTextures();
             card.SetDefinition(omegaLoadDef);
+            card.LoadCardByCodeName(code);
         }
 
         public Card3DCtrl MoveAlphaCardToVoid(string inventoryItemId)
@@ -295,7 +299,7 @@ namespace SG03
         {
             if (this.battleCardDefinitions == null) yield break;
             if (this.battleCardDefinitions.IsLoaded) yield break;
-            Debug.Log("<color=#FFD700>[CardSpawning] Waiting for BattleCardDefinitions to load...</color>");
+            if (this.debugLog) Debug.Log("<color=#FFD700>[CardSpawning] Waiting for BattleCardDefinitions to load...</color>");
             bool loaded = false;
             BattleCardDefinitions.OnDefinitionsLoaded += SetLoaded;
             yield return new UnityEngine.WaitUntil(() => loaded);
@@ -316,7 +320,18 @@ namespace SG03
 
         private Transform ResolveHandTarget(int slotIndex, Transform[] handTargets)
         {
-            return slotIndex < handTargets.Length ? handTargets[slotIndex] : this.deskPosition.AlphaSpawnPoint;
+            if (slotIndex >= 0 && slotIndex < handTargets.Length)
+                return handTargets[slotIndex];
+            return this.FindFirstEmptyHandSlot(handTargets);
+        }
+
+        private Transform FindFirstEmptyHandSlot(Transform[] handTargets)
+        {
+            foreach (Transform slot in handTargets)
+            {
+                if (!this.IsSlotOccupied(slot)) return slot;
+            }
+            return null;
         }
 
         private IEnumerator SpawnAlphaSourceCardsRoutine(int count)
@@ -330,6 +345,8 @@ namespace SG03
                 Card3DCtrl card = this.SpawnCardAt(prefab, this.deskPosition.AlphaSpawnPoint);
                 if (card == null) break;
                 card.SetOwner(Owner.alpha);
+                card.SetMoveDuration(this.ActionMoveDuration);
+                card.SetRotateDuration(this.ActionRotateDuration);
                 card.MoveAndRotate(this.deskPosition.AlphaTheSource, Location.in_source);
                 this.alphaSourceCardQueue.Enqueue(card);
                 this.alphaSourceSpawnedCount++;

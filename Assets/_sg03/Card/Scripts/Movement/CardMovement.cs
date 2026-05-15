@@ -245,7 +245,11 @@ namespace SG03
         /// </summary>
         public void MoveAndRotate(Transform target, Location destination)
         {
-            if (this.isFlipping) return;
+            if (this.isFlipping)
+            {
+                Debug.LogWarning($"[CardMovement] {this.gameObject.name} MoveAndRotate SKIPPED — isFlipping=true");
+                return;
+            }
             this.location = destination;
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
@@ -287,6 +291,7 @@ namespace SG03
         {
             if (this.isFlipping) return;
             if (holder == null) return;
+            // Debug.Log($"[CardMovement] {this.gameObject.name} MoveToUnknow → '{holder.name}' (moveTween active: {this.moveTween != null && this.moveTween.IsActive()})");
             this.ctrl.AssignCardHolder(holder);
             Location destination = holder.HolderLocation;
             this.location = destination;
@@ -593,6 +598,8 @@ namespace SG03
 
         private void KillAllTweens()
         {
+            if (this.moveTween != null && this.moveTween.IsActive())
+                Debug.LogWarning($"[CardMovement] {this.gameObject.name} KillAllTweens — killing active moveTween\n{UnityEngine.StackTraceUtility.ExtractStackTrace()}");
             this.KillMoveTween();
             this.yTween?.Kill();
             this.yTween = null;

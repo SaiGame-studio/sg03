@@ -332,6 +332,7 @@ namespace SG03.UI
                 case "init_cards": return NextMoveType.init_cards;
                 case "alpha_turn": return NextMoveType.alpha_turn;
                 case "omega_turn": return NextMoveType.omega_turn;
+                case "alpha_draw": return NextMoveType.alpha_draw;
                 default: return NextMoveType.unknown;
             }
         }
