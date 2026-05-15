@@ -14,9 +14,13 @@ namespace SG03
         [SerializeField] private CardSpawning         cardSpawning;
         [SerializeField] private BattleCardDefinitions battleCardDefinitions;
         [SerializeField] private LampOfSoulCtrl       lampOfSoul;
+        [SerializeField] private CardSelection        cardSelection;
         [SerializeField] private float actionInterval = 0.1f;
         [SerializeField] private float actionMoveDuration   = 1f;
         [SerializeField] private float actionRotateDuration = 0.4f;
+
+        [Header("Debug")]
+        [SerializeField] private bool logActions = false;
 
         [Header("Action Log")]
         [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
@@ -30,6 +34,7 @@ namespace SG03
             this.LoadCardSpawning();
             this.LoadBattleCardDefinitions();
             this.LoadLampOfSoul();
+            this.LoadCardSelection();
         }
 
         protected virtual void LoadBattleState()
@@ -66,6 +71,13 @@ namespace SG03
             Debug.LogWarning(this.transform.name + ": LoadLampOfSoul", this.gameObject);
         }
 
+        protected virtual void LoadCardSelection()
+        {
+            if (this.cardSelection != null) return;
+            this.cardSelection = UnityEngine.Object.FindFirstObjectByType<CardSelection>(FindObjectsInactive.Include);
+            Debug.LogWarning(this.transform.name + ": LoadCardSelection", this.gameObject);
+        }
+
         private void OnEnable()  => this.SubscribeEvents();
         private void OnDisable() => this.UnsubscribeEvents();
 
@@ -96,7 +108,7 @@ namespace SG03
                 this.StartDispatch();
                 return;
             }
-            Debug.Log("<color=#FFD700>[ClientActions] Waiting for BattleCardDefinitions to load before dispatching actions...</color>", this.gameObject);
+            if (this.logActions) Debug.Log("<color=#FFD700>[ClientActions] Waiting for BattleCardDefinitions to load before dispatching actions...</color>", this.gameObject);
             BattleCardDefinitions.OnDefinitionsLoaded -= this.OnDefinitionsLoaded;
             BattleCardDefinitions.OnDefinitionsLoaded += this.OnDefinitionsLoaded;
         }
@@ -221,10 +233,17 @@ namespace SG03
             onDone();
         }
 
+        private void LogAction(ClientActionLog log)
+        {
+            if (!this.logActions) return;
+            string paramsText = string.IsNullOrEmpty(log.Parameters) ? "(no params)" : log.Parameters;
+            Debug.Log($"[ClientActions] <color=#88FFFF>Executing:</color> <b>{log.ActionName}</b> | {paramsText}", this.gameObject);
+        }
+
         private Coroutine ExecuteAction(ClientActionLog log)
         {
             this.SyncActionMoveDuration();
-            // Debug.Log($"[ClientActions] <color=#88FFFF>Executing:</color> <b>{log.ActionName}</b> | {(string.IsNullOrEmpty(log.Parameters) ? "(no params)" : log.Parameters)} | executed={log.Executed}", this.gameObject);
+            this.LogAction(log);
             string[] parameters = string.IsNullOrEmpty(log.Parameters)
                 ? System.Array.Empty<string>()
                 : log.Parameters.Split(',');
@@ -254,6 +273,7 @@ namespace SG03
                 case "omega_planing_character_attack": result = this.ExecuteOmegaPlaningCharacterAttack(parameters); break;
                 case "alpha_take_lamp":             result = this.ExecuteLampMoveToAlpha();                break;
                 case "omega_take_lamp":             result = this.ExecuteLampMoveToOmega();                break;
+                case "omega_turn_end":              result = this.ExecuteOmegaEndTurn();                    break;
                 default:
                     Debug.LogWarning($"[ClientActions] Unknown action: {log.ActionName}", this.gameObject);
                     handled = false;
@@ -290,8 +310,13 @@ namespace SG03
         private IEnumerator AlphaSourceToHandRoutine(string inventoryItemId, int slotIndex)
         {
             Card3DCtrl card = this.cardSpawning?.SetAlphaSourceCardData(inventoryItemId);
+            if (this.logActions) Debug.Log($"[AlphaSourceToHand] card={(card != null ? card.name : "NULL")}, id={inventoryItemId}, slot={slotIndex}");
             yield return new WaitForSeconds(this.actionInterval);
+            if (this.logActions) Debug.Log($"[AlphaSourceToHand] before commit — IsAnimating={card?.IsAnimating}, Location={card?.Location}");
             this.cardSpawning?.CommitAlphaSourceToHand(card, inventoryItemId, slotIndex);
+            if (this.logActions) Debug.Log($"[AlphaSourceToHand] after commit — IsAnimating={card?.IsAnimating}, Location={card?.Location}");
+            if (card != null) yield return this.StartCoroutine(this.WaitForCard(card));
+            if (this.logActions) Debug.Log($"[AlphaSourceToHand] WaitForCard done — IsAnimating={card?.IsAnimating}");
         }
 
         private Coroutine ExecuteOmegaSourceToHand(string[] parameters)
@@ -474,6 +499,12 @@ namespace SG03
             if (this.lampOfSoul == null) return null;
             this.lampOfSoul.MoveToOmega();
             return this.StartCoroutine(this.WaitForLamp());
+        }
+
+        private Coroutine ExecuteOmegaEndTurn()
+        {
+            this.cardSelection?.ResetCharDeployCount();
+            return null;
         }
 
         private void SyncActionMoveDuration()
