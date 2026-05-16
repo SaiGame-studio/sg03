@@ -21,6 +21,7 @@ namespace SG03
         [SerializeField] private string scriptNameGetCardDefinitions = "get_card_definitions";
         [SerializeField] private string scriptNameCardDeploy         = "card_deploy";
         [SerializeField] private string scriptNameAlphaAttacking     = "alpha_attacking";
+        [SerializeField] private string scriptNameAlphaCardDeploy    = "alpha_card_deploy";
         [SerializeField] private string scriptNameAlphaTurnEnd       = "alpha_turn_end";
         [SerializeField] private string scriptNameAlphaDefendingEnd  = "alpha_defending_end";
 
@@ -100,6 +101,14 @@ namespace SG03
             this.RunWithLock(this.scriptNameAlphaAttacking, requestBody, onSuccess, onError);
         }
 
+        public void RunAlphaCardDeploy(Action<string> onSuccess, Action<string> onError)
+        {
+            if (this.IsBattleScriptMissing(nameof(this.RunAlphaCardDeploy))) return;
+            string requestBody = this.BuildAlphaCardDeployRequestBody();
+            this.LogPayload("RunAlphaCardDeploy", "#AADDFF", requestBody);
+            this.RunWithLock(this.scriptNameAlphaCardDeploy, requestBody, onSuccess, onError);
+        }
+
         public void RunAlphaTurnEnd(Action<string> onSuccess, Action<string> onError)
         {
             if (this.IsBattleScriptMissing(nameof(this.RunAlphaTurnEnd))) return;
@@ -124,17 +133,28 @@ namespace SG03
             }
 
             this.isRunning = true;
-            Debug.Log($"[BattleScripts] RunScript: <color=#FFFF00>{scriptName}</color>");
-            this.battleScript.RunScript(scriptName, requestBody, this.ReleaseLockThen(onSuccess), this.ReleaseLockThen(onError));
+            string payloadPart = string.IsNullOrEmpty(requestBody) ? string.Empty : "\n" + requestBody;
+            Debug.Log($"[BattleScripts] RunScript: <color=#FFFF00>{scriptName}</color>{payloadPart}");
+            this.battleScript.RunScript(scriptName, requestBody, this.ReleaseLockThenSuccess(scriptName, onSuccess), this.ReleaseLockThenError(scriptName));
         }
 
-        /// <summary>Returns a wrapper that releases the in-flight lock and then invokes the original callback.</summary>
-        private Action<string> ReleaseLockThen(Action<string> callback)
+        private Action<string> ReleaseLockThenSuccess(string scriptName, Action<string> onSuccess)
         {
             return result =>
             {
                 this.isRunning = false;
-                callback?.Invoke(result);
+                if (this.logPayload)
+                    Debug.Log($"[BattleScripts] <color=#FFFF00>{scriptName}</color> response:\n{result}", this.gameObject);
+                onSuccess?.Invoke(result);
+            };
+        }
+
+        private Action<string> ReleaseLockThenError(string scriptName)
+        {
+            return error =>
+            {
+                this.isRunning = false;
+                Debug.LogWarning($"[BattleScripts] '{scriptName}' error: {error}", this.gameObject);
             };
         }
 
@@ -156,6 +176,17 @@ namespace SG03
         private string BuildAlphaAttackingRequestBody(string attackerInventoryItemId, string defenderInventoryItemId)
         {
             return $"{{\"payload\":{{\"attacker_inventory_item_id\":\"{attackerInventoryItemId}\",\"defender_inventory_item_id\":\"{defenderInventoryItemId}\"}}}}";
+        }
+
+        private string BuildAlphaCardDeployRequestBody()
+        {
+            string[] hand                  = this.CollectInventoryIds(this.battleState?.AlphaHand);
+            CardDeployLineSlot[] frontLine = this.CollectLineSlots(this.battleState?.AlphaFrontLine);
+            CardDeployLineSlot[] backLine  = this.CollectLineSlots(this.battleState?.AlphaBackLine);
+            string handJson  = this.ToJsonStringArray(hand);
+            string frontJson = this.ToJsonLineSlotArray(frontLine);
+            string backJson  = this.ToJsonLineSlotArray(backLine);
+            return $"{{\"payload\":{{\"hand\":{handJson},\"front_line\":{frontJson},\"back_line\":{backJson}}}}}";
         }
 
         private string BuildCardDeployRequestBody()

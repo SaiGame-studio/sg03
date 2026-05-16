@@ -27,6 +27,9 @@ namespace SG03
 
         private Coroutine dispatchRoutine;
 
+        /// <summary>True while client actions are still being dispatched.</summary>
+        public bool IsDispatching => this.dispatchRoutine != null;
+
         protected override void LoadComponents()
         {
             base.LoadComponents();
