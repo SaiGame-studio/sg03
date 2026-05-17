@@ -1122,11 +1122,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 8aa14df4b183d0c4d92a1150de993a88, type: 3}
+        m_Texture: {fileID: 2800000, guid: e3c56984d9d4b7643b578df0d2443d8c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 8aa14df4b183d0c4d92a1150de993a88, type: 3}
+        m_Texture: {fileID: 2800000, guid: e3c56984d9d4b7643b578df0d2443d8c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -1814,10 +1814,6 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1061435743}
-    - target: {fileID: 9041437042871058224, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
-      propertyPath: cardNamePrefix
-      value: 
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -1543,13 +1543,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 585805519}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40673664, y: 0, z: 0, w: 0.9135455}
-  m_LocalPosition: {x: 0, y: 39, z: -32}
+  m_LocalRotation: {x: 0.46174863, y: 0, z: 0, w: 0.8870109}
+  m_LocalPosition: {x: 0, y: 39.5, z: -32}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 948749803}
-  m_LocalEulerAnglesHint: {x: 48, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 55, y: 0, z: 0}
 --- !u!1 &632999077
 GameObject:
   m_ObjectHideFlags: 0
@@ -3437,11 +3437,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 8aa14df4b183d0c4d92a1150de993a88, type: 3}
+        m_Texture: {fileID: 2800000, guid: e3c56984d9d4b7643b578df0d2443d8c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 8aa14df4b183d0c4d92a1150de993a88, type: 3}
+        m_Texture: {fileID: 2800000, guid: e3c56984d9d4b7643b578df0d2443d8c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -6900,6 +6900,7 @@ MonoBehaviour:
   scriptNameGetCardDefinitions: get_card_definitions
   scriptNameCardDeploy: card_deploy
   scriptNameAlphaAttacking: alpha_attacking
+  scriptNameAlphaCardDeploy: alpha_card_deploy
   scriptNameAlphaTurnEnd: alpha_turn_end
   scriptNameAlphaDefendingEnd: alpha_defending_end
   battleState: {fileID: 2015755439}
@@ -7951,26 +7952,6 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1086256998}
-    - target: {fileID: 4719509819920680533, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: flipAxis.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4719509819920680533, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: flipAxis.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4719509819920680533, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: flipAxisUnknown.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4719509819920680533, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: flipAxisUnknown.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4719509819920680533, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: planningStopDistance
-      value: 7
-      objectReference: {fileID: 0}
     - target: {fileID: 4973814592829607053, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_LocalPosition.x
       value: -75.99

@@ -1070,6 +1070,46 @@ MonoBehaviour:
   card: {fileID: 1279015152172670498}
   loader: {fileID: 7980353759426569992}
   movement: {fileID: 4719509819920680533}
+  cardOwner: 0
+  codeName: 
+  inventoryItemId: 
+  definition:
+    id: 
+    item_code: 
+    name: 
+    category: 
+    rarity: 
+    grid_width: 0
+    grid_height: 0
+    is_stackable: 0
+    allow_client_update_qty: 0
+    client_writable: 0
+    game_id: 
+    created_at: 
+    created_by: 
+    updated_at: 
+    updated_by: 
+    base_stats:
+      atk: 0
+      def: 0
+      star: 0
+      atk_add: 0
+      atk_deduct: 0
+      def_add: 0
+      def_deduct: 0
+      stun_count: 0
+      summon_count: 0
+      hp_restore: 0
+    metadata:
+      behavior: 
+      description: 
+      race: 
+      type: 
+      gender: 
+      char_code: 
+      abilities: 
+      summon: 
+  expose: 0
   cardHolder: {fileID: 0}
 --- !u!114 &4719509819920680533
 MonoBehaviour:
@@ -1086,6 +1126,7 @@ MonoBehaviour:
   ctrl: {fileID: 724914520211398535}
   duration: 1
   ease: 6
+  lineOffsetY: 0.2
   hoverOffsetY: 0.3
   hoverDuration: 0.15
   hoverEase: 6
@@ -1098,7 +1139,34 @@ MonoBehaviour:
   fullDetailReturnEase: 7
   faceUpRotation: {x: 90, y: 0, z: 0}
   faceDownRotation: {x: -90, y: 0, z: 0}
+  flipAxisUpDown: {x: 0, y: 0, z: 1}
+  flipRiseHeight: 5
+  flipDuration: 0.4
+  flipEase: 7
+  rotateY180Duration: 0.4
+  rotateY180Ease: 7
+  damagedRiseHeight: 1.5
+  damagedPhaseDuration: 0.15
+  damagedRiseEase: 6
+  damagedFallEase: 5
+  attackLungeRatio: 0.4
+  attackLungeDuration: 0.15
+  attackReturnDuration: 0.25
+  attackLungeEase: 6
+  attackReturnEase: 5
+  planningStopDistance: 7
+  attackBackstepRatio: 0.15
+  attackBackstepDuration: 0.12
+  attackBackstepEase: 6
+  abilityRiseHeight: 1.2
+  abilityScalePeak: 1.15
+  abilityRiseDuration: 0.18
+  abilityHoldDuration: 0.12
+  abilityReturnDuration: 0.22
+  abilityRiseEase: 27
+  abilityReturnEase: 5
   location: 0
+  faceState: 0
 --- !u!65 &2260832097321709496
 BoxCollider:
   m_ObjectHideFlags: 0

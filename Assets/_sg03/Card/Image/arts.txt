@@ -32,3 +32,12 @@ hãy vẽ một Iron Citadel tươi sáng, đừng vẽ người chỉ tòa thà
 
 
 hãy vẽ một abyssal mist u ám, hãy vẽ 1 người đang tấng công 1 người khác từ phía sau, những gì nhìn thấy được chỉ là bóng của 2 người đó trong sương mù, theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050, 4k resolution, chủ thể được đặt tại phần ba trên (Upper third) của khung hình
+
+
+card holder front character:
+Tông màu đề xuất: Màu Vàng cát, Cam ấm, hoặc Nâu đất sáng.
+hãy vẽ mặt trước của một lá bài ma thuật có màu chủ đạo là Nâu đất sáng, khi vực hiển thị ảnh nhân vật chiếm 4/6 diện tích ảnh và trong suốt. Phân dưới là khu vục card description, góc trên bên trái của card des là Card name, góc trên bên phải là Card start có tối đa 9 start, hãy chừa place holder để tôi điều thông tin này sau. Góc dưới bên trái của card description là Atk chỉ để icon đừng để số và chỗ trống để tôi điều số vều sau. Góc dưới bên phải của card description là Def chỉ để icon đừng để số và chỗ trống để tôi điều số vều sau. Trung tâp của card des là 1 vùng trống để tôi điền mô tả của card, phần này cần rất nhiều diện tíc có thể. vẽ theo phong cách Hyper-Realistic Rendering of Anime Characters, Dark Gritty Fantasy, Cinematic, image size 750x1050
+
+
+card holder front magic:
+Tông màu đề xuất: Màu Xanh lục bảo (Emerald Green) hoặc Xanh lam huyền bí (Mystic Blue).
