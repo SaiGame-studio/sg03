@@ -84,6 +84,13 @@ namespace SG03
         private float     currentYAngle = 0f;
         private Coroutine flipCoroutine;
 
+        // ─── Unity lifecycle ──────────────────────────────────────────────────────
+
+        private void Awake()
+        {
+            this.ApplyFrontFaceCulling();
+        }
+
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
@@ -252,6 +259,26 @@ namespace SG03
         {
             if (rend == null || texture == null) return;
             rend.material.mainTexture = texture;
+        }
+
+        /// <summary>
+        /// Makes all card text components visible from the front side only.
+        /// Prevents text from showing through the back of the card.
+        /// </summary>
+        private void ApplyFrontFaceCulling()
+        {
+            SetTMPCullMode(this.cardNameText);
+            SetTMPCullMode(this.starsText);
+            SetTMPCullMode(this.atkText);
+            SetTMPCullMode(this.defText);
+            SetTMPCullMode(this.descriptionText);
+        }
+
+        /// <summary>Sets Back face culling on a single TMP component's material instance.</summary>
+        private static void SetTMPCullMode(TMPro.TextMeshPro tmp)
+        {
+            if (tmp == null) return;
+            tmp.fontMaterial.SetFloat("_CullMode", 2f);
         }
     }
 }
