@@ -244,8 +244,8 @@ namespace SG03
 
             this.SetTMPText(this.cardNameText,    displayName);
             this.SetTMPText(this.starsText,       new string('*', displayStars));
-            this.SetTMPText(this.atkText,         $"ATK/{displayAtk}");
-            this.SetTMPText(this.defText,         $"DEF/{displayDef}");
+            this.SetTMPText(this.atkText,         $"{displayAtk}");
+            this.SetTMPText(this.defText,         $"{displayDef}");
             this.SetTMPText(this.descriptionText, displayDescription);
         }
 

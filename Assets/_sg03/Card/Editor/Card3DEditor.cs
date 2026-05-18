@@ -121,8 +121,10 @@ namespace SG03
             so.ApplyModifiedProperties();
         }
 
-        // Assigns a one-sided transparent material (URP Unlit, Cull Back) to each quad
-        // renderer so alpha channels work correctly and quads are invisible from behind.
+        // Assigns a depth-writing, alpha-clip, one-sided (Cull Back) material to each
+        // quad renderer. Using SG03/CardCharacter (ZWrite On, AlphaTest queue) ensures
+        // every opaque card pixel is written to the depth buffer, so TMP text from any
+        // other card that is further from the camera fails ZTest and is properly occluded.
         private static void SetupMaterials(Card3D card)
         {
             SerializedObject so = new SerializedObject(card);
@@ -144,32 +146,18 @@ namespace SG03
             r.sharedMaterial = mat;
         }
 
-        // Creates a transparent, one-sided (Cull Back) material using URP Unlit.
-        // Falls back to Sprites/Default if URP Unlit is unavailable.
+        // Creates a depth-writing, alpha-clip, one-sided material using SG03/CardCharacter.
+        // ZWrite On + AlphaTest queue ensures card quads write to the depth buffer so that
+        // TextMeshPro text (Transparent queue, ZTest LEqual) from other cards is occluded.
+        // Falls back to Legacy Cutout/Diffuse if the custom shader is not found.
         private static Material CreateCardMaterial(string matName)
         {
-            Shader urpUnlit = Shader.Find("Universal Render Pipeline/Unlit");
-            if (urpUnlit == null)
-            {
-                Material fallback = new Material(Shader.Find("Sprites/Default"));
-                fallback.name = matName;
-                return fallback;
-            }
+            Shader shader = Shader.Find("SG03/CardCharacter");
+            if (shader == null)
+                shader = Shader.Find("Legacy Shaders/Transparent/Cutout/Diffuse");
 
-            Material mat = new Material(urpUnlit);
+            Material mat = new Material(shader);
             mat.name = matName;
-
-            mat.SetFloat("_Surface",      1f);  // Transparent
-            mat.SetFloat("_Blend",        0f);  // Alpha
-            mat.SetFloat("_Cull",         2f);  // Back
-            mat.SetFloat("_ZWrite",       0f);
-            mat.SetFloat("_SrcBlend",     5f);  // SrcAlpha
-            mat.SetFloat("_DstBlend",    10f);  // OneMinusSrcAlpha
-            mat.SetFloat("_SrcBlendAlpha", 1f); // One
-            mat.SetFloat("_DstBlendAlpha", 0f); // Zero
-            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-
             return mat;
         }
 
