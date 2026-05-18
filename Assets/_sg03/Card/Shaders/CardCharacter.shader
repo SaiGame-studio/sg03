@@ -6,7 +6,7 @@ Shader "SG03/CardCharacter"
     Properties
     {
         _MainTex ("Texture", 2D)             = "white" {}
-        _Cutoff  ("Alpha Cutoff", Range(0,1)) = 0.01
+        _Cutoff  ("Alpha Cutoff", Range(0,1)) = 0.2
     }
 
     SubShader

@@ -169,6 +169,7 @@ namespace SG03
 
             Material mat = new Material(shader);
             mat.name = matName;
+            mat.SetFloat("_Cull", 2f); // Cull Back — hide the rear face of each card quad
             return mat;
         }
 

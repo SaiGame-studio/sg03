@@ -91,6 +91,15 @@ namespace SG03
         {
             this.ApplyFrontFaceCulling();
             this.ApplySortingGroup();
+            this.HideCharacterRenderer();
+        }
+
+        // Hides the character quad until a texture is loaded via ApplyTextures.
+        // Prevents the white default texture from showing when no CardData is assigned.
+        private void HideCharacterRenderer()
+        {
+            if (this.characterRenderer == null) return;
+            this.characterRenderer.enabled = false;
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -137,6 +146,7 @@ namespace SG03
             SetRendererTexture(this.frontFrameRenderer, frame);
             SetRendererTexture(this.characterRenderer,  this.cardData.CharacterTexture);
             SetRendererTexture(this.backRenderer,       back);
+            this.SetCharacterRendererVisible(this.cardData.CharacterTexture != null);
 
             this.ApplyCardText();
         }
@@ -255,6 +265,12 @@ namespace SG03
         {
             if (tmp == null) return;
             tmp.text = text;
+        }
+
+        private void SetCharacterRendererVisible(bool visible)
+        {
+            if (this.characterRenderer == null) return;
+            this.characterRenderer.enabled = visible;
         }
 
         private static void SetRendererTexture(Renderer rend, Texture2D texture)
