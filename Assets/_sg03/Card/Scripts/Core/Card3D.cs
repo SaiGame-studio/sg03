@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SG03
 {
@@ -89,7 +90,7 @@ namespace SG03
         private void Awake()
         {
             this.ApplyFrontFaceCulling();
-            this.ApplyRenderOrder();
+            this.ApplySortingGroup();
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -276,15 +277,47 @@ namespace SG03
         }
 
         /// <summary>
-        /// Ensures Frame always renders on top of Character by setting its render queue
-        /// one step higher. Fixes Z-fighting on coplanar transparent quads.
+        /// Adds a SortingGroup to the card root so every renderer on this card
+        /// is treated as one atomic unit during transparency sorting.
+        /// Prevents text from any other card from interleaving with
+        /// the Character/Frame/Text layers of this card.
         /// </summary>
-        private void ApplyRenderOrder()
+        private void ApplySortingGroup()
         {
-            if (this.characterRenderer  == null) return;
-            if (this.frontFrameRenderer == null) return;
-            int characterQueue = this.characterRenderer.material.renderQueue;
-            this.frontFrameRenderer.material.renderQueue = characterQueue + 1;
+            this.EnsureSortingGroup();
+            this.ApplySortingOrder();
+        }
+
+        private void EnsureSortingGroup()
+        {
+            if (this.gameObject.GetComponent<SortingGroup>() != null) return;
+            this.gameObject.AddComponent<SortingGroup>();
+        }
+
+        /// <summary>
+        /// Sets per-renderer sortingOrder within this card's SortingGroup:
+        /// Character (0) → Text (1) → Frame (2).
+        /// </summary>
+        private void ApplySortingOrder()
+        {
+            if (this.characterRenderer  != null) this.characterRenderer.sortingOrder  = 0;
+            this.SetTextSortingOrder(1);
+            if (this.frontFrameRenderer != null) this.frontFrameRenderer.sortingOrder = 2;
+        }
+
+        private void SetTextSortingOrder(int order)
+        {
+            SetTMPSortingOrder(this.cardNameText,    order);
+            SetTMPSortingOrder(this.starsText,       order);
+            SetTMPSortingOrder(this.atkText,         order);
+            SetTMPSortingOrder(this.defText,         order);
+            SetTMPSortingOrder(this.descriptionText, order);
+        }
+
+        private static void SetTMPSortingOrder(TextMeshPro tmp, int order)
+        {
+            if (tmp == null) return;
+            tmp.sortingOrder = order;
         }
 
         /// <summary>Sets Back face culling on a single TMP component's material instance.</summary>

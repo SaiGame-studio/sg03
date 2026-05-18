@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEditor;
 using UnityEngine;
 
@@ -37,8 +36,8 @@ namespace SG03
                 EditorUtility.SetDirty(card);
             }
 
-            if (GUILayout.Button("Setup Card Text"))
-                SetupCardText(card);
+            if (GUILayout.Button("Add SortingGroup"))
+                AddSortingGroup(card);
 
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("Runtime Controls", EditorStyles.boldLabel);
@@ -92,9 +91,6 @@ namespace SG03
             so.FindProperty("frontFrameRenderer").objectReferenceValue = frameGO.GetComponent<Renderer>();
             so.FindProperty("backRenderer").objectReferenceValue       = backGO.GetComponent<Renderer>();
 
-            // --- Text elements on the front face ---
-            SetupCardText(card);
-
             so.ApplyModifiedProperties();
 
             AutoFillCardDefaults(so);
@@ -128,22 +124,37 @@ namespace SG03
         private static void SetupMaterials(Card3D card)
         {
             SerializedObject so = new SerializedObject(card);
-            AssignNewMaterial(so.FindProperty("frontFrameRenderer"), "Card_Frame");
+            AssignNewMaterial(so.FindProperty("frontFrameRenderer"), "Card_Frame",     "Assets/_sg03/Card/Image/CardFrame/card_front_char_1.png");
             AssignNewMaterial(so.FindProperty("characterRenderer"),  "Card_Character");
-            AssignNewMaterial(so.FindProperty("backRenderer"),       "Card_Back");
+            AssignNewMaterial(so.FindProperty("backRenderer"),       "Card_Back",      "Assets/_sg03/Card/Image/CardFrame/card_back.png");
             so.ApplyModifiedProperties();
 
             EditorUtility.SetDirty(card);
         }
 
-        private static void AssignNewMaterial(SerializedProperty rendererProp, string matName)
+        private static void AssignNewMaterial(SerializedProperty rendererProp, string matName, string texturePath = null)
         {
             if (rendererProp.objectReferenceValue is not Renderer r) return;
 
             Material mat = CreateCardMaterial(matName);
+            if (texturePath != null)
+                ApplyTextureToMaterial(mat, texturePath);
+
             Undo.RegisterCreatedObjectUndo(mat, "Create " + matName);
             Undo.RecordObject(r, "Assign Material " + matName);
             r.sharedMaterial = mat;
+        }
+
+        // Loads a Texture2D from the given asset path and sets it as the material's main texture.
+        private static void ApplyTextureToMaterial(Material mat, string texturePath)
+        {
+            Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
+            if (tex == null)
+            {
+                Debug.LogWarning("[Card3DEditor] Texture not found: " + texturePath);
+                return;
+            }
+            mat.mainTexture = tex;
         }
 
         // Creates a depth-writing, alpha-clip, one-sided material using SG03/CardCharacter.
@@ -161,48 +172,6 @@ namespace SG03
             return mat;
         }
 
-        /// <summary>
-        /// Creates (or re-configures) all TMP text children on FrontFace and wires them
-        /// into the Card3D serialized fields. Safe to call multiple times (idempotent).
-        /// </summary>
-        private static void SetupCardText(Card3D card)
-        {
-            Undo.SetCurrentGroupName("Setup Card Text");
-            int undoGroup = Undo.GetCurrentGroup();
-
-            // Card is 7.5 x 10.5 world units (750 x 1050 px at 100 PPU).
-            // Z = -0.003f keeps text in front of Character (z=0) and Frame (z=-0.001f).
-            Transform frontFace = card.transform.Find("FrontFace");
-            if (frontFace == null)
-            {
-                Debug.LogWarning("[Card3DEditor] FrontFace child not found. Run Setup Card Structure first.", card);
-                return;
-            }
-
-            // Defaults sourced from scene 1-lobby.unity (anchoredPosition, sizeDelta, alignment, wrapping).
-            // CardNameText : pos=(0,4.2)      size=(6,0.8)   Left/Middle  wrap=on   overflow=Ellipsis
-            // StarsText    : pos=(0.96,4.35)  size=(4,0.6)   Right/Middle wrap=on   overflow=Ellipsis
-            // AtkText      : pos=(-2.01,-4.6) size=(2.5,0.5) Left/Middle  wrap=on   overflow=Ellipsis
-            // DefText      : pos=(1.84,-4.48) size=(2.5,0.5) Right/Middle wrap=on   overflow=Ellipsis
-            // DescriptionText: pos=(0.54,-3.69) size=(6,2.5) Left/Top     wrap=off  overflow=Overflow
-            GameObject cardNameGO    = GetOrCreateTMPText("CardNameText",    frontFace, new Vector3( 0f,     4.2f,  -0.003f), 6.0f, 0.8f, 3f, TextAlignmentOptions.Left,    true,  TextOverflowModes.Ellipsis);
-            GameObject starsGO       = GetOrCreateTMPText("StarsText",       frontFace, new Vector3( 0.96f,  4.35f, -0.003f), 4.0f, 0.6f, 3f, TextAlignmentOptions.Right,   true,  TextOverflowModes.Ellipsis);
-            GameObject atkGO         = GetOrCreateTMPText("AtkText",         frontFace, new Vector3(-2.01f, -4.6f,  -0.003f), 2.5f, 0.5f, 3f, TextAlignmentOptions.Left,    true,  TextOverflowModes.Ellipsis);
-            GameObject defGO         = GetOrCreateTMPText("DefText",         frontFace, new Vector3( 1.84f, -4.48f, -0.003f), 2.5f, 0.5f, 3f, TextAlignmentOptions.Right,   true,  TextOverflowModes.Ellipsis);
-            GameObject descriptionGO = GetOrCreateTMPText("DescriptionText", frontFace, new Vector3( 0.54f, -3.69f, -0.003f), 6.0f, 2.5f, 3f, TextAlignmentOptions.TopLeft, false, TextOverflowModes.Overflow);
-
-            SerializedObject so = new SerializedObject(card);
-            so.FindProperty("cardNameText").objectReferenceValue    = cardNameGO.GetComponent<TextMeshPro>();
-            so.FindProperty("starsText").objectReferenceValue       = starsGO.GetComponent<TextMeshPro>();
-            so.FindProperty("atkText").objectReferenceValue         = atkGO.GetComponent<TextMeshPro>();
-            so.FindProperty("defText").objectReferenceValue         = defGO.GetComponent<TextMeshPro>();
-            so.FindProperty("descriptionText").objectReferenceValue = descriptionGO.GetComponent<TextMeshPro>();
-            so.ApplyModifiedProperties();
-
-            Undo.CollapseUndoOperations(undoGroup);
-            EditorUtility.SetDirty(card);
-        }
-
         private static Transform GetOrCreateChild(Transform parent, string childName)
         {
             Transform existing = parent.Find(childName);
@@ -212,72 +181,6 @@ namespace SG03
             Undo.RegisterCreatedObjectUndo(go, "Create " + childName);
             go.transform.SetParent(parent, false);
             return go.transform;
-        }
-
-        // Creates or fully reconfigures a world-space TextMeshPro child.
-        // Always applies position, RectTransform size, and TMP settings
-        // so the method is safe to call again on already-existing objects.
-        private static GameObject GetOrCreateTMPText(
-            string               objName,
-            Transform            parent,
-            Vector3              localPosition,
-            float                width,
-            float                height,
-            float                fontSize,
-            TextAlignmentOptions alignment,
-            bool                 wordWrap,
-            TextOverflowModes    overflowMode)
-        {
-            Transform existing = parent.Find(objName);
-
-            GameObject go;
-            TextMeshPro tmp;
-
-            if (existing != null)
-            {
-                go  = existing.gameObject;
-                tmp = go.GetComponent<TextMeshPro>();
-                if (tmp == null)
-                    tmp = Undo.AddComponent<TextMeshPro>(go);
-            }
-            else
-            {
-                go = new GameObject(objName);
-                Undo.RegisterCreatedObjectUndo(go, "Create " + objName);
-                Undo.SetTransformParent(go.transform, parent, "Parent " + objName);
-                tmp = Undo.AddComponent<TextMeshPro>(go);
-            }
-
-            // Position & scale
-            Undo.RecordObject(go.transform, "Configure " + objName);
-            go.transform.localPosition = localPosition;
-            go.transform.localRotation = Quaternion.identity;
-            go.transform.localScale    = Vector3.one;
-
-            // RectTransform size — critical for world-space TMP to render
-            RectTransform rt = go.GetComponent<RectTransform>();
-            if (rt != null)
-            {
-                Undo.RecordObject(rt, "Set RectTransform " + objName);
-                rt.sizeDelta = new Vector2(width, height);
-            }
-
-            // TMP settings
-            Undo.RecordObject(tmp, "Configure TMP " + objName);
-            tmp.fontSize           = fontSize;
-            tmp.alignment          = alignment;
-            tmp.textWrappingMode   = wordWrap ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
-            tmp.overflowMode       = overflowMode;
-
-            // Raise sorting order so text renders on top of the card quad materials
-            MeshRenderer mr = go.GetComponent<MeshRenderer>();
-            if (mr != null)
-            {
-                Undo.RecordObject(mr, "Set SortingOrder " + objName);
-                mr.sortingOrder = 1;
-            }
-
-            return go;
         }
 
         private static GameObject GetOrCreateQuad(string quadName, Transform parent)
@@ -300,6 +203,20 @@ namespace SG03
             quad.transform.localScale    = Vector3.one;
 
             return quad;
+        }
+
+        // Adds a SortingGroup component to the card root if one is not already present.
+        // SortingGroup ensures all transparent renderers on this card are sorted as a
+        // single unit, preventing text or geometry from other cards from bleeding through.
+        private static void AddSortingGroup(Card3D card)
+        {
+            if (card.GetComponent<UnityEngine.Rendering.SortingGroup>() != null)
+            {
+                Debug.Log("[Card3DEditor] SortingGroup already exists on this card.", card);
+                return;
+            }
+
+            Undo.AddComponent<UnityEngine.Rendering.SortingGroup>(card.gameObject);
         }
     }
 }
