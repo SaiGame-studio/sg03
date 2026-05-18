@@ -89,6 +89,7 @@ namespace SG03
         private void Awake()
         {
             this.ApplyFrontFaceCulling();
+            this.ApplyRenderOrder();
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -272,6 +273,18 @@ namespace SG03
             SetTMPCullMode(this.atkText);
             SetTMPCullMode(this.defText);
             SetTMPCullMode(this.descriptionText);
+        }
+
+        /// <summary>
+        /// Ensures Frame always renders on top of Character by setting its render queue
+        /// one step higher. Fixes Z-fighting on coplanar transparent quads.
+        /// </summary>
+        private void ApplyRenderOrder()
+        {
+            if (this.characterRenderer  == null) return;
+            if (this.frontFrameRenderer == null) return;
+            int characterQueue = this.characterRenderer.material.renderQueue;
+            this.frontFrameRenderer.material.renderQueue = characterQueue + 1;
         }
 
         /// <summary>Sets Back face culling on a single TMP component's material instance.</summary>
