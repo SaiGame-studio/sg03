@@ -453,7 +453,7 @@ namespace SG03
                 this.TryCancelTargeting();
                 return;
             }
-            if (!this.IsAlphaTurn() && !this.IsAlphaDefendingBackLineSelected() && !this.IsAlphaDrawCharacterSelected())
+            if (!this.IsAlphaTurn() && !this.IsAlphaDefendingBackLineSelected() && !this.IsAlphaDrawCharacterSelected() && !this.IsAlphaDrawBackLineSelected())
             {
                 this.TryCancelTargeting();
                 return;
@@ -489,6 +489,13 @@ namespace SG03
             if (this.battleStateCtrl?.BattleState == null) return false;
             if (this.battleStateCtrl.BattleState.NextMove != NextMoveType.alpha_draw) return false;
             return this.selected.CardOwner == Owner.alpha && this.selected.IsCharacter();
+        }
+
+        private bool IsAlphaDrawBackLineSelected()
+        {
+            if (this.battleStateCtrl?.BattleState == null) return false;
+            if (this.battleStateCtrl.BattleState.NextMove != NextMoveType.alpha_draw) return false;
+            return this.selected.CardOwner == Owner.alpha && this.selected.Location == Location.in_back;
         }
 
         private bool IsSelectedCardTriggered()
