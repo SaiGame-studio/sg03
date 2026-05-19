@@ -8047,10 +8047,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 784772871}
     m_Modifications:
-    - target: {fileID: 773438719042802862, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 792007169825556148, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -8102,15 +8098,6 @@ PrefabInstance:
     - target: {fileID: 8660204716586372184, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_Name
       value: Card3D
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_text
-      value: 'Description Text Description Text Description Text Description Text
-        Description Text Description Text '
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_TextWrappingMode
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9221625749736723552, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
