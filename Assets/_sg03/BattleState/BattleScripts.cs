@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using SaiGame.Services;
 using SG03.UI;
 using UnityEngine;
@@ -144,9 +145,22 @@ namespace SG03
             {
                 this.isRunning = false;
                 if (this.logPayload)
-                    Debug.Log($"[BattleScripts] <color=#FFFF00>{scriptName}</color> response:\n{result}", this.gameObject);
+                    this.LogResponse(scriptName, result);
                 onSuccess?.Invoke(result);
             };
+        }
+
+        private void LogResponse(string scriptName, string result)
+        {
+            int timestamp = (int)System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (result.Length <= 500)
+            {
+                Debug.Log($"[BattleScripts] <color=#FFFF00>{scriptName}</color> [{timestamp}] response:\n{result}", this.gameObject);
+                return;
+            }
+            string path = Path.Combine(Application.persistentDataPath, $"{timestamp}_BattleScripts_{scriptName}.json");
+            File.WriteAllText(path, result);
+            Debug.Log($"[BattleScripts] <color=#FFFF00>{scriptName}</color> [{timestamp}] response too large ({result.Length} chars) \u2192 saved to:\n{path}", this.gameObject);
         }
 
         private Action<string> ReleaseLockThenError(string scriptName)

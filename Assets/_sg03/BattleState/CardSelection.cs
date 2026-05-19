@@ -373,7 +373,7 @@ namespace SG03
             if (this.IsAlphaDrawPhase())
                 this.RunAlphaCardDeployThenAttack(source, target);
             else
-                this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(source.InventoryItemId, target.InventoryItemId, this.OnAlphaAttackingSuccess, null);
+                this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(source.InventoryItemId, this.ResolveDefenderId(target), this.OnAlphaAttackingSuccess, null);
         }
 
         private bool IsAlphaDrawPhase()
@@ -411,7 +411,14 @@ namespace SG03
         private void RunAlphaAttackingAfterDeploy(Card3DCtrl source, Card3DCtrl target)
         {
             this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(
-                source.InventoryItemId, target.InventoryItemId, this.OnAlphaAttackingSuccess, null);
+                source.InventoryItemId, this.ResolveDefenderId(target), this.OnAlphaAttackingSuccess, null);
+        }
+
+        private string ResolveDefenderId(Card3DCtrl target)
+        {
+            if (target.CardOwner == Owner.omega && target.Location == Location.in_void)   return "omega_hp";
+            if (target.CardOwner == Owner.omega && target.Location == Location.in_source) return "omega_hp";
+            return target.InventoryItemId;
         }
 
         private void OnAlphaAttackingSuccess(string response)
@@ -612,14 +619,26 @@ namespace SG03
             if (holder.HeldCard != null) { if (this.debugLog) Debug.LogWarning($"[CardSelection] OnHolderSelected — holder '{holder.name}' already has card '{holder.HeldCard.name}' — skipped"); return; }
             if (!this.IsPlacementValid(this.selected, holder)) return;
             this.PlaceFromHandIntoHolder(holder);
-            this.TryIncrementCharDeploy(this.selected);
-            this.NotifyBattleStateOnPlacement(holder);
+            this.UpdateLocalStateOnPlacement(holder, this.selected);
+            this.RunDeployScript(this.selected);
         }
 
-        private void NotifyBattleStateOnPlacement(CardHolderCtrl targetHolder)
+        private void RunDeployScript(Card3DCtrl card)
+        {
+            this.battleStateCtrl?.BattleScripts?.RunAlphaCardDeploy(
+                response => this.OnDeployScriptSuccess(response, card), null);
+        }
+
+        private void OnDeployScriptSuccess(string response, Card3DCtrl card)
+        {
+            this.TryIncrementCharDeploy(card);
+            this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
+        }
+
+        private void UpdateLocalStateOnPlacement(CardHolderCtrl holder, Card3DCtrl card)
         {
             if (this.battleStateCtrl?.BattleState == null) return;
-            this.battleStateCtrl.BattleState.MoveCardFromHandToLine(this.selected.CodeName, targetHolder.HolderLink, targetHolder.Index);
+            this.battleStateCtrl.BattleState.MoveCardFromHandToLine(card.CodeName, holder.HolderLink, holder.Index);
         }
 
         private void PlaceFromHandIntoHolder(CardHolderCtrl targetHolder)
@@ -642,7 +661,7 @@ namespace SG03
         {
             if (this.battleStateCtrl?.BattleState == null) { if (this.debugLog) Debug.LogWarning("[CardSelection] IsCardDeployPhase — battleState is NULL"); return false; }
             NextMoveType nextMove = this.battleStateCtrl.BattleState.NextMove;
-            bool valid = nextMove == NextMoveType.card_deploy || nextMove == NextMoveType.alpha_draw;
+            bool valid = nextMove == NextMoveType.card_deploy || nextMove == NextMoveType.alpha_draw || nextMove == NextMoveType.alpha_turn;
             if (!valid && this.debugLog) Debug.LogWarning($"[CardSelection] IsCardDeployPhase — NextMove={nextMove} — not a deploy phase, skipped");
             return valid;
         }

@@ -29,6 +29,7 @@ namespace SG03.UI
         public string              error;
         public string              battle_difficulty;
         public bool                alpha_defending;
+        public bool                omega_defending;
         public bool                is_development;
         public BattleStatusMetadata metadata;
     }
