@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SG03
 {
@@ -84,6 +85,23 @@ namespace SG03
         private float     currentYAngle = 0f;
         private Coroutine flipCoroutine;
 
+        // ─── Unity lifecycle ──────────────────────────────────────────────────────
+
+        private void Awake()
+        {
+            this.ApplyFrontFaceCulling();
+            this.ApplySortingGroup();
+            this.HideCharacterRenderer();
+        }
+
+        // Hides the character quad until a texture is loaded via ApplyTextures.
+        // Prevents the white default texture from showing when no CardData is assigned.
+        private void HideCharacterRenderer()
+        {
+            if (this.characterRenderer == null) return;
+            this.characterRenderer.enabled = false;
+        }
+
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
@@ -128,6 +146,7 @@ namespace SG03
             SetRendererTexture(this.frontFrameRenderer, frame);
             SetRendererTexture(this.characterRenderer,  this.cardData.CharacterTexture);
             SetRendererTexture(this.backRenderer,       back);
+            this.SetCharacterRendererVisible(this.cardData.CharacterTexture != null);
 
             this.ApplyCardText();
         }
@@ -237,8 +256,8 @@ namespace SG03
 
             this.SetTMPText(this.cardNameText,    displayName);
             this.SetTMPText(this.starsText,       new string('*', displayStars));
-            this.SetTMPText(this.atkText,         $"ATK/{displayAtk}");
-            this.SetTMPText(this.defText,         $"DEF/{displayDef}");
+            this.SetTMPText(this.atkText,         $"{displayAtk}");
+            this.SetTMPText(this.defText,         $"{displayDef}");
             this.SetTMPText(this.descriptionText, displayDescription);
         }
 
@@ -248,10 +267,80 @@ namespace SG03
             tmp.text = text;
         }
 
+        private void SetCharacterRendererVisible(bool visible)
+        {
+            if (this.characterRenderer == null) return;
+            this.characterRenderer.enabled = visible;
+        }
+
         private static void SetRendererTexture(Renderer rend, Texture2D texture)
         {
             if (rend == null || texture == null) return;
             rend.material.mainTexture = texture;
+        }
+
+        /// <summary>
+        /// Makes all card text components visible from the front side only.
+        /// Prevents text from showing through the back of the card.
+        /// </summary>
+        private void ApplyFrontFaceCulling()
+        {
+            SetTMPCullMode(this.cardNameText);
+            SetTMPCullMode(this.starsText);
+            SetTMPCullMode(this.atkText);
+            SetTMPCullMode(this.defText);
+            SetTMPCullMode(this.descriptionText);
+        }
+
+        /// <summary>
+        /// Adds a SortingGroup to the card root so every renderer on this card
+        /// is treated as one atomic unit during transparency sorting.
+        /// Prevents text from any other card from interleaving with
+        /// the Character/Frame/Text layers of this card.
+        /// </summary>
+        private void ApplySortingGroup()
+        {
+            this.EnsureSortingGroup();
+            this.ApplySortingOrder();
+        }
+
+        private void EnsureSortingGroup()
+        {
+            if (this.gameObject.GetComponent<SortingGroup>() != null) return;
+            this.gameObject.AddComponent<SortingGroup>();
+        }
+
+        /// <summary>
+        /// Sets per-renderer sortingOrder within this card's SortingGroup:
+        /// Character (0) → Text (1) → Frame (2).
+        /// </summary>
+        private void ApplySortingOrder()
+        {
+            if (this.characterRenderer  != null) this.characterRenderer.sortingOrder  = 0;
+            this.SetTextSortingOrder(1);
+            if (this.frontFrameRenderer != null) this.frontFrameRenderer.sortingOrder = 2;
+        }
+
+        private void SetTextSortingOrder(int order)
+        {
+            SetTMPSortingOrder(this.cardNameText,    order);
+            SetTMPSortingOrder(this.starsText,       order);
+            SetTMPSortingOrder(this.atkText,         order);
+            SetTMPSortingOrder(this.defText,         order);
+            SetTMPSortingOrder(this.descriptionText, order);
+        }
+
+        private static void SetTMPSortingOrder(TextMeshPro tmp, int order)
+        {
+            if (tmp == null) return;
+            tmp.sortingOrder = order;
+        }
+
+        /// <summary>Sets Back face culling on a single TMP component's material instance.</summary>
+        private static void SetTMPCullMode(TMPro.TextMeshPro tmp)
+        {
+            if (tmp == null) return;
+            tmp.fontMaterial.SetFloat("_CullMode", 2f);
         }
     }
 }

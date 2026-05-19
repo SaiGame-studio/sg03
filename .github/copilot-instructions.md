@@ -9,6 +9,7 @@
 - You may inspect any file in the repository for context.
 - Before editing, verify the target path is under `Assets/_sg03/`.
 - If a requested change would require writing outside `Assets/_sg03/`, stop and ask for approval instead of making the edit.
+- **NEVER** do anything beyond what the user explicitly requests. No extra features, no extra fields, no assumptions.
 
 ## One File — One Type
 - Every `class`, `struct`, `enum`, and `interface` must live in its own dedicated file.

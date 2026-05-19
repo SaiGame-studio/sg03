@@ -27,7 +27,7 @@ namespace SG03
         [SerializeField] private Ease ease = Ease.OutQuad;
 
         [Tooltip("Y offset (world units) applied when placing a card into a line slot.")]
-        [SerializeField] private float lineOffsetY = 0.2f;
+        [SerializeField] private float lineOffsetY = 0.3f;
 
         // ─── In-Hand Hover ────────────────────────────────────────────────────────
 

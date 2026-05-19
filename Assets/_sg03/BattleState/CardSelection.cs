@@ -149,6 +149,11 @@ namespace SG03
                 this.HideMarkSelected();
                 return;
             }
+            if (this.fullDetail)
+            {
+                this.HideMarkSelected();
+                return;
+            }
             this.SnapToSelectedCard();
             this.ShowMarkSelected();
         }
