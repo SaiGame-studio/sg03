@@ -29,6 +29,7 @@ namespace SG03.UI
         [SerializeField] private int omegaTheVoidCount;
         [SerializeField] private string sessionId;
         [SerializeField] private string battleDifficulty;
+        [SerializeField] private string battleStatus;
         [SerializeField] private bool alphaDefending;
         [SerializeField] private bool omegaDefending;
         [SerializeField] private bool isDevelopment;
@@ -70,6 +71,7 @@ namespace SG03.UI
         public BattleCardSlot[] OmegaBackLine => this.omegaBackLine;
         public string SessionId => this.sessionId;
         public string BattleDifficulty => this.battleDifficulty;
+        public string BattleStatus     => this.battleStatus;
         public NextMoveType NextMove => this.nextMove;
         public bool AlphaDefending => this.alphaDefending;
         public bool OmegaDefending => this.omegaDefending;
@@ -150,6 +152,7 @@ namespace SG03.UI
             this.omegaBackLine = null;
             this.sessionId = string.Empty;
             this.battleDifficulty = string.Empty;
+            this.battleStatus = string.Empty;
             this.alphaDefending = false;
             this.omegaDefending = false;
             this.isDevelopment = false;
@@ -266,6 +269,7 @@ namespace SG03.UI
             this.clientActions = output.client_actions;
             this.debugLog = output.debug_log;
             this.battleDifficulty = output.metadata?.battle_difficulty ?? output.battle_difficulty;
+            this.battleStatus = output.status;
             this.alphaDefending = output.alpha_defending;
             this.omegaDefending = output.omega_defending;
             this.isDevelopment = output.is_development;
