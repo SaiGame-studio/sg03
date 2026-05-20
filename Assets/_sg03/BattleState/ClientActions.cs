@@ -15,9 +15,11 @@ namespace SG03
         [SerializeField] private BattleCardDefinitions battleCardDefinitions;
         [SerializeField] private LampOfSoulCtrl       lampOfSoul;
         [SerializeField] private CardSelection        cardSelection;
+        [SerializeField] private DeskPositionCtrl     deskPosition;
         [SerializeField] private float actionInterval = 0.1f;
         [SerializeField] private float actionMoveDuration   = 1f;
         [SerializeField] private float actionRotateDuration = 0.4f;
+        [SerializeField] private float omegaFrontLinePostDelay = 0.5f;
 
         [Header("Debug")]
         [SerializeField] private bool logActions = false;
@@ -38,6 +40,7 @@ namespace SG03
             this.LoadBattleCardDefinitions();
             this.LoadLampOfSoul();
             this.LoadCardSelection();
+            this.LoadDeskPosition();
         }
 
         protected virtual void LoadBattleState()
@@ -79,6 +82,13 @@ namespace SG03
             if (this.cardSelection != null) return;
             this.cardSelection = UnityEngine.Object.FindFirstObjectByType<CardSelection>(FindObjectsInactive.Include);
             Debug.LogWarning(this.transform.name + ": LoadCardSelection", this.gameObject);
+        }
+
+        protected virtual void LoadDeskPosition()
+        {
+            if (this.deskPosition != null) return;
+            this.deskPosition = UnityEngine.Object.FindFirstObjectByType<DeskPositionCtrl>(FindObjectsInactive.Include);
+            Debug.LogWarning(this.transform.name + ": LoadDeskPosition", this.gameObject);
         }
 
         private void OnEnable()  => this.SubscribeEvents();
@@ -170,6 +180,8 @@ namespace SG03
                 {
                     int groupEnd = this.FindConsecutiveParallelGroupEnd(i, matcher);
                     yield return this.StartCoroutine(this.DispatchParallelGroup(i, groupEnd));
+                    float postDelay = this.GetPostGroupDelay(log.ActionName);
+                    if (postDelay > 0f) yield return new WaitForSeconds(postDelay);
                     i = groupEnd;
                 }
                 else
@@ -200,8 +212,19 @@ namespace SG03
                 matcher = static n => n == "omega_source_to_hand";
                 return true;
             }
+            if (actionName == "omega_hand_to_front_line")
+            {
+                matcher = static n => n == "omega_hand_to_front_line";
+                return true;
+            }
             matcher = null;
             return false;
+        }
+
+        private float GetPostGroupDelay(string actionName)
+        {
+            if (actionName == "omega_hand_to_front_line") return this.omegaFrontLinePostDelay;
+            return 0f;
         }
 
         private int FindConsecutiveParallelGroupEnd(int from, Func<string, bool> matcher)
@@ -269,6 +292,7 @@ namespace SG03
                 case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
                 case "omega_card_sent_to_void":    result = this.ExecuteOmegaCardSentToVoid(parameters);  break;
                 case "alpha_attack":               result = this.ExecuteAlphaAttack(parameters);           break;
+                case "alpha_attack_omega_hp":       result = this.ExecuteAlphaAttackOmegaHp(parameters);   break;
                 case "alpha_card_ability":         result = this.ExecuteCardAbility(parameters);           break;
                 case "omega_card_ability":         result = this.ExecuteCardAbility(parameters);           break;
                 case "omega_attack":               result = this.ExecuteOmegaAttack(parameters);           break;
@@ -428,6 +452,17 @@ namespace SG03
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
             attacker.AttackLunge(defender.transform.position);
+            return this.StartCoroutine(this.WaitForCard(attacker));
+        }
+
+        private Coroutine ExecuteAlphaAttackOmegaHp(string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return null;
+            string attackerId = parameters[0].Trim();
+            if (string.IsNullOrEmpty(attackerId)) return null;
+            Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
+            if (attacker == null || this.deskPosition == null) return null;
+            attacker.AttackLunge(this.deskPosition.OmegaTheSource.position);
             return this.StartCoroutine(this.WaitForCard(attacker));
         }
 

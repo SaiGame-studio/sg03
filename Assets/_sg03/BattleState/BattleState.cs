@@ -29,7 +29,9 @@ namespace SG03.UI
         [SerializeField] private int omegaTheVoidCount;
         [SerializeField] private string sessionId;
         [SerializeField] private string battleDifficulty;
+        [SerializeField] private string battleStatus;
         [SerializeField] private bool alphaDefending;
+        [SerializeField] private bool omegaDefending;
         [SerializeField] private bool isDevelopment;
         [SerializeField] private NextMoveType nextMove;
         [SerializeField] private BattleCardSlot[] alphaTheVoid;
@@ -69,8 +71,10 @@ namespace SG03.UI
         public BattleCardSlot[] OmegaBackLine => this.omegaBackLine;
         public string SessionId => this.sessionId;
         public string BattleDifficulty => this.battleDifficulty;
+        public string BattleStatus     => this.battleStatus;
         public NextMoveType NextMove => this.nextMove;
         public bool AlphaDefending => this.alphaDefending;
+        public bool OmegaDefending => this.omegaDefending;
         public bool IsDevelopment => this.isDevelopment;
         public string[] ClientActions => this.clientActions;
         public string[] DebugLog => this.debugLog;
@@ -148,7 +152,9 @@ namespace SG03.UI
             this.omegaBackLine = null;
             this.sessionId = string.Empty;
             this.battleDifficulty = string.Empty;
+            this.battleStatus = string.Empty;
             this.alphaDefending = false;
+            this.omegaDefending = false;
             this.isDevelopment = false;
             this.debugLog = null;
             this.SetNextMove(string.Empty);
@@ -175,32 +181,16 @@ namespace SG03.UI
         {
             if (string.IsNullOrWhiteSpace(rawJson)) return;
             this.battleStatusJson = BeautifyJson(rawJson);
-            this.ParseAndApplyBattleStatus(rawJson);
+            this.ParseAndApply(rawJson);
         }
 
-        /// <summary>
-        /// Called by any script that receives a raw card_deploy JSON response.
-        /// Applies next_move first, then remaining fields.
-        /// </summary>
-        public void UpdateFromCardDeploy(string rawJson)
+        private void ParseAndApply(string rawJson)
         {
-            if (string.IsNullOrWhiteSpace(rawJson)) return;
-            this.ParseAndApplyCardDeploy(rawJson);
-        }
-
-        private void ParseAndApplyCardDeploy(string rawJson)
-        {
-            CardDeployScriptResponse response = JsonUtility.FromJson<CardDeployScriptResponse>(rawJson);
-            if (response == null) return;
-            if (response.output == null) return;
-            this.ApplyCardDeployOutput(response.output);
-        }
-
-        private void ApplyCardDeployOutput(CardDeployOutput output)
-        {
-            this.SetNextMove(output.next_move);
-            if (!string.IsNullOrEmpty(output.session_id)) this.sessionId = output.session_id;
-            this.OnBattleStatusChanged?.Invoke();
+            BattleStatusScriptResponse response = JsonUtility.FromJson<BattleStatusScriptResponse>(rawJson);
+            if (response?.output == null) { Debug.LogError("[BattleState] UpdateFromBattleStatus — failed to parse response"); return; }
+            if (!string.IsNullOrEmpty(response.output.error)) { Debug.LogError($"[BattleState] Script error: {response.output.error}"); return; }
+            if (response.output.alpha_hand == null) { Debug.LogError("[BattleState] UpdateFromBattleStatus — alpha_hand is missing from response"); return; }
+            this.ApplyOutput(response.output);
         }
 
         private static string BeautifyJson(string json)
@@ -257,19 +247,6 @@ namespace SG03.UI
             return sb.ToString();
         }
 
-        private void ParseAndApplyBattleStatus(string rawJson)
-        {
-            BattleStatusScriptResponse response = JsonUtility.FromJson<BattleStatusScriptResponse>(rawJson);
-            if (response == null) return;
-            if (response.output == null) return;
-            if (!string.IsNullOrEmpty(response.output.error))
-            {
-                Debug.LogError($"[BattleState] Script error: {response.output.error}");
-                return;
-            }
-            this.ApplyOutput(response.output);
-        }
-
         private void ApplyOutput(BattleStatusOutput output)
         {
             this.turn = output.turn;
@@ -292,7 +269,9 @@ namespace SG03.UI
             this.clientActions = output.client_actions;
             this.debugLog = output.debug_log;
             this.battleDifficulty = output.metadata?.battle_difficulty ?? output.battle_difficulty;
+            this.battleStatus = output.status;
             this.alphaDefending = output.alpha_defending;
+            this.omegaDefending = output.omega_defending;
             this.isDevelopment = output.is_development;
             this.SetNextMove(output.metadata?.next_move ?? output.next_move);
             this.metadataJson = BeautifyJson(JsonUtility.ToJson(output.metadata));

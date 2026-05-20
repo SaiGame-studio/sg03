@@ -28,7 +28,9 @@ namespace SG03.UI
         public string[]            debug_log;
         public string              error;
         public string              battle_difficulty;
+        public string              status;
         public bool                alpha_defending;
+        public bool                omega_defending;
         public bool                is_development;
         public BattleStatusMetadata metadata;
     }

@@ -313,6 +313,8 @@ namespace SG03
             if (!existing.gameObject.activeInHierarchy)
             {
                 this.slotOccupancy.Remove(target);
+                existing.CardHolder?.SetCard(null);
+                existing.AssignCardHolder(null);
                 return false;
             }
             return true;
@@ -397,7 +399,10 @@ namespace SG03
                 keyToRemove = kvp.Key;
                 break;
             }
-            if (keyToRemove != null) this.slotOccupancy.Remove(keyToRemove);
+            if (keyToRemove == null) return;
+            this.slotOccupancy.Remove(keyToRemove);
+            card.CardHolder?.SetCard(null);
+            card.AssignCardHolder(null);
         }
 
         private void ApplyFaceState(Card3DCtrl card, BattleCardSlot slot)
