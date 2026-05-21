@@ -283,6 +283,14 @@ namespace SG03
             this.StartMoveTween(target.position, this.duration, this.ease, null);
         }
 
+        public void MoveTo(Vector3 worldPosition, Location destination)
+        {
+            if (this.isFlipping) return;
+            this.location = destination;
+            this.KillAllTweens();
+            this.StartMoveTween(worldPosition, this.duration, this.ease, null);
+        }
+
         /// <summary>
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position
         /// without changing its rotation, then invokes <paramref name="onComplete"/> when the move finishes.
@@ -366,6 +374,20 @@ namespace SG03
                 return;
             }
             this.FaceUp();
+        }
+
+        /// <summary>Smoothly rotates the card in-place to the target world-space rotation without any position change.</summary>
+        public void RotateTo(Quaternion targetRotation)
+        {
+            if (this.isFlipping) return;
+            this.isFlipping = true;
+            this.faceTween?.Kill();
+            this.faceTween = DOTween.Sequence();
+            this.faceTween.Append(
+                this.transform.DORotateQuaternion(targetRotation, this.flipDuration * 2f)
+                    .SetEase(this.flipEase));
+            this.faceTween.OnComplete(() => this.isFlipping = false);
+            this.faceTween.OnKill(() => this.isFlipping = false);
         }
 
         /// <summary>Rotates the card 180 degrees around the world Y axis, then invokes <paramref name="onComplete"/>.</summary>

@@ -149,6 +149,12 @@ namespace SG03
         /// <summary>Smoothly moves the card to the specified transform, position only (no rotation change).</summary>
         public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
 
+        /// <summary>Smoothly moves the card to the specified world position, no rotation change.</summary>
+        public void MoveTo(Vector3 worldPosition, Location destination) => this.movement.MoveTo(worldPosition, destination);
+
+        /// <summary>Smoothly rotates the card in-place to the target world-space rotation.</summary>
+        public void RotateTo(Quaternion targetRotation) => this.movement.RotateTo(targetRotation);
+
         /// <summary>Moves the card to <paramref name="holder"/>'s position and flips face-down via the Unknown axis.
         /// Intended for hand → line transitions.</summary>
         public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null) => this.movement.MoveToUnknow(holder, onReady);

@@ -20,6 +20,12 @@ namespace SG03
         [Header("Source Stack")]
         [SerializeField] private float sourceStackOffsetY = 0.05f;
 
+        [Header("Void Stack")]
+        [SerializeField] private float voidDropHeight = 5f;
+
+        [Header("Line Transition")]
+        [SerializeField] private float aboveLineHeight = 5f;
+
         [Header("Debug")]
         [SerializeField] private bool debugLog;
 
@@ -57,9 +63,18 @@ namespace SG03
 
         public Card3DCtrl SetAlphaSourceCardData(string inventoryItemId)
         {
-            if (this.alphaSourceCardQueue.Count == 0) return null;
-            Card3DCtrl card = this.alphaSourceCardQueue.Last.Value;
-            this.alphaSourceCardQueue.RemoveLast();
+            Card3DCtrl card;
+            if (this.alphaSourceCardQueue.Count > 0)
+            {
+                card = this.alphaSourceCardQueue.Last.Value;
+                this.alphaSourceCardQueue.RemoveLast();
+            }
+            else
+            {
+                Card3DCtrl prefab = this.ResolvePrefab();
+                card = this.SpawnCardAt(prefab, this.deskPosition.AlphaTheSource);
+            }
+            if (card == null) return null;
             card.SetOwner(Owner.alpha);
             card.SetInventoryItemId(inventoryItemId);
             BattleCardSlot slot = this.FindAlphaSlotById(inventoryItemId);
@@ -120,6 +135,9 @@ namespace SG03
             return card;
         }
 
+        public Card3DCtrl PeekOmegaHandCard()
+            => this.omegaHandCardQueue.Count > 0 ? this.omegaHandCardQueue.Peek() : null;
+
         public Card3DCtrl MoveAlphaHandToFrontLine(string inventoryItemId, int slotIndex)
             => this.MoveAlphaHandToLine(inventoryItemId, slotIndex, this.deskPosition.AlphaFrontLine);
 
@@ -137,15 +155,31 @@ namespace SG03
             if (this.IsSlotOccupied(target)) return null;
             this.handCardRegistry.Remove(inventoryItemId);
             this.RemoveFromSlotOccupancy(card);
-            BattleCardSlot slot = this.FindAlphaSlotById(inventoryItemId);
-            if (slot != null) card.SetExpose(slot.expose);
-            System.Action faceCallback = slot != null ? () => this.ApplyAlphaFaceState(card, slot) : null;
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
-            card.MoveToUnknow(holder, faceCallback);
+            Vector3 abovePos = holder.transform.position + Vector3.up * this.aboveLineHeight;
+            card.MoveTo(abovePos, holder.HolderLocation);
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
             return card;
+        }
+
+        public void SettleAlphaHandInFrontLine(Card3DCtrl card, string inventoryItemId, int slotIndex)
+            => this.SettleAlphaHandInLine(card, inventoryItemId, slotIndex, this.deskPosition.AlphaFrontLine);
+
+        public void SettleAlphaHandInBackLine(Card3DCtrl card, string inventoryItemId, int slotIndex)
+            => this.SettleAlphaHandInLine(card, inventoryItemId, slotIndex, this.deskPosition.AlphaBackLine);
+
+        private void SettleAlphaHandInLine(Card3DCtrl card, string inventoryItemId, int slotIndex, CardHolderCtrl[] holders)
+        {
+            if (slotIndex < 0 || slotIndex >= holders.Length) return;
+            CardHolderCtrl holder = holders[slotIndex];
+            if (holder == null) return;
+            BattleCardSlot slot = this.FindAlphaSlotById(inventoryItemId);
+            if (slot != null) card.SetExpose(slot.expose);
+            card.SetMoveDuration(this.ActionMoveDuration);
+            card.SetRotateDuration(this.ActionRotateDuration);
+            card.MoveToUnknow(holder, slot != null ? () => this.ApplyAlphaFaceState(card, slot) : null);
         }
 
         public Card3DCtrl MoveOmegaHandToFrontLine(string inventoryItemId, int slotIndex)
@@ -177,13 +211,30 @@ namespace SG03
                 card.SetDefinition(omegaDef);
                 card.SetExpose(slot.expose);
             }
-            System.Action faceCallback = slot != null ? () => this.ApplyFaceState(card, slot) : null;
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
-            card.MoveToUnknow(holder, faceCallback);
+            Vector3 abovePos = holder.transform.position + Vector3.up * this.aboveLineHeight;
+            card.MoveTo(abovePos, holder.HolderLocation);
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
             return card;
+        }
+
+        public void SettleOmegaHandInFrontLine(Card3DCtrl card, string inventoryItemId, int slotIndex)
+            => this.SettleOmegaHandInLine(card, inventoryItemId, slotIndex, this.deskPosition.OmegaFrontLine);
+
+        public void SettleOmegaHandInBackLine(Card3DCtrl card, string inventoryItemId, int slotIndex)
+            => this.SettleOmegaHandInLine(card, inventoryItemId, slotIndex, this.deskPosition.OmegaBackLine);
+
+        private void SettleOmegaHandInLine(Card3DCtrl card, string inventoryItemId, int slotIndex, CardHolderCtrl[] holders)
+        {
+            if (slotIndex < 0 || slotIndex >= holders.Length) return;
+            CardHolderCtrl holder = holders[slotIndex];
+            if (holder == null) return;
+            BattleCardSlot slot = this.FindOmegaSlotById(inventoryItemId);
+            card.SetMoveDuration(this.ActionMoveDuration);
+            card.SetRotateDuration(this.ActionRotateDuration);
+            card.MoveToUnknow(holder, slot != null ? () => this.ApplyFaceState(card, slot) : null);
         }
 
         private BattleCardSlot FindSlotById(BattleCardSlot[] slots, string inventoryItemId)
@@ -243,20 +294,38 @@ namespace SG03
         }
 
         public Card3DCtrl MoveAlphaCardToVoid(string inventoryItemId)
-        {
-            Card3DCtrl card = this.MoveCardToVoid(inventoryItemId, this.deskPosition.AlphaTheVoid, this.alphaVoidSpawnedCount);
-            if (card != null) this.alphaVoidSpawnedCount++;
-            return card;
-        }
+            => this.MoveCardToVoid(inventoryItemId, this.deskPosition.AlphaTheVoid);
 
         public Card3DCtrl MoveOmegaCardToVoid(string inventoryItemId)
+            => this.MoveCardToVoid(inventoryItemId, this.deskPosition.OmegaTheVoid);
+
+        public void SettleAlphaCardInVoid(Card3DCtrl card)
         {
-            Card3DCtrl card = this.MoveCardToVoid(inventoryItemId, this.deskPosition.OmegaTheVoid, this.omegaVoidSpawnedCount);
-            if (card != null) this.omegaVoidSpawnedCount++;
-            return card;
+            this.SettleCardInVoidAt(card, this.deskPosition.AlphaTheVoid, this.alphaVoidSpawnedCount);
+            this.alphaVoidSpawnedCount++;
         }
 
-        private Card3DCtrl MoveCardToVoid(string inventoryItemId, Transform voidPoint, int stackCount)
+        public void SettleOmegaCardInVoid(Card3DCtrl card)
+        {
+            this.SettleCardInVoidAt(card, this.deskPosition.OmegaTheVoid, this.omegaVoidSpawnedCount);
+            this.omegaVoidSpawnedCount++;
+        }
+
+        private void SettleCardInVoidAt(Card3DCtrl card, Transform voidPoint, int stackCount)
+        {
+            Vector3 finalPos = voidPoint.position + Vector3.up * (stackCount * this.sourceStackOffsetY);
+            card.SetMoveDuration(this.ActionMoveDuration);
+            card.SetRotateDuration(this.ActionRotateDuration);
+            card.MoveAndRotate(finalPos, voidPoint.rotation, Location.in_void);
+        }
+
+        public void RotateAlphaCardAtVoidTransit(Card3DCtrl card)
+            => card.RotateTo(this.deskPosition.AlphaTheVoid.rotation);
+
+        public void RotateOmegaCardAtVoidTransit(Card3DCtrl card)
+            => card.RotateTo(this.deskPosition.OmegaTheVoid.rotation);
+
+        private Card3DCtrl MoveCardToVoid(string inventoryItemId, Transform voidPoint)
         {
             Card3DCtrl card = this.FindCardById(inventoryItemId);
             if (card == null) return null;
@@ -264,8 +333,8 @@ namespace SG03
             this.RemoveFromSlotOccupancy(card);
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
-            Vector3 targetPos = voidPoint.position + Vector3.up * (stackCount * this.sourceStackOffsetY);
-            card.MoveAndRotate(targetPos, voidPoint.rotation, Location.in_void);
+            Vector3 abovePos = voidPoint.position + Vector3.up * this.voidDropHeight;
+            card.MoveTo(abovePos, Location.in_void);
             return card;
         }
 
@@ -411,7 +480,7 @@ namespace SG03
                 this.omegaSourceCardQueue.RemoveLast();
                 return top;
             }
-            return this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+            return this.SpawnCardAt(prefab, this.deskPosition.OmegaTheSource);
         }
 
         public void DespawnTopAlphaSourceCard()
