@@ -5,7 +5,7 @@ public class Card3DDespawn : Despawn<Card3DCtrl>
 {
     protected override void Reset()
     {
-s        base.Reset();
+        base.Reset();
         this.SetDefaultDespawnByTime();
     }
 

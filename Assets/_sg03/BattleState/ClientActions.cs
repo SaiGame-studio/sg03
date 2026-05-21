@@ -171,6 +171,7 @@ namespace SG03
 
         private IEnumerator DispatchRoutine()
         {
+            yield return this.StartCoroutine(this.DispatchSourceSpawnActions());
             int i = 0;
             while (i < this.actionLog.Count)
             {
@@ -194,6 +195,27 @@ namespace SG03
             }
             this.dispatchRoutine = null;
         }
+
+        private IEnumerator DispatchSourceSpawnActions()
+        {
+            int launched = 0;
+            int done = 0;
+            foreach (ClientActionLog log in this.actionLog)
+            {
+                if (log.Executed) continue;
+                if (!this.IsSourceSpawnAction(log.ActionName)) continue;
+                Coroutine c = this.ExecuteAction(log);
+                launched++;
+                if (c != null)
+                    this.StartCoroutine(this.WaitThenSignal(c, () => done++));
+                else
+                    done++;
+            }
+            yield return new WaitUntil(() => done >= launched);
+        }
+
+        private bool IsSourceSpawnAction(string actionName)
+            => actionName == "alpha_source_spawn_card" || actionName == "omega_source_spawn_card";
 
         private bool TryGetParallelGroupMatcher(string actionName, out Func<string, bool> matcher)
         {
@@ -341,6 +363,7 @@ namespace SG03
             yield return new WaitForSeconds(this.actionInterval);
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] before commit — IsAnimating={card?.IsAnimating}, Location={card?.Location}");
             this.cardSpawning?.CommitAlphaSourceToHand(card, inventoryItemId, slotIndex);
+            this.cardSpawning?.DespawnTopAlphaSourceCard();
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] after commit — IsAnimating={card?.IsAnimating}, Location={card?.Location}");
             if (card != null) yield return this.StartCoroutine(this.WaitForCard(card));
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] WaitForCard done — IsAnimating={card?.IsAnimating}");
@@ -350,6 +373,7 @@ namespace SG03
         {
             if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
             Card3DCtrl card = this.cardSpawning?.MoveOmegaSourceToHand(inventoryItemId, slotIndex);
+            if (card != null) this.cardSpawning?.DespawnTopOmegaSourceCard();
             if (card == null) return null;
             return this.StartCoroutine(this.WaitForCard(card));
         }

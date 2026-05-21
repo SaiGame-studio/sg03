@@ -28,11 +28,13 @@ namespace SG03
         private readonly Dictionary<string, Card3DCtrl>    sourceCardRegistry  = new Dictionary<string, Card3DCtrl>();
         private readonly Dictionary<string, Card3DCtrl>    handCardRegistry    = new Dictionary<string, Card3DCtrl>();
         private readonly Dictionary<Transform, Card3DCtrl> slotOccupancy       = new Dictionary<Transform, Card3DCtrl>();
-        private readonly Queue<Card3DCtrl>                  omegaSourceCardQueue = new Queue<Card3DCtrl>();
+        private readonly LinkedList<Card3DCtrl>             omegaSourceCardQueue = new LinkedList<Card3DCtrl>();
         private readonly Queue<Card3DCtrl>                  omegaHandCardQueue   = new Queue<Card3DCtrl>();
-        private readonly Queue<Card3DCtrl>                  alphaSourceCardQueue = new Queue<Card3DCtrl>();
+        private readonly LinkedList<Card3DCtrl>             alphaSourceCardQueue = new LinkedList<Card3DCtrl>();
         private int omegaSourceSpawnedCount = 0;
         private int alphaSourceSpawnedCount = 0;
+        private int alphaVoidSpawnedCount = 0;
+        private int omegaVoidSpawnedCount = 0;
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
@@ -56,7 +58,8 @@ namespace SG03
         public Card3DCtrl SetAlphaSourceCardData(string inventoryItemId)
         {
             if (this.alphaSourceCardQueue.Count == 0) return null;
-            Card3DCtrl card = this.alphaSourceCardQueue.Dequeue();
+            Card3DCtrl card = this.alphaSourceCardQueue.Last.Value;
+            this.alphaSourceCardQueue.RemoveLast();
             card.SetOwner(Owner.alpha);
             card.SetInventoryItemId(inventoryItemId);
             BattleCardSlot slot = this.FindAlphaSlotById(inventoryItemId);
@@ -204,6 +207,8 @@ namespace SG03
             this.alphaSourceCardQueue.Clear();
             this.omegaSourceSpawnedCount = 0;
             this.alphaSourceSpawnedCount = 0;
+            this.alphaVoidSpawnedCount = 0;
+            this.omegaVoidSpawnedCount = 0;
         }
 
         public Card3DCtrl FindCardById(string inventoryItemId)
@@ -238,12 +243,20 @@ namespace SG03
         }
 
         public Card3DCtrl MoveAlphaCardToVoid(string inventoryItemId)
-            => this.MoveCardToVoid(inventoryItemId, this.deskPosition.AlphaTheVoid);
+        {
+            Card3DCtrl card = this.MoveCardToVoid(inventoryItemId, this.deskPosition.AlphaTheVoid, this.alphaVoidSpawnedCount);
+            if (card != null) this.alphaVoidSpawnedCount++;
+            return card;
+        }
 
         public Card3DCtrl MoveOmegaCardToVoid(string inventoryItemId)
-            => this.MoveCardToVoid(inventoryItemId, this.deskPosition.OmegaTheVoid);
+        {
+            Card3DCtrl card = this.MoveCardToVoid(inventoryItemId, this.deskPosition.OmegaTheVoid, this.omegaVoidSpawnedCount);
+            if (card != null) this.omegaVoidSpawnedCount++;
+            return card;
+        }
 
-        private Card3DCtrl MoveCardToVoid(string inventoryItemId, Transform voidPoint)
+        private Card3DCtrl MoveCardToVoid(string inventoryItemId, Transform voidPoint, int stackCount)
         {
             Card3DCtrl card = this.FindCardById(inventoryItemId);
             if (card == null) return null;
@@ -251,7 +264,8 @@ namespace SG03
             this.RemoveFromSlotOccupancy(card);
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
-            card.MoveAndRotate(voidPoint, Location.in_void);
+            Vector3 targetPos = voidPoint.position + Vector3.up * (stackCount * this.sourceStackOffsetY);
+            card.MoveAndRotate(targetPos, voidPoint.rotation, Location.in_void);
             return card;
         }
 
@@ -354,7 +368,7 @@ namespace SG03
                 card.SetRotateDuration(this.ActionRotateDuration);
                 Vector3 alphaSourcePos = this.deskPosition.AlphaTheSource.position + Vector3.up * (this.alphaSourceSpawnedCount * this.sourceStackOffsetY);
                 card.MoveAndRotate(alphaSourcePos, this.deskPosition.AlphaTheSource.rotation, Location.in_source);
-                this.alphaSourceCardQueue.Enqueue(card);
+                this.alphaSourceCardQueue.AddLast(card);
                 this.alphaSourceSpawnedCount++;
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
@@ -379,7 +393,7 @@ namespace SG03
                 card.SetRotateDuration(this.ActionRotateDuration);
                 Vector3 omegaSourcePos = this.deskPosition.OmegaTheSource.position + Vector3.up * (this.omegaSourceSpawnedCount * this.sourceStackOffsetY);
                 card.MoveAndRotate(omegaSourcePos, this.deskPosition.OmegaTheSource.rotation, Location.in_source);
-                this.omegaSourceCardQueue.Enqueue(card);
+                this.omegaSourceCardQueue.AddLast(card);
                 this.omegaSourceSpawnedCount++;
                 spawnedThisFrame++;
                 if (spawnedThisFrame < this.spawnPerFrame) continue;
@@ -391,8 +405,29 @@ namespace SG03
 
         private Card3DCtrl DequeueOmegaSourceCard(Card3DCtrl prefab)
         {
-            if (this.omegaSourceCardQueue.Count > 0) return this.omegaSourceCardQueue.Dequeue();
+            if (this.omegaSourceCardQueue.Count > 0)
+            {
+                Card3DCtrl top = this.omegaSourceCardQueue.Last.Value;
+                this.omegaSourceCardQueue.RemoveLast();
+                return top;
+            }
             return this.SpawnCardAt(prefab, this.deskPosition.OmegaSpawnPoint);
+        }
+
+        public void DespawnTopAlphaSourceCard()
+        {
+            if (this.alphaSourceCardQueue.Count == 0) return;
+            Card3DCtrl top = this.alphaSourceCardQueue.Last.Value;
+            this.alphaSourceCardQueue.RemoveLast();
+            top.Despawn?.DoDespawn();
+        }
+
+        public void DespawnTopOmegaSourceCard()
+        {
+            if (this.omegaSourceCardQueue.Count == 0) return;
+            Card3DCtrl top = this.omegaSourceCardQueue.Last.Value;
+            this.omegaSourceCardQueue.RemoveLast();
+            top.Despawn?.DoDespawn();
         }
 
         private void RemoveFromSlotOccupancy(Card3DCtrl card)
