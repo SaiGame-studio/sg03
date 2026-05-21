@@ -596,12 +596,18 @@ namespace SG03
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
+            return this.StartCoroutine(this.OmegaPlaningCharacterAttackRoutine(attacker, defender));
+        }
+
+        private IEnumerator OmegaPlaningCharacterAttackRoutine(Card3DCtrl attacker, Card3DCtrl defender)
+        {
+            yield return this.StartCoroutine(this.WaitForCard(attacker));
             // Planning attack: card advances next to the defender on the side it came from
             // (target.x - 1 when attacking from the left, target.x + 1 when from the right).
             // No return — waits for alpha's decision in the next server response.
             Vector3 destination = this.BuildPlanningAttackDestination(attacker.transform.position, defender.transform.position);
             attacker.PlanningLungeTo(destination);
-            return this.StartCoroutine(this.WaitForCard(attacker));
+            yield return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
         private Vector3 BuildPlanningAttackDestination(Vector3 attackerPosition, Vector3 defenderPosition)

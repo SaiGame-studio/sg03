@@ -533,6 +533,7 @@ namespace SG03
         /// </summary>
         public void PlanningLungeTo(Vector3 destination)
         {
+            this.faceTween?.Kill();
             this.attackTween?.Kill();
             this.attackTween = DOTween.Sequence();
             this.attackTween.Append(this.transform.DOMove(destination, this.attackLungeDuration).SetEase(this.attackLungeEase));
