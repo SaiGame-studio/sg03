@@ -322,21 +322,21 @@ namespace SG03.UI
         /// Updates alpha hand, front line, and back line when the player drags a card
         /// from hand to a front or back line holder on the board.
         /// </summary>
-        public void MoveCardFromHandToLine(string codeName, Link link, int slotIndex)
+        public void MoveCardFromHandToLine(string inventoryItemId, Link link, int slotIndex)
         {
-            BattleCardSlot slot = this.RemoveFromHand(codeName);
+            BattleCardSlot slot = this.RemoveFromHand(inventoryItemId);
             if (slot == null) return;
             if (link == Link.front) this.InsertIntoFrontLine(slot, slotIndex);
             else this.InsertIntoBackLine(slot, slotIndex);
             this.OnBattleStatusChanged?.Invoke();
         }
 
-        private BattleCardSlot RemoveFromHand(string codeName)
+        private BattleCardSlot RemoveFromHand(string inventoryItemId)
         {
             if (this.alphaHand == null) return null;
             for (int i = 0; i < this.alphaHand.Length; i++)
             {
-                if (this.alphaHand[i]?.item_definition_code_name != codeName) continue;
+                if (this.alphaHand[i]?.inventory_item_id != inventoryItemId) continue;
                 BattleCardSlot slot = this.alphaHand[i];
                 this.alphaHand[i] = null;
                 return slot;

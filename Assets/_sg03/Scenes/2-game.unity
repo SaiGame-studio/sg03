@@ -2973,14 +2973,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 871735552}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.5, y: -0.5, z: 0.5, w: 0.5}
+  m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
   m_LocalPosition: {x: 29, y: 0, z: 17.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1127616149}
   m_Father: {fileID: 948749803}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 90}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 90}
 --- !u!1 &892252099
 GameObject:
   m_ObjectHideFlags: 0
@@ -4655,14 +4655,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1473015795}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.5, y: -0.5, z: 0.5, w: 0.5}
+  m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
   m_LocalPosition: {x: 29, y: 0, z: -3.6999998}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1742238188}
   m_Father: {fileID: 948749803}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 90}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 90}
 --- !u!114 &1487664597 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6696618329774845696, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
@@ -6813,6 +6813,7 @@ MonoBehaviour:
   prefabName: Card3D
   spawnPerFrame: 1
   spawnInterval: 0.05
+  sourceStackOffsetY: 0.05
   debugLog: 0
 --- !u!114 &2015755439
 MonoBehaviour:
@@ -6837,7 +6838,9 @@ MonoBehaviour:
   omegaTheVoidCount: 0
   sessionId: 
   battleDifficulty: 
+  battleStatus: 
   alphaDefending: 0
+  omegaDefending: 0
   isDevelopment: 0
   nextMove: 0
   alphaTheVoid: []
@@ -6988,9 +6991,11 @@ MonoBehaviour:
   battleCardDefinitions: {fileID: 2015755443}
   lampOfSoul: {fileID: 1773165130}
   cardSelection: {fileID: 2015755440}
+  deskPosition: {fileID: 0}
   actionInterval: 0.1
   actionMoveDuration: 1
   actionRotateDuration: 0.4
+  omegaFrontLinePostDelay: 0.5
   logActions: 0
   actionLog: []
 --- !u!1 &2028831695
@@ -8047,6 +8052,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 784772871}
     m_Modifications:
+    - target: {fileID: 56747626888172300, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: spawner
+      value: 
+      objectReference: {fileID: 2028831696}
     - target: {fileID: 792007169825556148, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

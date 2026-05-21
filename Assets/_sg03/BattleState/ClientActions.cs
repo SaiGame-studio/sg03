@@ -171,6 +171,7 @@ namespace SG03
 
         private IEnumerator DispatchRoutine()
         {
+            yield return this.StartCoroutine(this.DispatchSourceSpawnActions());
             int i = 0;
             while (i < this.actionLog.Count)
             {
@@ -194,6 +195,27 @@ namespace SG03
             }
             this.dispatchRoutine = null;
         }
+
+        private IEnumerator DispatchSourceSpawnActions()
+        {
+            int launched = 0;
+            int done = 0;
+            foreach (ClientActionLog log in this.actionLog)
+            {
+                if (log.Executed) continue;
+                if (!this.IsSourceSpawnAction(log.ActionName)) continue;
+                Coroutine c = this.ExecuteAction(log);
+                launched++;
+                if (c != null)
+                    this.StartCoroutine(this.WaitThenSignal(c, () => done++));
+                else
+                    done++;
+            }
+            yield return new WaitUntil(() => done >= launched);
+        }
+
+        private bool IsSourceSpawnAction(string actionName)
+            => actionName == "alpha_source_spawn_card" || actionName == "omega_source_spawn_card";
 
         private bool TryGetParallelGroupMatcher(string actionName, out Func<string, bool> matcher)
         {
@@ -341,6 +363,7 @@ namespace SG03
             yield return new WaitForSeconds(this.actionInterval);
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] before commit — IsAnimating={card?.IsAnimating}, Location={card?.Location}");
             this.cardSpawning?.CommitAlphaSourceToHand(card, inventoryItemId, slotIndex);
+            this.cardSpawning?.DespawnTopAlphaSourceCard();
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] after commit — IsAnimating={card?.IsAnimating}, Location={card?.Location}");
             if (card != null) yield return this.StartCoroutine(this.WaitForCard(card));
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] WaitForCard done — IsAnimating={card?.IsAnimating}");
@@ -350,6 +373,7 @@ namespace SG03
         {
             if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
             Card3DCtrl card = this.cardSpawning?.MoveOmegaSourceToHand(inventoryItemId, slotIndex);
+            if (card != null) this.cardSpawning?.DespawnTopOmegaSourceCard();
             if (card == null) return null;
             return this.StartCoroutine(this.WaitForCard(card));
         }
@@ -357,33 +381,77 @@ namespace SG03
         private Coroutine ExecuteAlphaHandToFrontLine(string[] parameters)
         {
             if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
-            Card3DCtrl card = this.cardSpawning?.MoveAlphaHandToFrontLine(inventoryItemId, slotIndex);
-            if (card == null) return null;
-            return this.StartCoroutine(this.WaitForCard(card));
+            return this.StartCoroutine(this.AlphaHandToFrontLineRoutine(inventoryItemId, slotIndex));
+        }
+
+        private IEnumerator AlphaHandToFrontLineRoutine(string inventoryItemId, int slotIndex)
+        {
+            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
+            if (card == null) yield break;
+            card.FaceDownUnknown();
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            card = this.cardSpawning?.MoveAlphaHandToFrontLine(inventoryItemId, slotIndex);
+            if (card == null) yield break;
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            this.cardSpawning?.SettleAlphaHandInFrontLine(card, inventoryItemId, slotIndex);
+            yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
         private Coroutine ExecuteAlphaHandToBackLine(string[] parameters)
         {
             if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
-            Card3DCtrl card = this.cardSpawning?.MoveAlphaHandToBackLine(inventoryItemId, slotIndex);
-            if (card == null) return null;
-            return this.StartCoroutine(this.WaitForCard(card));
+            return this.StartCoroutine(this.AlphaHandToBackLineRoutine(inventoryItemId, slotIndex));
+        }
+
+        private IEnumerator AlphaHandToBackLineRoutine(string inventoryItemId, int slotIndex)
+        {
+            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
+            if (card == null) yield break;
+            card.FaceDownUnknown();
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            card = this.cardSpawning?.MoveAlphaHandToBackLine(inventoryItemId, slotIndex);
+            if (card == null) yield break;
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            this.cardSpawning?.SettleAlphaHandInBackLine(card, inventoryItemId, slotIndex);
+            yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
         private Coroutine ExecuteOmegaHandToFrontLine(string[] parameters)
         {
             if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
-            Card3DCtrl card = this.cardSpawning?.MoveOmegaHandToFrontLine(inventoryItemId, slotIndex);
-            if (card == null) return null;
-            return this.StartCoroutine(this.WaitForCard(card));
+            return this.StartCoroutine(this.OmegaHandToFrontLineRoutine(inventoryItemId, slotIndex));
+        }
+
+        private IEnumerator OmegaHandToFrontLineRoutine(string inventoryItemId, int slotIndex)
+        {
+            Card3DCtrl card = this.cardSpawning?.PeekOmegaHandCard();
+            if (card == null) yield break;
+            card.FaceDownUnknown();
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            card = this.cardSpawning?.MoveOmegaHandToFrontLine(inventoryItemId, slotIndex);
+            if (card == null) yield break;
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            this.cardSpawning?.SettleOmegaHandInFrontLine(card, inventoryItemId, slotIndex);
+            yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
         private Coroutine ExecuteOmegaHandToBackLine(string[] parameters)
         {
             if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
-            Card3DCtrl card = this.cardSpawning?.MoveOmegaHandToBackLine(inventoryItemId, slotIndex);
-            if (card == null) return null;
-            return this.StartCoroutine(this.WaitForCard(card));
+            return this.StartCoroutine(this.OmegaHandToBackLineRoutine(inventoryItemId, slotIndex));
+        }
+
+        private IEnumerator OmegaHandToBackLineRoutine(string inventoryItemId, int slotIndex)
+        {
+            Card3DCtrl card = this.cardSpawning?.PeekOmegaHandCard();
+            if (card == null) yield break;
+            card.FaceDownUnknown();
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            card = this.cardSpawning?.MoveOmegaHandToBackLine(inventoryItemId, slotIndex);
+            if (card == null) yield break;
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            this.cardSpawning?.SettleOmegaHandInBackLine(card, inventoryItemId, slotIndex);
+            yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
         private Coroutine ExecuteCardDamaged(string[] parameters)
@@ -429,7 +497,16 @@ namespace SG03
             if (string.IsNullOrEmpty(inventoryItemId)) return null;
             Card3DCtrl card = this.cardSpawning?.MoveAlphaCardToVoid(inventoryItemId);
             if (card == null) return null;
-            return this.StartCoroutine(this.WaitForCard(card));
+            return this.StartCoroutine(this.AlphaCardToVoidRoutine(card));
+        }
+
+        private IEnumerator AlphaCardToVoidRoutine(Card3DCtrl card)
+        {
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            this.cardSpawning?.RotateAlphaCardAtVoidTransit(card);
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            this.cardSpawning?.SettleAlphaCardInVoid(card);
+            yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
         private Coroutine ExecuteOmegaCardSentToVoid(string[] parameters)
@@ -439,7 +516,16 @@ namespace SG03
             if (string.IsNullOrEmpty(inventoryItemId)) return null;
             Card3DCtrl card = this.cardSpawning?.MoveOmegaCardToVoid(inventoryItemId);
             if (card == null) return null;
-            return this.StartCoroutine(this.WaitForCard(card));
+            return this.StartCoroutine(this.OmegaCardToVoidRoutine(card));
+        }
+
+        private IEnumerator OmegaCardToVoidRoutine(Card3DCtrl card)
+        {
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            this.cardSpawning?.RotateOmegaCardAtVoidTransit(card);
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            this.cardSpawning?.SettleOmegaCardInVoid(card);
+            yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
         private Coroutine ExecuteAlphaAttack(string[] parameters)
@@ -510,12 +596,18 @@ namespace SG03
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
+            return this.StartCoroutine(this.OmegaPlaningCharacterAttackRoutine(attacker, defender));
+        }
+
+        private IEnumerator OmegaPlaningCharacterAttackRoutine(Card3DCtrl attacker, Card3DCtrl defender)
+        {
+            yield return this.StartCoroutine(this.WaitForCard(attacker));
             // Planning attack: card advances next to the defender on the side it came from
             // (target.x - 1 when attacking from the left, target.x + 1 when from the right).
             // No return — waits for alpha's decision in the next server response.
             Vector3 destination = this.BuildPlanningAttackDestination(attacker.transform.position, defender.transform.position);
             attacker.PlanningLungeTo(destination);
-            return this.StartCoroutine(this.WaitForCard(attacker));
+            yield return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
         private Vector3 BuildPlanningAttackDestination(Vector3 attackerPosition, Vector3 defenderPosition)

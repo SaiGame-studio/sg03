@@ -257,6 +257,19 @@ namespace SG03
             this.rotateTween = this.transform.DORotateQuaternion(target.rotation, this.duration).SetEase(this.ease);
         }
 
+        public void MoveAndRotate(Vector3 worldPosition, Quaternion rotation, Location destination)
+        {
+            if (this.isFlipping)
+            {
+                Debug.LogWarning($"[CardMovement] {this.gameObject.name} MoveAndRotate SKIPPED — isFlipping=true");
+                return;
+            }
+            this.location = destination;
+            this.KillAllTweens();
+            this.StartMoveTween(worldPosition, this.duration, this.ease, null);
+            this.rotateTween = this.transform.DORotateQuaternion(rotation, this.duration).SetEase(this.ease);
+        }
+
         /// <summary>
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position
         /// without changing its rotation. Any in-progress tween is cancelled before starting the new one.
@@ -268,6 +281,14 @@ namespace SG03
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
             this.StartMoveTween(target.position, this.duration, this.ease, null);
+        }
+
+        public void MoveTo(Vector3 worldPosition, Location destination)
+        {
+            if (this.isFlipping) return;
+            this.location = destination;
+            this.KillAllTweens();
+            this.StartMoveTween(worldPosition, this.duration, this.ease, null);
         }
 
         /// <summary>
@@ -353,6 +374,20 @@ namespace SG03
                 return;
             }
             this.FaceUp();
+        }
+
+        /// <summary>Smoothly rotates the card in-place to the target world-space rotation without any position change.</summary>
+        public void RotateTo(Quaternion targetRotation)
+        {
+            if (this.isFlipping) return;
+            this.isFlipping = true;
+            this.faceTween?.Kill();
+            this.faceTween = DOTween.Sequence();
+            this.faceTween.Append(
+                this.transform.DORotateQuaternion(targetRotation, this.flipDuration * 2f)
+                    .SetEase(this.flipEase));
+            this.faceTween.OnComplete(() => this.isFlipping = false);
+            this.faceTween.OnKill(() => this.isFlipping = false);
         }
 
         /// <summary>Rotates the card 180 degrees around the world Y axis, then invokes <paramref name="onComplete"/>.</summary>
@@ -498,6 +533,7 @@ namespace SG03
         /// </summary>
         public void PlanningLungeTo(Vector3 destination)
         {
+            this.faceTween?.Kill();
             this.attackTween?.Kill();
             this.attackTween = DOTween.Sequence();
             this.attackTween.Append(this.transform.DOMove(destination, this.attackLungeDuration).SetEase(this.attackLungeEase));

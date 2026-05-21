@@ -80,12 +80,6 @@ namespace SG03
             Debug.LogWarning(transform.name + "LoadCardMovement", gameObject);
         }
 
-        protected override void LoadDespawn()
-        {
-            //do nothing
-        }
-
-
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>Loads CardData via Addressables and applies it to the Card3D.</summary>
@@ -149,8 +143,17 @@ namespace SG03
         /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
         public void MoveAndRotate(Transform target, Location destination) => this.movement.MoveAndRotate(target, destination);
 
+        /// <summary>Smoothly moves the card to the specified world position and rotation.</summary>
+        public void MoveAndRotate(Vector3 worldPosition, Quaternion rotation, Location destination) => this.movement.MoveAndRotate(worldPosition, rotation, destination);
+
         /// <summary>Smoothly moves the card to the specified transform, position only (no rotation change).</summary>
         public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
+
+        /// <summary>Smoothly moves the card to the specified world position, no rotation change.</summary>
+        public void MoveTo(Vector3 worldPosition, Location destination) => this.movement.MoveTo(worldPosition, destination);
+
+        /// <summary>Smoothly rotates the card in-place to the target world-space rotation.</summary>
+        public void RotateTo(Quaternion targetRotation) => this.movement.RotateTo(targetRotation);
 
         /// <summary>Moves the card to <paramref name="holder"/>'s position and flips face-down via the Unknown axis.
         /// Intended for hand → line transitions.</summary>
