@@ -17,6 +17,9 @@ namespace SG03
         [SerializeField] private int spawnPerFrame = 1;
         [SerializeField] private float spawnInterval = 0.05f;
 
+        [Header("Source Stack")]
+        [SerializeField] private float sourceStackOffsetY = 0.05f;
+
         [Header("Debug")]
         [SerializeField] private bool debugLog;
 
@@ -349,7 +352,8 @@ namespace SG03
                 card.SetOwner(Owner.alpha);
                 card.SetMoveDuration(this.ActionMoveDuration);
                 card.SetRotateDuration(this.ActionRotateDuration);
-                card.MoveAndRotate(this.deskPosition.AlphaTheSource, Location.in_source);
+                Vector3 alphaSourcePos = this.deskPosition.AlphaTheSource.position + Vector3.up * (this.alphaSourceSpawnedCount * this.sourceStackOffsetY);
+                card.MoveAndRotate(alphaSourcePos, this.deskPosition.AlphaTheSource.rotation, Location.in_source);
                 this.alphaSourceCardQueue.Enqueue(card);
                 this.alphaSourceSpawnedCount++;
                 spawnedThisFrame++;
@@ -373,7 +377,8 @@ namespace SG03
                 card.SetOwner(Owner.omega);
                 card.SetMoveDuration(this.ActionMoveDuration);
                 card.SetRotateDuration(this.ActionRotateDuration);
-                card.MoveAndRotate(this.deskPosition.OmegaTheSource, Location.in_source);
+                Vector3 omegaSourcePos = this.deskPosition.OmegaTheSource.position + Vector3.up * (this.omegaSourceSpawnedCount * this.sourceStackOffsetY);
+                card.MoveAndRotate(omegaSourcePos, this.deskPosition.OmegaTheSource.rotation, Location.in_source);
                 this.omegaSourceCardQueue.Enqueue(card);
                 this.omegaSourceSpawnedCount++;
                 spawnedThisFrame++;
@@ -399,8 +404,7 @@ namespace SG03
                 keyToRemove = kvp.Key;
                 break;
             }
-            if (keyToRemove == null) return;
-            this.slotOccupancy.Remove(keyToRemove);
+            if (keyToRemove != null) this.slotOccupancy.Remove(keyToRemove);
             card.CardHolder?.SetCard(null);
             card.AssignCardHolder(null);
         }

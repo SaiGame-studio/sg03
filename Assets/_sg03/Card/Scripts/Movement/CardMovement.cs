@@ -257,6 +257,19 @@ namespace SG03
             this.rotateTween = this.transform.DORotateQuaternion(target.rotation, this.duration).SetEase(this.ease);
         }
 
+        public void MoveAndRotate(Vector3 worldPosition, Quaternion rotation, Location destination)
+        {
+            if (this.isFlipping)
+            {
+                Debug.LogWarning($"[CardMovement] {this.gameObject.name} MoveAndRotate SKIPPED — isFlipping=true");
+                return;
+            }
+            this.location = destination;
+            this.KillAllTweens();
+            this.StartMoveTween(worldPosition, this.duration, this.ease, null);
+            this.rotateTween = this.transform.DORotateQuaternion(rotation, this.duration).SetEase(this.ease);
+        }
+
         /// <summary>
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position
         /// without changing its rotation. Any in-progress tween is cancelled before starting the new one.

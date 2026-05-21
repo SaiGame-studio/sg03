@@ -638,7 +638,7 @@ namespace SG03
         private void UpdateLocalStateOnPlacement(CardHolderCtrl holder, Card3DCtrl card)
         {
             if (this.battleStateCtrl?.BattleState == null) return;
-            this.battleStateCtrl.BattleState.MoveCardFromHandToLine(card.CodeName, holder.HolderLink, holder.Index);
+            this.battleStateCtrl.BattleState.MoveCardFromHandToLine(card.InventoryItemId, holder.HolderLink, holder.Index);
         }
 
         private void PlaceFromHandIntoHolder(CardHolderCtrl targetHolder)
