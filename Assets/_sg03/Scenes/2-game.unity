@@ -1889,27 +1889,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: showDebugLog
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: showButtonsLog
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: showUrlRequest
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: showCallbackLog
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: showJsonRequest
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: showJsonResponse
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6814,6 +6814,8 @@ MonoBehaviour:
   spawnPerFrame: 1
   spawnInterval: 0.05
   sourceStackOffsetY: 0.05
+  voidDropHeight: 5
+  aboveLineHeight: 5
   debugLog: 0
 --- !u!114 &2015755439
 MonoBehaviour:
