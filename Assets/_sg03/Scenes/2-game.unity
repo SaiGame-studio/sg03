@@ -6970,7 +6970,7 @@ MonoBehaviour:
   scriptNameInitCards: init_cards
   scriptNameGetCardDefinitions: get_card_definitions
   scriptNameCardDeploy: card_deploy
-  scriptNameAlphaAttacking: alpha_attacking
+  scriptNameAlphaCardActive: alpha_card_active
   scriptNameAlphaCardDeploy: alpha_card_deploy
   scriptNameAlphaTurnEnd: alpha_turn_end
   scriptNameAlphaDefendingEnd: alpha_defending_end
