@@ -21,7 +21,7 @@ namespace SG03
         [SerializeField] private string scriptNameInitCards          = "init_cards";
         [SerializeField] private string scriptNameGetCardDefinitions = "get_card_definitions";
         [SerializeField] private string scriptNameCardDeploy         = "card_deploy";
-        [SerializeField] private string scriptNameAlphaAttacking     = "alpha_attacking";
+        [SerializeField] private string scriptNameAlphaCardActive    = "alpha_card_active";
         [SerializeField] private string scriptNameAlphaCardDeploy    = "alpha_card_deploy";
         [SerializeField] private string scriptNameAlphaTurnEnd       = "alpha_turn_end";
         [SerializeField] private string scriptNameAlphaDefendingEnd  = "alpha_defending_end";
@@ -99,7 +99,7 @@ namespace SG03
             if (this.IsBattleScriptMissing(nameof(this.RunAlphaAttacking))) return;
             string requestBody = this.BuildAlphaAttackingRequestBody(attackerInventoryItemId, defenderInventoryItemId);
             this.LogPayload("RunAlphaAttacking", "#FF4444", requestBody);
-            this.RunWithLock(this.scriptNameAlphaAttacking, requestBody, onSuccess, onError);
+            this.RunWithLock(this.scriptNameAlphaCardActive, requestBody, onSuccess, onError);
         }
 
         public void RunAlphaCardDeploy(Action<string> onSuccess, Action<string> onError)
