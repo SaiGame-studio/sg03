@@ -222,7 +222,7 @@ namespace SG03
         public void PlanningLungeTo(Vector3 destination) => this.movement.PlanningLungeTo(destination);
 
         /// <summary>Plays the ability activation animation: card rises + scales up, holds, then returns.</summary>
-        public void ActivateAbility() => this.movement.ActivateAbility();
+        public void ActivateAbility() => this.RunUp();
 
         /// <summary>Toggles the card between face-up and face-down.</summary>
         public void ToggleFace()

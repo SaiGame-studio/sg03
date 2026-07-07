@@ -540,22 +540,9 @@ namespace SG03
         }
 
         /// <summary>
-        /// Plays the ability activation animation: card rises and scales up, holds briefly, then returns.
+        /// Plays the ability activation animation using the same lightweight rise/fall motion as damage.
         /// </summary>
-        public void ActivateAbility()
-        {
-            Vector3 origin     = this.transform.position;
-            Vector3 risen      = origin + Vector3.up * this.abilityRiseHeight;
-            Vector3 baseScale  = this.transform.localScale;
-            Vector3 peakScale  = baseScale * this.abilityScalePeak;
-            this.abilityTween?.Kill();
-            this.abilityTween = DOTween.Sequence();
-            this.abilityTween.Append(this.transform.DOMove(risen, this.abilityRiseDuration).SetEase(this.abilityRiseEase));
-            this.abilityTween.Join(this.transform.DOScale(peakScale, this.abilityRiseDuration).SetEase(this.abilityRiseEase));
-            this.abilityTween.AppendInterval(this.abilityHoldDuration);
-            this.abilityTween.Append(this.transform.DOMove(origin, this.abilityReturnDuration).SetEase(this.abilityReturnEase));
-            this.abilityTween.Join(this.transform.DOScale(baseScale, this.abilityReturnDuration).SetEase(this.abilityReturnEase));
-        }
+        public void ActivateAbility() => this.RunUp();
 
         // ─── Hover handlers ───────────────────────────────────────────────────────
 
