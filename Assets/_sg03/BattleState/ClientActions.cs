@@ -296,7 +296,6 @@ namespace SG03
                 ? System.Array.Empty<string>()
                 : log.Parameters.Split(',');
             Coroutine result = null;
-            bool handled = true;
             switch (log.ActionName)
             {
                 case "alpha_source_spawn_card": result = this.ExecuteAlphaSourceSpawnCard(parameters); break;
@@ -325,10 +324,9 @@ namespace SG03
                 case "omega_turn_end":              result = this.ExecuteOmegaEndTurn();                    break;
                 default:
                     Debug.LogWarning($"[ClientActions] Unknown action: {log.ActionName}", this.gameObject);
-                    handled = false;
                     break;
             }
-            if (handled) log.MarkExecuted();
+            log.MarkExecuted();
             return result;
         }
 
