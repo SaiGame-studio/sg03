@@ -436,6 +436,11 @@ namespace SG03
             this.SyncTargetingState();
             if (!this.IsTargeting) return;
             if (this.arrowIndicator == null) return;
+            if (this.fullDetail)
+            {
+                this.arrowIndicator.Hide();
+                return;
+            }
             if (!this.HasArrowTarget())
             {
                 this.arrowIndicator.Hide();
