@@ -1,6 +1,7 @@
 using System;
 using SaiGame.Services;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace SG03.UI
@@ -20,10 +21,7 @@ namespace SG03.UI
 
         private Button btnEndBattle;
         private Button btnCheckStatus;
-        private Button btnInitCard;
-        private Button btnEndTurn;
-        private Button btnDrawCard;
-        private Button btnAttack;
+
         private Button btnStartBattle;
         private TextField enemyCodeNameInput;
 
@@ -47,10 +45,7 @@ namespace SG03.UI
         {
             this.btnEndBattle = root.Q<Button>("BtnEndBattle");
             this.btnCheckStatus = root.Q<Button>("BtnCheckStatus");
-            this.btnInitCard = root.Q<Button>("BtnInitCard");
-            this.btnEndTurn = root.Q<Button>("BtnEndTurn");
-            this.btnDrawCard = root.Q<Button>("BtnDrawCard");
-            this.btnAttack = root.Q<Button>("BtnAttack");
+
             this.btnStartBattle = root.Q<Button>("BtnStartBattle");
             this.enemyCodeNameInput = root.Q<TextField>("EnemyCodeNameInput");
         }
@@ -59,10 +54,7 @@ namespace SG03.UI
         {
             this.btnEndBattle?.RegisterCallback<ClickEvent>(_ => this.OnEndBattleClicked());
             this.btnCheckStatus?.RegisterCallback<ClickEvent>(_ => this.OnCheckStatusClicked());
-            this.btnInitCard?.RegisterCallback<ClickEvent>(_ => this.OnInitCardClicked());
-            this.btnEndTurn?.RegisterCallback<ClickEvent>(_ => this.OnEndTurnClicked());
-            this.btnDrawCard?.RegisterCallback<ClickEvent>(_ => this.OnDrawCardClicked());
-            this.btnAttack?.RegisterCallback<ClickEvent>(_ => this.OnAttackClicked());
+
             this.btnStartBattle?.RegisterCallback<ClickEvent>(_ => this.OnStartBattleClicked());
             this.enemyCodeNameInput?.RegisterValueChangedCallback(_ => this.ResetStartBattleButtonText());
         }
@@ -80,10 +72,7 @@ namespace SG03.UI
             this.selectedPreset = preset;
         }
 
-        protected virtual void OnInitCardClicked()
-        {
-            this.TriggerInitCard();
-        }
+
 
         protected virtual void OnEndBattleClicked()
         {
@@ -98,54 +87,6 @@ namespace SG03.UI
         protected virtual void OnStartBattleClicked()
         {
             this.TriggerStartBattle();
-        }
-
-        protected virtual void OnEndTurnClicked() { }
-
-        protected virtual void OnDrawCardClicked() { }
-
-        protected virtual void OnAttackClicked() { }
-
-        private void TriggerInitCard()
-        {
-            BattleScripts scripts = this.getBattleScripts();
-            if (!this.CanInitCard(scripts)) return;
-            this.SetInitCardLoading(true);
-            scripts.RunInitCards(this.OnInitCardSucceeded, this.OnInitCardFailed);
-        }
-
-        private bool CanInitCard(BattleScripts scripts)
-        {
-            if (scripts != null) return true;
-            this.SetInitCardButtonText("No Script");
-            return false;
-        }
-
-        private void SetInitCardLoading(bool isLoading)
-        {
-            if (this.btnInitCard == null) return;
-            this.btnInitCard.SetEnabled(!isLoading);
-            this.btnInitCard.text = isLoading ? "Initing..." : "Init Card";
-        }
-
-        private void SetInitCardButtonText(string text)
-        {
-            if (this.btnInitCard == null) return;
-            this.btnInitCard.text = text;
-        }
-
-        private void OnInitCardSucceeded(string response)
-        {
-            this.SetInitCardLoading(false);
-            this.SetInitCardButtonText("Init OK");
-            this.ApplyBattleStatusResponse(response);
-        }
-
-        private void OnInitCardFailed(string error)
-        {
-            this.SetInitCardLoading(false);
-            this.SetInitCardButtonText("Init Failed");
-            Debug.LogWarning("GameBattleActionsUI: Init card failed: " + error);
         }
 
         private void TriggerCheckStatus()
@@ -231,6 +172,10 @@ namespace SG03.UI
             this.SetEndBattleLoading(false);
             this.SetEndBattleButtonText("Battle Ended");
             this.getBattleStateCtrl()?.BattleState?.ClearData();
+            Scene activeScene = SceneManager.GetActiveScene();
+            if (!activeScene.IsValid()) return;
+            if (string.IsNullOrWhiteSpace(activeScene.name)) return;
+            SceneManager.LoadScene(activeScene.name);
         }
 
         private void OnBattleEndFailed(string error)

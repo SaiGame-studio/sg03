@@ -6989,11 +6989,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.ClientActions
   battleState: {fileID: 2015755439}
+  battleScripts: {fileID: 2015755445}
   cardSpawning: {fileID: 2015755438}
   battleCardDefinitions: {fileID: 2015755443}
   lampOfSoul: {fileID: 1773165130}
   cardSelection: {fileID: 2015755440}
-  deskPosition: {fileID: 0}
+  deskPosition: {fileID: 948749802}
   actionInterval: 0.1
   actionMoveDuration: 1
   actionRotateDuration: 0.4

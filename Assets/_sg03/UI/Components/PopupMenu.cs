@@ -205,7 +205,7 @@ namespace SG03.UI.Components
             if (b.width > 0f)
             {
                 // Layout already resolved — position immediately.
-                ApplyPosition(b.xMin, b.yMax);
+                QueueApplyPosition(b.xMin, b.yMax);
                 return;
             }
 
@@ -215,9 +215,18 @@ namespace SG03.UI.Components
                 anchor.UnregisterCallback<GeometryChangedEvent>(OnLayout);
                 if (!IsVisible) return;
                 Rect resolved = anchor.worldBound;
-                ApplyPosition(resolved.xMin, resolved.yMax);
+                QueueApplyPosition(resolved.xMin, resolved.yMax);
             }
             anchor.RegisterCallback<GeometryChangedEvent>(OnLayout);
+        }
+
+        private void QueueApplyPosition(float left, float top)
+        {
+            _root.schedule.Execute(() =>
+            {
+                if (!IsVisible) return;
+                ApplyPosition(left, top);
+            });
         }
 
         private void ApplyPosition(float left, float top)
