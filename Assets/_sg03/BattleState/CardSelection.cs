@@ -347,9 +347,15 @@ namespace SG03
         private bool TryConfirmTargeting()
         {
             if (!this.IsTargeting) return false;
-            if (this.hovered == null) return false;
-            if (this.hovered == this.targetingSource) return false;
-            this.ConfirmTargeting();
+            if (this.hovered != null)
+            {
+                if (this.hovered == this.targetingSource) return false;
+                this.ConfirmTargeting();
+                return true;
+            }
+            if (this.holderHover == null) return false;
+            if (this.holderHover.HolderOwner != Owner.omega) return false;
+            this.ConfirmHolderTargeting();
             return true;
         }
 
@@ -374,6 +380,20 @@ namespace SG03
             this.LogTargetConfirmed(source, target);
             TargetSelected?.Invoke(source, target);
             this.DispatchAttackingScripts(source, target);
+        }
+
+        private void ConfirmHolderTargeting()
+        {
+            Card3DCtrl source = this.targetingSource;
+            CardHolderCtrl holder = this.holderHover;
+            if (source == null || holder == null) return;
+            string defenderId = this.ResolveDefenderId(holder);
+            Debug.Log($"<color=#00FFAA>[Targeting] <b>{source.name}</b> â†’ <b>{holder.name}</b> ({defenderId})</color>");
+            this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(
+                source.InventoryItemId,
+                defenderId,
+                this.OnAlphaAttackingSuccess,
+                null);
         }
 
         private void DispatchAttackingScripts(Card3DCtrl source, Card3DCtrl target)
@@ -429,6 +449,25 @@ namespace SG03
             return target.InventoryItemId;
         }
 
+        private string ResolveDefenderId(CardHolderCtrl holder)
+        {
+            if (holder == null) return "omega_hp";
+            if (holder.HolderOwner != Owner.omega) return "omega_hp";
+            return this.HasAnyOmegaFrontlineCard() ? "omega" : "omega_hp";
+        }
+
+        private bool HasAnyOmegaFrontlineCard()
+        {
+            BattleCardSlot[] slots = this.battleStateCtrl?.BattleState?.OmegaFrontLine;
+            if (slots == null) return false;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot == null) continue;
+                if (!string.IsNullOrEmpty(slot.inventory_item_id)) return true;
+            }
+            return false;
+        }
+
         private void OnAlphaAttackingSuccess(string response)
         {
             this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
@@ -468,7 +507,7 @@ namespace SG03
         private bool HasArrowTarget()
         {
             if (this.hovered != null && this.hovered != this.targetingSource) return true;
-            if (this.holderHover != null && this.holderHover.HeldCard != null) return true;
+            if (this.holderHover != null) return true;
             return false;
         }
 
@@ -569,7 +608,7 @@ namespace SG03
         {
             if (this.hovered != null && this.hovered != this.targetingSource)
                 return this.hovered.transform.position;
-            if (this.holderHover != null && this.holderHover.HeldCard != null)
+            if (this.holderHover != null)
                 return this.holderHover.transform.position;
             return this.GetMouseWorldPosition();
         }
