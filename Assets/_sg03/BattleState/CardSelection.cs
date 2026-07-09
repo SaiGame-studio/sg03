@@ -226,6 +226,7 @@ namespace SG03
         private void HandleMiddleClick()
         {
             if (!this.IsMouseMiddleClickedThisFrame()) return;
+            if (this.AreClientActionsPending()) return;
             if (this.hovered == null) return;
             if (this.IsLocationNonSelectable(this.hovered.Location)) return;
             if (!this.IsClickOnSelected()) this.SelectHovered();
@@ -259,6 +260,7 @@ namespace SG03
 
         private void HandleCardClick()
         {
+            if (this.AreClientActionsPending()) return;
             if (this.hovered == null) return;
             if (this.IsLocationNonSelectable(this.hovered.Location)) return;
             if (this.IsClickOnSelected()) return;
@@ -405,7 +407,7 @@ namespace SG03
         {
             ClientActions clientActions = this.battleStateCtrl?.ClientActions;
             if (clientActions == null) yield break;
-            yield return new WaitUntil(() => !clientActions.IsDispatching);
+            yield return new WaitUntil(() => !clientActions.HasPendingActions);
         }
 
         private void RunAlphaAttackingAfterDeploy(Card3DCtrl source, Card3DCtrl target)
@@ -617,6 +619,7 @@ namespace SG03
         private void OnHolderSelected(CardHolderCtrl holder)
         {
             this.holderSelected = holder;
+            if (this.AreClientActionsPending()) return;
             if (this.selected == null) { if (this.debugLog) Debug.LogWarning("[CardSelection] OnHolderSelected — no card selected"); return; }
             if (this.debugLog) Debug.Log($"[CardSelection] OnHolderSelected — card='{this.selected.name}' owner={this.selected.CardOwner} isCharacter={this.selected.IsCharacter()} location={this.selected.Location} → holder='{holder.name}' link={holder.HolderLink} owner={holder.HolderOwner} heldCard={holder.HeldCard?.name ?? "null"}");
             if (!this.IsCardDeployPhase()) return;
@@ -692,6 +695,11 @@ namespace SG03
         {
             this.countCharDeploy = 0;
             if (this.debugLog) Debug.Log($"[CardSelection] ResetCharDeployCount — reset to 0 (max={this.maxCharDeploy})");
+        }
+
+        private bool AreClientActionsPending()
+        {
+            return this.battleStateCtrl?.ClientActions?.HasPendingActions == true;
         }
 
         private Card3DCtrl FindFrontLineCharacter(Card3DCtrl excludeCard)

@@ -29,9 +29,13 @@ namespace SG03
         [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
 
         private Coroutine dispatchRoutine;
+        [SerializeField] private bool hasPendingActions;
 
         /// <summary>True while client actions are still being dispatched.</summary>
         public bool IsDispatching => this.dispatchRoutine != null;
+
+        /// <summary>True while there are client actions that have not finished yet.</summary>
+        public bool HasPendingActions => this.hasPendingActions;
 
         protected override void LoadComponents()
         {
@@ -127,6 +131,7 @@ namespace SG03
 
         private void TryStartDispatchWhenDefinitionsLoaded()
         {
+            this.hasPendingActions = this.HasUnexecutedActions();
             if (this.battleCardDefinitions != null && this.battleCardDefinitions.IsLoaded)
             {
                 this.StartDispatch();
@@ -205,6 +210,7 @@ namespace SG03
                 }
             }
             this.dispatchRoutine = null;
+            this.hasPendingActions = this.HasUnexecutedActions();
         }
 
         private IEnumerator DispatchSourceSpawnActions()
@@ -731,6 +737,15 @@ namespace SG03
             count = 0;
             if (parameters == null || parameters.Length == 0) return false;
             return int.TryParse(parameters[0].Trim(), out count);
+        }
+
+        private bool HasUnexecutedActions()
+        {
+            foreach (ClientActionLog log in this.actionLog)
+            {
+                if (!log.Executed) return true;
+            }
+            return false;
         }
     }
 }
