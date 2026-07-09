@@ -54,6 +54,7 @@ namespace SG03
         [SerializeField] private int maxCharDeploy   = 1;
         [SerializeField] private int countCharDeploy = 0;
 
+        private readonly Dictionary<string, PlayerDeployRecord> pendingPlayerDeploys = new Dictionary<string, PlayerDeployRecord>();
 
         private bool IsTargeting => this.targetingSource != null;
 
@@ -646,6 +647,7 @@ namespace SG03
         private void UpdateLocalStateOnPlacement(CardHolderCtrl holder, Card3DCtrl card)
         {
             if (this.battleStateCtrl?.BattleState == null) return;
+            this.RegisterPlayerDeploy(card, holder);
             this.battleStateCtrl.BattleState.MoveCardFromHandToLine(card.InventoryItemId, holder.HolderLink, holder.Index);
         }
 
@@ -697,9 +699,27 @@ namespace SG03
             if (this.debugLog) Debug.Log($"[CardSelection] ResetCharDeployCount — reset to 0 (max={this.maxCharDeploy})");
         }
 
+        public bool TryConsumePlayerDeploy(string inventoryItemId, Link link, int slotIndex)
+        {
+            if (string.IsNullOrEmpty(inventoryItemId)) return false;
+            if (!this.pendingPlayerDeploys.TryGetValue(inventoryItemId, out PlayerDeployRecord record)) return false;
+            if (record.Link != link || record.SlotIndex != slotIndex) return false;
+            this.pendingPlayerDeploys.Remove(inventoryItemId);
+            if (this.debugLog) Debug.Log($"[CardSelection] Consumed local player deploy — id={inventoryItemId}, link={link}, slot={slotIndex}");
+            return true;
+        }
+
         private bool AreClientActionsPending()
         {
             return this.battleStateCtrl?.ClientActions?.HasPendingActions == true;
+        }
+
+        private void RegisterPlayerDeploy(Card3DCtrl card, CardHolderCtrl holder)
+        {
+            if (card == null || holder == null) return;
+            if (string.IsNullOrEmpty(card.InventoryItemId)) return;
+            this.pendingPlayerDeploys[card.InventoryItemId] = new PlayerDeployRecord(holder.HolderLink, holder.Index);
+            if (this.debugLog) Debug.Log($"[CardSelection] Registered local player deploy — id={card.InventoryItemId}, link={holder.HolderLink}, slot={holder.Index}");
         }
 
         private Card3DCtrl FindFrontLineCharacter(Card3DCtrl excludeCard)
@@ -713,6 +733,18 @@ namespace SG03
                 if (h.HeldCard.IsCharacter()) return h.HeldCard;
             }
             return null;
+        }
+
+        private readonly struct PlayerDeployRecord
+        {
+            public PlayerDeployRecord(Link link, int slotIndex)
+            {
+                this.Link = link;
+                this.SlotIndex = slotIndex;
+            }
+
+            public Link Link { get; }
+            public int SlotIndex { get; }
         }
 
     }

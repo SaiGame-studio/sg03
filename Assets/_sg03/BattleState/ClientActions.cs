@@ -435,6 +435,11 @@ namespace SG03
         {
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card == null) yield break;
+            if (this.IsLocalPlayerDeploy(inventoryItemId, Link.front, slotIndex))
+            {
+                yield return this.StartCoroutine(this.WaitForCard(card));
+                yield break;
+            }
             card.FaceDownUnknown();
             yield return this.StartCoroutine(this.WaitForCard(card));
             card = this.cardSpawning?.MoveAlphaHandToFrontLine(inventoryItemId, slotIndex);
@@ -454,6 +459,11 @@ namespace SG03
         {
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card == null) yield break;
+            if (this.IsLocalPlayerDeploy(inventoryItemId, Link.back, slotIndex))
+            {
+                yield return this.StartCoroutine(this.WaitForCard(card));
+                yield break;
+            }
             card.FaceDownUnknown();
             yield return this.StartCoroutine(this.WaitForCard(card));
             card = this.cardSpawning?.MoveAlphaHandToBackLine(inventoryItemId, slotIndex);
@@ -710,6 +720,11 @@ namespace SG03
             if (this.cardSpawning == null) return;
             this.cardSpawning.ActionMoveDuration   = this.actionMoveDuration;
             this.cardSpawning.ActionRotateDuration = this.actionRotateDuration;
+        }
+
+        private bool IsLocalPlayerDeploy(string inventoryItemId, Link link, int slotIndex)
+        {
+            return this.cardSelection != null && this.cardSelection.TryConsumePlayerDeploy(inventoryItemId, link, slotIndex);
         }
 
         private IEnumerator WaitForCard(Card3DCtrl card)
