@@ -11,6 +11,7 @@ namespace SG03
     public class ClientActions : SaiBehaviour
     {
         [SerializeField] private BattleState          battleState;
+        [SerializeField] private BattleScripts        battleScripts;
         [SerializeField] private CardSpawning         cardSpawning;
         [SerializeField] private BattleCardDefinitions battleCardDefinitions;
         [SerializeField] private LampOfSoulCtrl       lampOfSoul;
@@ -36,6 +37,7 @@ namespace SG03
         {
             base.LoadComponents();
             this.LoadBattleState();
+            this.LoadBattleScripts();
             this.LoadCardSpawning();
             this.LoadBattleCardDefinitions();
             this.LoadLampOfSoul();
@@ -50,6 +52,15 @@ namespace SG03
             if (ctrl == null) return;
             this.battleState = ctrl.BattleState;
             Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
+        }
+
+        protected virtual void LoadBattleScripts()
+        {
+            if (this.battleScripts != null) return;
+            BattleStateCtrl ctrl = this.GetComponent<BattleStateCtrl>();
+            if (ctrl == null) return;
+            this.battleScripts = ctrl.BattleScripts;
+            Debug.LogWarning(this.transform.name + ": LoadBattleScripts", this.gameObject);
         }
 
         protected virtual void LoadCardSpawning()
@@ -121,7 +132,7 @@ namespace SG03
                 this.StartDispatch();
                 return;
             }
-            if (this.logActions) Debug.Log("<color=#FFD700>[ClientActions] Waiting for BattleCardDefinitions to load before dispatching actions...</color>", this.gameObject);
+            if (this.logActions) Debug.Log("<color=#88FFFF>[ClientActions]</color> <color=#FFD700>Waiting for BattleCardDefinitions to load before dispatching actions...</color>", this.gameObject);
             BattleCardDefinitions.OnDefinitionsLoaded -= this.OnDefinitionsLoaded;
             BattleCardDefinitions.OnDefinitionsLoaded += this.OnDefinitionsLoaded;
         }
@@ -134,7 +145,7 @@ namespace SG03
 
         private void BuildActionLogs(string[] actions)
         {
-            // Debug.Log($"<color=#FFD700><b>[ClientActions] Received {actions.Length} action(s)</b></color>", this.gameObject);
+            // Debug.Log($"<color=#88FFFF>[ClientActions]</color> <color=#FFD700><b>Received {actions.Length} action(s)</b></color>", this.gameObject);
             foreach (string entry in actions)
             {
                 if (string.IsNullOrWhiteSpace(entry)) continue;
@@ -285,7 +296,7 @@ namespace SG03
         {
             if (!this.logActions) return;
             string paramsText = string.IsNullOrEmpty(log.Parameters) ? "(no params)" : log.Parameters;
-            Debug.Log($"[ClientActions] <color=#88FFFF>Executing:</color> <b>{log.ActionName}</b> | {paramsText}", this.gameObject);
+            Debug.Log($"<color=#88FFFF>[ClientActions]</color> Executing: <b>{log.ActionName}</b> | {paramsText}", this.gameObject);
         }
 
         private Coroutine ExecuteAction(ClientActionLog log)
@@ -298,6 +309,7 @@ namespace SG03
             Coroutine result = null;
             switch (log.ActionName)
             {
+                case "next_move":                  result = this.ExecuteNextMove(log, parameters);         break;
                 case "alpha_source_spawn_card": result = this.ExecuteAlphaSourceSpawnCard(parameters); break;
                 case "omega_source_spawn_card": result = this.ExecuteOmegaSourceSpawnCard(parameters); break;
                 case "alpha_source_to_hand":       result = this.ExecuteAlphaSourceToHand(parameters);    break;
@@ -323,11 +335,42 @@ namespace SG03
                 case "omega_take_lamp":             result = this.ExecuteLampMoveToOmega();                break;
                 case "omega_turn_end":              result = this.ExecuteOmegaEndTurn();                    break;
                 default:
-                    Debug.LogWarning($"[ClientActions] Unknown action: {log.ActionName}", this.gameObject);
+                    Debug.LogWarning($"<color=#88FFFF>[ClientActions]</color> Unknown action: {log.ActionName}", this.gameObject);
                     break;
             }
             log.MarkExecuted();
             return result;
+        }
+
+        private Coroutine ExecuteNextMove(ClientActionLog log, string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return null;
+            string moveType = parameters[0].Trim();
+            
+            if (moveType == "init_cards")
+            {
+                bool isLastAction = this.actionLog.IndexOf(log) == this.actionLog.Count - 1;
+                if (!isLastAction)
+                {
+                    Debug.Log("<color=#88FFFF>[ClientActions]</color> Skip init_cards script because it is not the last action in the queue.", this.gameObject);
+                }
+                else if (this.battleScripts == null)
+                {
+                    Debug.Log("<color=#88FFFF>[ClientActions]</color> Skip init_cards script because BattleScripts reference is null.", this.gameObject);
+                }
+                else
+                {
+                    this.battleScripts.RunInitCards(
+                        response => 
+                        {
+                            if (!string.IsNullOrWhiteSpace(response))
+                                this.battleState?.UpdateFromBattleStatus(response);
+                        },
+                        error => Debug.LogWarning("<color=#88FFFF>[ClientActions]</color> Init cards failed: " + error, this.gameObject)
+                    );
+                }
+            }
+            return null;
         }
 
         private Coroutine ExecuteAlphaSourceSpawnCard(string[] parameters)

@@ -209,6 +209,7 @@ namespace SG03.UI
             this.BindBattleActions(panelRoot);
             this.WirePresetEventsToBattleActions();
             this.SubscribeToAuthEvents();
+            this.deskTabsUI?.LoadPresets();
         }
 
         private void BindPlayerName(VisualElement panelRoot)
@@ -297,6 +298,7 @@ namespace SG03.UI
         private void OnLoginSuccess(LoginResponse response)
         {
             this.RefreshPlayerName();
+            this.deskTabsUI?.LoadPresets();
         }
 
         private void RefreshPlayerName()

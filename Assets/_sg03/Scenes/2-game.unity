@@ -3835,7 +3835,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1117747785}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b84a4b2e93524634ea55ebad21b73b44, type: 3}
   m_Name: 
@@ -6989,6 +6989,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.ClientActions
   battleState: {fileID: 2015755439}
+  battleScripts: {fileID: 2015755445}
   cardSpawning: {fileID: 2015755438}
   battleCardDefinitions: {fileID: 2015755443}
   lampOfSoul: {fileID: 1773165130}

@@ -15,7 +15,6 @@
                 <ui:TextField name="EnemyCodeNameInput" label="Enemy" value="goblin_shaman" class="game-bottom-input" />
                 <ui:Button name="BtnStartBattle" text="Start Battle" class="game-bottom-btn game-bottom-btn--primary" />
                 <ui:VisualElement name="DeskTabs" class="game-top-menu__tabs">
-                    <ui:Button name="BtnLoadAddDesk" text="Load Add Desk" class="game-tab game-tab--loader" />
                 </ui:VisualElement>
                 <ui:Label name="PlayerNameLabel" text="Guest" class="game-top-menu__player-name" />
                 <ui:Label name="CardCountLabel" text="Card Count: 0" class="game-top-menu__card-count" />
@@ -35,7 +34,7 @@
                 <ui:Label name="AlphaLabel" text="Alpha" class="game-top-menu__title" />
                 <ui:Button name="BtnEndBattle" text="End Battle" class="game-bottom-btn game-bottom-btn--secondary game-bottom-btn--danger" />
                 <ui:Button name="BtnCheckStatus" text="Check Status" class="game-bottom-btn" />
-                <ui:Button name="BtnInitCard" text="Init Card" class="game-bottom-btn" />
+
                 <ui:Label name="NextMoveLabel" text="Move: --" class="game-top-menu__title" style="margin-left: auto;" />
             </ui:VisualElement>
 

@@ -140,29 +140,7 @@ namespace SG03
         [Tooltip("Ease for the backstep phase.")]
         [SerializeField] private Ease attackBackstepEase = Ease.OutQuad;
 
-        // ─── Ability ──────────────────────────────────────────────────────────────
 
-        [Header("Ability")]
-        [Tooltip("World units the card rises while activating its ability.")]
-        [SerializeField] private float abilityRiseHeight = 1.2f;
-
-        [Tooltip("Extra scale multiplier applied at the peak of the ability animation (1 = no change).")]
-        [SerializeField] private float abilityScalePeak = 1.15f;
-
-        [Tooltip("Duration of the rise/scale-up phase in seconds.")]
-        [SerializeField] private float abilityRiseDuration = 0.18f;
-
-        [Tooltip("Duration of the hold phase at the peak in seconds.")]
-        [SerializeField] private float abilityHoldDuration = 0.12f;
-
-        [Tooltip("Duration of the return phase in seconds.")]
-        [SerializeField] private float abilityReturnDuration = 0.22f;
-
-        [Tooltip("Ease for the rise/scale-up phase.")]
-        [SerializeField] private Ease abilityRiseEase = Ease.OutBack;
-
-        [Tooltip("Ease for the return phase.")]
-        [SerializeField] private Ease abilityReturnEase = Ease.InQuad;
 
         // ─── Runtime state ────────────────────────────────────────────────────────
 
@@ -621,8 +599,6 @@ namespace SG03
 
         private void KillAllTweens()
         {
-            if (this.moveTween != null && this.moveTween.IsActive())
-                Debug.LogWarning($"[CardMovement] {this.gameObject.name} KillAllTweens — killing active moveTween\n{UnityEngine.StackTraceUtility.ExtractStackTrace()}");
             this.KillMoveTween();
             this.yTween?.Kill();
             this.yTween = null;

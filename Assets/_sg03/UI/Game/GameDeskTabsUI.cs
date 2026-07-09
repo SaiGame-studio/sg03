@@ -15,7 +15,6 @@ namespace SG03.UI
 
         private readonly Func<ItemPreset> getItemPreset;
 
-        private Button btnLoadAddDesk;
         private VisualElement deskTabs;
         private readonly List<Button> deskButtons = new List<Button>();
         private Label cardCountLabel;
@@ -28,36 +27,24 @@ namespace SG03.UI
         public void Bind(VisualElement root)
         {
             this.deskTabs = root.Q("DeskTabs");
-            this.btnLoadAddDesk = root.Q<Button>("BtnLoadAddDesk");
             this.cardCountLabel = root.Q<Label>("CardCountLabel");
-            this.btnLoadAddDesk?.RegisterCallback<ClickEvent>(_ => this.OnLoadAddDeskClicked());
         }
 
-        private void OnLoadAddDeskClicked()
+        public void LoadPresets()
         {
             ItemPreset current = this.getItemPreset();
             if (current == null) return;
-            this.SetLoadAddDeskLoading(true);
             current.GetPresets(this.HandlePresetsLoaded, this.HandlePresetsLoadFailed);
         }
 
         private void HandlePresetsLoaded(PresetResponse response)
         {
-            this.SetLoadAddDeskLoading(false);
             this.RenderDeskTabs(response?.containers);
         }
 
         private void HandlePresetsLoadFailed(string error)
         {
-            this.SetLoadAddDeskLoading(false);
             this.RenderDeskTabs(null);
-        }
-
-        private void SetLoadAddDeskLoading(bool isLoading)
-        {
-            if (this.btnLoadAddDesk == null) return;
-            this.btnLoadAddDesk.SetEnabled(!isLoading);
-            this.btnLoadAddDesk.text = isLoading ? "Loading..." : "Load Add Desk";
         }
 
         private void RenderDeskTabs(PresetData[] presets)

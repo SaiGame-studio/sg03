@@ -20,7 +20,7 @@ namespace SG03.UI
 
         private Button btnEndBattle;
         private Button btnCheckStatus;
-        private Button btnInitCard;
+
         private Button btnStartBattle;
         private TextField enemyCodeNameInput;
 
@@ -44,7 +44,7 @@ namespace SG03.UI
         {
             this.btnEndBattle = root.Q<Button>("BtnEndBattle");
             this.btnCheckStatus = root.Q<Button>("BtnCheckStatus");
-            this.btnInitCard = root.Q<Button>("BtnInitCard");
+
             this.btnStartBattle = root.Q<Button>("BtnStartBattle");
             this.enemyCodeNameInput = root.Q<TextField>("EnemyCodeNameInput");
         }
@@ -53,7 +53,7 @@ namespace SG03.UI
         {
             this.btnEndBattle?.RegisterCallback<ClickEvent>(_ => this.OnEndBattleClicked());
             this.btnCheckStatus?.RegisterCallback<ClickEvent>(_ => this.OnCheckStatusClicked());
-            this.btnInitCard?.RegisterCallback<ClickEvent>(_ => this.OnInitCardClicked());
+
             this.btnStartBattle?.RegisterCallback<ClickEvent>(_ => this.OnStartBattleClicked());
             this.enemyCodeNameInput?.RegisterValueChangedCallback(_ => this.ResetStartBattleButtonText());
         }
@@ -71,10 +71,7 @@ namespace SG03.UI
             this.selectedPreset = preset;
         }
 
-        protected virtual void OnInitCardClicked()
-        {
-            this.TriggerInitCard();
-        }
+
 
         protected virtual void OnEndBattleClicked()
         {
@@ -89,48 +86,6 @@ namespace SG03.UI
         protected virtual void OnStartBattleClicked()
         {
             this.TriggerStartBattle();
-        }
-
-        private void TriggerInitCard()
-        {
-            BattleScripts scripts = this.getBattleScripts();
-            if (!this.CanInitCard(scripts)) return;
-            this.SetInitCardLoading(true);
-            scripts.RunInitCards(this.OnInitCardSucceeded, this.OnInitCardFailed);
-        }
-
-        private bool CanInitCard(BattleScripts scripts)
-        {
-            if (scripts != null) return true;
-            this.SetInitCardButtonText("No Script");
-            return false;
-        }
-
-        private void SetInitCardLoading(bool isLoading)
-        {
-            if (this.btnInitCard == null) return;
-            this.btnInitCard.SetEnabled(!isLoading);
-            this.btnInitCard.text = isLoading ? "Initing..." : "Init Card";
-        }
-
-        private void SetInitCardButtonText(string text)
-        {
-            if (this.btnInitCard == null) return;
-            this.btnInitCard.text = text;
-        }
-
-        private void OnInitCardSucceeded(string response)
-        {
-            this.SetInitCardLoading(false);
-            this.SetInitCardButtonText("Init OK");
-            this.ApplyBattleStatusResponse(response);
-        }
-
-        private void OnInitCardFailed(string error)
-        {
-            this.SetInitCardLoading(false);
-            this.SetInitCardButtonText("Init Failed");
-            Debug.LogWarning("GameBattleActionsUI: Init card failed: " + error);
         }
 
         private void TriggerCheckStatus()
