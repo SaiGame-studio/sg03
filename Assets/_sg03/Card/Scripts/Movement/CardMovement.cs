@@ -472,11 +472,12 @@ namespace SG03
         public void AttackLunge(Vector3 defenderPosition)
         {
             Vector3 origin = this.transform.position;
+            Vector3 returnPosition = this.GetAttackReturnPosition(origin);
             Vector3 lunged = Vector3.Lerp(origin, defenderPosition, this.attackLungeRatio);
             this.attackTween?.Kill();
             this.attackTween = DOTween.Sequence();
             this.attackTween.Append(this.transform.DOMove(lunged, this.attackLungeDuration).SetEase(this.attackLungeEase));
-            this.attackTween.Append(this.transform.DOMove(origin, this.attackReturnDuration).SetEase(this.attackReturnEase));
+            this.attackTween.Append(this.transform.DOMove(returnPosition, this.attackReturnDuration).SetEase(this.attackReturnEase));
         }
 
         /// <summary>
@@ -486,6 +487,7 @@ namespace SG03
         public void AttackBackstepLunge(Vector3 defenderPosition)
         {
             Vector3 origin     = this.transform.position;
+            Vector3 returnPosition = this.GetAttackReturnPosition(origin);
             Vector3 toDefender = defenderPosition - origin;
             Vector3 backstep   = origin - toDefender * this.attackBackstepRatio;
             Vector3 lunged     = Vector3.Lerp(origin, defenderPosition, this.attackLungeRatio);
@@ -493,7 +495,7 @@ namespace SG03
             this.attackTween = DOTween.Sequence();
             this.attackTween.Append(this.transform.DOMove(backstep, this.attackBackstepDuration).SetEase(this.attackBackstepEase));
             this.attackTween.Append(this.transform.DOMove(lunged,   this.attackLungeDuration).SetEase(this.attackLungeEase));
-            this.attackTween.Append(this.transform.DOMove(origin,   this.attackReturnDuration).SetEase(this.attackReturnEase));
+            this.attackTween.Append(this.transform.DOMove(returnPosition,   this.attackReturnDuration).SetEase(this.attackReturnEase));
         }
 
         /// <summary>
@@ -528,6 +530,13 @@ namespace SG03
         public void ActivateAbility() => this.RunUp();
 
         // ─── Hover handlers ───────────────────────────────────────────────────────
+
+        private Vector3 GetAttackReturnPosition(Vector3 fallbackPosition)
+        {
+            CardHolderCtrl holder = this.ctrl != null ? this.ctrl.CardHolder : null;
+            if (holder == null) return fallbackPosition;
+            return holder.transform.position + new Vector3(0f, this.lineOffsetY, 0f);
+        }
 
         private void OnHoverEntered(Card3DCtrl card)
         {
