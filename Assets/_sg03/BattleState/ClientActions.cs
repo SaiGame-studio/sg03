@@ -17,9 +17,8 @@ namespace SG03
         [SerializeField] private LampOfSoulCtrl       lampOfSoul;
         [SerializeField] private CardSelection        cardSelection;
         [SerializeField] private DeskPositionCtrl     deskPosition;
+        [SerializeField] private BattleStateCtrl      battleStateCtrl;
         [SerializeField] private float actionInterval = 0.1f;
-        [SerializeField] private float actionMoveDuration   = 1f;
-        [SerializeField] private float actionRotateDuration = 0.4f;
         [SerializeField] private float omegaFrontLinePostDelay = 0.5f;
 
         [Header("Debug")]
@@ -47,6 +46,14 @@ namespace SG03
             this.LoadLampOfSoul();
             this.LoadCardSelection();
             this.LoadDeskPosition();
+            this.LoadBattleStateCtrl();
+        }
+
+        protected virtual void LoadBattleStateCtrl()
+        {
+            if (this.battleStateCtrl != null) return;
+            this.battleStateCtrl = this.GetComponent<BattleStateCtrl>();
+            Debug.LogWarning(this.transform.name + ": LoadBattleStateCtrl", this.gameObject);
         }
 
         protected virtual void LoadBattleState()
@@ -435,6 +442,11 @@ namespace SG03
         {
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card == null) yield break;
+            if (this.IsLocalPlayerDeploy(inventoryItemId, Link.front, slotIndex))
+            {
+                yield return this.StartCoroutine(this.WaitForCard(card));
+                yield break;
+            }
             card.FaceDownUnknown();
             yield return this.StartCoroutine(this.WaitForCard(card));
             card = this.cardSpawning?.MoveAlphaHandToFrontLine(inventoryItemId, slotIndex);
@@ -454,6 +466,11 @@ namespace SG03
         {
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card == null) yield break;
+            if (this.IsLocalPlayerDeploy(inventoryItemId, Link.back, slotIndex))
+            {
+                yield return this.StartCoroutine(this.WaitForCard(card));
+                yield break;
+            }
             card.FaceDownUnknown();
             yield return this.StartCoroutine(this.WaitForCard(card));
             card = this.cardSpawning?.MoveAlphaHandToBackLine(inventoryItemId, slotIndex);
@@ -682,7 +699,7 @@ namespace SG03
         {
             float offsetX = attackerPosition.x < defenderPosition.x ? -1f : 1f;
             float offsetZ = attackerPosition.z < defenderPosition.z ? -9f : 9f;
-            return new Vector3(defenderPosition.x + offsetX, defenderPosition.y, defenderPosition.z + offsetZ);
+            return new Vector3(defenderPosition.x + offsetX, defenderPosition.y + 0.2f, defenderPosition.z + offsetZ);
         }
 
         private Coroutine ExecuteLampMoveToAlpha()
@@ -708,8 +725,13 @@ namespace SG03
         private void SyncActionMoveDuration()
         {
             if (this.cardSpawning == null) return;
-            this.cardSpawning.ActionMoveDuration   = this.actionMoveDuration;
-            this.cardSpawning.ActionRotateDuration = this.actionRotateDuration;
+            this.cardSpawning.ActionMoveDuration   = this.battleStateCtrl != null ? this.battleStateCtrl.CardMoveDuration : 1f;
+            this.cardSpawning.ActionRotateDuration = this.battleStateCtrl != null ? this.battleStateCtrl.CardRotateDuration : 0.4f;
+        }
+
+        private bool IsLocalPlayerDeploy(string inventoryItemId, Link link, int slotIndex)
+        {
+            return this.cardSelection != null && this.cardSelection.TryConsumePlayerDeploy(inventoryItemId, link, slotIndex);
         }
 
         private IEnumerator WaitForCard(Card3DCtrl card)

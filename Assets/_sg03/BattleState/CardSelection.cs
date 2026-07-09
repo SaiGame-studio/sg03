@@ -54,6 +54,7 @@ namespace SG03
         [SerializeField] private int maxCharDeploy   = 1;
         [SerializeField] private int countCharDeploy = 0;
 
+        private readonly Dictionary<string, PlayerDeployRecord> pendingPlayerDeploys = new Dictionary<string, PlayerDeployRecord>();
 
         private bool IsTargeting => this.targetingSource != null;
 
@@ -188,6 +189,11 @@ namespace SG03
 
         private void CheckClick()
         {
+            if (this.IsBattleCompleted())
+            {
+                this.ClearInteractionState();
+                return;
+            }
             if (CardMovement.IsAnyCardMoving)
             {
                 this.HandleCardSelectionOnly();
@@ -341,9 +347,15 @@ namespace SG03
         private bool TryConfirmTargeting()
         {
             if (!this.IsTargeting) return false;
-            if (this.hovered == null) return false;
-            if (this.hovered == this.targetingSource) return false;
-            this.ConfirmTargeting();
+            if (this.hovered != null)
+            {
+                if (this.hovered == this.targetingSource) return false;
+                this.ConfirmTargeting();
+                return true;
+            }
+            if (this.holderHover == null) return false;
+            if (this.holderHover.HolderOwner != Owner.omega) return false;
+            this.ConfirmHolderTargeting();
             return true;
         }
 
@@ -368,6 +380,20 @@ namespace SG03
             this.LogTargetConfirmed(source, target);
             TargetSelected?.Invoke(source, target);
             this.DispatchAttackingScripts(source, target);
+        }
+
+        private void ConfirmHolderTargeting()
+        {
+            Card3DCtrl source = this.targetingSource;
+            CardHolderCtrl holder = this.holderHover;
+            if (source == null || holder == null) return;
+            string defenderId = this.ResolveDefenderId(holder);
+            Debug.Log($"<color=#00FFAA>[Targeting] <b>{source.name}</b> â†’ <b>{holder.name}</b> ({defenderId})</color>");
+            this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(
+                source.InventoryItemId,
+                defenderId,
+                this.OnAlphaAttackingSuccess,
+                null);
         }
 
         private void DispatchAttackingScripts(Card3DCtrl source, Card3DCtrl target)
@@ -423,6 +449,25 @@ namespace SG03
             return target.InventoryItemId;
         }
 
+        private string ResolveDefenderId(CardHolderCtrl holder)
+        {
+            if (holder == null) return "omega_hp";
+            if (holder.HolderOwner != Owner.omega) return "omega_hp";
+            return this.HasAnyOmegaFrontlineCard() ? "omega" : "omega_hp";
+        }
+
+        private bool HasAnyOmegaFrontlineCard()
+        {
+            BattleCardSlot[] slots = this.battleStateCtrl?.BattleState?.OmegaFrontLine;
+            if (slots == null) return false;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot == null) continue;
+                if (!string.IsNullOrEmpty(slot.inventory_item_id)) return true;
+            }
+            return false;
+        }
+
         private void OnAlphaAttackingSuccess(string response)
         {
             this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
@@ -435,6 +480,12 @@ namespace SG03
 
         private void UpdateArrow()
         {
+            if (this.IsBattleCompleted())
+            {
+                this.ClearInteractionState();
+                this.arrowIndicator?.Hide();
+                return;
+            }
             this.SyncTargetingState();
             if (!this.IsTargeting) return;
             if (this.arrowIndicator == null) return;
@@ -456,7 +507,7 @@ namespace SG03
         private bool HasArrowTarget()
         {
             if (this.hovered != null && this.hovered != this.targetingSource) return true;
-            if (this.holderHover != null && this.holderHover.HeldCard != null) return true;
+            if (this.holderHover != null) return true;
             return false;
         }
 
@@ -557,7 +608,7 @@ namespace SG03
         {
             if (this.hovered != null && this.hovered != this.targetingSource)
                 return this.hovered.transform.position;
-            if (this.holderHover != null && this.holderHover.HeldCard != null)
+            if (this.holderHover != null)
                 return this.holderHover.transform.position;
             return this.GetMouseWorldPosition();
         }
@@ -619,6 +670,7 @@ namespace SG03
         private void OnHolderSelected(CardHolderCtrl holder)
         {
             this.holderSelected = holder;
+            if (this.IsBattleCompleted()) return;
             if (this.AreClientActionsPending()) return;
             if (this.selected == null) { if (this.debugLog) Debug.LogWarning("[CardSelection] OnHolderSelected — no card selected"); return; }
             if (this.debugLog) Debug.Log($"[CardSelection] OnHolderSelected — card='{this.selected.name}' owner={this.selected.CardOwner} isCharacter={this.selected.IsCharacter()} location={this.selected.Location} → holder='{holder.name}' link={holder.HolderLink} owner={holder.HolderOwner} heldCard={holder.HeldCard?.name ?? "null"}");
@@ -646,6 +698,7 @@ namespace SG03
         private void UpdateLocalStateOnPlacement(CardHolderCtrl holder, Card3DCtrl card)
         {
             if (this.battleStateCtrl?.BattleState == null) return;
+            this.RegisterPlayerDeploy(card, holder);
             this.battleStateCtrl.BattleState.MoveCardFromHandToLine(card.InventoryItemId, holder.HolderLink, holder.Index);
         }
 
@@ -653,6 +706,7 @@ namespace SG03
         {
             if (this.selected.IsFlipping) { if (this.debugLog) Debug.LogWarning($"[CardSelection] PlaceFromHandIntoHolder — card '{this.selected.name}' is still flipping — skipped"); return; }
             Card3DCtrl cardToRotate = this.selected;
+            this.ApplyBattleMotionSettings(cardToRotate);
             cardToRotate.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(cardToRotate)));
             targetHolder.SetCard(cardToRotate);
         }
@@ -697,9 +751,51 @@ namespace SG03
             if (this.debugLog) Debug.Log($"[CardSelection] ResetCharDeployCount — reset to 0 (max={this.maxCharDeploy})");
         }
 
+        public bool TryConsumePlayerDeploy(string inventoryItemId, Link link, int slotIndex)
+        {
+            if (string.IsNullOrEmpty(inventoryItemId)) return false;
+            if (!this.pendingPlayerDeploys.TryGetValue(inventoryItemId, out PlayerDeployRecord record)) return false;
+            if (record.Link != link || record.SlotIndex != slotIndex) return false;
+            this.pendingPlayerDeploys.Remove(inventoryItemId);
+            if (this.debugLog) Debug.Log($"[CardSelection] Consumed local player deploy — id={inventoryItemId}, link={link}, slot={slotIndex}");
+            return true;
+        }
+
         private bool AreClientActionsPending()
         {
             return this.battleStateCtrl?.ClientActions?.HasPendingActions == true;
+        }
+
+        private bool IsBattleCompleted()
+        {
+            string battleStatus = this.battleStateCtrl?.BattleState?.BattleStatus;
+            return string.Equals(battleStatus, "completed", System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void ClearInteractionState()
+        {
+            this.fullDetail = false;
+            this.selected = null;
+            this.targeted = null;
+            this.targetingSource = null;
+            this.holderSelected = null;
+            this.arrowIndicator?.Hide();
+        }
+
+        private void RegisterPlayerDeploy(Card3DCtrl card, CardHolderCtrl holder)
+        {
+            if (card == null || holder == null) return;
+            if (string.IsNullOrEmpty(card.InventoryItemId)) return;
+            this.pendingPlayerDeploys[card.InventoryItemId] = new PlayerDeployRecord(holder.HolderLink, holder.Index);
+            if (this.debugLog) Debug.Log($"[CardSelection] Registered local player deploy — id={card.InventoryItemId}, link={holder.HolderLink}, slot={holder.Index}");
+        }
+
+        private void ApplyBattleMotionSettings(Card3DCtrl card)
+        {
+            if (card == null) return;
+            if (this.battleStateCtrl == null) return;
+            card.SetMoveDuration(this.battleStateCtrl.CardMoveDuration);
+            card.SetRotateDuration(this.battleStateCtrl.CardRotateDuration);
         }
 
         private Card3DCtrl FindFrontLineCharacter(Card3DCtrl excludeCard)
@@ -713,6 +809,18 @@ namespace SG03
                 if (h.HeldCard.IsCharacter()) return h.HeldCard;
             }
             return null;
+        }
+
+        private readonly struct PlayerDeployRecord
+        {
+            public PlayerDeployRecord(Link link, int slotIndex)
+            {
+                this.Link = link;
+                this.SlotIndex = slotIndex;
+            }
+
+            public Link Link { get; }
+            public int SlotIndex { get; }
         }
 
     }

@@ -17,6 +17,10 @@ namespace SG03
         [SerializeField] private BattleCardDefinitions battleCardDefinitions;
         [SerializeField] private ClientActions clientActions;
 
+        [Header("Card Motion")]
+        [SerializeField] private float cardMoveDuration = 0.5f;
+        [SerializeField] private float cardRotateDuration = 0.2f;
+
         public BattleState BattleState => this.battleState;
         public BattleScripts BattleScripts => this.battleScripts;
         public CardSpawning CardSpawning => this.cardSpawning;
@@ -25,6 +29,8 @@ namespace SG03
         public CardHolderHoverDetector CardHolderHoverDetector => this.cardHolderHoverDetector;
         public BattleCardDefinitions BattleCardDefinitions => this.battleCardDefinitions;
         public ClientActions ClientActions => this.clientActions;
+        public float CardMoveDuration => this.cardMoveDuration;
+        public float CardRotateDuration => this.cardRotateDuration;
 
         protected override void LoadComponents()
         {
@@ -37,6 +43,7 @@ namespace SG03
             this.LoadCardHolderHoverDetector();
             this.LoadBattleCardDefinitions();
             this.LoadClientActions();
+            this.ApplyCardMotionSettings();
         }
 
         protected virtual void LoadBattleScripts()
@@ -93,6 +100,13 @@ namespace SG03
             if (this.clientActions != null) return;
             this.clientActions = this.GetComponentInChildren<ClientActions>(true);
             Debug.LogWarning(this.transform.name + ": LoadClientActions", this.gameObject);
+        }
+
+        private void ApplyCardMotionSettings()
+        {
+            if (this.cardSpawning == null) return;
+            this.cardSpawning.ActionMoveDuration = this.cardMoveDuration;
+            this.cardSpawning.ActionRotateDuration = this.cardRotateDuration;
         }
     }
 }
