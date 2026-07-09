@@ -17,9 +17,8 @@ namespace SG03
         [SerializeField] private LampOfSoulCtrl       lampOfSoul;
         [SerializeField] private CardSelection        cardSelection;
         [SerializeField] private DeskPositionCtrl     deskPosition;
+        [SerializeField] private BattleStateCtrl      battleStateCtrl;
         [SerializeField] private float actionInterval = 0.1f;
-        [SerializeField] private float actionMoveDuration   = 1f;
-        [SerializeField] private float actionRotateDuration = 0.4f;
         [SerializeField] private float omegaFrontLinePostDelay = 0.5f;
 
         [Header("Debug")]
@@ -47,6 +46,14 @@ namespace SG03
             this.LoadLampOfSoul();
             this.LoadCardSelection();
             this.LoadDeskPosition();
+            this.LoadBattleStateCtrl();
+        }
+
+        protected virtual void LoadBattleStateCtrl()
+        {
+            if (this.battleStateCtrl != null) return;
+            this.battleStateCtrl = this.GetComponent<BattleStateCtrl>();
+            Debug.LogWarning(this.transform.name + ": LoadBattleStateCtrl", this.gameObject);
         }
 
         protected virtual void LoadBattleState()
@@ -718,8 +725,8 @@ namespace SG03
         private void SyncActionMoveDuration()
         {
             if (this.cardSpawning == null) return;
-            this.cardSpawning.ActionMoveDuration   = this.actionMoveDuration;
-            this.cardSpawning.ActionRotateDuration = this.actionRotateDuration;
+            this.cardSpawning.ActionMoveDuration   = this.battleStateCtrl != null ? this.battleStateCtrl.CardMoveDuration : 1f;
+            this.cardSpawning.ActionRotateDuration = this.battleStateCtrl != null ? this.battleStateCtrl.CardRotateDuration : 0.4f;
         }
 
         private bool IsLocalPlayerDeploy(string inventoryItemId, Link link, int slotIndex)

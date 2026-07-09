@@ -214,8 +214,13 @@ namespace SG03
             (this.abilityTween != null && this.abilityTween.IsActive());
         public FaceState FaceState   => this.faceState;
 
-        public void SetMoveDuration(float d)   { this.duration          = d; }
-        public void SetRotateDuration(float d)  { this.rotateY180Duration = d; }
+        public void SetMoveDuration(float d)   { this.duration = d; }
+        public void SetRotateDuration(float d)
+        {
+            float clamped = Mathf.Max(0.01f, d);
+            this.rotateY180Duration = clamped;
+            this.flipDuration = clamped * 0.5f;
+        }
 
         /// <summary>
         /// Smoothly moves the card to the specified world-space <paramref name="target"/> position.

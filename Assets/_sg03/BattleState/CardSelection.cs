@@ -655,6 +655,7 @@ namespace SG03
         {
             if (this.selected.IsFlipping) { if (this.debugLog) Debug.LogWarning($"[CardSelection] PlaceFromHandIntoHolder — card '{this.selected.name}' is still flipping — skipped"); return; }
             Card3DCtrl cardToRotate = this.selected;
+            this.ApplyBattleMotionSettings(cardToRotate);
             cardToRotate.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(cardToRotate)));
             targetHolder.SetCard(cardToRotate);
         }
@@ -720,6 +721,14 @@ namespace SG03
             if (string.IsNullOrEmpty(card.InventoryItemId)) return;
             this.pendingPlayerDeploys[card.InventoryItemId] = new PlayerDeployRecord(holder.HolderLink, holder.Index);
             if (this.debugLog) Debug.Log($"[CardSelection] Registered local player deploy — id={card.InventoryItemId}, link={holder.HolderLink}, slot={holder.Index}");
+        }
+
+        private void ApplyBattleMotionSettings(Card3DCtrl card)
+        {
+            if (card == null) return;
+            if (this.battleStateCtrl == null) return;
+            card.SetMoveDuration(this.battleStateCtrl.CardMoveDuration);
+            card.SetRotateDuration(this.battleStateCtrl.CardRotateDuration);
         }
 
         private Card3DCtrl FindFrontLineCharacter(Card3DCtrl excludeCard)
