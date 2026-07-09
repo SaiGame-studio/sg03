@@ -36,9 +36,6 @@
                 <ui:Button name="BtnEndBattle" text="End Battle" class="game-bottom-btn game-bottom-btn--secondary game-bottom-btn--danger" />
                 <ui:Button name="BtnCheckStatus" text="Check Status" class="game-bottom-btn" />
                 <ui:Button name="BtnInitCard" text="Init Card" class="game-bottom-btn" />
-                <ui:Button name="BtnEndTurn" text="End Turn" class="game-bottom-btn" />
-                <ui:Button name="BtnDrawCard" text="Draw Card" class="game-bottom-btn" />
-                <ui:Button name="BtnAttack" text="Attack" class="game-bottom-btn" />
                 <ui:Label name="NextMoveLabel" text="Move: --" class="game-top-menu__title" style="margin-left: auto;" />
             </ui:VisualElement>
 
