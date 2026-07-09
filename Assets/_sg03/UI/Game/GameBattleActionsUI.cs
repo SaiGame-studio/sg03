@@ -1,6 +1,7 @@
 using System;
 using SaiGame.Services;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace SG03.UI
@@ -171,6 +172,10 @@ namespace SG03.UI
             this.SetEndBattleLoading(false);
             this.SetEndBattleButtonText("Battle Ended");
             this.getBattleStateCtrl()?.BattleState?.ClearData();
+            Scene activeScene = SceneManager.GetActiveScene();
+            if (!activeScene.IsValid()) return;
+            if (string.IsNullOrWhiteSpace(activeScene.name)) return;
+            SceneManager.LoadScene(activeScene.name);
         }
 
         private void OnBattleEndFailed(string error)
