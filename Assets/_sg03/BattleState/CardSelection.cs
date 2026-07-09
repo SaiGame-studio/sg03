@@ -189,6 +189,11 @@ namespace SG03
 
         private void CheckClick()
         {
+            if (this.IsBattleCompleted())
+            {
+                this.ClearInteractionState();
+                return;
+            }
             if (CardMovement.IsAnyCardMoving)
             {
                 this.HandleCardSelectionOnly();
@@ -436,6 +441,12 @@ namespace SG03
 
         private void UpdateArrow()
         {
+            if (this.IsBattleCompleted())
+            {
+                this.ClearInteractionState();
+                this.arrowIndicator?.Hide();
+                return;
+            }
             this.SyncTargetingState();
             if (!this.IsTargeting) return;
             if (this.arrowIndicator == null) return;
@@ -620,6 +631,7 @@ namespace SG03
         private void OnHolderSelected(CardHolderCtrl holder)
         {
             this.holderSelected = holder;
+            if (this.IsBattleCompleted()) return;
             if (this.AreClientActionsPending()) return;
             if (this.selected == null) { if (this.debugLog) Debug.LogWarning("[CardSelection] OnHolderSelected — no card selected"); return; }
             if (this.debugLog) Debug.Log($"[CardSelection] OnHolderSelected — card='{this.selected.name}' owner={this.selected.CardOwner} isCharacter={this.selected.IsCharacter()} location={this.selected.Location} → holder='{holder.name}' link={holder.HolderLink} owner={holder.HolderOwner} heldCard={holder.HeldCard?.name ?? "null"}");
@@ -713,6 +725,22 @@ namespace SG03
         private bool AreClientActionsPending()
         {
             return this.battleStateCtrl?.ClientActions?.HasPendingActions == true;
+        }
+
+        private bool IsBattleCompleted()
+        {
+            string battleStatus = this.battleStateCtrl?.BattleState?.BattleStatus;
+            return string.Equals(battleStatus, "completed", System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void ClearInteractionState()
+        {
+            this.fullDetail = false;
+            this.selected = null;
+            this.targeted = null;
+            this.targetingSource = null;
+            this.holderSelected = null;
+            this.arrowIndicator?.Hide();
         }
 
         private void RegisterPlayerDeploy(Card3DCtrl card, CardHolderCtrl holder)
