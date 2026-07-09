@@ -699,7 +699,7 @@ namespace SG03
         {
             float offsetX = attackerPosition.x < defenderPosition.x ? -1f : 1f;
             float offsetZ = attackerPosition.z < defenderPosition.z ? -9f : 9f;
-            return new Vector3(defenderPosition.x + offsetX, defenderPosition.y, defenderPosition.z + offsetZ);
+            return new Vector3(defenderPosition.x + offsetX, defenderPosition.y + 0.2f, defenderPosition.z + offsetZ);
         }
 
         private Coroutine ExecuteLampMoveToAlpha()
