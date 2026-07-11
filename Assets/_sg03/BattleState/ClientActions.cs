@@ -417,7 +417,6 @@ namespace SG03
             yield return new WaitForSeconds(this.actionInterval);
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] before commit — IsAnimating={card?.IsAnimating}, Location={card?.Location}");
             this.cardSpawning?.CommitAlphaSourceToHand(card, inventoryItemId, slotIndex);
-            this.cardSpawning?.DespawnTopAlphaSourceCard();
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] after commit — IsAnimating={card?.IsAnimating}, Location={card?.Location}");
             if (card != null) yield return this.StartCoroutine(this.WaitForCard(card));
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] WaitForCard done — IsAnimating={card?.IsAnimating}");
@@ -427,7 +426,6 @@ namespace SG03
         {
             if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
             Card3DCtrl card = this.cardSpawning?.MoveOmegaSourceToHand(inventoryItemId, slotIndex);
-            if (card != null) this.cardSpawning?.DespawnTopOmegaSourceCard();
             if (card == null) return null;
             return this.StartCoroutine(this.WaitForCard(card));
         }
