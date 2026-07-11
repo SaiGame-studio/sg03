@@ -253,6 +253,8 @@ namespace SG03
                 matcher = static n => n == "alpha_source_to_hand";
                 return true;
             }
+            // omega_source_to_hand runs in parallel; slot collision is handled in
+            // MoveOmegaSourceToHand by falling back to the next available slot.
             if (actionName == "omega_source_to_hand")
             {
                 matcher = static n => n == "omega_source_to_hand";
