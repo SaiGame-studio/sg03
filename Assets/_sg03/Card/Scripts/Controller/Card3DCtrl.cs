@@ -21,6 +21,7 @@ namespace SG03
         public static event Action<Card3DCtrl> HoverExited;
         public static event Action<Card3DCtrl> CardSelected;
         public static event Action<Card3DCtrl, bool> FaceStateChanged;
+        public static event Action<Card3DCtrl, bool> TriggerStateChanged;
 
         // ─── Linked components ────────────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ namespace SG03
         [SerializeField] private string             inventoryItemId;
         [SerializeField] private CardDefinitionData definition;
         [SerializeField] private bool               expose;
+        [SerializeField] private bool               isTrigger;
 
         // ─── Optional external references ─────────────────────────────────────────
 
@@ -312,6 +314,17 @@ namespace SG03
 
         /// <summary>Returns true if this card is exposed and must not be flipped face-down.</summary>
         public bool Expose => this.expose;
+
+        /// <summary>Returns true if this card is a trigger.</summary>
+        public bool IsTrigger => this.isTrigger;
+
+        /// <summary>Sets whether this card is a trigger.</summary>
+        public void SetIsTrigger(bool value)
+        {
+            if (this.isTrigger == value) return;
+            this.isTrigger = value;
+            TriggerStateChanged?.Invoke(this, value);
+        }
 
         /// <summary>Returns true when this is an omega card that should not reveal its tooltip
         /// (hidden unless both exposed and face-up).</summary>
