@@ -613,16 +613,18 @@ namespace SG03
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
             
-            if (attacker.IsCharacter())
-            {
-                attacker.AttackLunge(defender.transform.position);
-            }
-            else
-            {
-                attacker.AbilityActive();
-            }
+            return this.StartCoroutine(this.AlphaAttackRoutine(attacker, defender));
+        }
+
+        private IEnumerator AlphaAttackRoutine(Card3DCtrl attacker, Card3DCtrl defender)
+        {
+            if (attacker.IsCharacter()) attacker.AttackLunge(defender.transform.position);
+            else attacker.AbilityActive();
             
-            return this.StartCoroutine(this.WaitForCard(attacker));
+            defender.Damaged();
+
+            yield return this.StartCoroutine(this.WaitForCard(attacker));
+            yield return this.StartCoroutine(this.WaitForCard(defender));
         }
 
         private Coroutine ExecuteAlphaAttackOmegaHp(string[] parameters)
@@ -655,16 +657,18 @@ namespace SG03
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
 
-            if (attacker.IsCharacter())
-            {
-                attacker.AttackBackstepLunge(defender.transform.position);
-            }
-            else
-            {
-                attacker.AbilityActive();
-            }
+            return this.StartCoroutine(this.OmegaAttackRoutine(attacker, defender));
+        }
 
-            return this.StartCoroutine(this.WaitForCard(attacker));
+        private IEnumerator OmegaAttackRoutine(Card3DCtrl attacker, Card3DCtrl defender)
+        {
+            if (attacker.IsCharacter()) attacker.AttackBackstepLunge(defender.transform.position);
+            else attacker.AbilityActive();
+
+            defender.Damaged();
+
+            yield return this.StartCoroutine(this.WaitForCard(attacker));
+            yield return this.StartCoroutine(this.WaitForCard(defender));
         }
 
         private Coroutine ExecuteOmegaCardMoveBackToHolder(string[] parameters)
