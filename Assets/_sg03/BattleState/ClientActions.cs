@@ -681,10 +681,22 @@ namespace SG03
             }
 
             if (string.IsNullOrEmpty(sourceId)) return null;
-            Card3DCtrl card = this.cardSpawning?.FindCardById(sourceId);
-            if (card == null) return null;
-            card.ActivateAbility();
-            return this.StartCoroutine(this.WaitForCard(card));
+            return this.StartCoroutine(this.CardAbilityRoutine(sourceId, targetId, selectedId));
+        }
+
+        private IEnumerator CardAbilityRoutine(string sourceId, string targetId, string selectedId)
+        {
+            Card3DCtrl sourceCard = !string.IsNullOrEmpty(sourceId) ? this.cardSpawning?.FindCardById(sourceId) : null;
+            Card3DCtrl targetCard = !string.IsNullOrEmpty(targetId) ? this.cardSpawning?.FindCardById(targetId) : null;
+            Card3DCtrl selectedCard = !string.IsNullOrEmpty(selectedId) ? this.cardSpawning?.FindCardById(selectedId) : null;
+
+            if (sourceCard != null) sourceCard.RunUp();
+            if (selectedCard != null && targetCard != null) selectedCard.AttackLunge(targetCard.transform.position);
+            if (targetCard != null) targetCard.Damaged();
+
+            if (sourceCard != null) yield return this.StartCoroutine(this.WaitForCard(sourceCard));
+            if (selectedCard != null) yield return this.StartCoroutine(this.WaitForCard(selectedCard));
+            if (targetCard != null) yield return this.StartCoroutine(this.WaitForCard(targetCard));
         }
 
         private Coroutine ExecuteOmegaPlaningCharacterAttack(string[] parameters)
