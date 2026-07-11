@@ -33,7 +33,7 @@ namespace SG03
 
         [Header("Card Data")]
         [Tooltip("ScriptableObject that provides the frame, character, and back textures.")]
-        [SerializeField] private CardData     cardData;
+        [SerializeField] private CardData cardData;
 
         [Tooltip("Shared default textures used as fallback when CardData leaves frame or back null.")]
         [SerializeField] private CardDefaults cardDefaults;
@@ -72,17 +72,17 @@ namespace SG03
 
         [Header("Card Size")]
         [Tooltip("Card width in pixels (converted to world units via Pixels Per Unit).")]
-        [SerializeField] private int   cardWidthPixels  = 750;
+        [SerializeField] private int cardWidthPixels = 750;
         [Tooltip("Card height in pixels (converted to world units via Pixels Per Unit).")]
-        [SerializeField] private int   cardHeightPixels = 1050;
+        [SerializeField] private int cardHeightPixels = 1050;
         [Tooltip("How many pixels equal 1 Unity world unit. Match your texture import setting.")]
-        [SerializeField] private float pixelsPerUnit    = 100f;
+        [SerializeField] private float pixelsPerUnit = 100f;
 
-        private float CardWidth  => cardWidthPixels  / pixelsPerUnit;
+        private float CardWidth => cardWidthPixels / pixelsPerUnit;
         private float CardHeight => cardHeightPixels / pixelsPerUnit;
 
-        private bool      isFacingFront = true;
-        private float     currentYAngle = 0f;
+        private bool isFacingFront = true;
+        private float currentYAngle = 0f;
         private Coroutine flipCoroutine;
 
         // ─── Unity lifecycle ──────────────────────────────────────────────────────
@@ -91,7 +91,7 @@ namespace SG03
         {
             this.ApplyFrontFaceCulling();
             this.ApplySortingGroup();
-            this.HideCharacterRenderer();
+            // this.HideCharacterRenderer();
         }
 
         // Hides the character quad until a texture is loaded via ApplyTextures.
@@ -112,8 +112,8 @@ namespace SG03
         {
             Vector3 size = new Vector3(CardWidth, CardHeight, 1f);
             if (frontFrameRenderer != null) frontFrameRenderer.transform.localScale = size;
-            if (characterRenderer  != null) characterRenderer.transform.localScale  = size;
-            if (backRenderer       != null) backRenderer.transform.localScale       = size;
+            if (characterRenderer != null) characterRenderer.transform.localScale = size;
+            if (backRenderer != null) backRenderer.transform.localScale = size;
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace SG03
         {
             if (cardDefaults == null) return;
             SetRendererTexture(frontFrameRenderer, cardDefaults.FrameTexture);
-            SetRendererTexture(backRenderer,       cardDefaults.BackTexture);
+            SetRendererTexture(backRenderer, cardDefaults.BackTexture);
         }
 
         /// <summary>
@@ -141,11 +141,11 @@ namespace SG03
             }
 
             Texture2D frame = this.cardData.FrameTexture != null ? this.cardData.FrameTexture : this.cardDefaults?.FrameTexture;
-            Texture2D back  = this.cardData.BackTexture  != null ? this.cardData.BackTexture  : this.cardDefaults?.BackTexture;
+            Texture2D back = this.cardData.BackTexture != null ? this.cardData.BackTexture : this.cardDefaults?.BackTexture;
 
             SetRendererTexture(this.frontFrameRenderer, frame);
-            SetRendererTexture(this.characterRenderer,  this.cardData.CharacterTexture);
-            SetRendererTexture(this.backRenderer,       back);
+            SetRendererTexture(this.characterRenderer, this.cardData.CharacterTexture);
+            SetRendererTexture(this.backRenderer, back);
             this.SetCharacterRendererVisible(this.cardData.CharacterTexture != null);
 
             this.ApplyCardText();
@@ -222,9 +222,9 @@ namespace SG03
 
             while (elapsed < flipDuration)
             {
-                elapsed       += Time.deltaTime;
-                float t        = Mathf.Clamp01(elapsed / flipDuration);
-                currentYAngle  = Mathf.LerpAngle(fromY, toY, Mathf.SmoothStep(0f, 1f, t));
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / flipDuration);
+                currentYAngle = Mathf.LerpAngle(fromY, toY, Mathf.SmoothStep(0f, 1f, t));
                 transform.localEulerAngles = new Vector3(0f, currentYAngle, 0f);
                 yield return null;
             }
@@ -246,18 +246,18 @@ namespace SG03
                 ? this.fallbackName
                 : this.cardData.CardName;
 
-            int displayAtk   = this.cardData.Atk   != 0 ? this.cardData.Atk   : this.fallbackStats?.atk  ?? 0;
-            int displayDef   = this.cardData.Def   != 0 ? this.cardData.Def   : this.fallbackStats?.def  ?? 0;
+            int displayAtk = this.cardData.Atk != 0 ? this.cardData.Atk : this.fallbackStats?.atk ?? 0;
+            int displayDef = this.cardData.Def != 0 ? this.cardData.Def : this.fallbackStats?.def ?? 0;
             int displayStars = this.cardData.Stars != 0 ? this.cardData.Stars : this.fallbackStats?.star ?? 0;
 
             string displayDescription = string.IsNullOrEmpty(this.cardData.Description)
                 ? this.fallbackDescription
                 : this.cardData.Description;
 
-            this.SetTMPText(this.cardNameText,    displayName);
-            this.SetTMPText(this.starsText,       new string('*', displayStars));
-            this.SetTMPText(this.atkText,         $"{displayAtk}");
-            this.SetTMPText(this.defText,         $"{displayDef}");
+            this.SetTMPText(this.cardNameText, displayName);
+            this.SetTMPText(this.starsText, new string('*', displayStars));
+            this.SetTMPText(this.atkText, $"{displayAtk}");
+            this.SetTMPText(this.defText, $"{displayDef}");
             this.SetTMPText(this.descriptionText, displayDescription);
         }
 
@@ -316,17 +316,17 @@ namespace SG03
         /// </summary>
         private void ApplySortingOrder()
         {
-            if (this.characterRenderer  != null) this.characterRenderer.sortingOrder  = 0;
+            if (this.characterRenderer != null) this.characterRenderer.sortingOrder = 0;
             this.SetTextSortingOrder(1);
             if (this.frontFrameRenderer != null) this.frontFrameRenderer.sortingOrder = 2;
         }
 
         private void SetTextSortingOrder(int order)
         {
-            SetTMPSortingOrder(this.cardNameText,    order);
-            SetTMPSortingOrder(this.starsText,       order);
-            SetTMPSortingOrder(this.atkText,         order);
-            SetTMPSortingOrder(this.defText,         order);
+            SetTMPSortingOrder(this.cardNameText, order);
+            SetTMPSortingOrder(this.starsText, order);
+            SetTMPSortingOrder(this.atkText, order);
+            SetTMPSortingOrder(this.defText, order);
             SetTMPSortingOrder(this.descriptionText, order);
         }
 
