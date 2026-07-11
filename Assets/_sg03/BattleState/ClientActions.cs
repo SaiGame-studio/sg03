@@ -343,6 +343,8 @@ namespace SG03
                 case "alpha_attack_omega_hp":       result = this.ExecuteAlphaAttackOmegaHp(parameters);   break;
                 case "alpha_card_ability":         result = this.ExecuteCardAbility(parameters);           break;
                 case "omega_card_ability":         result = this.ExecuteCardAbility(parameters);           break;
+                case "alpha_card_guarded":         result = this.ExecuteCardGuarded(parameters);           break;
+                case "omega_card_guarded":         result = this.ExecuteCardGuarded(parameters);           break;
                 case "omega_attack":               result = this.ExecuteOmegaAttack(parameters);           break;
                 case "omega_card_move_back_to_holder": result = this.ExecuteOmegaCardMoveBackToHolder(parameters); break;
                 case "omega_planing_character_attack": result = this.ExecuteOmegaPlaningCharacterAttack(parameters); break;
@@ -547,6 +549,33 @@ namespace SG03
             if (card != null)
             {
                 card.Damaged();
+                return this.StartCoroutine(this.WaitForCard(card));
+            }
+
+            return null;
+        }
+
+        private Coroutine ExecuteCardGuarded(string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return null;
+            
+            string targetId = null;
+            foreach (string p in parameters)
+            {
+                string[] kv = p.Split('=');
+                if (kv.Length == 2 && kv[0].Trim().ToLower() == "target") targetId = kv[1].Trim();
+            }
+            if (string.IsNullOrEmpty(targetId) && !parameters[0].Contains("="))
+            {
+                targetId = parameters[0].Trim();
+            }
+
+            if (string.IsNullOrEmpty(targetId)) return null;
+            
+            Card3DCtrl card = this.cardSpawning?.FindCardById(targetId);
+            if (card != null)
+            {
+                card.RunUp();
                 return this.StartCoroutine(this.WaitForCard(card));
             }
 
