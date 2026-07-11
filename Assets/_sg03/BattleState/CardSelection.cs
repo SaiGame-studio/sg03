@@ -632,6 +632,7 @@ namespace SG03
             CardHolderCtrl.HoverEntered += this.OnHolderHoverEntered;
             CardHolderCtrl.HoverExited += this.OnHolderHoverExited;
             CardHolderCtrl.HolderSelected += this.OnHolderSelected;
+            BattleState.OnNextMoveChanged += this.OnNextMoveChanged;
         }
 
         private void Unsubscribe()
@@ -641,6 +642,12 @@ namespace SG03
             CardHolderCtrl.HoverEntered -= this.OnHolderHoverEntered;
             CardHolderCtrl.HoverExited -= this.OnHolderHoverExited;
             CardHolderCtrl.HolderSelected -= this.OnHolderSelected;
+            BattleState.OnNextMoveChanged -= this.OnNextMoveChanged;
+        }
+
+        private void OnNextMoveChanged(NextMoveType nextMove)
+        {
+            this.ClearInteractionState();
         }
 
         // ─── Card hover handlers ──────────────────────────────────────────────────
