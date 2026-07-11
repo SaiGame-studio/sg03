@@ -35,16 +35,34 @@ public class CardOutlineIndicator : SaiBehaviour
         }
     }
 
+    private bool _isFullDetail = false;
+
     private void OnEnable()
     {
         Card3DCtrl.HoverEntered += OnHoverEntered;
         Card3DCtrl.HoverExited += OnHoverExited;
+        CardSelection.OnFullDetailEntered += OnFullDetailEntered;
+        CardSelection.OnFullDetailExited += OnFullDetailExited;
     }
 
     private void OnDisable()
     {
         Card3DCtrl.HoverEntered -= OnHoverEntered;
         Card3DCtrl.HoverExited -= OnHoverExited;
+        CardSelection.OnFullDetailEntered -= OnFullDetailEntered;
+        CardSelection.OnFullDetailExited -= OnFullDetailExited;
+    }
+
+    private void OnFullDetailEntered()
+    {
+        _isFullDetail = true;
+        UpdateRendererState();
+    }
+
+    private void OnFullDetailExited()
+    {
+        _isFullDetail = false;
+        UpdateRendererState();
     }
 
     private void OnHoverEntered(Card3DCtrl card)
@@ -67,19 +85,23 @@ public class CardOutlineIndicator : SaiBehaviour
     {
         if (_isHover == isHover) return;
         _isHover = isHover;
-        
+        UpdateRendererState();
+    }
+
+    private void UpdateRendererState()
+    {
         if (_renderer != null)
         {
-            _renderer.enabled = _isHover;
+            _renderer.enabled = _isHover && !_isFullDetail;
         }
     }
 
     private void OnValidate()
     {
         // Allow toggling the _isHover checkbox in the inspector during Play Mode to test the outline
-        if (Application.isPlaying && _renderer != null)
+        if (Application.isPlaying)
         {
-            _renderer.enabled = _isHover;
+            UpdateRendererState();
         }
     }
 }

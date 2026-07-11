@@ -561,7 +561,8 @@ namespace SG03
             if (card != this.ctrl) return;
             if (this.location != Location.in_hand) return;
             if (this.isSelected) return;
-            this.TweenToY(this.handAnchorY + this.hoverOffsetY, this.hoverDuration, this.hoverEase);
+            // Temporarily disable hover rise animation
+            // this.TweenToY(this.handAnchorY + this.hoverOffsetY, this.hoverDuration, this.hoverEase);
         }
 
         private void OnHoverExited(Card3DCtrl card)
@@ -569,7 +570,8 @@ namespace SG03
             if (card != this.ctrl) return;
             if (this.location != Location.in_hand) return;
             if (this.isSelected) return;
-            this.TweenToY(this.handAnchorY, this.hoverDuration, this.hoverEase);
+            // Temporarily disable hover rise animation
+            // this.TweenToY(this.handAnchorY, this.hoverDuration, this.hoverEase);
         }
 
         // ─── Select handler ───────────────────────────────────────────────────────
