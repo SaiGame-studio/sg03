@@ -31,6 +31,7 @@ namespace SG03.UI
         private string searchText = string.Empty;
         private readonly HashSet<int> starredSlots = new HashSet<int>();
         private const int MaxStarredSlots = 3;
+        private int pendingApiRequests = 0;
 
         public event Action OnBackRequested;
         public event Action OnCardViewerShown;
@@ -494,16 +495,44 @@ namespace SG03.UI
 
         private void OnRemoveFromDesk(PresetData desk, int slotIndex)
         {
+            if (this.currentDesk.slots != null)
+            {
+                var list = new List<PresetSlotData>(this.currentDesk.slots);
+                list.RemoveAll(s => s.slot_index == slotIndex);
+                this.currentDesk.slots = list.ToArray();
+                this.RenderSlots(this.currentDesk);
+                this.RenderInventory();
+            }
+
+            this.pendingApiRequests++;
             this.deskList.RemoveItemFromDesk(
                 presetId:  desk.id,
                 slotIndex: slotIndex,
                 onSuccess: updatedDesk =>
                 {
-                    this.currentDesk = updatedDesk;
-                    this.RenderSlots(updatedDesk);
+                    this.pendingApiRequests--;
+                    if (this.pendingApiRequests == 0)
+                    {
+                        this.currentDesk = updatedDesk;
+                    }
+                    else
+                    {
+                        var optSlots = this.currentDesk.slots;
+                        this.currentDesk = updatedDesk;
+                        this.currentDesk.slots = optSlots;
+                    }
+                    this.RenderSlots(this.currentDesk);
                     this.RenderInventory();
                 },
-                onError: _ => { }
+                onError: _ => 
+                {
+                    this.pendingApiRequests--;
+                    if (this.pendingApiRequests == 0)
+                    {
+                        string meta = this.currentDesk.metadataJson;
+                        this.deskList.GetDesk(desk.id, d => { d.metadataJson = meta; this.currentDesk = d; this.RenderSlots(d); this.RenderInventory(); }, e => {});
+                    }
+                }
             );
         }
 
@@ -518,21 +547,52 @@ namespace SG03.UI
             VisualElement targetSlot = this.slotGrid?.Q($"Slot_{emptySlot}");
             string itemId = stack.ItemIds[0];
 
-            this.AnimateFly(sourceElement, targetSlot, () =>
+            this.AnimateFly(sourceElement, targetSlot, null);
+
+            if (this.currentDesk.slots == null)
             {
-                this.deskList.AddItemToDesk(
-                    presetId:        this.currentDesk.id,
-                    slotIndex:       emptySlot,
-                    inventoryItemId: itemId,
-                    onSuccess: updatedDesk =>
+                this.currentDesk.slots = new PresetSlotData[] { new PresetSlotData { slot_index = emptySlot, inventory_item_id = itemId } };
+            }
+            else
+            {
+                var list = new List<PresetSlotData>(this.currentDesk.slots);
+                list.Add(new PresetSlotData { slot_index = emptySlot, inventory_item_id = itemId });
+                this.currentDesk.slots = list.ToArray();
+            }
+            this.RenderSlots(this.currentDesk);
+            this.RenderInventory();
+
+            this.pendingApiRequests++;
+            this.deskList.AddItemToDesk(
+                presetId:        this.currentDesk.id,
+                slotIndex:       emptySlot,
+                inventoryItemId: itemId,
+                onSuccess: updatedDesk =>
+                {
+                    this.pendingApiRequests--;
+                    if (this.pendingApiRequests == 0)
                     {
                         this.currentDesk = updatedDesk;
-                        this.RenderSlots(updatedDesk);
-                        this.RenderInventory();
-                    },
-                    onError: _ => { }
-                );
-            });
+                    }
+                    else
+                    {
+                        var optSlots = this.currentDesk.slots;
+                        this.currentDesk = updatedDesk;
+                        this.currentDesk.slots = optSlots;
+                    }
+                    this.RenderSlots(this.currentDesk);
+                    this.RenderInventory();
+                },
+                onError: _ => 
+                {
+                    this.pendingApiRequests--;
+                    if (this.pendingApiRequests == 0)
+                    {
+                        string meta = this.currentDesk.metadataJson;
+                        this.deskList.GetDesk(this.currentDesk.id, d => { d.metadataJson = meta; this.currentDesk = d; this.RenderSlots(d); this.RenderInventory(); }, e => {});
+                    }
+                }
+            );
         }
 
         private int FindFirstEmptySlot()

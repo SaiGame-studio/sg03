@@ -253,6 +253,8 @@ namespace SG03
                 matcher = static n => n == "alpha_source_to_hand";
                 return true;
             }
+            // omega_source_to_hand runs in parallel; slot collision is handled in
+            // MoveOmegaSourceToHand by falling back to the next available slot.
             if (actionName == "omega_source_to_hand")
             {
                 matcher = static n => n == "omega_source_to_hand";
@@ -331,8 +333,8 @@ namespace SG03
                 case "alpha_hand_to_back_line":    result = this.ExecuteAlphaHandToBackLine(parameters);  break;
                 case "omega_hand_to_front_line":   result = this.ExecuteOmegaHandToFrontLine(parameters); break;
                 case "omega_hand_to_back_line":    result = this.ExecuteOmegaHandToBackLine(parameters);  break;
-                case "alpha_card_damaged":         result = this.ExecuteCardDamaged(parameters);           break;
-                case "omega_card_damaged":         result = this.ExecuteCardDamaged(parameters);           break;
+                case "alpha_card_take_damage":     result = this.ExecuteCardTakeDamage(parameters);        break;
+                case "omega_card_take_damage":     result = this.ExecuteCardTakeDamage(parameters);        break;
                 case "alpha_card_expose":          result = this.ExecuteCardExpose(parameters);            break;
                 case "omega_card_expose":          result = this.ExecuteOmegaCardExpose(parameters);      break;
                 case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
@@ -417,7 +419,6 @@ namespace SG03
             yield return new WaitForSeconds(this.actionInterval);
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] before commit — IsAnimating={card?.IsAnimating}, Location={card?.Location}");
             this.cardSpawning?.CommitAlphaSourceToHand(card, inventoryItemId, slotIndex);
-            this.cardSpawning?.DespawnTopAlphaSourceCard();
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] after commit — IsAnimating={card?.IsAnimating}, Location={card?.Location}");
             if (card != null) yield return this.StartCoroutine(this.WaitForCard(card));
             if (this.logActions) Debug.Log($"[AlphaSourceToHand] WaitForCard done — IsAnimating={card?.IsAnimating}");
@@ -427,7 +428,6 @@ namespace SG03
         {
             if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
             Card3DCtrl card = this.cardSpawning?.MoveOmegaSourceToHand(inventoryItemId, slotIndex);
-            if (card != null) this.cardSpawning?.DespawnTopOmegaSourceCard();
             if (card == null) return null;
             return this.StartCoroutine(this.WaitForCard(card));
         }
@@ -518,31 +518,54 @@ namespace SG03
             yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
-        private Coroutine ExecuteCardDamaged(string[] parameters)
+        private Coroutine ExecuteCardTakeDamage(string[] parameters)
         {
             if (parameters == null || parameters.Length == 0) return null;
-            string inventoryItemId = parameters[0].Trim();
-            if (string.IsNullOrEmpty(inventoryItemId)) return null;
-            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
-            if (card == null) return null;
-            card.RunUp();
-            return this.StartCoroutine(this.WaitForCard(card));
+            
+            string targetId = null;
+            int damage = 0;
+            int totalDamage = 0;
+
+            foreach (string p in parameters)
+            {
+                string[] kv = p.Split('=');
+                if (kv.Length == 2)
+                {
+                    string key = kv[0].Trim().ToLower();
+                    string value = kv[1].Trim();
+                    if (key == "target") targetId = value;
+                    else if (key == "damage") int.TryParse(value, out damage);
+                    else if (key == "total_damage") int.TryParse(value, out totalDamage);
+                }
+            }
+
+            if (string.IsNullOrEmpty(targetId)) return null;
+            
+            if (this.logActions) Debug.Log($"[CardTakeDamage] target={targetId}, damage={damage}, total_damage={totalDamage}");
+            
+            Card3DCtrl card = this.cardSpawning?.FindCardById(targetId);
+            if (card != null)
+            {
+                card.Damaged();
+                return this.StartCoroutine(this.WaitForCard(card));
+            }
+
+            return null;
         }
 
         private Coroutine ExecuteOmegaCardExpose(string[] parameters)
         {
             return this.ExecuteCardExposeInternal(
                 parameters,
-                playCardActive: false,
                 beforeExpose: inventoryItemId => this.cardSpawning?.LoadOmegaCardData(inventoryItemId));
         }
 
         private Coroutine ExecuteCardExpose(string[] parameters)
         {
-            return this.ExecuteCardExposeInternal(parameters, playCardActive: true);
+            return this.ExecuteCardExposeInternal(parameters);
         }
 
-        private Coroutine ExecuteCardExposeInternal(string[] parameters, bool playCardActive, System.Action<string> beforeExpose = null)
+        private Coroutine ExecuteCardExposeInternal(string[] parameters, System.Action<string> beforeExpose = null)
         {
             if (parameters == null || parameters.Length == 0) return null;
             string inventoryItemId = parameters[0].Trim();
@@ -550,28 +573,19 @@ namespace SG03
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card == null) return null;
             if (card.FaceState == FaceState.FaceUp) return null;
-            return this.StartCoroutine(this.CardExposeRoutine(card, inventoryItemId, playCardActive, beforeExpose));
+            return this.StartCoroutine(this.CardExposeRoutine(card, inventoryItemId, beforeExpose));
         }
 
-        private IEnumerator CardExposeRoutine(Card3DCtrl card, string inventoryItemId, bool playCardActive, System.Action<string> beforeExpose = null)
+        private IEnumerator CardExposeRoutine(Card3DCtrl card, string inventoryItemId, System.Action<string> beforeExpose = null)
         {
             beforeExpose?.Invoke(inventoryItemId);
             yield return this.StartCoroutine(this.PlayFaceUpAnimation(card));
-            if (!playCardActive) yield break;
-            yield return this.StartCoroutine(this.PlayCardActiveAnimation(card));
         }
 
         private IEnumerator PlayFaceUpAnimation(Card3DCtrl card)
         {
             if (card == null || card.FaceState == FaceState.FaceUp) yield break;
             card.FaceUp();
-            yield return this.StartCoroutine(this.WaitForCard(card));
-        }
-
-        private IEnumerator PlayCardActiveAnimation(Card3DCtrl card)
-        {
-            if (card == null) yield break;
-            card.RunUp();
             yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
@@ -622,8 +636,16 @@ namespace SG03
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
-            attacker.AttackLunge(defender.transform.position);
-            return this.StartCoroutine(this.WaitForCard(attacker));
+            
+            return this.StartCoroutine(this.AlphaAttackRoutine(attacker, defender));
+        }
+
+        private IEnumerator AlphaAttackRoutine(Card3DCtrl attacker, Card3DCtrl defender)
+        {
+            if (attacker.IsCharacter()) attacker.AttackLunge(defender.transform.position);
+            else attacker.AbilityActive();
+
+            yield return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
         private Coroutine ExecuteAlphaAttackOmegaHp(string[] parameters)
@@ -633,7 +655,16 @@ namespace SG03
             if (string.IsNullOrEmpty(attackerId)) return null;
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             if (attacker == null || this.deskPosition == null) return null;
-            attacker.AttackLunge(this.deskPosition.OmegaTheSource.position);
+            
+            if (attacker.IsCharacter())
+            {
+                attacker.AttackLunge(this.deskPosition.OmegaTheSource.position);
+            }
+            else
+            {
+                attacker.AbilityActive();
+            }
+
             return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
@@ -646,8 +677,16 @@ namespace SG03
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
-            attacker.AttackBackstepLunge(defender.transform.position);
-            return this.StartCoroutine(this.WaitForCard(attacker));
+
+            return this.StartCoroutine(this.OmegaAttackRoutine(attacker, defender));
+        }
+
+        private IEnumerator OmegaAttackRoutine(Card3DCtrl attacker, Card3DCtrl defender)
+        {
+            if (attacker.IsCharacter()) attacker.AttackBackstepLunge(defender.transform.position);
+            else attacker.AbilityActive();
+
+            yield return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
         private Coroutine ExecuteOmegaCardMoveBackToHolder(string[] parameters)
@@ -664,12 +703,47 @@ namespace SG03
         private Coroutine ExecuteCardAbility(string[] parameters)
         {
             if (parameters == null || parameters.Length == 0) return null;
-            string inventoryItemId = parameters[0].Trim();
-            if (string.IsNullOrEmpty(inventoryItemId)) return null;
-            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
-            if (card == null) return null;
-            card.ActivateAbility();
-            return this.StartCoroutine(this.WaitForCard(card));
+            
+            string sourceId = null;
+            string abilityName = null;
+            string targetId = null;
+            string selectedId = null;
+
+            foreach (string p in parameters)
+            {
+                string[] kv = p.Split('=');
+                if (kv.Length == 2)
+                {
+                    string key = kv[0].Trim().ToLower();
+                    string value = kv[1].Trim();
+                    if (key == "source") sourceId = value;
+                    else if (key == "ability") abilityName = value;
+                    else if (key == "target") targetId = value;
+                    else if (key == "selected") selectedId = value;
+                }
+            }
+
+            // Fallback for old format just in case
+            if (string.IsNullOrEmpty(sourceId) && parameters.Length > 0 && !parameters[0].Contains("="))
+            {
+                sourceId = parameters[0].Trim();
+            }
+
+            if (string.IsNullOrEmpty(sourceId)) return null;
+            return this.StartCoroutine(this.CardAbilityRoutine(sourceId, targetId, selectedId));
+        }
+
+        private IEnumerator CardAbilityRoutine(string sourceId, string targetId, string selectedId)
+        {
+            Card3DCtrl sourceCard = !string.IsNullOrEmpty(sourceId) ? this.cardSpawning?.FindCardById(sourceId) : null;
+            Card3DCtrl targetCard = !string.IsNullOrEmpty(targetId) ? this.cardSpawning?.FindCardById(targetId) : null;
+            Card3DCtrl selectedCard = !string.IsNullOrEmpty(selectedId) ? this.cardSpawning?.FindCardById(selectedId) : null;
+
+            if (sourceCard != null) sourceCard.RunUp();
+            if (selectedCard != null && targetCard != null) selectedCard.AttackLunge(targetCard.transform.position);
+
+            if (sourceCard != null) yield return this.StartCoroutine(this.WaitForCard(sourceCard));
+            if (selectedCard != null) yield return this.StartCoroutine(this.WaitForCard(selectedCard));
         }
 
         private Coroutine ExecuteOmegaPlaningCharacterAttack(string[] parameters)

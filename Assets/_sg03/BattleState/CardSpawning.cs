@@ -122,9 +122,23 @@ namespace SG03
         {
             Card3DCtrl prefab = this.ResolvePrefab();
             if (prefab == null) return null;
+
+            // Try to find the exact slot index from BattleState using the item ID
+            BattleCardSlot slot = this.FindOmegaSlotById(inventoryItemId);
+            if (slot != null && slot.slot_index >= 0)
+            {
+                slotIndex = slot.slot_index;
+            }
+
             Transform target = this.ResolveHandTarget(slotIndex, this.deskPosition.OmegaHand);
             if (target == null) return null;
-            if (this.IsSlotOccupied(target)) return null;
+            
+            // If the exact slot is somehow still occupied, fallback to prevent missing
+            if (this.IsSlotOccupied(target))
+            {
+                target = this.FindFirstEmptyHandSlot(this.deskPosition.OmegaHand);
+                if (target == null) return null;
+            }
             Card3DCtrl card = this.DequeueOmegaSourceCard(prefab);
             if (card == null) return null;
             card.SetMoveDuration(this.ActionMoveDuration);

@@ -469,6 +469,24 @@ namespace SG03
             this.damageTween.Append(this.transform.DOMove(origin,  this.damagedPhaseDuration).SetEase(this.damagedFallEase));
         }
 
+        public void Damaged()
+        {
+            this.damageTween?.Kill();
+            this.damageTween = DOTween.Sequence();
+            this.damageTween.Append(this.transform.DOShakePosition(this.damagedPhaseDuration * 2f, new Vector3(0, 0, 0.5f), 20, 90f, false, true));
+        }
+
+        public void AbilityActive()
+        {
+            Vector3 origin = this.transform.position;
+            Vector3 risen  = origin + Vector3.up * this.damagedRiseHeight;
+            this.damageTween?.Kill();
+            this.damageTween = DOTween.Sequence();
+            this.damageTween.Append(this.transform.DOMove(risen, this.damagedPhaseDuration).SetEase(Ease.OutQuad));
+            this.damageTween.Append(this.transform.DOPunchScale(new Vector3(0.2f, 0.2f, 0.2f), 0.3f, 5, 0.5f));
+            this.damageTween.Append(this.transform.DOMove(origin, this.damagedPhaseDuration).SetEase(Ease.InQuad));
+        }
+
         public void AttackLunge(Vector3 defenderPosition)
         {
             Vector3 origin = this.transform.position;

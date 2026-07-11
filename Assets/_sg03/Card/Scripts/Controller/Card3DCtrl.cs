@@ -202,6 +202,12 @@ namespace SG03
         /// <summary>Plays the damage run-up animation: card rises then returns to its current position.</summary>
         public void RunUp() => this.movement.RunUp();
 
+        /// <summary>Plays the damage shake animation on the Z axis.</summary>
+        public void Damaged() => this.movement.Damaged();
+
+        /// <summary>Plays the ability activation animation.</summary>
+        public void AbilityActive() => this.movement.AbilityActive();
+
         /// <summary>Plays the attack lunge animation: card charges toward the defender then returns.</summary>
         public void AttackLunge(Vector3 defenderPosition) => this.movement.AttackLunge(defenderPosition);
 
@@ -236,8 +242,8 @@ namespace SG03
         }
 
         /// <summary>Current logical location of this card.</summary>
-        public Location Location  => this.movement.Location;
-        public bool    IsFlipping => this.movement.IsFlipping;
+        public Location Location   => this.movement.Location;
+        public bool    IsFlipping  => this.movement.IsFlipping;
         public bool    IsAnimating => this.movement.IsAnimating;
         public string  InventoryItemId => this.inventoryItemId;
 
@@ -252,8 +258,36 @@ namespace SG03
         /// <summary>The type of this card (character or support), derived from Definition.Metadata.type.</summary>
         public CardType CardType => Enum.TryParse(this.definition?.metadata?.type, out CardType t) ? t : default;
 
-        /// <summary>Sets the owner of this card (alpha or omega).</summary>
-        public void SetOwner(Owner owner) => this.cardOwner = owner;
+        // ─── Per-owner spawn counters ─────────────────────────────────────────────
+        // Counted independently so alpha and omega each start at 1.
+
+        private static int alphaSpawnIndex = 0;
+        private static int omegaSpawnIndex = 0;
+
+        /// <summary>Sets the owner of this card (alpha or omega) and prefixes the
+        /// GameObject name with [alpha] or [omega] so cards are easy to identify
+        /// in the Hierarchy and Debug logs.
+        /// The trailing index is counted independently per owner so alpha and omega
+        /// each start from 1 (e.g. [alpha]Card3D_1, [omega]Card3D_1).</summary>
+        public void SetOwner(Owner owner)
+        {
+            this.cardOwner = owner;
+            string prefix = $"[{owner}]";
+            if (!this.name.StartsWith(prefix))
+            {
+                // Derive the bare prefab name by stripping any existing owner prefix
+                // and the trailing _N index added by Spawner.UpdateName.
+                string baseName = this.name;
+                if (baseName.StartsWith("[alpha]")) baseName = baseName.Substring(7);
+                else if (baseName.StartsWith("[omega]")) baseName = baseName.Substring(7);
+                int underscoreIdx = baseName.LastIndexOf('_');
+                if (underscoreIdx >= 0 && int.TryParse(baseName.Substring(underscoreIdx + 1), out _))
+                    baseName = baseName.Substring(0, underscoreIdx);
+
+                int index = owner == Owner.alpha ? ++alphaSpawnIndex : ++omegaSpawnIndex;
+                this.name = $"{prefix}{baseName}_{index}";
+            }
+        }
 
         /// <summary>The owner (alpha or omega) of this card.</summary>
         public Owner CardOwner => this.cardOwner;
