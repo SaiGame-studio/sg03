@@ -654,9 +654,34 @@ namespace SG03
         private Coroutine ExecuteCardAbility(string[] parameters)
         {
             if (parameters == null || parameters.Length == 0) return null;
-            string inventoryItemId = parameters[0].Trim();
-            if (string.IsNullOrEmpty(inventoryItemId)) return null;
-            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
+            
+            string sourceId = null;
+            string abilityName = null;
+            string targetId = null;
+            string selectedId = null;
+
+            foreach (string p in parameters)
+            {
+                string[] kv = p.Split('=');
+                if (kv.Length == 2)
+                {
+                    string key = kv[0].Trim().ToLower();
+                    string value = kv[1].Trim();
+                    if (key == "source") sourceId = value;
+                    else if (key == "ability") abilityName = value;
+                    else if (key == "target") targetId = value;
+                    else if (key == "selected") selectedId = value;
+                }
+            }
+
+            // Fallback for old format just in case
+            if (string.IsNullOrEmpty(sourceId) && parameters.Length > 0 && !parameters[0].Contains("="))
+            {
+                sourceId = parameters[0].Trim();
+            }
+
+            if (string.IsNullOrEmpty(sourceId)) return null;
+            Card3DCtrl card = this.cardSpawning?.FindCardById(sourceId);
             if (card == null) return null;
             card.ActivateAbility();
             return this.StartCoroutine(this.WaitForCard(card));
