@@ -392,6 +392,8 @@ namespace SG03
             this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(
                 source.InventoryItemId,
                 defenderId,
+                source.CodeName,
+                "",
                 this.OnAlphaAttackingSuccess,
                 null);
         }
@@ -401,7 +403,7 @@ namespace SG03
             if (this.IsAlphaDrawPhase())
                 this.RunAlphaCardDeployThenAttack(source, target);
             else
-                this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(source.InventoryItemId, this.ResolveDefenderId(target), this.OnAlphaAttackingSuccess, null);
+                this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(source.InventoryItemId, this.ResolveDefenderId(target), source.CodeName, target.CodeName, this.OnAlphaAttackingSuccess, null);
         }
 
         private bool IsAlphaDrawPhase()
@@ -439,7 +441,7 @@ namespace SG03
         private void RunAlphaAttackingAfterDeploy(Card3DCtrl source, Card3DCtrl target)
         {
             this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(
-                source.InventoryItemId, this.ResolveDefenderId(target), this.OnAlphaAttackingSuccess, null);
+                source.InventoryItemId, this.ResolveDefenderId(target), source.CodeName, target.CodeName, this.OnAlphaAttackingSuccess, null);
         }
 
         private string ResolveDefenderId(Card3DCtrl target)
