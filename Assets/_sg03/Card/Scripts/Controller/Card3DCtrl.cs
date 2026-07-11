@@ -205,6 +205,9 @@ namespace SG03
         /// <summary>Plays the damage shake animation on the Z axis.</summary>
         public void Damaged() => this.movement.Damaged();
 
+        /// <summary>Plays the ability activation animation.</summary>
+        public void AbilityActive() => this.movement.AbilityActive();
+
         /// <summary>Plays the attack lunge animation: card charges toward the defender then returns.</summary>
         public void AttackLunge(Vector3 defenderPosition) => this.movement.AttackLunge(defenderPosition);
 

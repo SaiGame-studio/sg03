@@ -612,7 +612,16 @@ namespace SG03
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
-            attacker.AttackLunge(defender.transform.position);
+            
+            if (attacker.IsCharacter())
+            {
+                attacker.AttackLunge(defender.transform.position);
+            }
+            else
+            {
+                attacker.AbilityActive();
+            }
+            
             return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
@@ -623,7 +632,16 @@ namespace SG03
             if (string.IsNullOrEmpty(attackerId)) return null;
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             if (attacker == null || this.deskPosition == null) return null;
-            attacker.AttackLunge(this.deskPosition.OmegaTheSource.position);
+            
+            if (attacker.IsCharacter())
+            {
+                attacker.AttackLunge(this.deskPosition.OmegaTheSource.position);
+            }
+            else
+            {
+                attacker.AbilityActive();
+            }
+
             return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
@@ -636,7 +654,16 @@ namespace SG03
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
-            attacker.AttackBackstepLunge(defender.transform.position);
+
+            if (attacker.IsCharacter())
+            {
+                attacker.AttackBackstepLunge(defender.transform.position);
+            }
+            else
+            {
+                attacker.AbilityActive();
+            }
+
             return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
