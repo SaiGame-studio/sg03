@@ -12,11 +12,14 @@ namespace SG03
         private MaterialPropertyBlock propBlock;
         private static readonly int IsTriggerProp = Shader.PropertyToID("_IsTrigger");
 
+        private ClientActions clientActions;
+
         protected override void LoadComponents()
         {
             base.LoadComponents();
             if (this.cardCtrl == null) this.cardCtrl = this.GetComponentInParent<Card3DCtrl>();
             if (this.triggerRenderer == null) this.triggerRenderer = this.GetComponent<Renderer>();
+            if (this.clientActions == null) this.clientActions = UnityEngine.Object.FindFirstObjectByType<ClientActions>(FindObjectsInactive.Include);
         }
 
         private void OnEnable()
@@ -26,7 +29,7 @@ namespace SG03
             if (this.cardCtrl != null)
             {
                 this.SetVisual(this.cardCtrl.IsTrigger);
-                this.UpdateRendererState();
+                this.CheckAndEnableRenderer();
             }
         }
 
@@ -34,21 +37,48 @@ namespace SG03
         {
             Card3DCtrl.TriggerStateChanged -= this.OnTriggerStateChanged;
             Card3DCtrl.LocationChanged -= this.OnLocationChanged;
+            this.StopAllCoroutines();
         }
 
         private void OnLocationChanged(Card3DCtrl card, Location newLocation)
         {
             if (this.cardCtrl == null || card != this.cardCtrl) return;
-            this.UpdateRendererState();
+            this.CheckAndEnableRenderer();
         }
 
-        private void UpdateRendererState()
+        private void CheckAndEnableRenderer()
         {
             if (this.cardCtrl == null || this.triggerRenderer == null) return;
-            bool shouldEnable = this.cardCtrl.Location == Location.in_front;
-            if (this.triggerRenderer.enabled != shouldEnable)
+            this.StopAllCoroutines();
+            
+            if (this.cardCtrl.Location == Location.in_front)
             {
-                this.triggerRenderer.enabled = shouldEnable;
+                this.StartCoroutine(this.WaitAndEnableRenderer());
+            }
+            else
+            {
+                this.SetRendererEnabled(false);
+            }
+        }
+
+        private System.Collections.IEnumerator WaitAndEnableRenderer()
+        {
+            if (this.clientActions != null)
+            {
+                yield return new WaitUntil(() => !this.clientActions.IsResuming);
+            }
+            yield return new WaitUntil(() => !this.cardCtrl.IsAnimating);
+            if (this.cardCtrl.Location == Location.in_front)
+            {
+                this.SetRendererEnabled(true);
+            }
+        }
+
+        private void SetRendererEnabled(bool enable)
+        {
+            if (this.triggerRenderer != null && this.triggerRenderer.enabled != enable)
+            {
+                this.triggerRenderer.enabled = enable;
             }
         }
 

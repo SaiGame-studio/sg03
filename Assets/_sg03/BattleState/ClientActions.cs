@@ -10,14 +10,14 @@ namespace SG03
     [AddComponentMenu("SG03/Battle/Client Actions")]
     public partial class ClientActions : SaiBehaviour
     {
-        [SerializeField] private BattleState          battleState;
-        [SerializeField] private BattleScripts        battleScripts;
-        [SerializeField] private CardSpawning         cardSpawning;
+        [SerializeField] private BattleState battleState;
+        [SerializeField] private BattleScripts battleScripts;
+        [SerializeField] private CardSpawning cardSpawning;
         [SerializeField] private BattleCardDefinitions battleCardDefinitions;
-        [SerializeField] private LampOfSoulCtrl       lampOfSoul;
-        [SerializeField] private CardSelection        cardSelection;
-        [SerializeField] private DeskPositionCtrl     deskPosition;
-        [SerializeField] private BattleStateCtrl      battleStateCtrl;
+        [SerializeField] private LampOfSoulCtrl lampOfSoul;
+        [SerializeField] private CardSelection cardSelection;
+        [SerializeField] private DeskPositionCtrl deskPosition;
+        [SerializeField] private BattleStateCtrl battleStateCtrl;
         [SerializeField] private float actionInterval = 0.1f;
         [SerializeField] private float omegaFrontLinePostDelay = 0.5f;
 
@@ -25,7 +25,6 @@ namespace SG03
         [SerializeField] private bool logActions = false;
 
         [Header("Action Log")]
-        [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
 
         private Coroutine dispatchRoutine;
         [SerializeField] private bool hasPendingActions;
@@ -35,6 +34,12 @@ namespace SG03
 
         /// <summary>True while there are client actions that have not finished yet.</summary>
         public bool HasPendingActions => this.hasPendingActions;
+
+        [SerializeField] private bool isResuming;
+        /// <summary>True if the current action dispatch is a resume or game start sequence.</summary>
+        public bool IsResuming => this.isResuming;
+
+        [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
 
         protected override void LoadComponents()
         {
@@ -113,7 +118,7 @@ namespace SG03
             Debug.LogWarning(this.transform.name + ": LoadDeskPosition", this.gameObject);
         }
 
-        private void OnEnable()  => this.SubscribeEvents();
+        private void OnEnable() => this.SubscribeEvents();
         private void OnDisable() => this.UnsubscribeEvents();
 
         private void SubscribeEvents()
@@ -133,7 +138,20 @@ namespace SG03
         {
             if (actions == null) return;
             this.BuildActionLogs(actions);
+            this.UpdateIsResuming(actions);
             this.TryStartDispatchWhenDefinitionsLoaded();
+        }
+
+        private void UpdateIsResuming(string[] actions)
+        {
+            foreach (string entry in actions)
+            {
+                if (entry.Contains("alpha_source_spawn_card") || entry.Contains("omega_source_spawn_card"))
+                {
+                    this.isResuming = true;
+                    return;
+                }
+            }
         }
 
         private void TryStartDispatchWhenDefinitionsLoaded()
@@ -168,10 +186,10 @@ namespace SG03
         private void ParseAndAddAction(string entry)
         {
             int firstColon = entry.IndexOf(':');
-            string id   = firstColon >= 0 ? entry.Substring(0, firstColon) : entry;
+            string id = firstColon >= 0 ? entry.Substring(0, firstColon) : entry;
             string rest = firstColon >= 0 ? entry.Substring(firstColon + 1) : string.Empty;
             int secondColon = rest.IndexOf(':');
-            string name   = secondColon >= 0 ? rest.Substring(0, secondColon) : rest;
+            string name = secondColon >= 0 ? rest.Substring(0, secondColon) : rest;
             string @params = secondColon >= 0 ? rest.Substring(secondColon + 1) : string.Empty;
             if (this.IsDuplicateAction(id)) return;
             this.actionLog.Add(new ClientActionLog(id, name, @params));
@@ -218,6 +236,7 @@ namespace SG03
             }
             this.dispatchRoutine = null;
             this.hasPendingActions = this.HasUnexecutedActions();
+            if (!this.hasPendingActions) this.isResuming = false;
         }
 
         private IEnumerator DispatchSourceSpawnActions()
@@ -324,33 +343,33 @@ namespace SG03
             Coroutine result = null;
             switch (log.ActionName)
             {
-                case "next_move":                  result = this.ExecuteNextMove(log, parameters);         break;
+                case "next_move": result = this.ExecuteNextMove(log, parameters); break;
                 case "alpha_source_spawn_card": result = this.ExecuteAlphaSourceSpawnCard(parameters); break;
                 case "omega_source_spawn_card": result = this.ExecuteOmegaSourceSpawnCard(parameters); break;
-                case "alpha_source_to_hand":       result = this.ExecuteAlphaSourceToHand(parameters);    break;
-                case "omega_source_to_hand":       result = this.ExecuteOmegaSourceToHand(parameters);    break;
-                case "alpha_hand_to_front_line":   result = this.ExecuteAlphaHandToFrontLine(parameters); break;
-                case "alpha_hand_to_back_line":    result = this.ExecuteAlphaHandToBackLine(parameters);  break;
-                case "omega_hand_to_front_line":   result = this.ExecuteOmegaHandToFrontLine(parameters); break;
-                case "omega_hand_to_back_line":    result = this.ExecuteOmegaHandToBackLine(parameters);  break;
-                case "alpha_card_take_damage":     result = this.ExecuteCardTakeDamage(parameters);        break;
-                case "omega_card_take_damage":     result = this.ExecuteCardTakeDamage(parameters);        break;
-                case "alpha_card_expose":          result = this.ExecuteCardExpose(parameters);            break;
-                case "omega_card_expose":          result = this.ExecuteOmegaCardExpose(parameters);      break;
-                case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
-                case "omega_card_sent_to_void":    result = this.ExecuteOmegaCardSentToVoid(parameters);  break;
-                case "alpha_attack":               result = this.ExecuteAlphaAttack(parameters);           break;
-                case "alpha_attack_omega_hp":       result = this.ExecuteAlphaAttackOmegaHp(parameters);   break;
-                case "alpha_card_ability":         result = this.ExecuteCardAbility(parameters);           break;
-                case "omega_card_ability":         result = this.ExecuteCardAbility(parameters);           break;
-                case "alpha_card_guarded":         result = this.ExecuteCardGuarded(parameters);           break;
-                case "omega_card_guarded":         result = this.ExecuteCardGuarded(parameters);           break;
-                case "omega_attack":               result = this.ExecuteOmegaAttack(parameters);           break;
+                case "alpha_source_to_hand": result = this.ExecuteAlphaSourceToHand(parameters); break;
+                case "omega_source_to_hand": result = this.ExecuteOmegaSourceToHand(parameters); break;
+                case "alpha_hand_to_front_line": result = this.ExecuteAlphaHandToFrontLine(parameters); break;
+                case "alpha_hand_to_back_line": result = this.ExecuteAlphaHandToBackLine(parameters); break;
+                case "omega_hand_to_front_line": result = this.ExecuteOmegaHandToFrontLine(parameters); break;
+                case "omega_hand_to_back_line": result = this.ExecuteOmegaHandToBackLine(parameters); break;
+                case "alpha_card_take_damage": result = this.ExecuteCardTakeDamage(parameters); break;
+                case "omega_card_take_damage": result = this.ExecuteCardTakeDamage(parameters); break;
+                case "alpha_card_expose": result = this.ExecuteCardExpose(parameters); break;
+                case "omega_card_expose": result = this.ExecuteOmegaCardExpose(parameters); break;
+                case "alpha_card_sent_to_void": result = this.ExecuteAlphaCardSentToVoid(parameters); break;
+                case "omega_card_sent_to_void": result = this.ExecuteOmegaCardSentToVoid(parameters); break;
+                case "alpha_attack": result = this.ExecuteAlphaAttack(parameters); break;
+                case "alpha_attack_omega_hp": result = this.ExecuteAlphaAttackOmegaHp(parameters); break;
+                case "alpha_card_ability": result = this.ExecuteCardAbility(parameters); break;
+                case "omega_card_ability": result = this.ExecuteCardAbility(parameters); break;
+                case "alpha_card_guarded": result = this.ExecuteCardGuarded(parameters); break;
+                case "omega_card_guarded": result = this.ExecuteCardGuarded(parameters); break;
+                case "omega_attack": result = this.ExecuteOmegaAttack(parameters); break;
                 case "omega_card_move_back_to_holder": result = this.ExecuteOmegaCardMoveBackToHolder(parameters); break;
                 case "omega_planing_character_attack": result = this.ExecuteOmegaPlaningCharacterAttack(parameters); break;
-                case "alpha_take_lamp":             result = this.ExecuteLampMoveToAlpha();                break;
-                case "omega_take_lamp":             result = this.ExecuteLampMoveToOmega();                break;
-                case "omega_turn_end":              result = this.ExecuteOmegaEndTurn();                    break;
+                case "alpha_take_lamp": result = this.ExecuteLampMoveToAlpha(); break;
+                case "omega_take_lamp": result = this.ExecuteLampMoveToOmega(); break;
+                case "omega_turn_end": result = this.ExecuteOmegaEndTurn(); break;
                 default:
                     Debug.LogWarning($"<color=#88FFFF>[ClientActions]</color> Unknown action: {log.ActionName}", this.gameObject);
                     break;
@@ -364,7 +383,7 @@ namespace SG03
         private void SyncActionMoveDuration()
         {
             if (this.cardSpawning == null) return;
-            this.cardSpawning.ActionMoveDuration   = this.battleStateCtrl != null ? this.battleStateCtrl.CardMoveDuration : 1f;
+            this.cardSpawning.ActionMoveDuration = this.battleStateCtrl != null ? this.battleStateCtrl.CardMoveDuration : 1f;
             this.cardSpawning.ActionRotateDuration = this.battleStateCtrl != null ? this.battleStateCtrl.CardRotateDuration : 0.4f;
         }
 

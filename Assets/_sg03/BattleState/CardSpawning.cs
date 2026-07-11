@@ -190,7 +190,11 @@ namespace SG03
             CardHolderCtrl holder = holders[slotIndex];
             if (holder == null) return;
             BattleCardSlot slot = this.FindAlphaSlotById(inventoryItemId);
-            if (slot != null) card.SetExpose(slot.expose);
+            if (slot != null)
+            {
+                card.SetExpose(slot.expose);
+                card.SetIsTrigger(slot.trigger);
+            }
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
             card.MoveToUnknow(holder, slot != null ? () => this.ApplyAlphaFaceState(card, slot) : null);
@@ -224,6 +228,7 @@ namespace SG03
                 card.LoadCardByCodeName(code);
                 card.SetDefinition(omegaDef);
                 card.SetExpose(slot.expose);
+                card.SetIsTrigger(slot.trigger);
             }
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
@@ -246,6 +251,11 @@ namespace SG03
             CardHolderCtrl holder = holders[slotIndex];
             if (holder == null) return;
             BattleCardSlot slot = this.FindOmegaSlotById(inventoryItemId);
+            if (slot != null)
+            {
+                card.SetExpose(slot.expose);
+                card.SetIsTrigger(slot.trigger);
+            }
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
             card.MoveToUnknow(holder, slot != null ? () => this.ApplyFaceState(card, slot) : null);
@@ -305,6 +315,7 @@ namespace SG03
             this.ApplyCardFallbacks(card, slot.item_definition_name, omegaLoadDef);
             card.SetDefinition(omegaLoadDef);
             card.LoadCardByCodeName(code);
+            card.SetIsTrigger(slot.trigger);
         }
 
         public Card3DCtrl MoveAlphaCardToVoid(string inventoryItemId)
