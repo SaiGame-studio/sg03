@@ -333,8 +333,8 @@ namespace SG03
                 case "alpha_hand_to_back_line":    result = this.ExecuteAlphaHandToBackLine(parameters);  break;
                 case "omega_hand_to_front_line":   result = this.ExecuteOmegaHandToFrontLine(parameters); break;
                 case "omega_hand_to_back_line":    result = this.ExecuteOmegaHandToBackLine(parameters);  break;
-                case "alpha_card_damaged":         result = this.ExecuteCardDamaged(parameters);           break;
-                case "omega_card_damaged":         result = this.ExecuteCardDamaged(parameters);           break;
+                case "alpha_card_take_damage":     result = this.ExecuteCardTakeDamage(parameters);        break;
+                case "omega_card_take_damage":     result = this.ExecuteCardTakeDamage(parameters);        break;
                 case "alpha_card_expose":          result = this.ExecuteCardExpose(parameters);            break;
                 case "omega_card_expose":          result = this.ExecuteOmegaCardExpose(parameters);      break;
                 case "alpha_card_sent_to_void":    result = this.ExecuteAlphaCardSentToVoid(parameters);  break;
@@ -518,15 +518,34 @@ namespace SG03
             yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
-        private Coroutine ExecuteCardDamaged(string[] parameters)
+        private Coroutine ExecuteCardTakeDamage(string[] parameters)
         {
             if (parameters == null || parameters.Length == 0) return null;
-            string inventoryItemId = parameters[0].Trim();
-            if (string.IsNullOrEmpty(inventoryItemId)) return null;
-            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
-            if (card == null) return null;
-            card.Damaged();
-            return this.StartCoroutine(this.WaitForCard(card));
+            
+            string targetId = null;
+            int damage = 0;
+            int totalDamage = 0;
+
+            foreach (string p in parameters)
+            {
+                string[] kv = p.Split('=');
+                if (kv.Length == 2)
+                {
+                    string key = kv[0].Trim().ToLower();
+                    string value = kv[1].Trim();
+                    if (key == "target") targetId = value;
+                    else if (key == "damage") int.TryParse(value, out damage);
+                    else if (key == "total_damage") int.TryParse(value, out totalDamage);
+                }
+            }
+
+            if (string.IsNullOrEmpty(targetId)) return null;
+            
+            if (this.logActions) Debug.Log($"[CardTakeDamage] target={targetId}, damage={damage}, total_damage={totalDamage}");
+            
+            // Note: C# already handles visual Damaged() via AlphaAttackRoutine / CardAbilityRoutine directly.
+            // This action is captured here for explicit event tracking/logging based on backend's calculated damage > 0.
+            return null;
         }
 
         private Coroutine ExecuteOmegaCardExpose(string[] parameters)
@@ -620,11 +639,8 @@ namespace SG03
         {
             if (attacker.IsCharacter()) attacker.AttackLunge(defender.transform.position);
             else attacker.AbilityActive();
-            
-            defender.Damaged();
 
             yield return this.StartCoroutine(this.WaitForCard(attacker));
-            yield return this.StartCoroutine(this.WaitForCard(defender));
         }
 
         private Coroutine ExecuteAlphaAttackOmegaHp(string[] parameters)
@@ -665,10 +681,7 @@ namespace SG03
             if (attacker.IsCharacter()) attacker.AttackBackstepLunge(defender.transform.position);
             else attacker.AbilityActive();
 
-            defender.Damaged();
-
             yield return this.StartCoroutine(this.WaitForCard(attacker));
-            yield return this.StartCoroutine(this.WaitForCard(defender));
         }
 
         private Coroutine ExecuteOmegaCardMoveBackToHolder(string[] parameters)
@@ -723,11 +736,9 @@ namespace SG03
 
             if (sourceCard != null) sourceCard.RunUp();
             if (selectedCard != null && targetCard != null) selectedCard.AttackLunge(targetCard.transform.position);
-            if (targetCard != null) targetCard.Damaged();
 
             if (sourceCard != null) yield return this.StartCoroutine(this.WaitForCard(sourceCard));
             if (selectedCard != null) yield return this.StartCoroutine(this.WaitForCard(selectedCard));
-            if (targetCard != null) yield return this.StartCoroutine(this.WaitForCard(targetCard));
         }
 
         private Coroutine ExecuteOmegaPlaningCharacterAttack(string[] parameters)
