@@ -40,6 +40,7 @@ namespace SG03
         [SerializeField] private CardDefinitionData definition;
         [SerializeField] private bool               expose;
         [SerializeField] private bool               isTrigger;
+        [SerializeField] private bool               isHover;
 
         // ─── Optional external references ─────────────────────────────────────────
 
@@ -50,8 +51,17 @@ namespace SG03
 
         public override string GetName() => this.name;
 
-        public void NotifyHoverEntered() => HoverEntered?.Invoke(this);
-        public void NotifyHoverExited()  => HoverExited?.Invoke(this);
+        public void NotifyHoverEntered()
+        {
+            this.isHover = true;
+            HoverEntered?.Invoke(this);
+        }
+
+        public void NotifyHoverExited()
+        {
+            this.isHover = false;
+            HoverExited?.Invoke(this);
+        }
         public void NotifySelected()     => CardSelected?.Invoke(this);
         public void NotifyLocationChanged(Location newLocation) => LocationChanged?.Invoke(this, newLocation);
 
@@ -319,6 +329,9 @@ namespace SG03
 
         /// <summary>Returns true if this card is a trigger.</summary>
         public bool IsTrigger => this.isTrigger;
+
+        /// <summary>Returns true if this card is currently being hovered.</summary>
+        public bool IsHover => this.isHover;
 
         /// <summary>Sets whether this card is a trigger.</summary>
         public void SetIsTrigger(bool value)

@@ -46,14 +46,15 @@ Shader "Custom/CardURPOutline"
             {
                 Varyings output = (Varyings)0;
                 
-                // Lỗi khoảng trống ở góc xảy ra vì Cube có các góc vuông (Hard Edges), 
-                // Normal của các mặt bị tách rời nên khi push theo Normal các mặt sẽ bị bung ra.
-                // Giải pháp: Phóng to vertex từ tâm dựa trên Vị trí (Position) thay vì Normal.
+                // The gap issue at the corners occurs because Cubes have Hard Edges.
+                // The normals of the separated faces point in different directions, 
+                // so pushing along the Normal causes the faces to detach and explode outwards.
+                // Solution: Extrude the vertex outwards from the center based on its Position instead of Normal.
                 
-                // Dùng hàm sign() sẽ đẩy đỉnh ra 4 góc một cách đồng đều cho Cube / Plane
+                // Using the sign() function evenly pushes the vertices outwards to all 4 corners for a Cube or Plane
                 float3 offset = sign(input.positionOS.xyz) * _OutlineThickness;
                 
-                // Extrude vertex ra ngoài
+                // Extrude vertex outward
                 float3 positionOS = input.positionOS.xyz + offset;
                 
                 output.positionHCS = TransformObjectToHClip(positionOS);

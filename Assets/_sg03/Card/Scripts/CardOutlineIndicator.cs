@@ -1,96 +1,85 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
-using System.Collections.Generic;
+using SG03;
+using SaiGame.Services;
 
 [RequireComponent(typeof(Renderer))]
-public class CardOutlineIndicator : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class CardOutlineIndicator : SaiBehaviour
 {
-    private Renderer _renderer;
-    private Material[] _originalMaterials;
-    private Material[] _outlinedMaterials;
+    public Card3DCtrl _cardCtrl;
+    [SerializeField] private Renderer _renderer;
     
-    private bool _hasOutlineMaterial = false;
+    [SerializeField] private bool _isHover = false;
+
+    protected override void LoadComponents()
+    {
+        base.LoadComponents();
+        if (this._cardCtrl == null) this._cardCtrl = this.GetComponentInParent<Card3DCtrl>();
+        if (this._renderer == null) this._renderer = this.GetComponent<Renderer>();
+    }
 
     private void Awake()
     {
-        _renderer = GetComponent<Renderer>();
+        // Disable renderer by default, keeping the material in the Inspector
+        if (_renderer != null)
+        {
+            _renderer.enabled = false;
+        }
+    }
+
+    private void Start()
+    {
+        // Update initial state if the card is already being hovered
+        if (_cardCtrl != null && _cardCtrl.IsHover)
+        {
+            SetHover(true);
+        }
+    }
+
+    private void OnEnable()
+    {
+        Card3DCtrl.HoverEntered += OnHoverEntered;
+        Card3DCtrl.HoverExited += OnHoverExited;
+    }
+
+    private void OnDisable()
+    {
+        Card3DCtrl.HoverEntered -= OnHoverEntered;
+        Card3DCtrl.HoverExited -= OnHoverExited;
+    }
+
+    private void OnHoverEntered(Card3DCtrl card)
+    {
+        if (card == _cardCtrl)
+        {
+            SetHover(true);
+        }
+    }
+
+    private void OnHoverExited(Card3DCtrl card)
+    {
+        if (card == _cardCtrl)
+        {
+            SetHover(false);
+        }
+    }
+
+    public void SetHover(bool isHover)
+    {
+        if (_isHover == isHover) return;
+        _isHover = isHover;
         
-        // Lấy tất cả material hiện có trên Renderer
-        Material[] currentMaterials = _renderer.materials;
-        List<Material> baseMaterials = new List<Material>();
-        Material outlineMat = null;
-
-        // Tìm material sử dụng shader CardURPOutline
-        for (int i = 0; i < currentMaterials.Length; i++)
+        if (_renderer != null)
         {
-            if (currentMaterials[i].shader.name == "Custom/CardURPOutline")
-            {
-                outlineMat = currentMaterials[i];
-            }
-            else
-            {
-                baseMaterials.Add(currentMaterials[i]);
-            }
-        }
-
-        if (outlineMat != null)
-        {
-            _hasOutlineMaterial = true;
-            _originalMaterials = baseMaterials.ToArray();
-            
-            _outlinedMaterials = new Material[_originalMaterials.Length + 1];
-            for (int i = 0; i < _originalMaterials.Length; i++)
-            {
-                _outlinedMaterials[i] = _originalMaterials[i];
-            }
-            _outlinedMaterials[_outlinedMaterials.Length - 1] = outlineMat;
-
-            // Mặc định tắt outline khi mới chạy
-            _renderer.materials = _originalMaterials;
-        }
-        else
-        {
-            Debug.LogWarning("CardOutlineIndicator: Không tìm thấy Material nào sử dụng Shader 'Custom/CardURPOutline' trên Cube. Hãy chắc chắn bạn đã kéo Material đó vào Renderer.");
-            _originalMaterials = currentMaterials;
-            _outlinedMaterials = currentMaterials;
+            _renderer.enabled = _isHover;
         }
     }
 
-    // Handles UI/EventSystem pointer enter (Requires PhysicsRaycaster on Camera)
-    public void OnPointerEnter(PointerEventData eventData)
+    private void OnValidate()
     {
-        SetOutlineEnabled(true);
-    }
-
-    // Handles UI/EventSystem pointer exit
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        SetOutlineEnabled(false);
-    }
-
-    // Handles physics raycast mouse enter (Requires Collider)
-    private void OnMouseEnter()
-    {
-        SetOutlineEnabled(true);
-    }
-
-    // Handles physics raycast mouse exit (Requires Collider)
-    private void OnMouseExit()
-    {
-        SetOutlineEnabled(false);
-    }
-
-    public void SetOutlineEnabled(bool isEnabled)
-    {
-        if (!_hasOutlineMaterial) return;
-
-        if (isEnabled)
+        // Allow toggling the _isHover checkbox in the inspector during Play Mode to test the outline
+        if (Application.isPlaying && _renderer != null)
         {
-            _renderer.materials = _outlinedMaterials;
-        }
-        else
-        {
-            _renderer.materials = _originalMaterials;
+            _renderer.enabled = _isHover;
         }
     }
 }
