@@ -17,8 +17,9 @@ public class CardOutlineIndicator : SaiBehaviour
         if (this._renderer == null) this._renderer = this.GetComponent<Renderer>();
     }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         // Disable renderer by default, keeping the material in the Inspector
         if (_renderer != null)
         {
@@ -26,8 +27,9 @@ public class CardOutlineIndicator : SaiBehaviour
         }
     }
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
         // Update initial state if the card is already being hovered
         if (_cardCtrl != null && _cardCtrl.IsHover)
         {

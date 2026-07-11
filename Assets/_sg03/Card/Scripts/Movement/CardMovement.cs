@@ -32,8 +32,8 @@ namespace SG03
         // ─── In-Hand Hover ────────────────────────────────────────────────────────
 
         [Header("In-Hand Hover")]
-        [Tooltip("Y offset (world units) the card rises when hovered while in hand.")]
-        [SerializeField] private float hoverOffsetY = 0.3f;
+        // [Tooltip("Y offset (world units) the card rises when hovered while in hand.")]
+        // [SerializeField] private float hoverOffsetY = 0.3f;
 
         [Tooltip("Duration of the hover rise/fall animation in seconds.")]
         [SerializeField] private float hoverDuration = 0.15f;
@@ -149,8 +149,8 @@ namespace SG03
         [SerializeField] private FaceState faceState = FaceState.Unknown;
 
         private float handAnchorY;
-        private bool  isSelected;
-        private bool  isFlipping;
+        private bool isSelected;
+        private bool isFlipping;
         private Tween yTween;
         private Tween moveTween;
         private Tween rotateTween;
@@ -159,13 +159,13 @@ namespace SG03
         private Sequence damageTween;
         private Sequence attackTween;
         private Sequence abilityTween;
-        private Vector3    preFullDetailPosition;
+        private Vector3 preFullDetailPosition;
         private Quaternion preFullDetailRotation;
 
         // ─── Static movement gate ─────────────────────────────────────────────────
 
         private static int movingCount = 0;
-        public  static bool IsAnyCardMoving => movingCount > 0;
+        public static bool IsAnyCardMoving => movingCount > 0;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -182,7 +182,7 @@ namespace SG03
             Debug.LogWarning(transform.name + ": LoadCard3DCtrl", gameObject);
         }
 
-        private void OnEnable()  => this.Subscribe();
+        private void OnEnable() => this.Subscribe();
         private void OnDisable() => this.Unsubscribe();
         private void OnDestroy() => this.KillAllTweens();
 
@@ -191,30 +191,30 @@ namespace SG03
         private void Subscribe()
         {
             Card3DCtrl.HoverEntered += this.OnHoverEntered;
-            Card3DCtrl.HoverExited  += this.OnHoverExited;
+            Card3DCtrl.HoverExited += this.OnHoverExited;
             Card3DCtrl.CardSelected += this.OnCardSelected;
         }
 
         private void Unsubscribe()
         {
             Card3DCtrl.HoverEntered -= this.OnHoverEntered;
-            Card3DCtrl.HoverExited  -= this.OnHoverExited;
+            Card3DCtrl.HoverExited -= this.OnHoverExited;
             Card3DCtrl.CardSelected -= this.OnCardSelected;
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
-        public Location  Location   => this.location;
-        public bool      IsFlipping  => this.isFlipping;
-        public bool      IsAnimating =>
+        public Location Location => this.location;
+        public bool IsFlipping => this.isFlipping;
+        public bool IsAnimating =>
             (this.moveTween != null && this.moveTween.IsActive()) ||
             this.isFlipping ||
             (this.damageTween != null && this.damageTween.IsActive()) ||
             (this.attackTween != null && this.attackTween.IsActive()) ||
             (this.abilityTween != null && this.abilityTween.IsActive());
-        public FaceState FaceState   => this.faceState;
+        public FaceState FaceState => this.faceState;
 
-        public void SetMoveDuration(float d)   { this.duration = d; }
+        public void SetMoveDuration(float d) { this.duration = d; }
         public void SetRotateDuration(float d)
         {
             float clamped = Mathf.Max(0.01f, d);
@@ -404,10 +404,10 @@ namespace SG03
 
         private void DoFaceFlip(Vector3 targetEulers, Vector3 axis)
         {
-            Vector3 origin    = this.transform.position;
-            Vector3 risen     = origin + Vector3.up * this.flipRiseHeight;
-            float   totalTime = this.flipDuration * 2f;
-            float   angle     = this.ComputeFlipAngle(targetEulers, axis);
+            Vector3 origin = this.transform.position;
+            Vector3 risen = origin + Vector3.up * this.flipRiseHeight;
+            float totalTime = this.flipDuration * 2f;
+            float angle = this.ComputeFlipAngle(targetEulers, axis);
 
             this.isFlipping = true;
             this.faceTween?.Kill();
@@ -427,8 +427,8 @@ namespace SG03
 
         private float ComputeFlipAngle(Vector3 targetEulers, Vector3 axis)
         {
-            Quaternion from  = this.transform.rotation;
-            Quaternion to    = Quaternion.Euler(targetEulers);
+            Quaternion from = this.transform.rotation;
+            Quaternion to = Quaternion.Euler(targetEulers);
             Quaternion delta = to * Quaternion.Inverse(from);
             delta.ToAngleAxis(out float angle, out Vector3 rotAxis);
             return angle * Mathf.Sign(Vector3.Dot(rotAxis, axis.normalized));
@@ -462,11 +462,11 @@ namespace SG03
         public void RunUp()
         {
             Vector3 origin = this.transform.position;
-            Vector3 risen  = origin + Vector3.up * this.damagedRiseHeight;
+            Vector3 risen = origin + Vector3.up * this.damagedRiseHeight;
             this.damageTween?.Kill();
             this.damageTween = DOTween.Sequence();
-            this.damageTween.Append(this.transform.DOMove(risen,   this.damagedPhaseDuration).SetEase(this.damagedRiseEase));
-            this.damageTween.Append(this.transform.DOMove(origin,  this.damagedPhaseDuration).SetEase(this.damagedFallEase));
+            this.damageTween.Append(this.transform.DOMove(risen, this.damagedPhaseDuration).SetEase(this.damagedRiseEase));
+            this.damageTween.Append(this.transform.DOMove(origin, this.damagedPhaseDuration).SetEase(this.damagedFallEase));
         }
 
         public void Damaged()
@@ -479,7 +479,7 @@ namespace SG03
         public void AbilityActive()
         {
             Vector3 origin = this.transform.position;
-            Vector3 risen  = origin + Vector3.up * this.damagedRiseHeight;
+            Vector3 risen = origin + Vector3.up * this.damagedRiseHeight;
             this.damageTween?.Kill();
             this.damageTween = DOTween.Sequence();
             this.damageTween.Append(this.transform.DOMove(risen, this.damagedPhaseDuration).SetEase(Ease.OutQuad));
@@ -504,16 +504,16 @@ namespace SG03
         /// </summary>
         public void AttackBackstepLunge(Vector3 defenderPosition)
         {
-            Vector3 origin     = this.transform.position;
+            Vector3 origin = this.transform.position;
             Vector3 returnPosition = this.GetAttackReturnPosition(origin);
             Vector3 toDefender = defenderPosition - origin;
-            Vector3 backstep   = origin - toDefender * this.attackBackstepRatio;
-            Vector3 lunged     = Vector3.Lerp(origin, defenderPosition, this.attackLungeRatio);
+            Vector3 backstep = origin - toDefender * this.attackBackstepRatio;
+            Vector3 lunged = Vector3.Lerp(origin, defenderPosition, this.attackLungeRatio);
             this.attackTween?.Kill();
             this.attackTween = DOTween.Sequence();
             this.attackTween.Append(this.transform.DOMove(backstep, this.attackBackstepDuration).SetEase(this.attackBackstepEase));
-            this.attackTween.Append(this.transform.DOMove(lunged,   this.attackLungeDuration).SetEase(this.attackLungeEase));
-            this.attackTween.Append(this.transform.DOMove(returnPosition,   this.attackReturnDuration).SetEase(this.attackReturnEase));
+            this.attackTween.Append(this.transform.DOMove(lunged, this.attackLungeDuration).SetEase(this.attackLungeEase));
+            this.attackTween.Append(this.transform.DOMove(returnPosition, this.attackReturnDuration).SetEase(this.attackReturnEase));
         }
 
         /// <summary>
@@ -524,7 +524,7 @@ namespace SG03
         public void PlanningLunge(Vector3 defenderPosition)
         {
             Vector3 direction = (defenderPosition - this.transform.position).normalized;
-            Vector3 lunged    = defenderPosition - direction * this.planningStopDistance;
+            Vector3 lunged = defenderPosition - direction * this.planningStopDistance;
             this.attackTween?.Kill();
             this.attackTween = DOTween.Sequence();
             this.attackTween.Append(this.transform.DOMove(lunged, this.attackLungeDuration).SetEase(this.attackLungeEase));
@@ -606,7 +606,7 @@ namespace SG03
         {
             if (destination != Location.in_hand) return;
             this.handAnchorY = target.position.y;
-            this.isSelected  = false;
+            this.isSelected = false;
         }
 
         private void SetLocation(Location newLocation)

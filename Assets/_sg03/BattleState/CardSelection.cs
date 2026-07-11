@@ -301,6 +301,7 @@ namespace SG03
             this.fullDetail = false;
             this.selected = this.hovered;
             this.selected.NotifySelected();
+            this.EvaluateTargetingStart();
         }
 
         private void EnterFullDetail()
@@ -400,7 +401,7 @@ namespace SG03
             CardHolderCtrl holder = this.holderHover;
             if (source == null || holder == null) return;
             string defenderId = this.ResolveDefenderId(holder);
-            Debug.Log($"<color=#00FFAA>[Targeting] <b>{source.name}</b> â†’ <b>{holder.name}</b> ({defenderId})</color>");
+            Debug.Log($"<color=#00FFAA>[Targeting] <b>{source.name}</b> → <b>{holder.name}</b> ({defenderId})</color>");
             this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(
                 source.InventoryItemId,
                 defenderId,
@@ -500,7 +501,7 @@ namespace SG03
                 this.arrowIndicator?.Hide();
                 return;
             }
-            this.SyncTargetingState();
+            
             if (!this.IsTargeting) return;
             if (this.arrowIndicator == null) return;
             if (this.fullDetail)
@@ -525,45 +526,30 @@ namespace SG03
             return false;
         }
 
-        private void SyncTargetingState()
+        private void EvaluateTargetingStart()
         {
-            if (this.selected == null)
-            {
-                this.TryCancelTargeting();
-                return;
-            }
+            this.TryCancelTargeting();
 
-            bool shouldStart = (this.targetingSource != this.selected);
+            if (this.selected == null) return;
 
             if (!this.IsAlphaTurn() && !this.IsAlphaDefendingBackLineSelected() && !this.IsAlphaDrawCharacterSelected() && !this.IsAlphaDrawBackLineSelected())
             {
-                if (shouldStart) Debug.LogWarning($"[CardSelection] SyncTargetingState: Cannot begin targeting - Not Alpha Turn/Draw/Defending phase. NextMove={this.battleStateCtrl?.BattleState?.NextMove}");
-                this.TryCancelTargeting();
                 return;
             }
             if (this.selected.CardOwner == Owner.omega)
             {
-                if (shouldStart) Debug.LogWarning("[CardSelection] SyncTargetingState: Cannot begin targeting - Cannot target with Omega's card");
-                this.TryCancelTargeting();
                 return;
             }
             if (this.IsSelectedCardTriggered())
             {
-                if (shouldStart) Debug.LogWarning($"[CardSelection] SyncTargetingState: Cannot begin targeting - Selected card ({this.selected.name}) is already triggered");
-                this.TryCancelTargeting();
                 return;
             }
             if (this.selected.Location == Location.in_hand)
             {
-                if (shouldStart) Debug.LogWarning("[CardSelection] SyncTargetingState: Cannot begin targeting - Selected card is in hand");
-                this.TryCancelTargeting();
                 return;
             }
-            if (shouldStart)
-            {
-                Debug.LogWarning($"[CardSelection] SyncTargetingState: Begin targeting with {this.selected.name}");
-                this.BeginTargeting();
-            }
+
+            this.BeginTargeting();
         }
 
         private bool IsAlphaDefendingBackLineSelected()
