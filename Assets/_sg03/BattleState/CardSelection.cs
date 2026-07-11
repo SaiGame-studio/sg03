@@ -191,6 +191,7 @@ namespace SG03
         {
             if (this.IsBattleCompleted())
             {
+                if (this.IsMouseClickedThisFrame()) Debug.LogWarning("[CardSelection] Cannot click: Battle is completed.");
                 this.ClearInteractionState();
                 return;
             }
@@ -225,6 +226,7 @@ namespace SG03
         private void HandleLeftClick()
         {
             if (!this.IsMouseClickedThisFrame()) return;
+            Debug.LogWarning("[CardSelection] Left click detected in HandleLeftClick!");
             this.HandleCardClick();
             this.HandleHolderClick();
         }
@@ -248,8 +250,17 @@ namespace SG03
 
         private bool IsMouseClickedThisFrame()
         {
-            if (Mouse.current == null) return false;
-            return Mouse.current.leftButton.wasPressedThisFrame;
+            if (Mouse.current == null) 
+            {
+                // Commented out to avoid spam, but if we need it we can log here
+                return false;
+            }
+            if (Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                Debug.LogWarning("[CardSelection] Mouse leftButton.wasPressedThisFrame is TRUE!");
+                return true;
+            }
+            return false;
         }
 
         private bool IsMouseRightClickedThisFrame()
@@ -266,10 +277,11 @@ namespace SG03
 
         private void HandleCardClick()
         {
-            if (this.AreClientActionsPending()) return;
-            if (this.hovered == null) return;
-            if (this.IsLocationNonSelectable(this.hovered.Location)) return;
-            if (this.IsClickOnSelected()) return;
+            if (this.AreClientActionsPending()) { Debug.LogWarning("[CardSelection] Cannot click: Actions pending"); return; }
+            if (this.hovered == null) { Debug.LogWarning("[CardSelection] Cannot click: Hovered card is null"); return; }
+            if (this.IsLocationNonSelectable(this.hovered.Location)) { Debug.LogWarning($"[CardSelection] Cannot click: Location {this.hovered.Location} non-selectable"); return; }
+            if (this.IsClickOnSelected()) { Debug.LogWarning("[CardSelection] Cannot click: Card already selected"); return; }
+            Debug.LogWarning($"[CardSelection] Selecting hovered card: {this.hovered.name}");
             this.SelectHovered();
         }
 
@@ -520,28 +532,38 @@ namespace SG03
                 this.TryCancelTargeting();
                 return;
             }
+
+            bool shouldStart = (this.targetingSource != this.selected);
+
             if (!this.IsAlphaTurn() && !this.IsAlphaDefendingBackLineSelected() && !this.IsAlphaDrawCharacterSelected() && !this.IsAlphaDrawBackLineSelected())
             {
+                if (shouldStart) Debug.LogWarning($"[CardSelection] SyncTargetingState: Cannot begin targeting - Not Alpha Turn/Draw/Defending phase. NextMove={this.battleStateCtrl?.BattleState?.NextMove}");
                 this.TryCancelTargeting();
                 return;
             }
             if (this.selected.CardOwner == Owner.omega)
             {
+                if (shouldStart) Debug.LogWarning("[CardSelection] SyncTargetingState: Cannot begin targeting - Cannot target with Omega's card");
                 this.TryCancelTargeting();
                 return;
             }
             if (this.IsSelectedCardTriggered())
             {
+                if (shouldStart) Debug.LogWarning($"[CardSelection] SyncTargetingState: Cannot begin targeting - Selected card ({this.selected.name}) is already triggered");
                 this.TryCancelTargeting();
                 return;
             }
             if (this.selected.Location == Location.in_hand)
             {
+                if (shouldStart) Debug.LogWarning("[CardSelection] SyncTargetingState: Cannot begin targeting - Selected card is in hand");
                 this.TryCancelTargeting();
                 return;
             }
-            if (this.targetingSource != this.selected)
+            if (shouldStart)
+            {
+                Debug.LogWarning($"[CardSelection] SyncTargetingState: Begin targeting with {this.selected.name}");
                 this.BeginTargeting();
+            }
         }
 
         private bool IsAlphaDefendingBackLineSelected()
