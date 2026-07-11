@@ -103,11 +103,13 @@ namespace SG03.UI
         private void SubscribeEvents()
         {
             Card3DCtrl.FaceStateChanged += this.OnCardFaceStateChanged;
+            Card3DCtrl.TriggerStateChanged += this.OnCardTriggerStateChanged;
         }
 
         private void UnsubscribeEvents()
         {
             Card3DCtrl.FaceStateChanged -= this.OnCardFaceStateChanged;
+            Card3DCtrl.TriggerStateChanged -= this.OnCardTriggerStateChanged;
         }
 
         private void OnCardFaceStateChanged(Card3DCtrl card, bool faceUp)
@@ -125,6 +127,27 @@ namespace SG03.UI
                 if (slot == null) continue;
                 if (slot.inventory_item_id != inventoryItemId) continue;
                 slot.face_up = faceUp;
+                return;
+            }
+        }
+
+        private void OnCardTriggerStateChanged(Card3DCtrl card, bool isTrigger)
+        {
+            this.UpdateSlotTrigger(this.alphaFrontLine, card.InventoryItemId, isTrigger);
+            this.UpdateSlotTrigger(this.alphaBackLine, card.InventoryItemId, isTrigger);
+            this.UpdateSlotTrigger(this.omegaFrontLine, card.InventoryItemId, isTrigger);
+            this.UpdateSlotTrigger(this.omegaBackLine, card.InventoryItemId, isTrigger);
+        }
+
+        private void UpdateSlotTrigger(BattleCardSlot[] slots, string inventoryItemId, bool isTrigger)
+        {
+            if (slots == null) return;
+            if (string.IsNullOrEmpty(inventoryItemId)) return;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot == null) continue;
+                if (slot.inventory_item_id != inventoryItemId) continue;
+                slot.trigger = isTrigger;
                 return;
             }
         }
@@ -276,8 +299,32 @@ namespace SG03.UI
             this.SetNextMove(output.metadata?.next_move ?? output.next_move);
             this.metadataJson = BeautifyJson(JsonUtility.ToJson(output.metadata));
             this.TryFireGameStart();
+            this.SyncTriggerStates();
             this.OnBattleStatusChanged?.Invoke();
             this.NotifyClientActions();
+        }
+
+        private void SyncTriggerStates()
+        {
+            if (this.cardSpawning == null) return;
+            this.SyncTriggerStateForSlots(this.alphaFrontLine);
+            this.SyncTriggerStateForSlots(this.alphaBackLine);
+            this.SyncTriggerStateForSlots(this.omegaFrontLine);
+            this.SyncTriggerStateForSlots(this.omegaBackLine);
+        }
+
+        private void SyncTriggerStateForSlots(BattleCardSlot[] slots)
+        {
+            if (slots == null) return;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot == null || string.IsNullOrEmpty(slot.inventory_item_id)) continue;
+                Card3DCtrl card = this.cardSpawning.FindCardById(slot.inventory_item_id);
+                if (card != null)
+                {
+                    card.SetIsTrigger(slot.trigger);
+                }
+            }
         }
 
         private void NotifyClientActions()

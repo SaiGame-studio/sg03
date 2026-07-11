@@ -233,7 +233,7 @@ namespace SG03
                 Debug.LogWarning($"[CardMovement] {this.gameObject.name} MoveAndRotate SKIPPED — isFlipping=true");
                 return;
             }
-            this.location = destination;
+            this.SetLocation(destination);
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
             this.StartMoveTween(target.position, this.duration, this.ease, null);
@@ -247,7 +247,7 @@ namespace SG03
                 Debug.LogWarning($"[CardMovement] {this.gameObject.name} MoveAndRotate SKIPPED — isFlipping=true");
                 return;
             }
-            this.location = destination;
+            this.SetLocation(destination);
             this.KillAllTweens();
             this.StartMoveTween(worldPosition, this.duration, this.ease, null);
             this.rotateTween = this.transform.DORotateQuaternion(rotation, this.duration).SetEase(this.ease);
@@ -260,7 +260,7 @@ namespace SG03
         public void MoveTo(Transform target, Location destination)
         {
             if (this.isFlipping) return;
-            this.location = destination;
+            this.SetLocation(destination);
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
             this.StartMoveTween(target.position, this.duration, this.ease, null);
@@ -269,7 +269,7 @@ namespace SG03
         public void MoveTo(Vector3 worldPosition, Location destination)
         {
             if (this.isFlipping) return;
-            this.location = destination;
+            this.SetLocation(destination);
             this.KillAllTweens();
             this.StartMoveTween(worldPosition, this.duration, this.ease, null);
         }
@@ -281,7 +281,7 @@ namespace SG03
         public void MoveTo(Transform target, Location destination, System.Action onComplete)
         {
             if (this.isFlipping) return;
-            this.location = destination;
+            this.SetLocation(destination);
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
             this.StartMoveTween(target.position, this.duration, this.ease, onComplete);
@@ -298,7 +298,7 @@ namespace SG03
             // Debug.Log($"[CardMovement] {this.gameObject.name} MoveToUnknow → '{holder.name}' (moveTween active: {this.moveTween != null && this.moveTween.IsActive()})");
             this.ctrl.AssignCardHolder(holder);
             Location destination = holder.HolderLocation;
-            this.location = destination;
+            this.SetLocation(destination);
             this.RecordHandAnchor(holder.transform, destination);
             this.KillAllTweens();
             Vector3 lineDestination = holder.transform.position + new Vector3(0f, this.lineOffsetY, 0f);
@@ -309,7 +309,7 @@ namespace SG03
         public void MoveBackToLineHolder(CardHolderCtrl holder)
         {
             if (holder == null) return;
-            this.location = holder.HolderLocation;
+            this.SetLocation(holder.HolderLocation);
             this.RecordHandAnchor(holder.transform, this.location);
             this.KillAllTweens();
             Vector3 lineDestination = holder.transform.position + new Vector3(0f, this.lineOffsetY, 0f);
@@ -605,6 +605,13 @@ namespace SG03
             if (destination != Location.in_hand) return;
             this.handAnchorY = target.position.y;
             this.isSelected  = false;
+        }
+
+        private void SetLocation(Location newLocation)
+        {
+            if (this.location == newLocation) return;
+            this.location = newLocation;
+            this.ctrl?.NotifyLocationChanged(newLocation);
         }
 
         private void TweenToY(float targetY, float dur, Ease easeType)

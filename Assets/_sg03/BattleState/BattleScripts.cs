@@ -94,10 +94,10 @@ namespace SG03
             this.RunWithLock(this.scriptNameCardDeploy, requestBody, onSuccess, onError);
         }
 
-        public void RunAlphaAttacking(string attackerInventoryItemId, string defenderInventoryItemId, Action<string> onSuccess, Action<string> onError)
+        public void RunAlphaAttacking(string attackerInventoryItemId, string defenderInventoryItemId, string attackerItemDefinitionCodeName, string defenderItemDefinitionCodeName, Action<string> onSuccess, Action<string> onError)
         {
             if (this.IsBattleScriptMissing(nameof(this.RunAlphaAttacking))) return;
-            string requestBody = this.BuildAlphaAttackingRequestBody(attackerInventoryItemId, defenderInventoryItemId);
+            string requestBody = this.BuildAlphaAttackingRequestBody(attackerInventoryItemId, defenderInventoryItemId, attackerItemDefinitionCodeName, defenderItemDefinitionCodeName);
             this.LogPayload("RunAlphaAttacking", "#FF4444", requestBody);
             this.RunWithLock(this.scriptNameAlphaCardActive, requestBody, onSuccess, onError);
         }
@@ -187,9 +187,9 @@ namespace SG03
             Debug.Log($"<color={color}><b>[BattleScripts] \u25ba {methodName}</b></color>{payloadPart}", this.gameObject);
         }
 
-        private string BuildAlphaAttackingRequestBody(string attackerInventoryItemId, string defenderInventoryItemId)
+        private string BuildAlphaAttackingRequestBody(string attackerInventoryItemId, string defenderInventoryItemId, string attackerItemDefinitionCodeName, string defenderItemDefinitionCodeName)
         {
-            return $"{{\"payload\":{{\"attacker_inventory_item_id\":\"{attackerInventoryItemId}\",\"defender_inventory_item_id\":\"{defenderInventoryItemId}\"}}}}";
+            return $"{{\"payload\":{{\"attacker_inventory_item_id\":\"{attackerInventoryItemId}\",\"defender_inventory_item_id\":\"{defenderInventoryItemId}\",\"attacker_item_definition_code_name\":\"{attackerItemDefinitionCodeName}\",\"defender_item_definition_code_name\":\"{defenderItemDefinitionCodeName}\"}}}}";
         }
 
         private string BuildAlphaCardDeployRequestBody()

@@ -7003,6 +7003,7 @@ MonoBehaviour:
   logActions: 0
   actionLog: []
   hasPendingActions: 0
+  isResuming: 0
 --- !u!1 &2028831695
 GameObject:
   m_ObjectHideFlags: 0
