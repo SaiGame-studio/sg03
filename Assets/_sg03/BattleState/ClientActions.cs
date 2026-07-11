@@ -543,8 +543,13 @@ namespace SG03
             
             if (this.logActions) Debug.Log($"[CardTakeDamage] target={targetId}, damage={damage}, total_damage={totalDamage}");
             
-            // Note: C# already handles visual Damaged() via AlphaAttackRoutine / CardAbilityRoutine directly.
-            // This action is captured here for explicit event tracking/logging based on backend's calculated damage > 0.
+            Card3DCtrl card = this.cardSpawning?.FindCardById(targetId);
+            if (card != null)
+            {
+                card.Damaged();
+                return this.StartCoroutine(this.WaitForCard(card));
+            }
+
             return null;
         }
 
