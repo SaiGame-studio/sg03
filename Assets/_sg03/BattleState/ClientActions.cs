@@ -21,10 +21,8 @@ namespace SG03
         [SerializeField] private float actionInterval = 0.1f;
         [SerializeField] private float omegaFrontLinePostDelay = 0.5f;
 
-        [Header("Debug")]
-        [SerializeField] private bool logActions = false;
-
         [Header("Action Log")]
+        [SerializeField] private bool logActions = false;
 
         private Coroutine dispatchRoutine;
         [SerializeField] private bool hasPendingActions;
