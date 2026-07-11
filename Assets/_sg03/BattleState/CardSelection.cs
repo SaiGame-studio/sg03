@@ -22,6 +22,8 @@ namespace SG03
 
         [SerializeField] private bool debugLog;
 
+        [Header("Input Control")]
+        [SerializeField] private bool debugMouseEvents = false;
 
         [SerializeField] private BattleStateCtrl battleStateCtrl;
 
@@ -191,7 +193,7 @@ namespace SG03
         {
             if (this.IsBattleCompleted())
             {
-                if (this.IsMouseClickedThisFrame()) Debug.LogWarning("[CardSelection] Cannot click: Battle is completed.");
+                if (this.IsMouseClickedThisFrame()) { if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Cannot click: Battle is completed."); }
                 this.ClearInteractionState();
                 return;
             }
@@ -226,7 +228,7 @@ namespace SG03
         private void HandleLeftClick()
         {
             if (!this.IsMouseClickedThisFrame()) return;
-            Debug.LogWarning("[CardSelection] Left click detected in HandleLeftClick!");
+            if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Left click detected in HandleLeftClick!");
             this.HandleCardClick();
             this.HandleHolderClick();
         }
@@ -257,7 +259,7 @@ namespace SG03
             }
             if (Mouse.current.leftButton.wasPressedThisFrame)
             {
-                Debug.LogWarning("[CardSelection] Mouse leftButton.wasPressedThisFrame is TRUE!");
+                if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Mouse leftButton.wasPressedThisFrame is TRUE!");
                 return true;
             }
             return false;
@@ -277,11 +279,11 @@ namespace SG03
 
         private void HandleCardClick()
         {
-            if (this.AreClientActionsPending()) { Debug.LogWarning("[CardSelection] Cannot click: Actions pending"); return; }
-            if (this.hovered == null) { Debug.LogWarning("[CardSelection] Cannot click: Hovered card is null"); return; }
-            if (this.IsLocationNonSelectable(this.hovered.Location)) { Debug.LogWarning($"[CardSelection] Cannot click: Location {this.hovered.Location} non-selectable"); return; }
-            if (this.IsClickOnSelected()) { Debug.LogWarning("[CardSelection] Cannot click: Card already selected"); return; }
-            Debug.LogWarning($"[CardSelection] Selecting hovered card: {this.hovered.name}");
+            if (this.AreClientActionsPending()) { if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Cannot click: Actions pending"); return; }
+            if (this.hovered == null) { if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Cannot click: Hovered card is null"); return; }
+            if (this.IsLocationNonSelectable(this.hovered.Location)) { if (this.debugMouseEvents) Debug.LogWarning($"[CardSelection] Cannot click: Location {this.hovered.Location} non-selectable"); return; }
+            if (this.IsClickOnSelected()) { if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Cannot click: Card already selected"); return; }
+            if (this.debugMouseEvents) Debug.LogWarning($"[CardSelection] Selecting hovered card: {this.hovered.name}");
             this.SelectHovered();
         }
 
