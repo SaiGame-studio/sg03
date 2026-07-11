@@ -22,15 +22,34 @@ namespace SG03
         private void OnEnable()
         {
             Card3DCtrl.TriggerStateChanged += this.OnTriggerStateChanged;
+            Card3DCtrl.LocationChanged += this.OnLocationChanged;
             if (this.cardCtrl != null)
             {
                 this.SetVisual(this.cardCtrl.IsTrigger);
+                this.UpdateRendererState();
             }
         }
 
         private void OnDisable()
         {
             Card3DCtrl.TriggerStateChanged -= this.OnTriggerStateChanged;
+            Card3DCtrl.LocationChanged -= this.OnLocationChanged;
+        }
+
+        private void OnLocationChanged(Card3DCtrl card, Location newLocation)
+        {
+            if (this.cardCtrl == null || card != this.cardCtrl) return;
+            this.UpdateRendererState();
+        }
+
+        private void UpdateRendererState()
+        {
+            if (this.cardCtrl == null || this.triggerRenderer == null) return;
+            bool shouldEnable = this.cardCtrl.Location == Location.in_front;
+            if (this.triggerRenderer.enabled != shouldEnable)
+            {
+                this.triggerRenderer.enabled = shouldEnable;
+            }
         }
 
         private void OnTriggerStateChanged(Card3DCtrl card, bool isTrigger)

@@ -22,6 +22,7 @@ namespace SG03
         public static event Action<Card3DCtrl> CardSelected;
         public static event Action<Card3DCtrl, bool> FaceStateChanged;
         public static event Action<Card3DCtrl, bool> TriggerStateChanged;
+        public static event Action<Card3DCtrl, Location> LocationChanged;
 
         // ─── Linked components ────────────────────────────────────────────────────
 
@@ -52,6 +53,7 @@ namespace SG03
         public void NotifyHoverEntered() => HoverEntered?.Invoke(this);
         public void NotifyHoverExited()  => HoverExited?.Invoke(this);
         public void NotifySelected()     => CardSelected?.Invoke(this);
+        public void NotifyLocationChanged(Location newLocation) => LocationChanged?.Invoke(this, newLocation);
 
         protected override void LoadComponents()
         {
