@@ -525,7 +525,7 @@ namespace SG03
             if (string.IsNullOrEmpty(inventoryItemId)) return null;
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card == null) return null;
-            card.RunUp();
+            card.Damaged();
             return this.StartCoroutine(this.WaitForCard(card));
         }
 
@@ -533,16 +533,15 @@ namespace SG03
         {
             return this.ExecuteCardExposeInternal(
                 parameters,
-                playCardActive: false,
                 beforeExpose: inventoryItemId => this.cardSpawning?.LoadOmegaCardData(inventoryItemId));
         }
 
         private Coroutine ExecuteCardExpose(string[] parameters)
         {
-            return this.ExecuteCardExposeInternal(parameters, playCardActive: true);
+            return this.ExecuteCardExposeInternal(parameters);
         }
 
-        private Coroutine ExecuteCardExposeInternal(string[] parameters, bool playCardActive, System.Action<string> beforeExpose = null)
+        private Coroutine ExecuteCardExposeInternal(string[] parameters, System.Action<string> beforeExpose = null)
         {
             if (parameters == null || parameters.Length == 0) return null;
             string inventoryItemId = parameters[0].Trim();
@@ -550,28 +549,19 @@ namespace SG03
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card == null) return null;
             if (card.FaceState == FaceState.FaceUp) return null;
-            return this.StartCoroutine(this.CardExposeRoutine(card, inventoryItemId, playCardActive, beforeExpose));
+            return this.StartCoroutine(this.CardExposeRoutine(card, inventoryItemId, beforeExpose));
         }
 
-        private IEnumerator CardExposeRoutine(Card3DCtrl card, string inventoryItemId, bool playCardActive, System.Action<string> beforeExpose = null)
+        private IEnumerator CardExposeRoutine(Card3DCtrl card, string inventoryItemId, System.Action<string> beforeExpose = null)
         {
             beforeExpose?.Invoke(inventoryItemId);
             yield return this.StartCoroutine(this.PlayFaceUpAnimation(card));
-            if (!playCardActive) yield break;
-            yield return this.StartCoroutine(this.PlayCardActiveAnimation(card));
         }
 
         private IEnumerator PlayFaceUpAnimation(Card3DCtrl card)
         {
             if (card == null || card.FaceState == FaceState.FaceUp) yield break;
             card.FaceUp();
-            yield return this.StartCoroutine(this.WaitForCard(card));
-        }
-
-        private IEnumerator PlayCardActiveAnimation(Card3DCtrl card)
-        {
-            if (card == null) yield break;
-            card.RunUp();
             yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
