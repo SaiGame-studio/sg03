@@ -282,8 +282,16 @@ namespace SG03
             if (this.AreClientActionsPending()) { if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Cannot click: Actions pending"); return; }
             if (this.hovered == null) { if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Cannot click: Hovered card is null"); return; }
             if (this.IsLocationNonSelectable(this.hovered.Location)) { if (this.debugMouseEvents) Debug.LogWarning($"[CardSelection] Cannot click: Location {this.hovered.Location} non-selectable"); return; }
-            if (this.IsClickOnSelected()) { if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Cannot click: Card already selected"); return; }
-            if (this.debugMouseEvents) Debug.LogWarning($"[CardSelection] Selecting hovered card: {this.hovered.name}");
+            
+            if (this.IsClickOnSelected()) 
+            { 
+                if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Re-selecting already selected card"); 
+            }
+            else
+            {
+                if (this.debugMouseEvents) Debug.LogWarning($"[CardSelection] Selecting hovered card: {this.hovered.name}");
+            }
+            
             this.SelectHovered();
         }
 
