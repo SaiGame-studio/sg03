@@ -120,13 +120,13 @@ namespace SG03
             {
                 attacker.AttackLunge(this.deskPosition.OmegaTheSource.position);
                 yield return new WaitForSeconds(0.15f);
-                this.cardSpawning?.ShakeOmegaSourceCards();
+                this.cardSpawning?.ShakeOmegaSourceAndVoidCards();
             }
             else
             {
                 attacker.AbilityActive();
                 yield return new WaitForSeconds(0.15f);
-                this.cardSpawning?.ShakeOmegaSourceCards();
+                this.cardSpawning?.ShakeOmegaSourceAndVoidCards();
             }
 
             yield return this.StartCoroutine(this.WaitForCard(attacker));
@@ -164,13 +164,13 @@ namespace SG03
             {
                 attacker.AttackBackstepLunge(this.deskPosition.AlphaTheSource.position);
                 yield return new WaitForSeconds(0.27f);
-                this.cardSpawning?.ShakeAlphaSourceCards();
+                this.cardSpawning?.ShakeAlphaSourceAndVoidCards();
             }
             else
             {
                 attacker.AbilityActive();
                 yield return new WaitForSeconds(0.15f);
-                this.cardSpawning?.ShakeAlphaSourceCards();
+                this.cardSpawning?.ShakeAlphaSourceAndVoidCards();
             }
 
             yield return this.StartCoroutine(this.WaitForCard(attacker));

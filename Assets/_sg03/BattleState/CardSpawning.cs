@@ -37,6 +37,8 @@ namespace SG03
         private readonly LinkedList<Card3DCtrl>             omegaSourceCardQueue = new LinkedList<Card3DCtrl>();
         private readonly Queue<Card3DCtrl>                  omegaHandCardQueue   = new Queue<Card3DCtrl>();
         private readonly LinkedList<Card3DCtrl>             alphaSourceCardQueue = new LinkedList<Card3DCtrl>();
+        private readonly List<Card3DCtrl>                   alphaVoidCardList    = new List<Card3DCtrl>();
+        private readonly List<Card3DCtrl>                   omegaVoidCardList    = new List<Card3DCtrl>();
         private int omegaSourceSpawnedCount = 0;
         private int alphaSourceSpawnedCount = 0;
         private int alphaVoidSpawnedCount = 0;
@@ -360,6 +362,16 @@ namespace SG03
             card.SetRotateDuration(this.ActionRotateDuration);
             Vector3 abovePos = voidPoint.position + Vector3.up * this.voidDropHeight;
             card.MoveTo(abovePos, Location.in_void);
+
+            if (voidPoint == this.deskPosition.AlphaTheVoid)
+            {
+                if (!this.alphaVoidCardList.Contains(card)) this.alphaVoidCardList.Add(card);
+            }
+            else if (voidPoint == this.deskPosition.OmegaTheVoid)
+            {
+                if (!this.omegaVoidCardList.Contains(card)) this.omegaVoidCardList.Add(card);
+            }
+
             return card;
         }
 
@@ -524,17 +536,25 @@ namespace SG03
             top.Despawn?.DoDespawn();
         }
 
-        public void ShakeAlphaSourceCards()
+        public void ShakeAlphaSourceAndVoidCards()
         {
             foreach (Card3DCtrl card in this.alphaSourceCardQueue)
             {
                 if (card != null) card.Damaged();
             }
+            foreach (Card3DCtrl card in this.alphaVoidCardList)
+            {
+                if (card != null) card.Damaged();
+            }
         }
 
-        public void ShakeOmegaSourceCards()
+        public void ShakeOmegaSourceAndVoidCards()
         {
             foreach (Card3DCtrl card in this.omegaSourceCardQueue)
+            {
+                if (card != null) card.Damaged();
+            }
+            foreach (Card3DCtrl card in this.omegaVoidCardList)
             {
                 if (card != null) card.Damaged();
             }
