@@ -524,6 +524,22 @@ namespace SG03
             top.Despawn?.DoDespawn();
         }
 
+        public void ShakeAlphaSourceCards()
+        {
+            foreach (Card3DCtrl card in this.alphaSourceCardQueue)
+            {
+                if (card != null) card.Damaged();
+            }
+        }
+
+        public void ShakeOmegaSourceCards()
+        {
+            foreach (Card3DCtrl card in this.omegaSourceCardQueue)
+            {
+                if (card != null) card.Damaged();
+            }
+        }
+
         private void RemoveFromSlotOccupancy(Card3DCtrl card)
         {
             Transform keyToRemove = null;

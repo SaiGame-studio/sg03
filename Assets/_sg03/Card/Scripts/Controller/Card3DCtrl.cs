@@ -63,6 +63,7 @@ namespace SG03
             HoverExited?.Invoke(this);
         }
         public void NotifySelected()     => CardSelected?.Invoke(this);
+        public static void NotifyDeselected() => CardSelected?.Invoke(null);
         public void NotifyLocationChanged(Location newLocation) => LocationChanged?.Invoke(this, newLocation);
 
         protected override void LoadComponents()

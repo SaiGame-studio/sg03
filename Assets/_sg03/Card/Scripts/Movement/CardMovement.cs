@@ -149,6 +149,9 @@ namespace SG03
         [SerializeField] private FaceState faceState = FaceState.Unknown;
 
         private float handAnchorY;
+        private Vector3 handAnchorPosition;
+        private Quaternion handAnchorRotation;
+        private bool hasHandAnchor;
         private bool isSelected;
         private bool isFlipping;
         private Tween yTween;
@@ -597,7 +600,16 @@ namespace SG03
         {
             if (!this.isSelected) return;
             this.isSelected = false;
-            this.TweenToY(this.handAnchorY, this.hoverDuration, this.hoverEase);
+            if (this.hasHandAnchor)
+            {
+                this.KillAllTweens();
+                this.StartMoveTween(this.handAnchorPosition, this.hoverDuration, this.hoverEase, null);
+                this.rotateTween = this.transform.DORotateQuaternion(this.handAnchorRotation, this.hoverDuration).SetEase(this.hoverEase);
+            }
+            else
+            {
+                this.TweenToY(this.handAnchorY, this.hoverDuration, this.hoverEase);
+            }
         }
 
         // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -606,6 +618,9 @@ namespace SG03
         {
             if (destination != Location.in_hand) return;
             this.handAnchorY = target.position.y;
+            this.handAnchorPosition = target.position;
+            this.handAnchorRotation = target.rotation;
+            this.hasHandAnchor = true;
             this.isSelected = false;
         }
 

@@ -827,6 +827,7 @@ namespace SG03
             this.targetingSource = null;
             this.holderSelected = null;
             this.arrowIndicator?.Hide();
+            Card3DCtrl.NotifyDeselected();
         }
 
         private void RegisterPlayerDeploy(Card3DCtrl card, CardHolderCtrl holder)
