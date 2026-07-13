@@ -91,21 +91,89 @@ namespace SG03
         private Coroutine ExecuteAlphaAttackOmegaHp(string[] parameters)
         {
             if (parameters == null || parameters.Length == 0) return null;
-            string attackerId = parameters[0].Trim();
+            string attackerId = null;
+            foreach (string p in parameters)
+            {
+                string[] kv = p.Split('=');
+                if (kv.Length == 2)
+                {
+                    string key = kv[0].Trim().ToLower();
+                    string value = kv[1].Trim();
+                    if (key == "attacker_card_id" || key == "attacker") attackerId = value;
+                }
+            }
+            if (string.IsNullOrEmpty(attackerId) && !parameters[0].Contains("="))
+            {
+                attackerId = parameters[0].Trim();
+            }
+
             if (string.IsNullOrEmpty(attackerId)) return null;
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             if (attacker == null || this.deskPosition == null) return null;
             
+            return this.StartCoroutine(this.AlphaAttackOmegaHpRoutine(attacker));
+        }
+
+        private IEnumerator AlphaAttackOmegaHpRoutine(Card3DCtrl attacker)
+        {
             if (attacker.IsCharacter())
             {
                 attacker.AttackLunge(this.deskPosition.OmegaTheSource.position);
+                yield return new WaitForSeconds(0.15f);
+                this.cardSpawning?.ShakeOmegaSourceAndVoidCards();
             }
             else
             {
                 attacker.AbilityActive();
+                yield return new WaitForSeconds(0.15f);
+                this.cardSpawning?.ShakeOmegaSourceAndVoidCards();
             }
 
-            return this.StartCoroutine(this.WaitForCard(attacker));
+            yield return this.StartCoroutine(this.WaitForCard(attacker));
+        }
+
+        private Coroutine ExecuteOmegaAttackAlphaHp(string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return null;
+            string attackerId = null;
+            foreach (string p in parameters)
+            {
+                string[] kv = p.Split('=');
+                if (kv.Length == 2)
+                {
+                    string key = kv[0].Trim().ToLower();
+                    string value = kv[1].Trim();
+                    if (key == "attacker_card_id" || key == "attacker") attackerId = value;
+                }
+            }
+            if (string.IsNullOrEmpty(attackerId) && !parameters[0].Contains("="))
+            {
+                attackerId = parameters[0].Trim();
+            }
+
+            if (string.IsNullOrEmpty(attackerId)) return null;
+            Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
+            if (attacker == null || this.deskPosition == null) return null;
+            
+            return this.StartCoroutine(this.OmegaAttackAlphaHpRoutine(attacker));
+        }
+
+        private IEnumerator OmegaAttackAlphaHpRoutine(Card3DCtrl attacker)
+        {
+            if (attacker.IsCharacter())
+            {
+                attacker.AttackBackstepLunge(this.deskPosition.AlphaTheSource.position);
+                yield return new WaitForSeconds(0.27f);
+                this.cardSpawning?.ShakeAlphaSourceAndVoidCards();
+            }
+            else
+            {
+                attacker.AbilityActive();
+                yield return new WaitForSeconds(0.15f);
+                this.cardSpawning?.ShakeAlphaSourceAndVoidCards();
+            }
+
+            yield return this.StartCoroutine(this.WaitForCard(attacker));
         }
 
         private Coroutine ExecuteOmegaAttack(string[] parameters)

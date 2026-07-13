@@ -1550,6 +1550,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 948749803}
   m_LocalEulerAnglesHint: {x: 55, y: 0, z: 0}
+--- !u!23 &617683291 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4481470967788255310, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+  m_PrefabInstance: {fileID: 8380321798757510902}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &632999077
 GameObject:
   m_ObjectHideFlags: 0
@@ -7001,9 +7006,9 @@ MonoBehaviour:
   actionInterval: 0.1
   omegaFrontLinePostDelay: 0.5
   logActions: 0
-  actionLog: []
   hasPendingActions: 0
   isResuming: 0
+  actionLog: []
 --- !u!1 &2028831695
 GameObject:
   m_ObjectHideFlags: 0
@@ -8106,6 +8111,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5360970333242679767, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: _cardCtrl
+      value: 
+      objectReference: {fileID: 1789002520}
+    - target: {fileID: 5360970333242679767, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: _renderer
+      value: 
+      objectReference: {fileID: 617683291}
     - target: {fileID: 5430974725798921348, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
