@@ -91,7 +91,22 @@ namespace SG03
         private Coroutine ExecuteAlphaAttackOmegaHp(string[] parameters)
         {
             if (parameters == null || parameters.Length == 0) return null;
-            string attackerId = parameters[0].Trim();
+            string attackerId = null;
+            foreach (string p in parameters)
+            {
+                string[] kv = p.Split('=');
+                if (kv.Length == 2)
+                {
+                    string key = kv[0].Trim().ToLower();
+                    string value = kv[1].Trim();
+                    if (key == "attacker_card_id" || key == "attacker") attackerId = value;
+                }
+            }
+            if (string.IsNullOrEmpty(attackerId) && !parameters[0].Contains("="))
+            {
+                attackerId = parameters[0].Trim();
+            }
+
             if (string.IsNullOrEmpty(attackerId)) return null;
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             if (attacker == null || this.deskPosition == null) return null;
@@ -99,6 +114,41 @@ namespace SG03
             if (attacker.IsCharacter())
             {
                 attacker.AttackLunge(this.deskPosition.OmegaTheSource.position);
+            }
+            else
+            {
+                attacker.AbilityActive();
+            }
+
+            return this.StartCoroutine(this.WaitForCard(attacker));
+        }
+
+        private Coroutine ExecuteOmegaAttackAlphaHp(string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return null;
+            string attackerId = null;
+            foreach (string p in parameters)
+            {
+                string[] kv = p.Split('=');
+                if (kv.Length == 2)
+                {
+                    string key = kv[0].Trim().ToLower();
+                    string value = kv[1].Trim();
+                    if (key == "attacker_card_id" || key == "attacker") attackerId = value;
+                }
+            }
+            if (string.IsNullOrEmpty(attackerId) && !parameters[0].Contains("="))
+            {
+                attackerId = parameters[0].Trim();
+            }
+
+            if (string.IsNullOrEmpty(attackerId)) return null;
+            Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
+            if (attacker == null || this.deskPosition == null) return null;
+            
+            if (attacker.IsCharacter())
+            {
+                attacker.AttackBackstepLunge(this.deskPosition.AlphaTheSource.position);
             }
             else
             {

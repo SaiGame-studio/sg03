@@ -654,6 +654,7 @@ namespace SG03
             CardHolderCtrl.HolderSelected += this.OnHolderSelected;
             BattleState.OnNextMoveChanged += this.OnNextMoveChanged;
             Card3DCtrl.LocationChanged += this.OnLocationChanged;
+            Card3DCtrl.TriggerStateChanged += this.OnTriggerStateChanged;
         }
 
         private void Unsubscribe()
@@ -665,6 +666,7 @@ namespace SG03
             CardHolderCtrl.HolderSelected -= this.OnHolderSelected;
             BattleState.OnNextMoveChanged -= this.OnNextMoveChanged;
             Card3DCtrl.LocationChanged -= this.OnLocationChanged;
+            Card3DCtrl.TriggerStateChanged -= this.OnTriggerStateChanged;
         }
 
         private void OnNextMoveChanged(NextMoveType nextMove)
@@ -675,6 +677,14 @@ namespace SG03
         private void OnLocationChanged(Card3DCtrl card, Location newLocation)
         {
             if (this.selected == card && newLocation == Location.in_void)
+            {
+                this.ClearInteractionState();
+            }
+        }
+
+        private void OnTriggerStateChanged(Card3DCtrl card, bool isTrigger)
+        {
+            if (this.selected == card && isTrigger)
             {
                 this.ClearInteractionState();
             }
