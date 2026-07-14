@@ -15,6 +15,10 @@ namespace SG03
         [SerializeField] private DeskPositionCtrl deskPosition;
         [SerializeField] private BattleState battleState;
 
+        [Header("State")]
+        [SerializeField] private bool isAtAlpha = false;
+        public bool IsAtAlpha => this.isAtAlpha;
+
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         protected override void LoadComponents()
@@ -79,6 +83,7 @@ namespace SG03
 
         private void MoveToCardDeployPosition()
         {
+            this.isAtAlpha = false;
             if (this.deskPosition == null) return;
             if (this.deskPosition.CardDeployPosition == null) return;
             this.movement.MoveTo(this.deskPosition.CardDeployPosition);
@@ -86,6 +91,7 @@ namespace SG03
 
         private void MoveToAlphaLampPosition()
         {
+            this.isAtAlpha = true;
             if (this.deskPosition == null) return;
             if (this.deskPosition.AlphaLampPosition == null) return;
             this.movement.MoveTo(this.deskPosition.AlphaLampPosition);
@@ -93,6 +99,7 @@ namespace SG03
 
         private void MoveToOmegaLampPosition()
         {
+            this.isAtAlpha = false;
             if (this.deskPosition == null) return;
             if (this.deskPosition.OmegaLampPosition == null) return;
             this.movement.MoveTo(this.deskPosition.OmegaLampPosition);
