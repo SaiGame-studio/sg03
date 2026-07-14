@@ -3446,6 +3446,9 @@ MonoBehaviour:
   battleStateCtrl: {fileID: 2015755444}
   mainCamera: {fileID: 330585545}
   battleScripts: {fileID: 2015755445}
+  cylinderRenderer: {fileID: 1043868439}
+  outlineMaterial: {fileID: 2100000, guid: c8394e1b80c54625b81a70c8a61ed303, type: 2}
+  isHovered: 0
 --- !u!21 &1061435743
 Material:
   serializedVersion: 8
@@ -6876,6 +6879,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardSelection
   debugLog: 1
+  debugMouseEvents: 0
   battleStateCtrl: {fileID: 2015755444}
   selected: {fileID: 0}
   hovered: {fileID: 0}
