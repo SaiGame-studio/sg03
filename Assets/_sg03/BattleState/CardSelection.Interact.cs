@@ -34,7 +34,7 @@ namespace SG03
                 return true;
             }
             if (this.holderHover == null) return false;
-            if (this.holderHover.HolderOwner != Owner.omega) return false;
+            if (this.holderHover.HolderOwner != Owner.omega && this.holderHover.HolderOwner != Owner.alpha) return false;
             this.ConfirmHolderTargeting();
             return true;
         }
@@ -126,16 +126,18 @@ namespace SG03
 
         private string ResolveDefenderId(Card3DCtrl target)
         {
-            if (target.CardOwner == Owner.omega && target.Location == Location.in_void)   return "omega_hp";
-            if (target.CardOwner == Owner.omega && target.Location == Location.in_source) return "omega_hp";
+            if (target.CardOwner == Owner.omega && target.Location == Location.in_void)   return "omega";
+            if (target.CardOwner == Owner.omega && target.Location == Location.in_source) return "omega";
+            if (target.CardOwner == Owner.alpha && target.Location == Location.in_void)   return "alpha";
+            if (target.CardOwner == Owner.alpha && target.Location == Location.in_source) return "alpha";
             return target.InventoryItemId;
         }
 
         private string ResolveDefenderId(CardHolderCtrl holder)
         {
-            if (holder == null) return "omega_hp";
-            if (holder.HolderOwner != Owner.omega) return "omega_hp";
-            return this.HasAnyOmegaFrontlineCard() ? "omega" : "omega_hp";
+            if (holder == null) return "omega";
+            if (holder.HolderOwner == Owner.alpha) return "alpha";
+            return "omega";
         }
 
         private bool HasAnyOmegaFrontlineCard()
