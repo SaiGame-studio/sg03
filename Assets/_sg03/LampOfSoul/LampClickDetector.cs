@@ -19,11 +19,23 @@ namespace SG03
         [Header("Hover Outline")]
         [SerializeField] private MeshRenderer cylinderRenderer;
         [SerializeField] private Material outlineMaterial;
+        [SerializeField] private Material outlineHoverMaterial;
         [SerializeField] private bool isHovered = false;
 
         private Material[] originalMaterials;
-        private Material[] hoveredMaterials;
+        private Material[] blinkingMaterials;
+        private Material[] solidMaterials;
         private bool isOutlineShowing = false;
+
+        private enum OutlineMode
+        {
+            Hidden,
+            Blinking,
+            Solid
+        }
+
+        private OutlineMode currentOutlineMode = OutlineMode.Hidden;
+        private Coroutine blinkCoroutine;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -92,13 +104,26 @@ namespace SG03
 #if UNITY_EDITOR
         protected virtual void LoadOutlineMaterial()
         {
-            if (this.outlineMaterial != null) return;
-            string[] guids = UnityEditor.AssetDatabase.FindAssets("CylinderURPOutline t:Material");
-            if (guids.Length > 0)
+            if (this.outlineMaterial == null)
             {
-                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
-                this.outlineMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
-                Debug.LogWarning(this.transform.name + ": LoadOutlineMaterial assigned from path " + path, this.gameObject);
+                string[] guids = UnityEditor.AssetDatabase.FindAssets("CylinderURPOutline t:Material");
+                if (guids.Length > 0)
+                {
+                    string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+                    this.outlineMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
+                    Debug.LogWarning(this.transform.name + ": LoadOutlineMaterial (yellow) assigned from path " + path, this.gameObject);
+                }
+            }
+
+            if (this.outlineHoverMaterial == null)
+            {
+                string[] guids = UnityEditor.AssetDatabase.FindAssets("CylinderURPOutlineGreen t:Material");
+                if (guids.Length > 0)
+                {
+                    string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+                    this.outlineHoverMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
+                    Debug.LogWarning(this.transform.name + ": LoadOutlineMaterial (green) assigned from path " + path, this.gameObject);
+                }
             }
         }
 #endif
@@ -119,19 +144,32 @@ namespace SG03
             // Cache original materials (slot 0 only)
             this.originalMaterials = new Material[] { currentShared[0] };
 
-            // Check if outline material is already in slot 1
+            // Resolve outline materials
+            Material yellowOutline = this.outlineMaterial;
             if (currentShared.Length > 1)
             {
-                this.hoveredMaterials = currentShared;
+                yellowOutline = currentShared[1];
             }
-            else if (this.outlineMaterial != null)
+
+            // Cache blinking materials (yellow)
+            if (yellowOutline != null)
             {
-                // Otherwise, append our outline material to slot 1
-                this.hoveredMaterials = new Material[] { currentShared[0], this.outlineMaterial };
+                this.blinkingMaterials = new Material[] { currentShared[0], yellowOutline };
             }
             else
             {
-                this.hoveredMaterials = this.originalMaterials;
+                this.blinkingMaterials = this.originalMaterials;
+            }
+
+            // Cache solid materials (green hover)
+            Material greenOutline = this.outlineHoverMaterial != null ? this.outlineHoverMaterial : yellowOutline;
+            if (greenOutline != null)
+            {
+                this.solidMaterials = new Material[] { currentShared[0], greenOutline };
+            }
+            else
+            {
+                this.solidMaterials = this.originalMaterials;
             }
 
             // Start in the non-hovered state
@@ -146,6 +184,7 @@ namespace SG03
             this.battleScripts = null;
             this.cylinderRenderer = null;
             this.outlineMaterial = null;
+            this.outlineHoverMaterial = null;
             this.lampOfSoulCtrl = null;
 
             // Force re-load components with cleared fields to automate configuration
@@ -157,6 +196,7 @@ namespace SG03
         private void OnDisable()
         {
             this.SetHover(false);
+            this.SetOutlineMode(OutlineMode.Hidden);
         }
 
         private void Update()
@@ -169,6 +209,7 @@ namespace SG03
 
         private void DetectClick()
         {
+            if (this.IsBattleCompleted()) return;
             if (!this.IsMouseButtonPressed()) return;
             if (!this.IsLampHit()) return;
             this.OnLampClicked();
@@ -277,7 +318,7 @@ namespace SG03
             {
                 this.SetHover(isHit);
             }
-            else if (this.isHovered)
+            else
             {
                 this.UpdateOutlineState();
             }
@@ -292,18 +333,64 @@ namespace SG03
         private void UpdateOutlineState()
         {
             if (this.cylinderRenderer == null) return;
-            if (this.originalMaterials == null || this.hoveredMaterials == null) return;
+            if (this.originalMaterials == null || this.blinkingMaterials == null || this.solidMaterials == null) return;
 
-            bool shouldShow = this.isHovered && this.CanShowOutline();
-            if (shouldShow != this.isOutlineShowing)
+            OutlineMode desiredMode = OutlineMode.Hidden;
+            if (this.CanShowOutline())
             {
-                this.isOutlineShowing = shouldShow;
-                this.cylinderRenderer.sharedMaterials = shouldShow ? this.hoveredMaterials : this.originalMaterials;
+                desiredMode = this.isHovered ? OutlineMode.Solid : OutlineMode.Blinking;
+            }
+
+            if (desiredMode != this.currentOutlineMode)
+            {
+                this.SetOutlineMode(desiredMode);
+            }
+        }
+
+        private void SetOutlineMode(OutlineMode mode)
+        {
+            this.currentOutlineMode = mode;
+
+            if (this.blinkCoroutine != null)
+            {
+                this.StopCoroutine(this.blinkCoroutine);
+                this.blinkCoroutine = null;
+            }
+
+            switch (mode)
+            {
+                case OutlineMode.Hidden:
+                    this.cylinderRenderer.sharedMaterials = this.originalMaterials;
+                    this.isOutlineShowing = false;
+                    break;
+
+                case OutlineMode.Solid:
+                    this.cylinderRenderer.sharedMaterials = this.solidMaterials;
+                    this.isOutlineShowing = true;
+                    break;
+
+                case OutlineMode.Blinking:
+                    this.blinkCoroutine = this.StartCoroutine(this.BlinkRoutine());
+                    break;
+            }
+        }
+
+        private System.Collections.IEnumerator BlinkRoutine()
+        {
+            bool show = true;
+            while (true)
+            {
+                this.cylinderRenderer.sharedMaterials = show ? this.blinkingMaterials : this.originalMaterials;
+                this.isOutlineShowing = show;
+                show = !show;
+                yield return new WaitForSeconds(0.5f);
             }
         }
 
         private bool CanShowOutline()
         {
+            if (this.IsBattleCompleted()) return false;
+
             // Do not show outline if client actions are resuming/fast-forwarding
             if (this.battleStateCtrl != null && this.battleStateCtrl.ClientActions != null)
             {
@@ -317,6 +404,12 @@ namespace SG03
             }
 
             return false;
+        }
+
+        private bool IsBattleCompleted()
+        {
+            if (this.battleStateCtrl == null || this.battleStateCtrl.BattleState == null) return false;
+            return this.battleStateCtrl.BattleState.BattleStatus == "completed";
         }
     }
 }
