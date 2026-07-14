@@ -126,8 +126,8 @@ namespace SG03
 
         private string ResolveDefenderId(Card3DCtrl target)
         {
-            if (target.CardOwner == Owner.omega && target.Location == Location.in_void)   return "omega_hp";
-            if (target.CardOwner == Owner.omega && target.Location == Location.in_source) return "omega_hp";
+            if (target.CardOwner == Owner.omega && target.Location == Location.in_void)   return "omega";
+            if (target.CardOwner == Owner.omega && target.Location == Location.in_source) return "omega";
             if (target.CardOwner == Owner.alpha && target.Location == Location.in_void)   return "alpha";
             if (target.CardOwner == Owner.alpha && target.Location == Location.in_source) return "alpha";
             return target.InventoryItemId;
@@ -135,9 +135,9 @@ namespace SG03
 
         private string ResolveDefenderId(CardHolderCtrl holder)
         {
-            if (holder == null) return "omega_hp";
+            if (holder == null) return "omega";
             if (holder.HolderOwner == Owner.alpha) return "alpha";
-            return this.HasAnyOmegaFrontlineCard() ? "omega" : "omega_hp";
+            return "omega";
         }
 
         private bool HasAnyOmegaFrontlineCard()
