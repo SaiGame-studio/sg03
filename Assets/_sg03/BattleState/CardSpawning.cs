@@ -355,6 +355,13 @@ namespace SG03
         private Card3DCtrl MoveCardToVoid(string inventoryItemId, Transform voidPoint)
         {
             Card3DCtrl card = this.FindCardById(inventoryItemId);
+            if (card == null)
+            {
+                if (voidPoint == this.deskPosition.AlphaTheVoid)
+                {
+                    card = this.SetAlphaSourceCardData(inventoryItemId);
+                }
+            }
             if (card == null) return null;
             this.handCardRegistry.Remove(inventoryItemId);
             this.RemoveFromSlotOccupancy(card);

@@ -38,15 +38,13 @@ namespace SaiGame.Services
 
             if (SaiServer.Instance == null)
             {
-                if (onError != null) onError.Invoke("SaiServer not found!");
-                else Debug.LogWarning("[BattleScript] RunScript: SaiServer not found!", gameObject);
+                onError?.Invoke("SaiServer not found!");
                 return;
             }
 
             if (!SaiServer.Instance.IsAuthenticated)
             {
-                if (onError != null) onError.Invoke("Not authenticated! Please login first.");
-                else Debug.LogWarning("[BattleScript] RunScript: Not authenticated!", gameObject);
+                onError?.Invoke("Not authenticated! Please login first.");
                 return;
             }
 
@@ -54,8 +52,7 @@ namespace SaiGame.Services
 
             if (string.IsNullOrEmpty(name))
             {
-                if (onError != null) onError.Invoke("Script name is empty!");
-                else Debug.LogWarning("[BattleScript] RunScript: Script name is empty!", gameObject);
+                onError?.Invoke("Script name is empty!");
                 return;
             }
 
@@ -82,16 +79,14 @@ namespace SaiGame.Services
                     this.OnRunScriptSuccess?.Invoke(response);
                     if (SaiServer.Instance != null && SaiServer.Instance.ShowCallbackLog)
                         Debug.Log("<color=#66CCFF>[BattleScript] RunScript</color> → <b><color=#00FF88>onSuccess</color></b> callback | BattleScript.cs › RunScriptCoroutine");
-                    if (onSuccess != null) onSuccess.Invoke(response);
-                    else Debug.Log($"<color=#00FF88>[BattleScript] RunScript '{name}' success (no onSuccess handler registered)</color>\n{response}", this.gameObject);
+                    onSuccess?.Invoke(response);
                 },
                 error =>
                 {
                     this.OnRunScriptFailure?.Invoke(error);
                     if (SaiServer.Instance != null && SaiServer.Instance.ShowCallbackLog)
                         Debug.LogWarning($"<color=#66CCFF>[BattleScript] RunScript</color> → <b><color=#FF4444>onError</color></b> callback | BattleScript.cs › RunScriptCoroutine | {error}");
-                    if (onError != null) onError.Invoke(error);
-                    else Debug.LogWarning($"[BattleScript] RunScript '{name}' error (no onError handler registered): {error}", this.gameObject);
+                    onError?.Invoke(error);
                 }
             );
         }

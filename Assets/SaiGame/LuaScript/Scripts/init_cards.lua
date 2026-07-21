@@ -269,6 +269,49 @@ local function main()
         output.error = omega_err; return
     end
 
+    -- Draws Alpha's chosen void cards: exactly the preset cards from void_card_1..7
+    -- (from alpha_preset_metadata). Moves them from alpha_the_source to alpha_the_void.
+    -- Returns: err
+    local function alpha_init_void(state)
+        lib_battle_common.dlog("[init_cards] == alpha_init_void ==")
+        local preset = state.alpha_preset_metadata
+        if preset == nil then
+            lib_battle_common.dlog("[init_cards] alpha_preset_metadata not found in session state, skipping void initialization")
+            return nil
+        end
+
+        local source = state.alpha_the_source
+        if source == nil then
+            return "alpha_the_source not found in session state"
+        end
+
+        if state.alpha_the_void == nil then
+            state.alpha_the_void = {}
+        end
+
+        local slot_names = { "void_card_1", "void_card_2", "void_card_3", "void_card_4", "void_card_5", "void_card_6", "void_card_7" }
+        for _, key in ipairs(slot_names) do
+            local uid = preset[key]
+            if uid ~= nil and uid ~= "" then
+                local card = find_and_remove(source, uid)
+                if card ~= nil then
+                    table.insert(state.alpha_the_void, card)
+                    lib_battle_common.append_client_action(state, "alpha_card_sent_to_void:" .. card.inventory_item_id)
+                    lib_battle_common.dlog("[init_cards] Moved alpha card to void: " .. card.inventory_item_id)
+                else
+                    lib_battle_common.dlog("[init_cards] Warning: void card " .. key .. " (" .. uid .. ") not found in alpha_the_source")
+                end
+            end
+        end
+
+        return nil
+    end
+
+    local void_err = alpha_init_void(state)
+    if void_err ~= nil then
+        output.error = void_err; return
+    end
+
     local deploy_err = run_omega_deploy(state)
     if deploy_err ~= nil then
         output.error = deploy_err; return
