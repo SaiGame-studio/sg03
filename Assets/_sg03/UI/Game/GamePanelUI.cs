@@ -28,6 +28,7 @@ namespace SG03.UI
         private VisualElement gameViewport;
         private VisualElement root;
         private bool authEventsSubscribed;
+        private bool battleStateEventsSubscribed;
 
         private GameDeskTabsUI deskTabsUI;
         private GameBattleStatusUI battleStatusUI;
@@ -209,6 +210,7 @@ namespace SG03.UI
             this.BindBattleActions(panelRoot);
             this.WirePresetEventsToBattleActions();
             this.SubscribeToAuthEvents();
+            this.SubscribeToBattleStateEvents();
             this.deskTabsUI?.LoadPresets();
         }
 
@@ -322,6 +324,77 @@ namespace SG03.UI
             this.battleStatusUI?.Dispose();
             this.deskTabsUI?.Dispose();
             this.UnsubscribeFromAuthEvents();
+            this.UnsubscribeFromBattleStateEvents();
+        }
+
+        private void SubscribeToBattleStateEvents()
+        {
+            if (this.battleStateEventsSubscribed) return;
+            BattleStateCtrl ctrl = this.GetCurrentBattleStateCtrl();
+            if (ctrl?.ClientActions == null) return;
+            ctrl.ClientActions.OnBattleCompleted += this.HandleBattleCompletedAction;
+            this.battleStateEventsSubscribed = true;
+        }
+
+        private void UnsubscribeFromBattleStateEvents()
+        {
+            if (!this.battleStateEventsSubscribed) return;
+            BattleStateCtrl ctrl = this.GetCurrentBattleStateCtrl();
+            if (ctrl?.ClientActions == null) return;
+            ctrl.ClientActions.OnBattleCompleted -= this.HandleBattleCompletedAction;
+            this.battleStateEventsSubscribed = false;
+        }
+
+        private void HandleBattleCompletedAction(string winner)
+        {
+            if (this.root == null || this.root.Q("BattleResultPopupOverlay") != null) return;
+
+            BattleState state = this.GetCurrentBattleStateCtrl()?.BattleState;
+            if (state == null) return;
+
+            if (this.battleScripts == null)
+            {
+                bool isWin = string.Equals(winner, "alpha", System.StringComparison.OrdinalIgnoreCase);
+                var popup = new GameBattleResultPopupUI(state, isWin, state.Turn, state.AlphaHp, state.OmegaHp, null, this.lobbySceneName);
+                popup.Show(this.root);
+                return;
+            }
+
+            this.battleScripts.RunBattleEnd(
+                response =>
+                {
+                    if (string.IsNullOrWhiteSpace(response)) return;
+
+                    BattleEndScriptResponse endResponse = JsonUtility.FromJson<BattleEndScriptResponse>(response);
+                    BattleEndOutput output = endResponse?.output;
+
+                    if (output != null && !string.IsNullOrEmpty(output.error))
+                    {
+                        Debug.LogError($"[GamePanelUI] Battle end script error: {output.error}");
+                        return;
+                    }
+
+                    bool isWin = string.Equals(output?.winner ?? winner, "alpha", System.StringComparison.OrdinalIgnoreCase);
+                    int turn = output != null ? output.turn : state.Turn;
+                    int playerHp = output != null ? output.alpha_hp : state.AlphaHp;
+                    int enemyHp = output != null ? output.omega_hp : state.OmegaHp;
+                    BattleEndDropItem[] drops = output?.drops;
+
+                    // Clear the battle state cache
+                    state.ClearData();
+
+                    // Show the popup
+                    var popup = new GameBattleResultPopupUI(state, isWin, turn, playerHp, enemyHp, drops, this.lobbySceneName);
+                    popup.Show(this.root);
+                },
+                error =>
+                {
+                    Debug.LogError($"[GamePanelUI] RunBattleEnd failed: {error}");
+                    bool isWin = string.Equals(winner, "alpha", System.StringComparison.OrdinalIgnoreCase);
+                    var popup = new GameBattleResultPopupUI(state, isWin, state.Turn, state.AlphaHp, state.OmegaHp, null, this.lobbySceneName);
+                    popup.Show(this.root);
+                }
+            );
         }
     }
 }

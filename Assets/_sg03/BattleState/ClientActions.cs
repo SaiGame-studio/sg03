@@ -37,6 +37,8 @@ namespace SG03
         /// <summary>True if the current action dispatch is a resume or game start sequence.</summary>
         public bool IsResuming => this.isResuming;
 
+        public event Action<string> OnBattleCompleted;
+
         [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
 
         protected override void LoadComponents()
@@ -369,6 +371,10 @@ namespace SG03
                 case "alpha_take_lamp": result = this.ExecuteLampMoveToAlpha(); break;
                 case "omega_take_lamp": result = this.ExecuteLampMoveToOmega(); break;
                 case "omega_turn_end": result = this.ExecuteOmegaEndTurn(); break;
+                case "battle_completed":
+                    string winner = parameters.Length > 0 ? parameters[0].Trim() : string.Empty;
+                    this.OnBattleCompleted?.Invoke(winner);
+                    break;
                 default:
                     Debug.LogWarning($"<color=#88FFFF>[ClientActions]</color> Unknown action: {log.ActionName}", this.gameObject);
                     break;
