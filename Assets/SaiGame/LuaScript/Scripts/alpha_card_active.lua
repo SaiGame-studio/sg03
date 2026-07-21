@@ -385,6 +385,13 @@ local function main()
         local is_spell_ability = (attacker_type == "ability")
 
         if is_spell_ability then
+            local ability_key = attacker_card.item_definition_code_name
+            local ability_def = lib_ability_all.get_ability_config(ability_key)
+            if ability_def ~= nil and ability_def.requires_target_card then
+                output.error = ability_key .. " requires a specific card target"
+                return
+            end
+
             local possible_lines
             if payload.defender_inventory_item_id == "alpha" then
                 possible_lines = { "alpha_the_source", "alpha_front_line", "alpha_back_line" }

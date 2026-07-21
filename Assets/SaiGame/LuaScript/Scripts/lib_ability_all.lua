@@ -12,10 +12,10 @@
 function get_ability_config(ability_key)
     local configs = {
         twin_reaper = { target_positions = { "enemy_frontline" } },
-        spinning_slash = { target_positions = { "enemy_frontline" }, is_character_ability = true },
-        cross_guard = { target_positions = { "own_frontline" } },
+        spinning_slash = { target_positions = { "enemy_frontline" }, is_character_ability = true, requires_target_card = true },
+        cross_guard = { target_positions = { "own_frontline" }, requires_target_card = true },
         totem_pulse = { target_positions = { "own_frontline" } },
-        back_stab = { target_positions = { "enemy_frontline" } },
+        back_stab = { target_positions = { "enemy_frontline" }, requires_target_card = true },
         holy_glow = { target_positions = { "own_frontline", "own_backline", "own_source", "own_void" } },
     }
     return configs[ability_key]
