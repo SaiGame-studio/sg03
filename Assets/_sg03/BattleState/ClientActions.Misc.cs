@@ -86,8 +86,6 @@ namespace SG03
         private IEnumerator AlphaCardToVoidRoutine(Card3DCtrl card)
         {
             yield return this.StartCoroutine(this.WaitForCard(card));
-            this.cardSpawning?.RotateAlphaCardAtVoidTransit(card);
-            yield return this.StartCoroutine(this.WaitForCard(card));
             this.cardSpawning?.SettleAlphaCardInVoid(card);
             yield return this.StartCoroutine(this.WaitForCard(card));
         }
@@ -104,8 +102,6 @@ namespace SG03
 
         private IEnumerator OmegaCardToVoidRoutine(Card3DCtrl card)
         {
-            yield return this.StartCoroutine(this.WaitForCard(card));
-            this.cardSpawning?.RotateOmegaCardAtVoidTransit(card);
             yield return this.StartCoroutine(this.WaitForCard(card));
             this.cardSpawning?.SettleOmegaCardInVoid(card);
             yield return this.StartCoroutine(this.WaitForCard(card));
