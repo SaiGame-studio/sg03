@@ -229,8 +229,24 @@ namespace SG03
         {
             if (!this.IsMouseClickedThisFrame()) return;
             if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Left click detected in HandleLeftClick!");
+
+            Card3DCtrl previousSelected = this.selected;
+            bool wasSelectedInHand = previousSelected != null && previousSelected.Location == Location.in_hand;
+
             this.HandleCardClick();
             this.HandleHolderClick();
+
+            if (wasSelectedInHand)
+            {
+                // If the selected card is still selected and still in hand, but the click was not on the card itself, deselect it.
+                if (this.selected == previousSelected && this.selected.Location == Location.in_hand)
+                {
+                    if (this.hovered != previousSelected)
+                    {
+                        this.ClearInteractionState();
+                    }
+                }
+            }
         }
 
         private void HandleMiddleClick()
