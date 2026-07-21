@@ -558,6 +558,13 @@
     padding: 8px 10px 4px 0;
 }
 
+.desk-detail-void-count {
+    font-size: 11px;
+    color: rgb(180, 100, 255);
+    -unity-font-style: bold;
+    padding: 8px 10px 4px 0;
+}
+
 /* Star badge — top-right corner of filled slot card */
 .desk-slot__star-btn {
     position: absolute;
@@ -594,6 +601,45 @@
 }
 
 .desk-slot__star-btn:disabled {
+    opacity: 0.25;
+}
+
+/* Void badge — top-left corner of filled slot card */
+.desk-slot__void-btn {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.4);
+    background-color: rgba(16, 20, 36, 0.85);
+    color: rgb(80, 90, 130);
+    font-size: 10px;
+    -unity-text-align: middle-center;
+    padding: 0;
+    transition-duration: 0.1s;
+}
+
+.desk-slot__void-btn:hover {
+    border-color: rgba(180, 80, 255, 0.7);
+    background-color: rgba(35, 10, 50, 0.9);
+    color: rgb(200, 100, 255);
+}
+
+.desk-slot__void-btn--active {
+    border-color: rgba(180, 80, 255, 0.8);
+    background-color: rgba(45, 12, 60, 0.9);
+    color: rgb(200, 100, 255);
+}
+
+.desk-slot__void-btn--active:hover {
+    background-color: rgba(65, 18, 90, 0.95);
+    color: rgb(220, 130, 255);
+}
+
+.desk-slot__void-btn:disabled {
     opacity: 0.25;
 }
 
