@@ -11,13 +11,14 @@ namespace SaiGame.Services
         public const string SCRIPT_FOLDER_ASSET_PATH = "Assets/SaiGame/LuaScript/Scripts";
 
         [SerializeField] private string battleStartScriptName = "battle_start";
-        [SerializeField] private string battleTurnScriptName = "battle_debug_turn";
+        [UnityEngine.Serialization.FormerlySerializedAs("battleTurnScriptName")]
+        [SerializeField] private string customScriptName = "";
         [SerializeField] private string battleEndScriptName = "battle_end";
         [SerializeField] private List<ScriptFileRecord> scriptFiles = new List<ScriptFileRecord>();
 
         public string BattleStartScriptName => this.battleStartScriptName;
 
-        public string BattleTurnScriptName => this.battleTurnScriptName;
+        public string CustomScriptName => this.customScriptName;
 
         public string BattleEndScriptName => this.battleEndScriptName;
 
@@ -389,7 +390,11 @@ namespace SaiGame.Services
             string jsonBody = JsonUtility.ToJson(request);
 
             yield return SaiServer.Instance.PatchRequest(endpoint, jsonBody,
-                response => this.HandleScriptResponse(response, scriptFile, onSuccess, onError),
+                response =>
+                {
+                    scriptFile.SetBackendScriptBody(scriptBody);
+                    this.HandleScriptResponse(response, scriptFile, onSuccess, onError);
+                },
                 onError);
         }
 
@@ -564,6 +569,11 @@ namespace SaiGame.Services
                 this.scriptId = string.Empty;
                 this.backendScriptBody = string.Empty;
                 this.hasBackendScript = false;
+            }
+
+            public void SetBackendScriptBody(string body)
+            {
+                this.backendScriptBody = body;
             }
 
             public void SetScriptId(string scriptId)

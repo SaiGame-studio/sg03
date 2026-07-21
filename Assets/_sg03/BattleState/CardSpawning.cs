@@ -341,7 +341,7 @@ namespace SG03
         private void SettleCardInVoidAt(Card3DCtrl card, Transform voidPoint, int stackCount)
         {
             Vector3 finalPos = voidPoint.position + Vector3.up * (stackCount * this.sourceStackOffsetY);
-            card.SetMoveDuration(this.ActionMoveDuration);
+            card.SetMoveDuration(this.ActionMoveDuration * 0.4f);
             card.SetRotateDuration(this.ActionRotateDuration);
             card.MoveAndRotate(finalPos, voidPoint.rotation, Location.in_void);
         }
@@ -355,13 +355,20 @@ namespace SG03
         private Card3DCtrl MoveCardToVoid(string inventoryItemId, Transform voidPoint)
         {
             Card3DCtrl card = this.FindCardById(inventoryItemId);
+            if (card == null)
+            {
+                if (voidPoint == this.deskPosition.AlphaTheVoid)
+                {
+                    card = this.SetAlphaSourceCardData(inventoryItemId);
+                }
+            }
             if (card == null) return null;
             this.handCardRegistry.Remove(inventoryItemId);
             this.RemoveFromSlotOccupancy(card);
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
             Vector3 abovePos = voidPoint.position + Vector3.up * this.voidDropHeight;
-            card.MoveTo(abovePos, Location.in_void);
+            card.MoveAndRotate(abovePos, voidPoint.rotation, Location.in_void);
 
             if (voidPoint == this.deskPosition.AlphaTheVoid)
             {

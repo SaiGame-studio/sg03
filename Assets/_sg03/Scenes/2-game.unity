@@ -1841,6 +1841,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: customScriptName
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: battleTurnScriptName
       value: battle_debug_turn
       objectReference: {fileID: 0}
@@ -3446,8 +3450,10 @@ MonoBehaviour:
   battleStateCtrl: {fileID: 2015755444}
   mainCamera: {fileID: 330585545}
   battleScripts: {fileID: 2015755445}
+  lampOfSoulCtrl: {fileID: 0}
   cylinderRenderer: {fileID: 1043868439}
   outlineMaterial: {fileID: 2100000, guid: c8394e1b80c54625b81a70c8a61ed303, type: 2}
+  outlineHoverMaterial: {fileID: 0}
   isHovered: 0
 --- !u!21 &1061435743
 Material:
@@ -5378,6 +5384,7 @@ MonoBehaviour:
   movement: {fileID: 1773165129}
   deskPosition: {fileID: 948749802}
   battleState: {fileID: 2015755439}
+  isAtAlpha: 0
 --- !u!84 &1774004019
 RenderTexture:
   m_ObjectHideFlags: 0

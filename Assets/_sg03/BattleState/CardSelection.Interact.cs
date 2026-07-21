@@ -75,7 +75,7 @@ namespace SG03
                 source.CodeName,
                 "",
                 this.OnAlphaAttackingSuccess,
-                null);
+                this.OnAlphaAttackingError);
         }
 
         private void DispatchAttackingScripts(Card3DCtrl source, Card3DCtrl target)
@@ -83,7 +83,7 @@ namespace SG03
             if (this.IsAlphaDrawPhase())
                 this.RunAlphaCardDeployThenAttack(source, target);
             else
-                this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(source.InventoryItemId, this.ResolveDefenderId(target), source.CodeName, target.CodeName, this.OnAlphaAttackingSuccess, null);
+                this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(source.InventoryItemId, this.ResolveDefenderId(target), source.CodeName, target.CodeName, this.OnAlphaAttackingSuccess, this.OnAlphaAttackingError);
         }
 
         private bool IsAlphaDrawPhase()
@@ -95,7 +95,7 @@ namespace SG03
         private void RunAlphaCardDeployThenAttack(Card3DCtrl source, Card3DCtrl target)
         {
             this.battleStateCtrl?.BattleScripts?.RunAlphaCardDeploy(
-                response => this.OnAlphaCardDeploySuccess(response, source, target), null);
+                response => this.OnAlphaCardDeploySuccess(response, source, target), this.OnAlphaCardDeployError);
         }
 
         private void OnAlphaCardDeploySuccess(string response, Card3DCtrl source, Card3DCtrl target)
@@ -121,7 +121,7 @@ namespace SG03
         private void RunAlphaAttackingAfterDeploy(Card3DCtrl source, Card3DCtrl target)
         {
             this.battleStateCtrl?.BattleScripts?.RunAlphaAttacking(
-                source.InventoryItemId, this.ResolveDefenderId(target), source.CodeName, target.CodeName, this.OnAlphaAttackingSuccess, null);
+                source.InventoryItemId, this.ResolveDefenderId(target), source.CodeName, target.CodeName, this.OnAlphaAttackingSuccess, this.OnAlphaAttackingError);
         }
 
         private string ResolveDefenderId(Card3DCtrl target)
@@ -155,6 +155,17 @@ namespace SG03
         private void OnAlphaAttackingSuccess(string response)
         {
             this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
+            this.ClearInteractionState();
+        }
+
+        private void OnAlphaAttackingError(string error)
+        {
+            this.ClearInteractionState();
+        }
+
+        private void OnAlphaCardDeployError(string error)
+        {
+            this.ClearInteractionState();
         }
 
         private void LogTargetConfirmed(Card3DCtrl source, Card3DCtrl target)
