@@ -29,6 +29,7 @@ namespace SG03.UI
     public class BattleEndDropItem
     {
         public string definition_id;
+        public string name;
         public int quantity;
     }
 
@@ -121,7 +122,8 @@ namespace SG03.UI
                 foreach (var drop in this.drops)
                 {
                     Label dropLabel = new Label { name = $"BattleResultPopupDrop_{drop.definition_id}" };
-                    dropLabel.text = $"{drop.definition_id} x{drop.quantity}";
+                    string displayName = !string.IsNullOrEmpty(drop.name) ? drop.name : drop.definition_id;
+                    dropLabel.text = $"{displayName} x{drop.quantity}";
                     dropLabel.style.color = new Color(0.8f, 0.9f, 1f);
                     dropLabel.style.fontSize = 14;
                     dropLabel.style.unityFontStyleAndWeight = FontStyle.Bold;

@@ -254,4 +254,4 @@ All lookup functions also return `err` as their second result. Do not access the
 
 Battle session state and end data are game-defined maps; the runtime returns the same state shape supplied by the game.
 
-`SSEntityDropPackResult` has `pack_id` (UUID), `pack_name` (string), and `success` (boolean). It has `error` (string) only when that pack failed. After argument validation succeeds, individual pack failures are reported in these entries rather than as the function-level `err`; inspect each entry's `success` and optional `error`.
+`SSEntityDropPackResult` has `pack_id` (UUID), `pack_name` (string), `success` (boolean), and `items` (`SSGachaGrantedItem[]`). Each granted item includes its `item_definition_id` and received `quantity`, together with `name`, `rarity`, and `category`. Failed pack results return an empty `items` list and have `error` (string). After argument validation succeeds, individual pack failures are reported in these entries rather than as the function-level `err`; inspect each entry's `success` and optional `error`.

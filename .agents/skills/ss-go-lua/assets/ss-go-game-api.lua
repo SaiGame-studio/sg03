@@ -278,6 +278,7 @@
 ---@field pack_id UUID
 ---@field pack_name string
 ---@field success boolean
+---@field items SSGachaGrantedItem[]
 ---@field error? string
 
 ---@class SSGameDetail
