@@ -505,21 +505,6 @@ function skeleton_shield_execute(state, source_card, event_data, helpers)
 
     hellscythe_card.trigger = true
 
-    local ability_item_def = helpers.find_item_def(state.item_defs, "skeleton_shield")
-    local def_add = 0
-    if ability_item_def ~= nil then
-        if ability_item_def.base_stats ~= nil and ability_item_def.base_stats.def_add then
-            def_add = ability_item_def.base_stats.def_add
-        elseif ability_item_def.metadata ~= nil and ability_item_def.metadata.def_add then
-            def_add = ability_item_def.metadata.def_add
-        end
-    end
-    if def_add == 0 then
-        def_add = 200
-    end
-
-    local prev_def = target_card.final_def or 0
-    target_card.final_def = prev_def + def_add
 
     local expose_action = helpers.expose_ability_selected_card(state, hellscythe_card)
     battle.dlog("[ability] skeleton_shield: swapped skeleton=" .. skeleton_card.inventory_item_id .. " and target=" .. target_card.inventory_item_id)
