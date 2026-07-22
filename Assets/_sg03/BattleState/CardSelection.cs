@@ -39,6 +39,8 @@ namespace SG03
         [SerializeField] private DeskPositionCtrl deskPositions;
         [SerializeField] private bool fullDetail;
 
+        public bool IsFullDetail => this.fullDetail;
+
         [Header("Marks")]
         [SerializeField] private GameObject markSelected;
         [SerializeField] private float markFollowSpeed = 10f;
@@ -197,14 +199,14 @@ namespace SG03
                 this.ClearInteractionState();
                 return;
             }
-            if (CardMovement.IsAnyCardMoving)
-            {
-                this.HandleCardSelectionOnly();
-                return;
-            }
             if (this.fullDetail)
             {
                 this.HandleFullDetailClick();
+                return;
+            }
+            if (CardMovement.IsAnyCardMoving)
+            {
+                this.HandleCardSelectionOnly();
                 return;
             }
             this.HandleLeftClick();
@@ -220,8 +222,7 @@ namespace SG03
 
         private void HandleFullDetailClick()
         {
-            if (this.hovered != this.selected) return;
-            if (!this.IsMouseClickedThisFrame() && !this.IsMouseMiddleClickedThisFrame()) return;
+            if (!this.IsMouseClickedThisFrame() && !this.IsMouseRightClickedThisFrame() && !this.IsMouseMiddleClickedThisFrame()) return;
             this.ExitFullDetail();
         }
 

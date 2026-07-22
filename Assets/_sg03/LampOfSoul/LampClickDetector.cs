@@ -210,9 +210,17 @@ namespace SG03
         private void DetectClick()
         {
             if (this.IsBattleCompleted()) return;
+            if (this.IsFullDetailActive()) return;
             if (!this.IsMouseButtonPressed()) return;
             if (!this.IsLampHit()) return;
             this.OnLampClicked();
+        }
+
+        private bool IsFullDetailActive()
+        {
+            return this.battleStateCtrl != null && 
+                   this.battleStateCtrl.CardSelection != null && 
+                   this.battleStateCtrl.CardSelection.IsFullDetail;
         }
 
         private bool IsMouseButtonPressed()
