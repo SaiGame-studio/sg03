@@ -195,7 +195,8 @@ namespace SG03.UI
                 this.BuildFilledContent(tile, desk, slotIndex, itemId);
 
                 bool isStarred = this.starredSlots.Contains(slotIndex);
-                bool canStar   = isStarred || this.starredSlots.Count < MaxStarredSlots;
+                bool isVoided  = this.voidedSlots.Contains(slotIndex);
+                bool canStar   = (isStarred || this.starredSlots.Count < MaxStarredSlots) && !isVoided;
 
                 Button starBtn = new Button();
                 starBtn.name = $"SlotStarBtn_{slotIndex}";
@@ -213,8 +214,7 @@ namespace SG03.UI
                 tile.Add(starBtn);
 
                 // Void button (left of card)
-                bool isVoided = this.voidedSlots.Contains(slotIndex);
-                bool canToggleVoid = isVoided || (this.voidedSlots.Count < MaxVoidedSlots);
+                bool canToggleVoid = (isVoided || this.voidedSlots.Count < MaxVoidedSlots) && !isStarred;
 
                 Button voidBtn = new Button();
                 voidBtn.name = $"SlotVoidBtn_{slotIndex}";

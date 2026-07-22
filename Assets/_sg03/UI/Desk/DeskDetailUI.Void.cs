@@ -50,7 +50,8 @@ namespace SG03.UI
                 foreach (PresetSlotData slot in desk.slots)
                 {
                     if (slot.inventory_item_id != itemId) continue;
-                    this.voidedSlots.Add(slot.slot_index);
+                    if (!this.starredSlots.Contains(slot.slot_index))
+                        this.voidedSlots.Add(slot.slot_index);
                     break;
                 }
             }
@@ -60,7 +61,7 @@ namespace SG03.UI
         {
             if (this.starredSlots.Contains(slotIndex))
                 this.starredSlots.Remove(slotIndex);
-            else if (this.starredSlots.Count < MaxStarredSlots)
+            else if (this.starredSlots.Count < MaxStarredSlots && !this.voidedSlots.Contains(slotIndex))
                 this.starredSlots.Add(slotIndex);
 
             if (this.currentDesk != null)
@@ -77,8 +78,8 @@ namespace SG03.UI
             }
             else
             {
-                // Enforce "maximum 7 cards in the void"
-                if (this.voidedSlots.Count < MaxVoidedSlots)
+                // Enforce "maximum 7 cards in the void" and ensure card is not starred
+                if (this.voidedSlots.Count < MaxVoidedSlots && !this.starredSlots.Contains(slotIndex))
                 {
                     this.voidedSlots.Add(slotIndex);
                 }
