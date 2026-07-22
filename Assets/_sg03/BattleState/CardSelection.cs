@@ -39,6 +39,8 @@ namespace SG03
         [SerializeField] private DeskPositionCtrl deskPositions;
         [SerializeField] private bool fullDetail;
 
+        public bool IsFullDetail => this.fullDetail;
+
         [Header("Marks")]
         [SerializeField] private GameObject markSelected;
         [SerializeField] private float markFollowSpeed = 10f;
@@ -197,14 +199,14 @@ namespace SG03
                 this.ClearInteractionState();
                 return;
             }
-            if (CardMovement.IsAnyCardMoving)
-            {
-                this.HandleCardSelectionOnly();
-                return;
-            }
             if (this.fullDetail)
             {
                 this.HandleFullDetailClick();
+                return;
+            }
+            if (CardMovement.IsAnyCardMoving)
+            {
+                this.HandleCardSelectionOnly();
                 return;
             }
             this.HandleLeftClick();
@@ -220,8 +222,7 @@ namespace SG03
 
         private void HandleFullDetailClick()
         {
-            if (this.hovered != this.selected) return;
-            if (!this.IsMouseClickedThisFrame() && !this.IsMouseMiddleClickedThisFrame()) return;
+            if (!this.IsMouseClickedThisFrame() && !this.IsMouseRightClickedThisFrame() && !this.IsMouseMiddleClickedThisFrame()) return;
             this.ExitFullDetail();
         }
 
@@ -229,8 +230,24 @@ namespace SG03
         {
             if (!this.IsMouseClickedThisFrame()) return;
             if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Left click detected in HandleLeftClick!");
+
+            Card3DCtrl previousSelected = this.selected;
+            bool wasSelectedInHand = previousSelected != null && previousSelected.Location == Location.in_hand;
+
             this.HandleCardClick();
             this.HandleHolderClick();
+
+            if (wasSelectedInHand)
+            {
+                // If the selected card is still selected and still in hand, but the click was not on the card itself, deselect it.
+                if (this.selected == previousSelected && this.selected.Location == Location.in_hand)
+                {
+                    if (this.hovered != previousSelected)
+                    {
+                        this.ClearInteractionState();
+                    }
+                }
+            }
         }
 
         private void HandleMiddleClick()

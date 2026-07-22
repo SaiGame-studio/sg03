@@ -12,11 +12,13 @@
 function get_ability_config(ability_key)
     local configs = {
         twin_reaper = { target_positions = { "enemy_frontline" } },
-        spinning_slash = { target_positions = { "enemy_frontline" }, is_character_ability = true },
-        cross_guard = { target_positions = { "own_frontline" } },
+        spinning_slash = { target_positions = { "enemy_frontline" }, is_character_ability = true, requires_target_card = true },
+        cross_guard = { target_positions = { "own_frontline" }, requires_target_card = true },
         totem_pulse = { target_positions = { "own_frontline" } },
-        back_stab = { target_positions = { "enemy_frontline" } },
+        back_stab = { target_positions = { "enemy_frontline" }, requires_target_card = true },
         holy_glow = { target_positions = { "own_frontline", "own_backline", "own_source", "own_void" } },
+        skeleton_shield = { target_positions = { "own_frontline" }, requires_target_card = true },
+        animate_dead = { target_positions = { "own_frontline", "own_backline", "own_source", "own_void" } },
     }
     return configs[ability_key]
 end
@@ -392,3 +394,276 @@ function holy_glow_execute(state, source_card, event_data, helpers)
 
     return ability_actions, nil
 end
+
+-- ability: skeleton_shield
+function skeleton_shield_execute(state, source_card, event_data, helpers)
+    local battle = helpers.lib_battle_common
+    battle.dlog("== [ability] skeleton_shield ====================")
+
+    local target_card = (event_data or {}).defender_card
+    if target_card == nil then
+        battle.dlog("[ability] skeleton_shield: skip - defender_card is nil in event_data")
+        return {}, nil
+    end
+
+    local source_side = helpers.find_card_side(state, source_card)
+    local front_line_key = source_side .. "_front_line"
+    local front_line = state[front_line_key] or {}
+
+    -- Requirement 1: Must select 1 untriggered hellscythe card in front_line
+    local hellscythe_card = helpers.find_untriggered_card(front_line, function(c)
+        return c.item_definition_code_name == "hellscythe"
+    end)
+    if hellscythe_card == nil then
+        battle.dlog("[ability] skeleton_shield: error - no untriggered hellscythe in " .. front_line_key)
+        return {}, "skeleton_shield requires untriggered hellscythe in front_line"
+    end
+
+    -- Requirement 2: Must have a skeleton card in front_line (different from target_card)
+    local skeleton_card = nil
+    local skel_idx = nil
+    for i, c in ipairs(front_line) do
+        local has_id = c.inventory_item_id ~= nil and c.inventory_item_id ~= ""
+        if has_id and c.item_definition_code_name == "skeleton" and c.inventory_item_id ~= target_card.inventory_item_id then
+            skeleton_card = c
+            skel_idx = i
+            break
+        end
+    end
+    if skeleton_card == nil or skel_idx == nil then
+        battle.dlog("[ability] skeleton_shield: error - no distinct skeleton in " .. front_line_key)
+        return {}, "skeleton_shield requires skeleton in front_line different from target_card"
+    end
+
+    -- Requirement 3: Target card must be currently targeted by an opponent planning attack
+    local opponent_planning = (source_side == "alpha") and (state.omega_planning or {}) or (state.alpha_planning or {})
+    local target_plan_entry = nil
+    for _, plan_entry in ipairs(opponent_planning) do
+        if plan_entry.defender_inv_id == target_card.inventory_item_id then
+            target_plan_entry = plan_entry
+            break
+        end
+    end
+
+    if target_plan_entry == nil then
+        battle.dlog("[ability] skeleton_shield: error - target_card is not targeted by opponent planning attack")
+        return {}, "skeleton_shield requires target card to be targeted by opponent planning attack"
+    end
+
+    -- Find target_card line and slot index
+    local target_line_key = (event_data or {}).defender_line_key
+    if target_line_key == nil or target_line_key == "" or state[target_line_key] == nil then
+        if state.alpha_front_line then
+            for _, c in ipairs(state.alpha_front_line) do
+                if c.inventory_item_id == target_card.inventory_item_id then
+                    target_line_key = "alpha_front_line"
+                    break
+                end
+            end
+        end
+        if target_line_key == nil and state.omega_front_line then
+            for _, c in ipairs(state.omega_front_line) do
+                if c.inventory_item_id == target_card.inventory_item_id then
+                    target_line_key = "omega_front_line"
+                    break
+                end
+            end
+        end
+    end
+
+    local target_line = target_line_key ~= nil and state[target_line_key] or nil
+    local target_idx = nil
+    if target_line ~= nil then
+        for i, c in ipairs(target_line) do
+            if c.inventory_item_id == target_card.inventory_item_id then
+                target_idx = i
+                break
+            end
+        end
+    end
+
+    if target_line == nil or target_idx == nil then
+        battle.dlog("[ability] skeleton_shield: error - target_card position not found")
+        return {}, "skeleton_shield target_card position not found"
+    end
+
+    -- Swap position of skeleton_card and target_card
+    local temp_slot = skeleton_card.slot_index
+    skeleton_card.slot_index = target_card.slot_index
+    target_card.slot_index = temp_slot
+
+    if front_line_key == target_line_key then
+        front_line[skel_idx] = target_card
+        front_line[target_idx] = skeleton_card
+    else
+        front_line[skel_idx] = target_card
+        target_line[target_idx] = skeleton_card
+    end
+
+    -- Redirect the opponent's planned attack to the skeleton card (as a substitute shield)
+    target_plan_entry.defender_inv_id = skeleton_card.inventory_item_id
+
+    hellscythe_card.trigger = true
+
+
+    local expose_action = helpers.expose_ability_selected_card(state, hellscythe_card)
+    battle.dlog("[ability] skeleton_shield: swapped skeleton=" .. skeleton_card.inventory_item_id .. " and target=" .. target_card.inventory_item_id)
+
+    local shield_actions = {}
+    if expose_action ~= nil then
+        table.insert(shield_actions, expose_action)
+    end
+    table.insert(shield_actions, source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=skeleton_shield,target=" .. target_card.inventory_item_id .. ",selected=" .. hellscythe_card.inventory_item_id .. ",swapped=" .. skeleton_card.inventory_item_id)
+    table.insert(shield_actions, source_side .. "_card_swapped:card1=" .. skeleton_card.inventory_item_id .. ",card2=" .. target_card.inventory_item_id)
+    table.insert(shield_actions, source_side .. "_card_guarded:" .. target_card.inventory_item_id)
+
+    return shield_actions, nil
+end
+
+-- ability: animate_dead
+function animate_dead_execute(state, source_card, event_data, helpers)
+    local battle = helpers.lib_battle_common
+    battle.dlog("== [ability] animate_dead ====================")
+
+    local caster_side = helpers.find_card_side(state, source_card)
+    if caster_side == "unknown" or caster_side == nil then
+        local function find_side_in_all_zones(card_id)
+            local alpha_keys = { "alpha_front_line", "alpha_back_line", "alpha_hand", "alpha_the_void", "alpha_the_source" }
+            for _, key in ipairs(alpha_keys) do
+                if state[key] then
+                    for _, c in ipairs(state[key]) do
+                        if c.inventory_item_id == card_id then return "alpha" end
+                    end
+                end
+            end
+            local omega_keys = { "omega_front_line", "omega_back_line", "omega_hand", "omega_the_void", "omega_the_source" }
+            for _, key in ipairs(omega_keys) do
+                if state[key] then
+                    for _, c in ipairs(state[key]) do
+                        if c.inventory_item_id == card_id then return "omega" end
+                    end
+                end
+            end
+            return "alpha" -- fallback
+        end
+        caster_side = find_side_in_all_zones(source_card.inventory_item_id)
+    end
+
+    local front_line_key = caster_side .. "_front_line"
+    local front_line = state[front_line_key] or {}
+
+    -- Requirement: Must select 1 untriggered hellscythe card in front_line
+    local hellscythe_card = helpers.find_untriggered_card(front_line, function(c)
+        return c.item_definition_code_name == "hellscythe"
+    end)
+    if hellscythe_card == nil then
+        battle.dlog("[ability] animate_dead: error - no untriggered hellscythe in " .. front_line_key)
+        return {}, "animate_dead requires untriggered hellscythe in front_line"
+    end
+
+    hellscythe_card.trigger = true
+    local expose_action = helpers.expose_ability_selected_card(state, hellscythe_card)
+
+    local ability_actions = {}
+    if expose_action ~= nil then
+        table.insert(ability_actions, expose_action)
+    end
+    table.insert(ability_actions, caster_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=animate_dead,selected=" .. hellscythe_card.inventory_item_id)
+
+    local void_key = caster_side .. "_the_void"
+    local void_zone = state[void_key] or {}
+
+    local max_summon = 3
+    local summoned_count = 0
+
+    for _ = 1, max_summon do
+        -- 1. Find a skeleton card in the_void
+        local skeleton_idx = nil
+        local skeleton_card = nil
+        for i, c in ipairs(void_zone) do
+            if c.item_definition_code_name == "skeleton" then
+                skeleton_idx = i
+                skeleton_card = c
+                break
+            end
+        end
+
+        if skeleton_card == nil or skeleton_idx == nil then
+            battle.dlog("[ability] animate_dead: no more skeleton in " .. void_key)
+            break
+        end
+
+        -- 2. Find free slots in front_line (slots 1 to 5)
+        local free_slots = {}
+        for i = 1, 5 do
+            local slot = front_line[i]
+            if slot == nil or slot.inventory_item_id == nil or slot.inventory_item_id == "" then
+                table.insert(free_slots, i)
+            end
+        end
+
+        if #free_slots == 0 then
+            battle.dlog("[ability] animate_dead: front_line has no free slots, stopping summon")
+            break
+        end
+
+        -- 3. Pick random free slot
+        local rand_i = math.random(1, #free_slots)
+        local chosen_slot_idx = free_slots[rand_i]
+        local zero_based_slot = chosen_slot_idx - 1
+
+        -- 4. Remove skeleton card from the_void
+        table.remove(void_zone, skeleton_idx)
+
+        -- 5. Set skeleton card properties and place into front_line slot
+        skeleton_card.slot_index = zero_based_slot
+        skeleton_card.stun_remain = 0
+        battle.reset_card_turn_state(state.item_defs, skeleton_card)
+        skeleton_card.trigger = true
+        skeleton_card.face_up = true
+        skeleton_card.expose = true
+
+        front_line[chosen_slot_idx] = skeleton_card
+        summoned_count = summoned_count + 1
+
+        battle.dlog("[ability] animate_dead: summoned skeleton=" .. skeleton_card.inventory_item_id .. " to slot=" .. zero_based_slot)
+        table.insert(ability_actions, caster_side .. "_void_to_front_line:" .. skeleton_card.inventory_item_id .. "," .. zero_based_slot)
+    end
+
+    -- Send source ability card to void if applicable
+    local card_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
+    local is_ability_card = (card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.type == "ability")
+    local will_system_send_to_void = false
+    if is_ability_card then
+        local defender_line_key = event_data ~= nil and event_data.defender_line_key or nil
+        if defender_line_key == "alpha_front_line" or
+           defender_line_key == "alpha_back_line"  or
+           defender_line_key == "omega_front_line" or
+           defender_line_key == "omega_back_line" then
+            will_system_send_to_void = true
+        end
+    end
+
+    if not will_system_send_to_void then
+        local lines_to_check = {
+            caster_side .. "_front_line",
+            caster_side .. "_back_line",
+            caster_side .. "_hand"
+        }
+        for _, line_key in ipairs(lines_to_check) do
+            local line = state[line_key]
+            if line ~= nil then
+                battle.remove_card_from_line(line, source_card.inventory_item_id)
+            end
+        end
+
+        if state[void_key] == nil then state[void_key] = {} end
+        table.insert(state[void_key], source_card)
+        battle.dlog("[ability] animate_dead: source card sent to void=" .. void_key .. " id=" .. source_card.inventory_item_id)
+        table.insert(ability_actions, caster_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+    end
+
+    return ability_actions, nil
+end
+
+

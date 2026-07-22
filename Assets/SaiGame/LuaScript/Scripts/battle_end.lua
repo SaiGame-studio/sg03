@@ -17,6 +17,33 @@ local determine_winner -- forward declaration
 local end_session      -- forward declaration
 local open_drop_packs  -- forward declaration
 
+-- Process and flatten drop packs results into a list of items with definition_id, name, and quantity
+local function process_drops(pack_results)
+    local item_list = {}
+    local item_map = {}
+    for _, pack in ipairs(pack_results) do
+        if pack.success and pack.items then
+            for _, item in ipairs(pack.items) do
+                local def_id = item.item_definition_id
+                if def_id then
+                    if item_map[def_id] then
+                        item_map[def_id].quantity = item_map[def_id].quantity + (item.quantity or 1)
+                    else
+                        local entry = {
+                            definition_id = def_id,
+                            name = item.name or def_id,
+                            quantity = item.quantity or 1
+                        }
+                        table.insert(item_list, entry)
+                        item_map[def_id] = entry
+                    end
+                end
+            end
+        end
+    end
+    return item_list
+end
+
 local function main()
     local err = validate_payload()
     if err ~= nil then output.error = err ; return end
@@ -39,10 +66,25 @@ local function main()
     output.alpha_hp   = alpha_hp
     output.omega_hp   = omega_hp
 
+    -- Log battle completion
+    game.log("Battle ended. Winner: " .. winner .. ", Turn: " .. tostring(state.turn or 1) .. ", Alpha HP: " .. tostring(alpha_hp) .. ", Omega HP: " .. tostring(omega_hp))
+
     if winner == "alpha" then
         local drops, drop_err = open_drop_packs(session_id, state)
         if drop_err ~= nil then output.error = drop_err ; return end
-        output.drops = drops
+
+        -- Flatten the drops list to return to the client
+        local flat_drops = process_drops(drops)
+        output.drops = flat_drops
+
+        -- Log drops/rewards
+        if flat_drops ~= nil and #flat_drops > 0 then
+            for _, drop in ipairs(flat_drops) do
+                game.log("Reward obtained: " .. tostring(drop.name) .. " (ID: " .. tostring(drop.definition_id) .. ") x" .. tostring(drop.quantity))
+            end
+        else
+            game.log("No rewards obtained.")
+        end
     end
 end
 

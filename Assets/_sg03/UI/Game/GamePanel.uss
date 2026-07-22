@@ -269,3 +269,83 @@
     min-width: 70px;
     max-width: 70px;
 }
+
+/* Battle Result Popup Styles */
+.battle-result-popup-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(6, 8, 16, 0.88);
+    align-items: center;
+    justify-content: center;
+}
+
+.battle-result-popup-card {
+    min-width: 380px;
+    padding: 36px;
+    background-color: rgba(22, 26, 40, 0.98);
+    border-radius: 16px;
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.4);
+    align-items: center;
+}
+
+.battle-result-popup-title {
+    font-size: 36px;
+    -unity-font-style: bold;
+    margin-bottom: 16px;
+    -unity-text-align: center;
+}
+
+.battle-result-popup-title--win {
+    color: rgb(0, 255, 136);
+}
+
+.battle-result-popup-title--loss {
+    color: rgb(255, 76, 76);
+}
+
+.battle-result-popup-message {
+    font-size: 15px;
+    color: rgb(180, 195, 240);
+    margin-bottom: 32px;
+    -unity-text-align: center;
+}
+
+.battle-result-popup-btn-row {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+}
+
+.battle-result-popup-btn {
+    flex: 1;
+    margin: 0 10px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    cursor: link;
+    transition-duration: 0.15s;
+    border-width: 0;
+}
+
+.battle-result-popup-btn--continue {
+    background-color: rgba(60, 110, 230, 1);
+    color: rgb(240, 244, 255);
+}
+
+.battle-result-popup-btn--continue:hover {
+    background-color: rgba(80, 130, 255, 1);
+}
+
+.battle-result-popup-btn--stop {
+    background-color: rgba(180, 30, 30, 0.85);
+    color: rgb(255, 220, 220);
+}
+
+.battle-result-popup-btn--stop:hover {
+    background-color: rgba(220, 50, 50, 1);
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "ss-go Lua"
+  short_description: "Generate safe ss-go Lua game scripts"
+  default_prompt: "Use $ss-go-lua to generate an ss-go-compatible Lua script from my game logic and payload schema."

@@ -136,5 +136,35 @@ namespace SG03
             this.cardSpawning?.SettleOmegaHandInBackLine(card, inventoryItemId, slotIndex);
             yield return this.StartCoroutine(this.WaitForCard(card));
         }
+
+        private Coroutine ExecuteAlphaVoidToFrontLine(string[] parameters)
+        {
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
+            return this.StartCoroutine(this.AlphaVoidToFrontLineRoutine(inventoryItemId, slotIndex));
+        }
+
+        private IEnumerator AlphaVoidToFrontLineRoutine(string inventoryItemId, int slotIndex)
+        {
+            Card3DCtrl card = this.cardSpawning?.MoveAlphaVoidToFrontLine(inventoryItemId, slotIndex);
+            if (card == null) yield break;
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            this.cardSpawning?.SettleAlphaVoidInFrontLine(card, inventoryItemId, slotIndex);
+            yield return this.StartCoroutine(this.WaitForCard(card));
+        }
+
+        private Coroutine ExecuteOmegaVoidToFrontLine(string[] parameters)
+        {
+            if (!this.TryParseSourceToHand(parameters, out string inventoryItemId, out int slotIndex)) return null;
+            return this.StartCoroutine(this.OmegaVoidToFrontLineRoutine(inventoryItemId, slotIndex));
+        }
+
+        private IEnumerator OmegaVoidToFrontLineRoutine(string inventoryItemId, int slotIndex)
+        {
+            Card3DCtrl card = this.cardSpawning?.MoveOmegaVoidToFrontLine(inventoryItemId, slotIndex);
+            if (card == null) yield break;
+            yield return this.StartCoroutine(this.WaitForCard(card));
+            this.cardSpawning?.SettleOmegaVoidInFrontLine(card, inventoryItemId, slotIndex);
+            yield return this.StartCoroutine(this.WaitForCard(card));
+        }
     }
 }

@@ -37,6 +37,8 @@ namespace SG03
         /// <summary>True if the current action dispatch is a resume or game start sequence.</summary>
         public bool IsResuming => this.isResuming;
 
+        public event Action<string> OnBattleCompleted;
+
         [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
 
         protected override void LoadComponents()
@@ -350,6 +352,8 @@ namespace SG03
                 case "alpha_hand_to_back_line": result = this.ExecuteAlphaHandToBackLine(parameters); break;
                 case "omega_hand_to_front_line": result = this.ExecuteOmegaHandToFrontLine(parameters); break;
                 case "omega_hand_to_back_line": result = this.ExecuteOmegaHandToBackLine(parameters); break;
+                case "alpha_void_to_front_line": result = this.ExecuteAlphaVoidToFrontLine(parameters); break;
+                case "omega_void_to_front_line": result = this.ExecuteOmegaVoidToFrontLine(parameters); break;
                 case "alpha_card_take_damage": result = this.ExecuteCardTakeDamage(parameters); break;
                 case "omega_card_take_damage": result = this.ExecuteCardTakeDamage(parameters); break;
                 case "alpha_card_expose": result = this.ExecuteCardExpose(parameters); break;
@@ -362,6 +366,8 @@ namespace SG03
                 case "omega_card_ability": result = this.ExecuteCardAbility(parameters); break;
                 case "alpha_card_guarded": result = this.ExecuteCardGuarded(parameters); break;
                 case "omega_card_guarded": result = this.ExecuteCardGuarded(parameters); break;
+                case "alpha_card_swapped": result = this.ExecuteCardSwapped(parameters); break;
+                case "omega_card_swapped": result = this.ExecuteCardSwapped(parameters); break;
                 case "omega_attack": result = this.ExecuteOmegaAttack(parameters); break;
                 case "omega_attack_alpha_hp": result = this.ExecuteOmegaAttackAlphaHp(parameters); break;
                 case "omega_card_move_back_to_holder": result = this.ExecuteOmegaCardMoveBackToHolder(parameters); break;
@@ -369,6 +375,10 @@ namespace SG03
                 case "alpha_take_lamp": result = this.ExecuteLampMoveToAlpha(); break;
                 case "omega_take_lamp": result = this.ExecuteLampMoveToOmega(); break;
                 case "omega_turn_end": result = this.ExecuteOmegaEndTurn(); break;
+                case "battle_completed":
+                    string winner = parameters.Length > 0 ? parameters[0].Trim() : string.Empty;
+                    this.OnBattleCompleted?.Invoke(winner);
+                    break;
                 default:
                     Debug.LogWarning($"<color=#88FFFF>[ClientActions]</color> Unknown action: {log.ActionName}", this.gameObject);
                     break;
