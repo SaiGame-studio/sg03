@@ -251,6 +251,8 @@ local function _get_ability_handler(ability_key)
         return lib_ability_all.back_stab_execute
     elseif ability_key == "holy_glow" then
         return lib_ability_all.holy_glow_execute
+    elseif ability_key == "skeleton_shield" then
+        return lib_ability_all.skeleton_shield_execute
     end
     return nil
 end

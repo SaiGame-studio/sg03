@@ -272,5 +272,65 @@ namespace SG03
             float offsetZ = attackerPosition.z < defenderPosition.z ? -9f : 9f;
             return new Vector3(defenderPosition.x + offsetX, defenderPosition.y + 0.2f, defenderPosition.z + offsetZ);
         }
+
+        private Coroutine ExecuteCardSwapped(string[] parameters)
+        {
+            if (parameters == null || parameters.Length < 2) return null;
+
+            string card1Id = null;
+            string card2Id = null;
+
+            foreach (string p in parameters)
+            {
+                string[] kv = p.Split('=');
+                if (kv.Length == 2)
+                {
+                    string key = kv[0].Trim().ToLower();
+                    string value = kv[1].Trim();
+                    if (key == "card1") card1Id = value;
+                    else if (key == "card2") card2Id = value;
+                }
+            }
+
+            if (string.IsNullOrEmpty(card1Id) || string.IsNullOrEmpty(card2Id))
+            {
+                if (parameters.Length >= 2 && !parameters[0].Contains("="))
+                {
+                    card1Id = parameters[0].Trim();
+                    card2Id = parameters[1].Trim();
+                }
+            }
+
+            if (string.IsNullOrEmpty(card1Id) || string.IsNullOrEmpty(card2Id)) return null;
+            if (card1Id == card2Id) return null;
+
+            Card3DCtrl card1 = this.cardSpawning?.FindCardById(card1Id);
+            Card3DCtrl card2 = this.cardSpawning?.FindCardById(card2Id);
+
+            if (card1 == null || card2 == null || card1 == card2) return null;
+
+            return this.StartCoroutine(this.CardSwappedRoutine(card1, card2));
+        }
+
+        private IEnumerator CardSwappedRoutine(Card3DCtrl card1, Card3DCtrl card2)
+        {
+            CardHolderCtrl holder1 = card1.CardHolder;
+            CardHolderCtrl holder2 = card2.CardHolder;
+
+            if (holder1 != null && holder2 != null)
+            {
+                holder1.SetCard(card2);
+                holder2.SetCard(card1);
+
+                card1.AssignCardHolder(holder2);
+                card2.AssignCardHolder(holder1);
+
+                card1.MoveTo(holder2.transform, holder2.HolderLocation);
+                card2.MoveTo(holder1.transform, holder1.HolderLocation);
+
+                yield return this.StartCoroutine(this.WaitForCard(card1));
+                yield return this.StartCoroutine(this.WaitForCard(card2));
+            }
+        }
     }
 }
