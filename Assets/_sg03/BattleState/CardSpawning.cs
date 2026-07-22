@@ -7,7 +7,7 @@ using UnityEngine;
 namespace SG03
 {
     [AddComponentMenu("SG03/Desk/Card Spawning")]
-    public class CardSpawning : SaiBehaviour
+    public partial class CardSpawning : SaiBehaviour
     {
         [SerializeField] private CardPool               cardPool;
         [SerializeField] private DeskPositionCtrl         deskPosition;
@@ -293,6 +293,14 @@ namespace SG03
             if (string.IsNullOrEmpty(inventoryItemId)) return null;
             if (this.handCardRegistry.TryGetValue(inventoryItemId, out Card3DCtrl handCard)) return handCard;
             foreach (Card3DCtrl card in this.slotOccupancy.Values)
+            {
+                if (card != null && card.InventoryItemId == inventoryItemId) return card;
+            }
+            foreach (Card3DCtrl card in this.alphaVoidCardList)
+            {
+                if (card != null && card.InventoryItemId == inventoryItemId) return card;
+            }
+            foreach (Card3DCtrl card in this.omegaVoidCardList)
             {
                 if (card != null && card.InventoryItemId == inventoryItemId) return card;
             }

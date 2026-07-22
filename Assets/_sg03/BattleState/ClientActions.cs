@@ -352,6 +352,8 @@ namespace SG03
                 case "alpha_hand_to_back_line": result = this.ExecuteAlphaHandToBackLine(parameters); break;
                 case "omega_hand_to_front_line": result = this.ExecuteOmegaHandToFrontLine(parameters); break;
                 case "omega_hand_to_back_line": result = this.ExecuteOmegaHandToBackLine(parameters); break;
+                case "alpha_void_to_front_line": result = this.ExecuteAlphaVoidToFrontLine(parameters); break;
+                case "omega_void_to_front_line": result = this.ExecuteOmegaVoidToFrontLine(parameters); break;
                 case "alpha_card_take_damage": result = this.ExecuteCardTakeDamage(parameters); break;
                 case "omega_card_take_damage": result = this.ExecuteCardTakeDamage(parameters); break;
                 case "alpha_card_expose": result = this.ExecuteCardExpose(parameters); break;
