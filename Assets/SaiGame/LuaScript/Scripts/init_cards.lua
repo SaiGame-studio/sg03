@@ -68,7 +68,6 @@ local function alpha_draw_random(state, card_count, start_slot)
         if hand_card.item_definition_code_name ~= nil and hand_card.item_definition_code_name ~= "" then
             hand_card.slot_index  = start_slot + i - 1
             hand_card.trigger     = false
-            hand_card.stun_remain = 0
         end
     end
     for _, hand_card in ipairs(hand) do
@@ -102,7 +101,6 @@ local function omega_draw_random(state, card_count, start_slot)
         if hand_card.item_definition_code_name ~= nil and hand_card.item_definition_code_name ~= "" then
             hand_card.slot_index  = start_slot + i - 1
             hand_card.trigger     = false
-            hand_card.stun_remain = 0
         end
     end
     for _, hand_card in ipairs(hand) do
@@ -146,7 +144,6 @@ local function alpha_choose_cards(state)
         end
         card.slot_index  = i - 1
         card.trigger     = false
-        card.stun_remain = 0
         table.insert(hand, card)
     end
 
@@ -200,7 +197,6 @@ local function omega_choose_cards(state)
         card.inventory_item_id = gen_id()
         card.slot_index        = i - 1
         card.trigger           = false
-        card.stun_remain       = 0
         table.insert(hand, card)
     end
 

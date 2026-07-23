@@ -17,7 +17,6 @@ namespace SG03
         public int atk_deduct;
         public int def_add;
         public int def_deduct;
-        public int stun_count;
         public int summon_count;
         public int hp_restore;
     }
