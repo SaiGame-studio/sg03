@@ -11,11 +11,11 @@ Khi một trận đấu PvE bắt đầu, `init_cards.lua` chia bài lên tay ba
 
 ### Khởi Tạo Phía Alpha (Người Chơi)
 - **Bài Chọn Sẵn**: Đọc `choose_card_1`, `choose_card_2`, và `choose_card_3` từ `alpha_preset_metadata` (khớp theo `inventory_item_id`).
-- **Rút Ngẫu Nhiên**: Rút 2 lá ngẫu nhiên từ `alpha_the_source` để lấp đầy 5 lá bài tay mở màn.
+- **Rút Ngẫu Nhiên**: Rút 2 lá ngẫu nhiên từ Bí Cảnh Cung (`alpha_the_source`) để lấp đầy 5 lá bài tay mở màn.
 
 ### Khởi Tạo Phía Omega (AI Boss)
 - **Slot Preset**: Đọc `choose_card_1`, `choose_card_2`, `choose_card_3` từ `metadata.omega.metadata` (khớp theo `item_definition_code_name`).
-- **Bộ Bài Boss**: Khởi tạo `omega_the_source` với các lá bài tay sai và kỹ năng theo kịch bản (ví dụ `goblin_shaman`, `totem_pulse`, `back_stab`).
+- **Bộ Bài Boss**: Khởi tạo Bí Cảnh Cung (`omega_the_source`) với các lá bài tay sai và kỹ năng theo kịch bản (ví dụ `goblin_shaman`, `totem_pulse`, `back_stab`).
 
 ---
 

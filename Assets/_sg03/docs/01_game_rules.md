@@ -14,15 +14,15 @@
 
 ## 2. Cấu Trúc Bàn Đấu & Các Khu Vực Bài
 
-Bàn đấu gồm 5 khu vực chứa bài riêng biệt cho mỗi bên (cả Alpha và Omega):
+Bàn đấu gồm **5 khu vực chứa bài riêng biệt** cho mỗi bên (cả Alpha và Omega):
 
-| Tên Khu Vực | Sức Chứa | Mô Tả |
+| Tên Khu Vực | Sức Chứa | Mô Tả Chi Tiết |
 |---|---|---|
-| **`the_source`** | Thay đổi | Bộ bài rút chứa các lá chưa rút lên tay. |
-| **`hand`** | Tối đa 5 slot | Tay cầm bài chứa các lá sẵn sàng thả ra sân. |
-| **`front_line`** | 5 slot cố định (0-4) | Hàng tiền tuyến. Các đơn vị đặt ở đây thực hiện tấn công, chặn đòn đánh của địch và kích hoạt kỹ năng tiền tuyến. |
-| **`back_line`** | 5 slot cố định (0-4) | Hàng hậu thuẫn. Chứa các đơn vị hỗ trợ hoặc công trình/pháp bảo kỹ năng mang lại hiệu ứng buff. |
-| **`the_void`** | Không giới hạn | Mộ bài chứa các nhân vật bị tiêu diệt hoặc các lá kỹ năng đã sử dụng. |
+| **Bí Cảnh Cung (`the_source`)** | Thay đổi | Nơi tích tụ thần khí chứa các lá bài 1 đến 3 sao chưa được rút lên tay. |
+| **Tay Bài (`hand`)** | Tối đa 5 slot | Tay cầm bài chứa các lá sẵn sàng thả ra sân. |
+| **Tiền Tuyến (`front_line`)** | 5 slot cố định (0-4) | Hàng tiền tuyến. Các đơn vị đặt ở đây thực hiện tấn công, chặn đòn đánh của địch và kích hoạt kỹ năng tiền tuyến. |
+| **Hậu Thuẫn (`back_line`)** | 5 slot cố định (0-4) | Hàng hậu thuẫn. Chứa các đơn vị hỗ trợ hoặc công trình/pháp bảo kỹ năng mang lại hiệu ứng buff. |
+| **Mộ Bài (`the_void`)** | Không giới hạn | **Nơi chứa bài bị tiêu diệt, bài đã dùng và Thẻ Cao Cấp**: <br>• Chứa các bài Nhân vật tử trận và bài Kỹ năng đã thi triển.<br>• **Mặc Định Đầu Game**: Tất cả thẻ Nhân vật từ **4 sao trở lên (4-9 sao)** đều nằm sẵn tại **Mộ Bài (`the_void`)** lúc `init_cards`, không thể rút lên `hand`. Người chơi cần dùng bài Chiêu Hồi để hồi sinh các lá này từ `the_void` ra mặt trận. |
 
 ---
 
@@ -46,7 +46,7 @@ stateDiagram-v2
 #### Chi Tiết Các Phase
 
 ##### Phase 1: Khởi Tạo Trận Đấu (`init_cards.lua`)
-1. **Bài Tay Alpha**: Rút 3 lá preset chọn sẵn + 2 lá ngẫu nhiên từ bộ bài `alpha_the_source`.
+1. **Bài Tay Alpha**: Rút 3 lá preset chọn sẵn + 2 lá ngẫu nhiên từ **Bí Cảnh Cung (`alpha_the_source`)**.
 2. **Bài Tay Omega**: Rút các lá bài theo kịch bản (PvE) hoặc theo chọn lựa người chơi (PvP).
 3. Gán trạng thái `metadata.next_move = "alpha_turn"`.
 
@@ -71,7 +71,7 @@ stateDiagram-v2
 2. Xử lý các kỹ năng kết thúc lượt.
 3. Chạy AI (`enemy_ai_goblin_shaman.lua`) trong chế độ PvE, hoặc chuyển lượt cho Player 2 trong chế độ PvP.
 4. Tăng đếm số lượt (`turn = turn + 1`).
-5. Người chơi lượt tiếp theo rút **2 lá bài** từ `the_source` lên `hand` (không vượt quá tối đa 5 lá).
+5. Người chơi lượt tiếp theo rút **2 lá bài** từ **Bí Cảnh Cung (`the_source`)** lên `hand` (không vượt quá tối đa 5 lá).
 
 ---
 
