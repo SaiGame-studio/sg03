@@ -160,7 +160,7 @@
           • payload: hand[] · front_line[{id,face_up,slot_index}] · back_line[...]<br>
           • validate: union(hand+front+back payload) == union(alpha_hand+front+back state)<br>
           • giới hạn: tối đa 1 card mới lên front_line mỗi lượt<br>
-          • reset card state (final_def, stun_remain) cho mỗi deployed card<br>
+          • reset card state (final_def) cho mỗi deployed card<br>
           • client: alpha_hand_to_front / alpha_hand_to_back / alpha_front_to_back / ...
         </div>
       </div>
@@ -187,7 +187,7 @@
       <div class="node node-alpha" style="min-width:400px;text-align:left;">
         <div style="text-align:center;font-weight:700;margin-bottom:8px;">alpha_turn_end</div>
         <div class="sub">
-          ① reset_turn_cards: trigger=false · stun_remain-- trên tất cả cards của cả 2 field<br>
+          ① reset_turn_cards: trigger=false trên tất cả cards của cả 2 field<br>
           ② client action: <code>omega_take_lamp</code><br>
           ③ omega rút N bài ngẫu nhiên từ omega_the_source → state.omega_hand<br>
           &nbsp;&nbsp;&nbsp;• client: omega_source_to_hand:id,slot × N<br>

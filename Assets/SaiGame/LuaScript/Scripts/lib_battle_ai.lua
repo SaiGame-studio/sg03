@@ -157,7 +157,6 @@ function alpha_draw_random(state, card_count)
             table.remove(source, idx)
             card.slot_index  = i - 1
             card.trigger     = false
-            card.stun_remain = 0
             state.alpha_hand[i] = card
             lib_battle_common.append_client_action(state,
                 "alpha_source_to_hand:" .. card.inventory_item_id .. "," .. tostring(card.slot_index))
@@ -201,7 +200,6 @@ function omega_draw_random(state, card_count, start_slot)
         if hand_card.item_definition_code_name ~= nil and hand_card.item_definition_code_name ~= "" then
             hand_card.slot_index  = start_slot + i - 1
             hand_card.trigger     = false
-            hand_card.stun_remain = 0
         end
     end
 

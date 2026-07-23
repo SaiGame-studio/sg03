@@ -207,10 +207,6 @@ function deal_damage_to_character(state, attacker_card, target_card, damage, tar
         lib_battle_common.dlog("[ability] deal_damage: skip - target is not character type")
         return {}, nil
     end
-    if lib_battle_common.is_card_stunned(attacker_card) then
-        lib_battle_common.dlog("[ability] deal_damage: skip - attacker stunned (stun_count=" .. (attacker_card.stun_count or 0) .. ")")
-        return {}, nil
-    end
 
     local final_def = target_card.final_def or 0
     local prev_damage = target_card.total_damage_received or 0

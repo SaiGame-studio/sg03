@@ -617,7 +617,6 @@ function animate_dead_execute(state, source_card, event_data, helpers)
 
         -- 5. Set skeleton card properties and place into front_line slot
         skeleton_card.slot_index = zero_based_slot
-        skeleton_card.stun_remain = 0
         battle.reset_card_turn_state(state.item_defs, skeleton_card)
         skeleton_card.trigger = true
         skeleton_card.face_up = true

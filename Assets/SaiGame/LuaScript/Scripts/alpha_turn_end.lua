@@ -51,7 +51,6 @@ local function run_omega_draw(state)
             card.inventory_item_id = gen_id()
             card.slot_index        = i - 1
             card.trigger           = false
-            card.stun_remain       = 0
             state.omega_hand[i]    = card
             lib_battle_common.append_client_action(state,
                 "omega_source_to_hand:" .. card.inventory_item_id .. "," .. tostring(card.slot_index))
