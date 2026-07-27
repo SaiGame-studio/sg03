@@ -61,7 +61,7 @@ GameObject:
   - component: {fileID: 4308186167237759036}
   - component: {fileID: 1892399005449690324}
   - component: {fileID: 2399963655362431771}
-  - component: {fileID: 3429150976175231259}
+  - component: {fileID: 5323172006139148077}
   m_Layer: 0
   m_Name: Quest
   m_TagString: Untagged
@@ -274,7 +274,7 @@ MonoBehaviour:
       created_at: 
       updated_at: 
     status: 
---- !u!114 &3429150976175231259
+--- !u!114 &5323172006139148077
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -288,8 +288,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.DailyTimeframe
   poolKey: 
   timeframePreset: 0
-  startDate: 2026-07-27
-  endDate: 2026-08-02
+  startDate: 2026-07-20
+  endDate: 2026-07-26
   currentResponse:
     pool_id: 
     days_ahead: 0
@@ -739,10 +739,10 @@ MonoBehaviour:
   leaderboard: {fileID: 1993458322055049526}
   battleSessions: {fileID: 8438002230962336466}
   battleScript: {fileID: 5292617345916487666}
-  serverEndpoint: 1
-  domainOption: 1
-  port: 443
-  useHttps: 1
+  serverEndpoint: 0
+  domainOption: 0
+  port: 82
+  useHttps: 0
   gameId: 
   requestTimeout: 30
   showButtonsLog: 1
@@ -775,7 +775,7 @@ MonoBehaviour:
     is_verified: 0
     created_at: 0
   loginTime: 0
-  autoLogin: 0
+  autoLogin: 1
   autoRefreshToken: 1
   refreshBeforeExpire: 2
   username: 
