@@ -13,14 +13,26 @@ namespace SG03.UI
 
         private readonly VisualTreeAsset dailyQuestAsset;
         private readonly VisualTreeAsset mainQuestAsset;
+        private readonly VisualTreeAsset thisWeekAsset;
+        private readonly VisualTreeAsset thisMonthAsset;
+        private readonly VisualTreeAsset next7DaysAsset;
+        private readonly VisualTreeAsset next30DaysAsset;
 
         public QuestPanelUI(
             VisualElement panelRoot,
             VisualTreeAsset dailyAsset,
-            VisualTreeAsset mainAsset)
+            VisualTreeAsset mainAsset,
+            VisualTreeAsset thisWeekAsset,
+            VisualTreeAsset thisMonthAsset,
+            VisualTreeAsset next7DaysAsset,
+            VisualTreeAsset next30DaysAsset)
         {
             this.dailyQuestAsset = dailyAsset;
             this.mainQuestAsset  = mainAsset;
+            this.thisWeekAsset = thisWeekAsset;
+            this.thisMonthAsset = thisMonthAsset;
+            this.next7DaysAsset = next7DaysAsset;
+            this.next30DaysAsset = next30DaysAsset;
 
             this.dailyNavBtn = panelRoot.Q<Button>("DailyQuestNavBtn");
             this.mainNavBtn  = panelRoot.Q<Button>("MainQuestNavBtn");
@@ -60,7 +72,12 @@ namespace SG03.UI
             this.contentArea.Add(content);
 
             if (type == QuestType.Daily)
-                new DailyQuestContentUI(content);
+                new DailyQuestContentUI(
+                    content,
+                    this.thisWeekAsset,
+                    this.thisMonthAsset,
+                    this.next7DaysAsset,
+                    this.next30DaysAsset);
         }
     }
 }

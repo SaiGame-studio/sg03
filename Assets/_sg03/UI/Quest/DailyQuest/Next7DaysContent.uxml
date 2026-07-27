@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="dq-day-grid-container">
+        <ui:VisualElement name="WeekGrid" class="dq-week-grid" />
+    </ui:VisualElement>
+    <ui:VisualElement name="EmptyState" class="dq-empty">
+        <ui:Label text="No daily quests loaded." class="dq-empty__label" />
+    </ui:VisualElement>
+</ui:UXML>

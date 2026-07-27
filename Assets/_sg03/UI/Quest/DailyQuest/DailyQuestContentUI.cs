@@ -13,24 +13,59 @@ namespace SG03.UI
     // (e.g. after auto-start + refresh).
     public class DailyQuestContentUI
     {
-        private readonly VisualElement weekGrid;
-        private readonly VisualElement emptyState;
+        private VisualElement weekGrid;
+        private VisualElement emptyState;
+        private readonly VisualElement tabContent;
+        private readonly Button thisWeekTab;
+        private readonly Button next7DaysTab;
+        private readonly Button next30DaysTab;
+        private readonly Button thisMonthTab;
+        private readonly VisualTreeAsset thisWeekAsset;
+        private readonly VisualTreeAsset thisMonthAsset;
+        private readonly VisualTreeAsset next7DaysAsset;
+        private readonly VisualTreeAsset next30DaysAsset;
         private QuestList[] lists;
         private bool hasCheckedOnOpen;
+        private DateRange selectedRange = DateRange.Next7Days;
 
         // Vietnamese weekday names (Monday=2 … Saturday=7, Sunday=CN)
         private static readonly string[] DayNames = { "CN", "2", "3", "4", "5", "6", "7" };
 
-        public DailyQuestContentUI(VisualElement root)
+        private enum DateRange
         {
-            this.weekGrid   = root.Q("WeekGrid");
-            this.emptyState = root.Q("EmptyState");
+            ThisWeek,
+            Next7Days,
+            Next30Days,
+            ThisMonth,
+        }
+
+        public DailyQuestContentUI(
+            VisualElement root,
+            VisualTreeAsset thisWeekAsset,
+            VisualTreeAsset thisMonthAsset,
+            VisualTreeAsset next7DaysAsset,
+            VisualTreeAsset next30DaysAsset)
+        {
+            this.tabContent = root.Q("DailyQuestTabContent");
+            this.thisWeekAsset = thisWeekAsset;
+            this.thisMonthAsset = thisMonthAsset;
+            this.next7DaysAsset = next7DaysAsset;
+            this.next30DaysAsset = next30DaysAsset;
+            this.thisWeekTab    = root.Q<Button>("ThisWeekTab");
+            this.next7DaysTab   = root.Q<Button>("Next7DaysTab");
+            this.next30DaysTab  = root.Q<Button>("Next30DaysTab");
+            this.thisMonthTab   = root.Q<Button>("ThisMonthTab");
+
+            this.thisWeekTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisWeek));
+            this.next7DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next7Days));
+            this.next30DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next30Days));
+            this.thisMonthTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisMonth));
 
             QuestDailyManager manager = UnityEngine.Object.FindFirstObjectByType<QuestDailyManager>(UnityEngine.FindObjectsInactive.Include);
-            if (manager == null) { this.ShowEmpty(); return; }
+            if (manager == null) { this.ShowSelectedTab(); return; }
 
             this.lists = manager.QuestLists;
-            if (this.lists == null || this.lists.Length == 0) { this.ShowEmpty(); return; }
+            if (this.lists == null || this.lists.Length == 0) { this.ShowSelectedTab(); return; }
 
             // Subscribe permanently — re-render on every future data update.
             foreach (QuestList list in this.lists)
@@ -46,15 +81,74 @@ namespace SG03.UI
                 if (!list.HasData) pendingCount++;
             }
 
-            if (pendingCount == 0) { this.Render(); return; }
+            if (pendingCount == 0) { this.ShowSelectedTab(); return; }
 
             foreach (QuestList list in this.lists)
             {
                 if (!list.HasData) list.Refresh();
             }
+
+            this.ShowSelectedTab();
         }
 
         private void OnAnyListUpdated() => this.Render();
+
+        private void SelectRange(DateRange range)
+        {
+            this.selectedRange = range;
+            this.UpdateRangeTabStates();
+            this.ShowSelectedTab();
+        }
+
+        private void ShowSelectedTab()
+        {
+            if (this.tabContent == null) return;
+
+            this.tabContent.Clear();
+            this.weekGrid = null;
+            this.emptyState = null;
+
+            VisualTreeAsset asset = this.GetSelectedTabAsset();
+            if (asset == null) return;
+
+            TemplateContainer content = asset.Instantiate();
+            content.style.flexGrow = 1;
+            content.style.flexShrink = 1;
+            content.style.alignSelf = Align.Stretch;
+            this.tabContent.Add(content);
+
+            if (this.selectedRange != DateRange.Next7Days || this.lists == null) return;
+
+            this.weekGrid = content.Q("WeekGrid");
+            this.emptyState = content.Q("EmptyState");
+            this.Render();
+        }
+
+        private VisualTreeAsset GetSelectedTabAsset()
+        {
+            switch (this.selectedRange)
+            {
+                case DateRange.ThisWeek: return this.thisWeekAsset;
+                case DateRange.ThisMonth: return this.thisMonthAsset;
+                case DateRange.Next30Days: return this.next30DaysAsset;
+                default: return this.next7DaysAsset;
+            }
+        }
+
+        private void UpdateRangeTabStates()
+        {
+            this.SetRangeTabState(this.thisWeekTab, this.selectedRange == DateRange.ThisWeek);
+            this.SetRangeTabState(this.next7DaysTab, this.selectedRange == DateRange.Next7Days);
+            this.SetRangeTabState(this.next30DaysTab, this.selectedRange == DateRange.Next30Days);
+            this.SetRangeTabState(this.thisMonthTab, this.selectedRange == DateRange.ThisMonth);
+        }
+
+        private void SetRangeTabState(Button tab, bool isActive)
+        {
+            if (tab == null) return;
+            if (isActive) tab.AddToClassList("dq-range-tab--active");
+            else tab.RemoveFromClassList("dq-range-tab--active");
+        }
 
         private void ShowEmpty()
         {
@@ -110,7 +204,7 @@ namespace SG03.UI
                 DateTime day = today.AddDays(i);
                 string key = day.ToString("yyyy-MM-dd");
                 byDate.TryGetValue(key, out List<DailyQuestEntryData> entries);
-                this.weekGrid.Add(this.BuildDayCard(day, i == 0, entries));
+                this.weekGrid.Add(this.BuildDayCard(day, day == today, entries));
             }
 
             if (!this.hasCheckedOnOpen)

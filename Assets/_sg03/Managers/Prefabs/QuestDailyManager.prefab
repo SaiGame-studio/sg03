@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8228317108348333969}
   - component: {fileID: 6632138787507382034}
-  - component: {fileID: 5108504568211804476}
   m_Layer: 0
   m_Name: daily_quests
   m_TagString: Untagged
@@ -50,19 +49,6 @@ MonoBehaviour:
   refreshMode: 0
   daysAhead: 6
   entries: []
---- !u!114 &5108504568211804476
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6733162829254639789}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 168c07b3dd9c0d042b2f729942deb5ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SG03.Quest.DailyQuestAutoStarter
-  questList: {fileID: 6632138787507382034}
 --- !u!1 &7908861190732204320
 GameObject:
   m_ObjectHideFlags: 0

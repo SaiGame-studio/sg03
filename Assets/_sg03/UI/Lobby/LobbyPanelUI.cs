@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using SaiGame.Services;
-using SG03.UI.Components;
 
 namespace SG03.UI
 {
@@ -23,6 +22,10 @@ namespace SG03.UI
         [SerializeField] private VisualTreeAsset questPanelAsset;
         [SerializeField] private VisualTreeAsset dailyQuestContentAsset;
         [SerializeField] private VisualTreeAsset mainQuestContentAsset;
+        [SerializeField] private VisualTreeAsset thisWeekContentAsset;
+        [SerializeField] private VisualTreeAsset thisMonthContentAsset;
+        [SerializeField] private VisualTreeAsset next7DaysContentAsset;
+        [SerializeField] private VisualTreeAsset next30DaysContentAsset;
 
         [Header("Mailbox Panel Assets")]
         [SerializeField] private VisualTreeAsset mailboxContentAsset;
@@ -49,6 +52,7 @@ namespace SG03.UI
             this.LoadQuestPanelAsset();
             this.LoadDailyQuestContentAsset();
             this.LoadMainQuestContentAsset();
+            this.LoadDailyQuestTabContentAssets();
             this.LoadMailboxContentAsset();
             this.LoadInventoryContentAsset();
             this.LoadDeskContentBehaviour();
@@ -163,10 +167,6 @@ namespace SG03.UI
         private Button shopTab;
         private Button questTab;
 
-        // Quest popup menu
-        private PopupMenu questMenu;
-        private QuestType? activeQuestType;
-
         // Bottom buttons
         private Button btnPlay;
         private Button btnProfile;
@@ -214,15 +214,10 @@ namespace SG03.UI
             this.homeTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.homeTab));
             this.shopTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.shopTab));
 
-            // Quest tab — PopupMenu handles all hover/click/close logic
-            this.questMenu = new PopupMenu(root);
-
+            // Quest tab opens the panel with Daily Quest selected.
             if (this.questTab != null)
             {
-                this.questTab.RegisterCallback<MouseEnterEvent>(_ =>
-                    this.questMenu.Show(this.questTab, this.GetQuestMenuItems()));
-                this.questTab.RegisterCallback<ClickEvent>(_ =>
-                    this.questMenu.Show(this.questTab, this.GetQuestMenuItems()));
+                this.questTab.RegisterCallback<ClickEvent>(_ => this.OnQuestTabClicked());
             }
 
             // Bottom buttons
@@ -281,36 +276,28 @@ namespace SG03.UI
             selected.AddToClassList("lobby-tab--active");
         }
 
-        // ------------------------------------------------------------------
-        //  Quest popup menu items
-        // ------------------------------------------------------------------
-
-        /// <summary>
-        /// Build the quest menu item list with up-to-date IsActive states.
-        /// Called every time Show/Toggle is invoked so the active highlight
-        /// always reflects the currently-loaded quest type.
-        /// </summary>
-        private PopupMenuItem[] GetQuestMenuItems() => new[]
+        private void OnQuestTabClicked()
         {
-            new PopupMenuItem
-            {
-                Label    = "Daily Quest",
-                IsActive = this.activeQuestType == QuestType.Daily,
-                OnClick  = () => this.OnQuestMenuItemClicked(QuestType.Daily),
-            },
-            new PopupMenuItem
-            {
-                Label    = "Main Quest",
-                IsActive = this.activeQuestType == QuestType.Main,
-                OnClick  = () => this.OnQuestMenuItemClicked(QuestType.Main),
-            },
-        };
-
-        private void OnQuestMenuItemClicked(QuestType type)
-        {
-            this.activeQuestType = type;
             this.OnTopTabClicked(this.questTab);
-            this.LoadQuestPanel(type);
+            this.LoadQuestPanel(QuestType.Daily);
+        }
+
+        private void LoadDailyQuestTabContentAssets()
+        {
+#if UNITY_EDITOR
+            if (this.thisWeekContentAsset == null)
+                this.thisWeekContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                    "Assets/_sg03/UI/Quest/DailyQuest/ThisWeekContent.uxml");
+            if (this.thisMonthContentAsset == null)
+                this.thisMonthContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                    "Assets/_sg03/UI/Quest/DailyQuest/ThisMonthContent.uxml");
+            if (this.next7DaysContentAsset == null)
+                this.next7DaysContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                    "Assets/_sg03/UI/Quest/DailyQuest/Next7DaysContent.uxml");
+            if (this.next30DaysContentAsset == null)
+                this.next30DaysContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                    "Assets/_sg03/UI/Quest/DailyQuest/Next30DaysContent.uxml");
+#endif
         }
 
         private void LoadQuestPanel(QuestType type)
@@ -332,7 +319,11 @@ namespace SG03.UI
             var questPanel = new QuestPanelUI(
                 panelRoot,
                 this.dailyQuestContentAsset,
-                this.mainQuestContentAsset);
+                this.mainQuestContentAsset,
+                this.thisWeekContentAsset,
+                this.thisMonthContentAsset,
+                this.next7DaysContentAsset,
+                this.next30DaysContentAsset);
 
             questPanel.ShowQuest(type);
         }
