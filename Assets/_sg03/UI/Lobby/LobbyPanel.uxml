@@ -5,8 +5,6 @@
          editor-extension-mode="False">
 
     <Style src="LobbyPanel.uss" />
-    <Style src="../Components/PopupMenu.uss" />
-
     <!-- Full-screen root — fills the panel, shows letterbox/pillarbox bars -->
     <ui:VisualElement name="LobbyRoot" class="lobby-root">
 

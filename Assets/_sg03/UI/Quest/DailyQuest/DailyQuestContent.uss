@@ -35,9 +35,68 @@
     min-height: 260px;
 }
 
+.dq-range-tabs {
+    flex-direction: row;
+    margin-bottom: 14px;
+}
+
+.dq-range-tab {
+    color: rgb(155, 170, 215);
+    background-color: rgba(30, 36, 58, 0.75);
+    border-color: rgba(80, 100, 160, 0.35);
+    border-width: 1px;
+    border-radius: 7px;
+    font-size: 12px;
+    margin-right: 8px;
+    padding: 6px 12px;
+}
+
+.dq-range-tab:hover {
+    background-color: rgba(50, 65, 105, 0.9);
+}
+
+.dq-range-tab--active {
+    color: rgb(220, 235, 255);
+    background-color: rgba(60, 105, 210, 0.65);
+    border-color: rgba(105, 165, 255, 0.85);
+}
+
+.dq-day-grid-scroll {
+    flex: 1;
+    min-height: 260px;
+}
+
+.dq-day-grid-container {
+    flex: 1;
+    min-height: 260px;
+}
+
+.dq-tab-content {
+    flex: 1;
+    min-height: 260px;
+}
+
+.dq-coming-soon {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(18, 22, 36, 1);
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.2);
+    border-radius: 12px;
+}
+
+.dq-coming-soon__label {
+    color: rgb(155, 170, 215);
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
 /* ---- Day card ---- */
 .dq-day-card {
     flex: 1;
+    flex-shrink: 1;
+    min-width: 0;
     flex-direction: column;
     align-items: stretch;
     background-color: rgba(18, 22, 36, 1);
