@@ -4,6 +4,7 @@ using System.Globalization;
 using UnityEngine.UIElements;
 using SaiGame.Services;
 using SG03.Quest;
+using SG03.UI.Components;
 
 namespace SG03.UI
 {
@@ -30,7 +31,8 @@ namespace SG03.UI
         private readonly Button questDetailStartButton;
         private readonly Button questDetailCheckButton;
         private readonly Button questDetailClaimButton;
-        private readonly Label serverTimeLabel;
+        private readonly VisualElement serverTimeLabel;
+        private readonly ServerTimeLabelComponent serverTime;
         private readonly VisualTreeAsset thisWeekAsset;
         private readonly VisualTreeAsset thisMonthAsset;
         private readonly VisualTreeAsset next7DaysAsset;
@@ -85,7 +87,9 @@ namespace SG03.UI
             this.questDetailStartButton = root.Q<Button>("QuestDetailStartButton");
             this.questDetailCheckButton = root.Q<Button>("QuestDetailCheckButton");
             this.questDetailClaimButton = root.Q<Button>("QuestDetailClaimButton");
-            this.serverTimeLabel = root.Q<Label>("ServerTimeLabel");
+            this.serverTimeLabel = root.Q("ServerTimeLabel");
+            if (this.serverTimeLabel != null)
+                this.serverTime = new ServerTimeLabelComponent(this.serverTimeLabel);
 
             this.thisWeekTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisWeek));
             this.next7DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next7Days));
@@ -97,8 +101,6 @@ namespace SG03.UI
             this.closeQuestDetailButton?.RegisterCallback<ClickEvent>(_ => this.HideQuestDetail());
             this.UpdateAssignAheadButtonVisibility();
             this.UpdateHeaderAlignment();
-            this.UpdateServerTime();
-            this.serverTimeLabel?.schedule.Execute(this.UpdateServerTime).Every(1000);
 
             QuestDailyManager manager = UnityEngine.Object.FindFirstObjectByType<QuestDailyManager>(UnityEngine.FindObjectsInactive.Include);
             if (manager == null) { this.ShowSelectedTab(); return; }
@@ -133,16 +135,6 @@ namespace SG03.UI
         }
 
         private void OnAnyListUpdated() => this.Render();
-
-        private void UpdateServerTime()
-        {
-            if (this.serverTimeLabel == null) return;
-
-            SaiServer server = SaiServer.Instance;
-            this.serverTimeLabel.text = server != null && server.HasServerTime
-                ? server.CurrentServerTime.ToString("MMM dd | HH:mm:ss", CultureInfo.InvariantCulture)
-                : "--- -- | --:--:--";
-        }
 
         private void LoadPoolChoices()
         {

@@ -9,7 +9,7 @@
     <ui:VisualElement class="dq-content">
         <ui:VisualElement class="dq-header">
             <ui:Label text="Daily Quest" class="dq-header__title" />
-            <ui:Label name="ServerTimeLabel" class="dq-header__server-time" />
+            <ui:VisualElement name="ServerTimeLabel" class="dq-header__server-time" />
         </ui:VisualElement>
 
         <ui:VisualElement class="dq-range-tabs">

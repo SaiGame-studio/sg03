@@ -241,6 +241,7 @@
 
 /* ---- Header ---- */
 .dq-header {
+    position: relative;
     flex-direction: row;
     align-items: center;
     padding-bottom: 16px;
@@ -257,9 +258,15 @@
 }
 
 .dq-header__server-time {
-    margin-left: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
     width: 150px;
     min-width: 150px;
+    max-width: 150px;
+    height: 22px;
     color: rgb(160, 180, 225);
     font-size: 13px;
     -unity-text-align: middle-right;
