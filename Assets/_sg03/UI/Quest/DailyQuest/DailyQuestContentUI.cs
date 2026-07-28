@@ -22,6 +22,7 @@ namespace SG03.UI
         private readonly Button next30DaysTab;
         private readonly Button thisMonthTab;
         private readonly DropdownField poolDropdown;
+        private readonly Button assignAheadButton;
         private readonly Button refreshButton;
         private readonly VisualTreeAsset thisWeekAsset;
         private readonly VisualTreeAsset thisMonthAsset;
@@ -29,13 +30,15 @@ namespace SG03.UI
         private readonly VisualTreeAsset next30DaysAsset;
         private QuestList[] lists;
         private readonly List<QuestList> poolLists = new List<QuestList>();
+        private readonly Dictionary<QuestList, DailyQuestPoolData> poolDataByList = new Dictionary<QuestList, DailyQuestPoolData>();
+        private readonly Dictionary<QuestList, DailyQuestEntryData[]> next7DaysCache = new Dictionary<QuestList, DailyQuestEntryData[]>();
+        private readonly Dictionary<QuestList, DailyQuestEntryData[]> next30DaysCache = new Dictionary<QuestList, DailyQuestEntryData[]>();
         private QuestList selectedPoolList;
         private bool hasCheckedOnOpen;
         private DateRange selectedRange = DateRange.Next7Days;
         private DateTime selectedDay = DateTime.Today;
 
-        // Vietnamese weekday names (Monday=2 … Saturday=7, Sunday=CN)
-        private static readonly string[] DayNames = { "CN", "2", "3", "4", "5", "6", "7" };
+        private static readonly string[] DayNames = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 
         private enum DateRange
         {
@@ -62,6 +65,7 @@ namespace SG03.UI
             this.next30DaysTab  = root.Q<Button>("Next30DaysTab");
             this.thisMonthTab   = root.Q<Button>("ThisMonthTab");
             this.poolDropdown   = root.Q<DropdownField>("PoolDropdown");
+            this.assignAheadButton = root.Q<Button>("AssignAheadButton");
             this.refreshButton  = root.Q<Button>("RefreshButton");
 
             this.thisWeekTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisWeek));
@@ -69,7 +73,9 @@ namespace SG03.UI
             this.next30DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next30Days));
             this.thisMonthTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisMonth));
             this.poolDropdown?.RegisterValueChangedCallback(this.OnPoolChanged);
+            this.assignAheadButton?.RegisterCallback<ClickEvent>(_ => this.AssignAhead());
             this.refreshButton?.RegisterCallback<ClickEvent>(_ => this.RefreshSelectedPool());
+            this.UpdateAssignAheadButtonVisibility();
 
             QuestDailyManager manager = UnityEngine.Object.FindFirstObjectByType<QuestDailyManager>(UnityEngine.FindObjectsInactive.Include);
             if (manager == null) { this.ShowSelectedTab(); return; }
@@ -129,6 +135,7 @@ namespace SG03.UI
 
             QuestList previousSelection = this.selectedPoolList;
             this.poolLists.Clear();
+            this.poolDataByList.Clear();
             List<string> choices = new List<string>();
 
             foreach (QuestList list in this.lists)
@@ -149,6 +156,7 @@ namespace SG03.UI
                 }
 
                 this.poolLists.Add(list);
+                if (pool != null) this.poolDataByList[list] = pool;
                 choices.Add(pool == null
                     ? list.PoolKey
                     : $"{pool.display_name} ({pool.pool_key})");
@@ -160,6 +168,7 @@ namespace SG03.UI
 
             this.selectedPoolList = selectedIndex >= 0 ? this.poolLists[selectedIndex] : null;
             this.poolDropdown.index = selectedIndex;
+            this.UpdateAssignAheadButtonVisibility();
             this.Render();
         }
 
@@ -169,11 +178,75 @@ namespace SG03.UI
             if (index < 0 || index >= this.poolLists.Count) return;
 
             this.selectedPoolList = this.poolLists[index];
-            this.RefreshSelectedPool();
+            if (this.selectedRange == DateRange.Next7Days || this.selectedRange == DateRange.Next30Days)
+                this.LoadSelectedRange(null, forceRefresh: false);
+            else
+                this.RefreshSelectedPool();
+        }
+
+        private void AssignAhead()
+        {
+            this.LoadSelectedRange(this.assignAheadButton, forceRefresh: true);
+        }
+
+        private void LoadSelectedRange(Button triggerButton, bool forceRefresh)
+        {
+            if (this.selectedRange != DateRange.Next7Days && this.selectedRange != DateRange.Next30Days) return;
+            if (this.selectedPoolList == null || SaiServer.Instance?.DailyQuest == null) return;
+            if (!this.poolDataByList.TryGetValue(this.selectedPoolList, out DailyQuestPoolData pool)) return;
+
+            QuestList targetList = this.selectedPoolList;
+            Dictionary<QuestList, DailyQuestEntryData[]> cache = this.selectedRange == DateRange.Next30Days
+                ? this.next30DaysCache
+                : this.next7DaysCache;
+
+            if (!forceRefresh && cache.TryGetValue(targetList, out DailyQuestEntryData[] cachedEntries))
+            {
+                targetList.SetEntries(cachedEntries);
+                return;
+            }
+
+            int daysAhead = this.selectedRange == DateRange.Next30Days ? 30 : 7;
+            triggerButton?.SetEnabled(false);
+            SaiServer.Instance.DailyQuest.AssignAhead(
+                dqPoolId: pool.id,
+                daysAhead: daysAhead,
+                onSuccess: response =>
+                {
+                    triggerButton?.SetEnabled(true);
+                    DailyQuestEntryData[] entries = this.FlattenAssignedDays(response?.days);
+                    cache[targetList] = entries;
+                    targetList.SetEntries(entries);
+                },
+                onError: error =>
+                {
+                    triggerButton?.SetEnabled(true);
+                    UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Assign ahead failed ({pool.pool_key}): {error}");
+                }
+            );
+        }
+
+        private DailyQuestEntryData[] FlattenAssignedDays(DailyDayData[] days)
+        {
+            if (days == null) return Array.Empty<DailyQuestEntryData>();
+
+            List<DailyQuestEntryData> entries = new List<DailyQuestEntryData>();
+            foreach (DailyDayData day in days)
+            {
+                if (day?.quests == null) continue;
+                entries.AddRange(day.quests);
+            }
+            return entries.ToArray();
         }
 
         private void RefreshSelectedPool()
         {
+            if (this.selectedRange == DateRange.Next7Days || this.selectedRange == DateRange.Next30Days)
+            {
+                this.LoadSelectedRange(this.refreshButton, forceRefresh: true);
+                return;
+            }
+
             this.selectedPoolList?.Refresh();
             this.Render();
         }
@@ -182,7 +255,19 @@ namespace SG03.UI
         {
             this.selectedRange = range;
             this.UpdateRangeTabStates();
+            this.UpdateAssignAheadButtonVisibility();
             this.ShowSelectedTab();
+
+            if (range == DateRange.Next7Days || range == DateRange.Next30Days)
+                this.LoadSelectedRange(null, forceRefresh: false);
+        }
+
+        private void UpdateAssignAheadButtonVisibility()
+        {
+            if (this.assignAheadButton == null) return;
+            bool isVisible = this.selectedRange == DateRange.Next7Days || this.selectedRange == DateRange.Next30Days;
+            this.assignAheadButton.style.display = isVisible ? DisplayStyle.Flex : DisplayStyle.None;
+            this.assignAheadButton.SetEnabled(isVisible && this.selectedPoolList != null && this.poolDataByList.ContainsKey(this.selectedPoolList));
         }
 
         private void ShowSelectedTab()
@@ -203,7 +288,7 @@ namespace SG03.UI
             content.style.alignSelf = Align.Stretch;
             this.tabContent.Add(content);
 
-            if (this.selectedRange != DateRange.Next7Days || this.lists == null) return;
+            if ((this.selectedRange != DateRange.Next7Days && this.selectedRange != DateRange.Next30Days) || this.lists == null) return;
 
             this.weekGrid = content.Q("WeekGrid");
             this.daySelector = content.Q("DaySelector");
@@ -271,7 +356,8 @@ namespace SG03.UI
                 }
             }
 
-            this.BuildDaySelector();
+            int displayedDayCount = this.selectedRange == DateRange.Next30Days ? 30 : 7;
+            this.BuildDaySelector(byDate, displayedDayCount);
 
             // No data loaded at all → show empty state.
             if (totalLoaded == 0)
@@ -337,20 +423,40 @@ namespace SG03.UI
             }
         }
 
-        private void BuildDaySelector()
+        private void BuildDaySelector(Dictionary<string, List<DailyQuestEntryData>> questsByDate, int dayCount)
         {
             if (this.daySelector == null) return;
 
             this.daySelector.Clear();
             DateTime today = DateTime.Today;
-            if (this.selectedDay < today || this.selectedDay > today.AddDays(6))
+            if (this.selectedDay < today || this.selectedDay > today.AddDays(dayCount - 1))
                 this.selectedDay = today;
 
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < dayCount; i++)
             {
                 DateTime day = today.AddDays(i);
-                Button dayButton = new Button { text = $"{DayNames[(int)day.DayOfWeek]}\n{day:dd/MM}" };
+                string dayKey = day.ToString("yyyy-MM-dd");
+                questsByDate.TryGetValue(dayKey, out List<DailyQuestEntryData> quests);
+                int questCount = quests?.Count ?? 0;
+                string questLabel = questCount == 1 ? "1 quest" : $"{questCount} quests";
+                Button dayButton = new Button();
                 dayButton.AddToClassList("dq-day-selector__button");
+
+                VisualElement dayHeader = new VisualElement();
+                dayHeader.AddToClassList("dq-day-selector__header");
+                Label dayName = new Label(DayNames[(int)day.DayOfWeek]);
+                dayName.AddToClassList("dq-day-selector__weekday");
+                Label date = new Label(day.ToString("dd/MM"));
+                date.AddToClassList("dq-day-selector__date");
+                dayHeader.Add(dayName);
+                dayHeader.Add(date);
+                dayButton.Add(dayHeader);
+
+                Label questCountLabel = new Label(questLabel);
+                questCountLabel.AddToClassList("dq-day-selector__quest-count");
+                if (questCount == 0) questCountLabel.AddToClassList("dq-day-selector__quest-count--empty");
+                dayButton.Add(questCountLabel);
+
                 if (day == today) dayButton.AddToClassList("dq-day-selector__button--today");
                 if (day == this.selectedDay) dayButton.AddToClassList("dq-day-selector__button--active");
                 dayButton.clicked += () =>
@@ -393,8 +499,12 @@ namespace SG03.UI
 
             string questId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
             string assignmentId = entry.assignment?.id;
+            string assignedDate = entry.assignment?.assigned_date;
+            bool assignedInFuture = IsInFuture(assignedDate);
             QuestList ownerList = this.FindOwnerList(questId);
-            Button actionButton = this.BuildQuestActionButton(entry.status, assignmentId, questId, ownerList);
+            VisualElement actionElement = entry.status == "not_started" && assignedInFuture
+                ? this.BuildNotAvailableLabel()
+                : this.BuildQuestActionButton(entry.status, assignmentId, questId, ownerList);
 
             string statusText = this.StatusLabel(entry.status);
             if (!string.IsNullOrEmpty(statusText))
@@ -405,10 +515,8 @@ namespace SG03.UI
                 bottom.Add(statusLabel);
             }
 
-            string assignedDate = entry.assignment?.assigned_date;
             string expiresAt    = entry.assignment?.expires_at;
 
-            bool assignedInFuture = IsInFuture(assignedDate);
             if (assignedInFuture)
             {
                 // Quest hasn't started yet — show when it will begin.
@@ -424,13 +532,25 @@ namespace SG03.UI
             }
 
             // The action is always the last element so it stays below status and timing details.
-            if (actionButton != null) bottom.Add(actionButton);
+            if (actionElement != null) bottom.Add(actionElement);
 
             item.Add(bottom);
             return item;
         }
 
-        private Button BuildQuestActionButton(string status, string assignmentId, string questId, QuestList ownerList)
+        private Label BuildNotAvailableLabel()
+        {
+            Label label = new Label("Not available yet");
+            label.AddToClassList("dq-quest-item__action-btn");
+            label.AddToClassList("dq-quest-item__availability");
+            return label;
+        }
+
+        private Button BuildQuestActionButton(
+            string status,
+            string assignmentId,
+            string questId,
+            QuestList ownerList)
         {
             if (string.IsNullOrEmpty(assignmentId)) return null;
 

@@ -43,6 +43,8 @@
 
 .dq-day-selector__button {
     flex: 1;
+    flex-direction: column;
+    align-items: stretch;
     min-height: 58px;
     margin-right: 6px;
     color: rgb(160, 175, 220);
@@ -64,14 +66,79 @@
 }
 
 .dq-day-selector__button--today {
-    border-color: rgba(90, 150, 255, 0.7);
-    color: rgb(130, 180, 255);
+    color: rgb(225, 240, 255);
+    background-color: rgba(45, 105, 225, 0.75);
+    border-color: rgb(115, 180, 255);
+    border-width: 2px;
 }
 
 .dq-day-selector__button--active {
     color: rgb(220, 235, 255);
     background-color: rgba(60, 105, 210, 0.65);
     border-color: rgba(105, 165, 255, 0.85);
+}
+
+.dq-day-selector__button--today.dq-day-selector__button--active {
+    background-color: rgb(55, 120, 245);
+    border-color: rgb(160, 210, 255);
+}
+
+.dq-day-selector__header {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.dq-day-selector__weekday {
+    -unity-text-align: middle-left;
+}
+
+.dq-day-selector__date {
+    -unity-text-align: middle-right;
+}
+
+.dq-day-selector__quest-count {
+    width: 100%;
+    margin-top: 2px;
+    -unity-text-align: middle-center;
+}
+
+.dq-day-selector__quest-count--empty {
+    color: rgb(105, 115, 140);
+}
+
+.dq-day-selector--30 {
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: 160px;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: space-between;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.dq-day-grid-container--30 {
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.dq-day-grid-container--30 .dq-quest-grid-scroll {
+    min-height: 0;
+}
+
+.dq-day-selector--30 .dq-day-selector__button {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 9.2%;
+    width: 9.2%;
+    height: 40px;
+    min-height: 40px;
+    margin-right: 0;
+    margin-bottom: 4px;
+    font-size: 10px;
+    padding: 2px 4px;
 }
 
 .dq-quest-grid {
@@ -154,9 +221,24 @@
 
 .dq-pool-dropdown {
     min-width: 180px;
-    margin-left: auto;
+    margin-left: 8px;
     color: rgb(155, 170, 215);
     font-size: 12px;
+}
+
+.dq-assign-ahead-button {
+    margin-left: auto;
+    color: rgb(220, 235, 255);
+    background-color: rgba(50, 90, 190, 0.8);
+    border-color: rgba(105, 165, 255, 0.85);
+    border-width: 1px;
+    border-radius: 7px;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.dq-assign-ahead-button:hover {
+    background-color: rgba(70, 115, 220, 0.85);
 }
 
 .dq-pool-dropdown .unity-base-field__input {
@@ -371,6 +453,13 @@
     color: rgb(180, 120, 100);
     -unity-text-align: middle-left;
     margin-top: 3px;
+}
+
+.dq-quest-item__availability {
+    color: rgb(255, 190, 100);
+    background-color: rgba(110, 75, 15, 0.65);
+    border-color: rgba(230, 170, 45, 0.9);
+    -unity-text-align: middle-center;
 }
 
 /* ---- Rewards row ---- */
