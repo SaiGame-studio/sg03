@@ -24,6 +24,9 @@ namespace SG03.UI
         private readonly DropdownField poolDropdown;
         private readonly Button assignAheadButton;
         private readonly Button refreshButton;
+        private readonly VisualElement questDetailPanel;
+        private readonly VisualElement questDetailContent;
+        private readonly Button closeQuestDetailButton;
         private readonly VisualTreeAsset thisWeekAsset;
         private readonly VisualTreeAsset thisMonthAsset;
         private readonly VisualTreeAsset next7DaysAsset;
@@ -36,6 +39,7 @@ namespace SG03.UI
         private QuestList selectedPoolList;
         private DailyTimeframe thisWeekTimeframe;
         private DailyTimeframeResponse thisWeekResponse;
+        private int questDetailRequestVersion;
         private bool hasCheckedOnOpen;
         private DateRange selectedRange = DateRange.Next7Days;
         private DateTime selectedDay = DateTime.Today;
@@ -69,6 +73,9 @@ namespace SG03.UI
             this.poolDropdown   = root.Q<DropdownField>("PoolDropdown");
             this.assignAheadButton = root.Q<Button>("AssignAheadButton");
             this.refreshButton  = root.Q<Button>("RefreshButton");
+            this.questDetailPanel = root.Q("QuestDetailPanel");
+            this.questDetailContent = root.Q("QuestDetailContent");
+            this.closeQuestDetailButton = root.Q<Button>("CloseQuestDetailButton");
 
             this.thisWeekTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisWeek));
             this.next7DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next7Days));
@@ -77,6 +84,7 @@ namespace SG03.UI
             this.poolDropdown?.RegisterValueChangedCallback(this.OnPoolChanged);
             this.assignAheadButton?.RegisterCallback<ClickEvent>(_ => this.AssignAhead());
             this.refreshButton?.RegisterCallback<ClickEvent>(_ => this.RefreshSelectedPool());
+            this.closeQuestDetailButton?.RegisterCallback<ClickEvent>(_ => this.HideQuestDetail());
             this.UpdateAssignAheadButtonVisibility();
 
             QuestDailyManager manager = UnityEngine.Object.FindFirstObjectByType<QuestDailyManager>(UnityEngine.FindObjectsInactive.Include);
@@ -564,6 +572,7 @@ namespace SG03.UI
         {
             VisualElement item = new VisualElement();
             item.AddToClassList("dq-quest-item");
+            item.RegisterCallback<ClickEvent>(_ => this.ShowQuestDetail(entry));
 
             Label nameLabel = new Label(entry.quest?.name ?? "—");
             nameLabel.AddToClassList("dq-quest-item__name");
@@ -630,6 +639,349 @@ namespace SG03.UI
             return label;
         }
 
+        private void ShowQuestDetail(DailyQuestEntryData entry)
+        {
+            if (entry == null || this.questDetailPanel == null || this.questDetailContent == null) return;
+
+            int requestVersion = ++this.questDetailRequestVersion;
+            if (this.questDetailPanel.ClassListContains("dq-quest-detail-panel--open"))
+            {
+                this.HideQuestDetail();
+                this.questDetailPanel.schedule.Execute(() =>
+                {
+                    if (requestVersion == this.questDetailRequestVersion)
+                        this.OpenQuestDetailAndLoadClaim(entry, requestVersion);
+                }).StartingIn(260);
+                return;
+            }
+
+            this.OpenQuestDetailAndLoadClaim(entry, requestVersion);
+        }
+
+        private void OpenQuestDetailAndLoadClaim(DailyQuestEntryData entry, int requestVersion)
+        {
+            this.OpenQuestDetail(entry);
+            this.LoadQuestClaim(entry, requestVersion);
+        }
+
+        private void OpenQuestDetail(DailyQuestEntryData entry)
+        {
+            if (entry == null || this.questDetailPanel == null || this.questDetailContent == null) return;
+
+            this.questDetailContent.Clear();
+            this.questDetailContent.Add(this.CreateDetailLabel(entry.quest?.name ?? "Quest", "dq-quest-detail__name"));
+            if (!string.IsNullOrEmpty(entry.quest?.description))
+                this.questDetailContent.Add(this.CreateDetailLabel(entry.quest.description, "dq-quest-detail__description"));
+
+            this.AddDetailSection("Status");
+            string statusLabel = this.StatusLabel(entry.status);
+            this.AddDetailRow("Status", string.IsNullOrEmpty(statusLabel) ? entry.status : statusLabel);
+            this.AddDetailRow("Quest type", entry.quest?.quest_type);
+            this.AddDetailRow("Code", entry.quest?.code_name);
+            this.AddDetailRow("Quest ID", entry.quest?.id ?? entry.assignment?.quest_definition_id);
+            this.AddConditionDetails(entry.quest?.conditions);
+
+            this.AddDetailSection("Assignment");
+            this.AddDetailRow("Assignment ID", entry.assignment?.id);
+            this.AddDetailRow("Pool ID", entry.assignment?.pool_id);
+            this.AddDetailRow("Assigned", entry.assignment?.assigned_date);
+            this.AddDetailRow("Expires", entry.assignment?.expires_at);
+            this.AddDetailRow("Created", entry.assignment?.created_at);
+
+            this.AddDetailSection("Progress");
+            this.AddDetailRow("Progress status", entry.progress?.status);
+            this.AddDetailRow("Completed", entry.progress?.completed_at);
+            this.AddDetailRow("Claimed", entry.progress?.claimed_at);
+            this.AddDetailRow("Reset", entry.progress?.reset_at);
+            this.AddDetailRow("Progress data", entry.progress?.progress_data_json);
+
+            this.AddDetailSection("Expected rewards");
+            if (entry.rewards == null || entry.rewards.Length == 0)
+                this.AddDetailRow("Rewards", "No reward data");
+            else
+            {
+                foreach (DailyRewardData reward in entry.rewards)
+                {
+                    string quantity = reward.quantity_min == reward.quantity_max
+                        ? reward.quantity_min.ToString()
+                        : $"{reward.quantity_min}–{reward.quantity_max}";
+                    this.AddRewardDetail(
+                        reward.reward_type,
+                        reward.item_definition_id,
+                        quantity,
+                        reward.item_definition);
+                }
+            }
+
+            this.AddClaimedRewardDetails(entry);
+
+            this.questDetailPanel.RemoveFromClassList("dq-quest-detail-panel--hidden");
+            this.questDetailPanel.AddToClassList("dq-quest-detail-panel--open");
+        }
+
+        private void LoadQuestClaim(DailyQuestEntryData entry, int requestVersion)
+        {
+            string progressId = entry.progress?.id;
+            QuestHistory history = SaiServer.Instance?.QuestHistory;
+            if (string.IsNullOrEmpty(progressId) || history == null) return;
+
+            history.GetClaims(
+                limit: 50,
+                progressId: progressId,
+                onSuccess: response =>
+                {
+                    if (requestVersion != this.questDetailRequestVersion) return;
+
+                    QuestClaimRecord claim = null;
+                    if (response?.claims != null)
+                    {
+                        foreach (QuestClaimRecord candidate in response.claims)
+                        {
+                            if (candidate?.progress_id == progressId)
+                            {
+                                claim = candidate;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (claim != null) this.OpenQuestClaimDetail(claim, entry);
+                },
+                onError: error => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Load quest claim failed ({progressId}): {error}")
+            );
+        }
+
+        private void OpenQuestClaimDetail(QuestClaimRecord claim, DailyQuestEntryData entry)
+        {
+            if (claim == null || this.questDetailContent == null) return;
+
+            QuestDefinitionData quest = claim.quest_definition;
+            this.questDetailContent.Clear();
+            this.questDetailContent.Add(this.CreateDetailLabel(quest?.name ?? "Quest claim", "dq-quest-detail__name"));
+            if (!string.IsNullOrEmpty(quest?.description))
+                this.questDetailContent.Add(this.CreateDetailLabel(quest.description, "dq-quest-detail__description"));
+
+            this.AddDetailSection("Claim");
+            this.AddDetailRow("Status", "Claimed");
+            this.AddDetailRow("Claim ID", claim.id);
+            this.AddDetailRow("Progress ID", claim.progress_id);
+            this.AddDetailRow("Claimed at", claim.claimed_at);
+            this.AddDetailRow("Idempotency key", claim.idempotency_key);
+
+            this.AddDetailSection("Quest");
+            this.AddDetailRow("Quest type", quest?.quest_type);
+            this.AddDetailRow("Code", quest?.code_name);
+            this.AddDetailRow("Quest ID", claim.quest_definition_id);
+            this.AddConditionDetails(quest?.conditions);
+
+            this.AddDetailSection("Expected rewards");
+            if (quest?.rewards == null || quest.rewards.Length == 0)
+                this.AddDetailRow("Rewards", "No reward data");
+            else
+            {
+                foreach (QuestReward reward in quest.rewards)
+                {
+                    if (reward == null) continue;
+                    int min = reward.quantity_min > 0
+                        ? reward.quantity_min
+                        : (reward.quantity > 0 ? reward.quantity : reward.amount);
+                    int max = reward.quantity_max > 0 ? reward.quantity_max : min;
+                    string quantity = min == max ? min.ToString() : $"{min}–{max}";
+                    this.AddRewardDetail(
+                        reward.reward_type,
+                        reward.item_definition_id,
+                        quantity,
+                        this.FindItemDefinition(entry, reward.item_definition_id));
+                }
+            }
+
+            this.AddDetailSection("Received rewards");
+            if (claim.rewards_granted == null || claim.rewards_granted.Length == 0)
+                this.AddDetailRow("Rewards", "No granted reward data");
+            else
+            {
+                foreach (ClaimQuestGrantedReward reward in claim.rewards_granted)
+                {
+                    if (reward == null) continue;
+                    int quantity = reward.quantity > 0 ? reward.quantity : reward.amount;
+                    this.AddRewardDetail(
+                        reward.reward_type,
+                        reward.item_definition_id,
+                        quantity.ToString(),
+                        this.FindItemDefinition(entry, reward.item_definition_id));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Daily assignments include resolved item definitions. Match by ID so the compact
+        /// reward objects returned by quest-claims can show readable item information.
+        /// </summary>
+        private ItemDefinitionData FindItemDefinition(DailyQuestEntryData entry, string itemDefinitionId)
+        {
+            if (string.IsNullOrEmpty(itemDefinitionId)) return null;
+
+            if (entry?.rewards != null)
+            {
+                foreach (DailyRewardData reward in entry.rewards)
+                {
+                    if (reward?.item_definition_id == itemDefinitionId && reward.item_definition != null)
+                        return reward.item_definition;
+                }
+            }
+
+            InventoryItemData[] items = SaiServer.Instance?.PlayerItem?.CurrentInventory?.items;
+            if (items == null) return null;
+
+            foreach (InventoryItemData item in items)
+            {
+                if (item?.item_definition_id == itemDefinitionId && item.definition != null)
+                    return item.definition;
+            }
+
+            return null;
+        }
+
+        private void AddRewardDetail(
+            string rewardType,
+            string itemDefinitionId,
+            string quantity,
+            ItemDefinitionData definition)
+        {
+            if (definition == null)
+            {
+                this.AddDetailRow(itemDefinitionId ?? rewardType ?? "Reward", quantity);
+                return;
+            }
+
+            VisualElement card = new VisualElement();
+            card.AddToClassList("dq-quest-detail__reward");
+
+            string itemName = !string.IsNullOrEmpty(definition.name)
+                ? definition.name
+                : (!string.IsNullOrEmpty(definition.item_code) ? definition.item_code : "Item");
+            card.Add(this.CreateDetailLabel($"{itemName} x {quantity}", "dq-quest-detail__reward-name"));
+
+            if (!string.IsNullOrEmpty(definition.item_code))
+                card.Add(this.CreateDetailLabel($"Code: {definition.item_code}", "dq-quest-detail__reward-info"));
+
+            string classification = "";
+            if (!string.IsNullOrEmpty(definition.category)) classification = definition.category;
+            if (!string.IsNullOrEmpty(definition.rarity))
+                classification = string.IsNullOrEmpty(classification)
+                    ? definition.rarity
+                    : $"{classification} / {definition.rarity}";
+            if (!string.IsNullOrEmpty(classification))
+                card.Add(this.CreateDetailLabel(classification, "dq-quest-detail__reward-info"));
+
+            string description = definition.ParsedMetadata?.description;
+            if (string.IsNullOrEmpty(description)) description = definition.ParsedMetadata?.flavor_text;
+            if (!string.IsNullOrEmpty(description))
+                card.Add(this.CreateDetailLabel(description, "dq-quest-detail__reward-info"));
+
+            card.Add(this.CreateDetailLabel($"Quantity: {quantity}", "dq-quest-detail__reward-info"));
+            this.questDetailContent.Add(card);
+        }
+
+        private void HideQuestDetail()
+        {
+            if (this.questDetailPanel == null) return;
+            this.questDetailPanel.RemoveFromClassList("dq-quest-detail-panel--open");
+            this.questDetailPanel.AddToClassList("dq-quest-detail-panel--hidden");
+        }
+
+        private void AddDetailSection(string text)
+        {
+            this.questDetailContent.Add(this.CreateDetailLabel(text, "dq-quest-detail__section"));
+        }
+
+        private void AddConditionDetails(QuestConditions conditions)
+        {
+            if (conditions?.clauses == null || conditions.clauses.Length == 0) return;
+
+            string operation = string.IsNullOrEmpty(conditions.operator_type)
+                ? "AND"
+                : conditions.operator_type.ToUpperInvariant();
+            this.AddDetailSection($"Conditions · {operation}");
+
+            foreach (QuestClause clause in conditions.clauses)
+            {
+                if (clause == null) continue;
+
+                VisualElement card = new VisualElement();
+                card.AddToClassList("dq-quest-detail__condition");
+                string clauseType = string.IsNullOrEmpty(clause.type) ? "Requirement" : clause.type;
+                card.Add(this.CreateDetailLabel(clauseType, "dq-quest-detail__condition-type"));
+                if (clause.target > 0)
+                    card.Add(this.CreateDetailLabel($"Target: {clause.target}", "dq-quest-detail__condition-rule"));
+
+                if (clause.items != null)
+                {
+                    foreach (QuestClauseItem item in clause.items)
+                    {
+                        if (item == null) continue;
+                        card.Add(this.CreateDetailLabel(
+                            $"Item: {item.item_definition_id} × {item.quantity}",
+                            "dq-quest-detail__condition-rule"));
+                    }
+                }
+
+                if (clause.packs != null && !string.IsNullOrEmpty(clause.packs.gacha_pack_id))
+                {
+                    card.Add(this.CreateDetailLabel(
+                        $"Gacha pack: {clause.packs.gacha_pack_id} × {clause.packs.quantity}",
+                        "dq-quest-detail__condition-rule"));
+                }
+
+                this.questDetailContent.Add(card);
+            }
+        }
+
+        private void AddClaimedRewardDetails(DailyQuestEntryData entry)
+        {
+            if (entry.status != "claimed") return;
+
+            ClaimQuestResponse claim = SaiServer.Instance?.QuestProgressor?.LastClaimedQuest;
+            string questId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
+            if (claim == null || claim.quest_definition_id != questId || claim.rewards_granted == null)
+            {
+                this.AddDetailSection("Received rewards");
+                this.AddDetailRow("Status", "Claimed — actual reward details are unavailable in this session.");
+                return;
+            }
+
+            this.AddDetailSection("Received rewards");
+            this.AddDetailRow("Claimed at", claim.claimed_at);
+            foreach (ClaimQuestGrantedReward reward in claim.rewards_granted)
+            {
+                if (reward == null) continue;
+                int quantity = reward.quantity > 0 ? reward.quantity : reward.amount;
+                this.AddRewardDetail(
+                    reward.reward_type,
+                    reward.item_definition_id,
+                    quantity.ToString(),
+                    this.FindItemDefinition(entry, reward.item_definition_id));
+            }
+        }
+
+        private void AddDetailRow(string key, string value)
+        {
+            if (string.IsNullOrEmpty(value)) return;
+
+            VisualElement row = new VisualElement();
+            row.AddToClassList("dq-quest-detail__row");
+            row.Add(this.CreateDetailLabel(key, "dq-quest-detail__key"));
+            row.Add(this.CreateDetailLabel(value, "dq-quest-detail__value"));
+            this.questDetailContent.Add(row);
+        }
+
+        private Label CreateDetailLabel(string text, string className)
+        {
+            Label label = new Label(text);
+            label.AddToClassList(className);
+            return label;
+        }
+
         private Button BuildQuestActionButton(
             string status,
             string assignmentId,
@@ -650,6 +1002,7 @@ namespace SG03.UI
             Button button = new Button { text = action };
             button.AddToClassList("dq-quest-item__action-btn");
             button.AddToClassList($"dq-quest-item__action-btn--{status}");
+            button.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
             button.clicked += () =>
             {
                 if (SaiServer.Instance?.QuestProgressor == null) return;

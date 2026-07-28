@@ -6,6 +6,162 @@
     flex-direction: column;
     width: 100%;
     align-self: stretch;
+    position: relative;
+    overflow: hidden;
+}
+
+.dq-quest-detail-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 380px;
+    flex-direction: column;
+    background-color: rgb(20, 26, 45);
+    border-left-width: 1px;
+    border-color: rgba(105, 165, 255, 0.6);
+    padding: 16px;
+    transition-property: right;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out;
+}
+
+.dq-quest-detail-panel--hidden {
+    right: -412px;
+}
+
+.dq-quest-detail-panel--open {
+    right: 0;
+}
+
+.dq-quest-detail-panel__header {
+    flex-direction: row;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom-width: 1px;
+    border-color: rgba(80, 100, 160, 0.35);
+}
+
+.dq-quest-detail-panel__title {
+    flex: 1;
+    color: rgb(220, 235, 255);
+    font-size: 17px;
+    -unity-font-style: bold;
+}
+
+.dq-quest-detail-panel__close {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: rgb(190, 205, 245);
+    background-color: rgba(50, 65, 105, 0.7);
+    border-color: rgba(105, 165, 255, 0.55);
+    border-width: 1px;
+    border-radius: 6px;
+    font-size: 20px;
+}
+
+.dq-quest-detail-panel__scroll {
+    flex: 1;
+    min-height: 0;
+}
+
+.dq-quest-detail-panel__content {
+    flex-direction: column;
+    padding-top: 14px;
+    padding-right: 4px;
+}
+
+.dq-quest-detail__name {
+    color: rgb(225, 235, 255);
+    font-size: 18px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 10px;
+}
+
+.dq-quest-detail__description {
+    color: rgb(170, 185, 220);
+    font-size: 12px;
+    white-space: normal;
+    margin-bottom: 14px;
+}
+
+.dq-quest-detail__section {
+    color: rgb(130, 180, 255);
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.dq-quest-detail__condition {
+    flex-direction: column;
+    background-color: rgba(35, 45, 75, 0.7);
+    border-left-width: 3px;
+    border-color: rgb(100, 160, 255);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+}
+
+.dq-quest-detail__condition-type {
+    color: rgb(220, 235, 255);
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.dq-quest-detail__condition-rule {
+    color: rgb(165, 185, 225);
+    font-size: 11px;
+    white-space: normal;
+    margin-top: 2px;
+}
+
+.dq-quest-detail__reward {
+    flex-direction: column;
+    background-color: rgba(42, 52, 82, 0.72);
+    border-left-width: 3px;
+    border-color: rgb(225, 178, 65);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+}
+
+.dq-quest-detail__reward-name {
+    color: rgb(255, 225, 140);
+    font-size: 12px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 3px;
+}
+
+.dq-quest-detail__reward-info {
+    color: rgb(175, 192, 230);
+    font-size: 11px;
+    white-space: normal;
+    margin-top: 1px;
+}
+
+.dq-quest-detail__row {
+    flex-direction: row;
+    padding: 4px 0;
+    border-bottom-width: 1px;
+    border-color: rgba(80, 100, 160, 0.16);
+}
+
+.dq-quest-detail__key {
+    width: 110px;
+    color: rgb(125, 145, 190);
+    font-size: 11px;
+}
+
+.dq-quest-detail__value {
+    flex: 1;
+    color: rgb(205, 215, 245);
+    font-size: 11px;
+    white-space: normal;
 }
 
 /* ---- Header ---- */

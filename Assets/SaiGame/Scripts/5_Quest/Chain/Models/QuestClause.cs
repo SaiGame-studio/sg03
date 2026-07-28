@@ -10,6 +10,7 @@ namespace SaiGame.Services
     {
         public string clause_id;
         public string type;
+        public int target;
         public QuestClauseItem[] items;
         public QuestClausePack packs;
     }
