@@ -27,6 +27,9 @@ namespace SG03.UI
         private readonly VisualElement questDetailPanel;
         private readonly VisualElement questDetailContent;
         private readonly Button closeQuestDetailButton;
+        private readonly Button questDetailStartButton;
+        private readonly Button questDetailCheckButton;
+        private readonly Button questDetailClaimButton;
         private readonly VisualTreeAsset thisWeekAsset;
         private readonly VisualTreeAsset thisMonthAsset;
         private readonly VisualTreeAsset next7DaysAsset;
@@ -76,6 +79,9 @@ namespace SG03.UI
             this.questDetailPanel = root.Q("QuestDetailPanel");
             this.questDetailContent = root.Q("QuestDetailContent");
             this.closeQuestDetailButton = root.Q<Button>("CloseQuestDetailButton");
+            this.questDetailStartButton = root.Q<Button>("QuestDetailStartButton");
+            this.questDetailCheckButton = root.Q<Button>("QuestDetailCheckButton");
+            this.questDetailClaimButton = root.Q<Button>("QuestDetailClaimButton");
 
             this.thisWeekTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisWeek));
             this.next7DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next7Days));
@@ -581,23 +587,17 @@ namespace SG03.UI
             if (entry.rewards != null && entry.rewards.Length > 0)
                 item.Add(this.BuildRewardRow(entry.rewards));
 
-            // Spacer pushes bottom content to the bottom of the card.
+            // Spacer pushes the status and timing details to the bottom of the card.
             VisualElement spacer = new VisualElement();
             spacer.AddToClassList("dq-quest-item__spacer");
             item.Add(spacer);
 
-            // Bottom section: claim button (if completed) then status label.
+            // Actions are kept in the Quest Detail panel footer.
             VisualElement bottom = new VisualElement();
             bottom.AddToClassList("dq-quest-item__bottom");
 
-            string questId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
-            string assignmentId = entry.assignment?.id;
             string assignedDate = entry.assignment?.assigned_date;
             bool assignedInFuture = IsInFuture(assignedDate);
-            QuestList ownerList = this.FindOwnerList(questId);
-            VisualElement actionElement = entry.status == "not_started" && assignedInFuture
-                ? this.BuildNotAvailableLabel()
-                : this.BuildQuestActionButton(entry.status, assignmentId, questId, ownerList);
 
             string statusText = this.StatusLabel(entry.status);
             if (!string.IsNullOrEmpty(statusText))
@@ -624,19 +624,8 @@ namespace SG03.UI
                 bottom.Add(expiresLabel);
             }
 
-            // The action is always the last element so it stays below status and timing details.
-            if (actionElement != null) bottom.Add(actionElement);
-
             item.Add(bottom);
             return item;
-        }
-
-        private Label BuildNotAvailableLabel()
-        {
-            Label label = new Label("Not available yet");
-            label.AddToClassList("dq-quest-item__action-btn");
-            label.AddToClassList("dq-quest-item__availability");
-            return label;
         }
 
         private void ShowQuestDetail(DailyQuestEntryData entry)
@@ -667,6 +656,8 @@ namespace SG03.UI
         private void OpenQuestDetail(DailyQuestEntryData entry)
         {
             if (entry == null || this.questDetailPanel == null || this.questDetailContent == null) return;
+
+            this.ConfigureQuestDetailActions(entry);
 
             this.questDetailContent.Clear();
             this.questDetailContent.Add(this.CreateDetailLabel(entry.quest?.name ?? "Quest", "dq-quest-detail__name"));
@@ -886,6 +877,7 @@ namespace SG03.UI
         private void HideQuestDetail()
         {
             if (this.questDetailPanel == null) return;
+            this.ClearQuestDetailActions();
             this.questDetailPanel.RemoveFromClassList("dq-quest-detail-panel--open");
             this.questDetailPanel.AddToClassList("dq-quest-detail-panel--hidden");
         }
@@ -982,59 +974,92 @@ namespace SG03.UI
             return label;
         }
 
-        private Button BuildQuestActionButton(
-            string status,
+        private void ConfigureQuestDetailActions(DailyQuestEntryData entry)
+        {
+            string assignmentId = entry.assignment?.id;
+            string questId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
+            QuestList ownerList = this.FindOwnerList(questId);
+            bool canStart = entry.status == "not_started" && !IsInFuture(entry.assignment?.assigned_date);
+            bool canCheck = entry.status == "in_progress";
+            bool canClaim = entry.status == "completed";
+
+            this.ConfigureQuestDetailAction(this.questDetailStartButton, "Start", canStart, entry, assignmentId, questId, ownerList);
+            this.ConfigureQuestDetailAction(this.questDetailCheckButton, "Check", canCheck, entry, assignmentId, questId, ownerList);
+            this.ConfigureQuestDetailAction(this.questDetailClaimButton, "Claim", canClaim, entry, assignmentId, questId, ownerList);
+        }
+
+        private void ConfigureQuestDetailAction(
+            Button button,
+            string action,
+            bool enabled,
+            DailyQuestEntryData entry,
             string assignmentId,
             string questId,
             QuestList ownerList)
         {
-            if (string.IsNullOrEmpty(assignmentId)) return null;
+            if (button == null) return;
 
-            string action;
-            switch (status)
+            button.clicked -= button.userData as Action;
+            Action onClick = () => this.RunQuestDetailAction(button, action, assignmentId, questId, ownerList);
+            button.userData = onClick;
+            button.clicked += onClick;
+            button.SetEnabled(enabled && !string.IsNullOrEmpty(assignmentId));
+            button.tooltip = enabled ? action : this.GetQuestActionUnavailableReason(action, entry);
+        }
+
+        private string GetQuestActionUnavailableReason(string action, DailyQuestEntryData entry)
+        {
+            if (action == "Start" && IsInFuture(entry.assignment?.assigned_date))
+                return "Not available yet";
+            return $"Quest must be {action.ToLowerInvariant()}able first.";
+        }
+
+        private void ClearQuestDetailActions()
+        {
+            this.ClearQuestDetailAction(this.questDetailStartButton);
+            this.ClearQuestDetailAction(this.questDetailCheckButton);
+            this.ClearQuestDetailAction(this.questDetailClaimButton);
+        }
+
+        private void ClearQuestDetailAction(Button button)
+        {
+            if (button == null) return;
+            button.clicked -= button.userData as Action;
+            button.userData = null;
+            button.SetEnabled(false);
+        }
+
+        private void RunQuestDetailAction(
+            Button button,
+            string action,
+            string assignmentId,
+            string questId,
+            QuestList ownerList)
+        {
+            if (SaiServer.Instance?.QuestProgressor == null || string.IsNullOrEmpty(assignmentId)) return;
+
+            button.SetEnabled(false);
+            if (action == "Start")
             {
-                case "not_started": action = "Start"; break;
-                case "in_progress": action = "Check"; break;
-                case "completed": action = "Claim"; break;
-                default: return null;
+                SaiServer.Instance.QuestProgressor.StartDailyQuestAssignment(
+                    assignmentId: assignmentId,
+                    onSuccess: _ => ownerList?.Refresh(),
+                    onError: err => this.OnQuestActionFailed(button, action, questId, err));
             }
-
-            Button button = new Button { text = action };
-            button.AddToClassList("dq-quest-item__action-btn");
-            button.AddToClassList($"dq-quest-item__action-btn--{status}");
-            button.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
-            button.clicked += () =>
+            else if (action == "Check")
             {
-                if (SaiServer.Instance?.QuestProgressor == null) return;
-
-                button.SetEnabled(false);
-                if (status == "not_started")
-                {
-                    SaiServer.Instance.QuestProgressor.StartDailyQuestAssignment(
-                        assignmentId: assignmentId,
-                        onSuccess: _ => ownerList?.Refresh(),
-                        onError: err => this.OnQuestActionFailed(button, action, questId, err)
-                    );
-                }
-                else if (status == "in_progress")
-                {
-                    SaiServer.Instance.QuestProgressor.CheckDailyQuestAssignment(
-                        assignmentId: assignmentId,
-                        onSuccess: _ => ownerList?.Refresh(),
-                        onError: err => this.OnQuestActionFailed(button, action, questId, err)
-                    );
-                }
-                else
-                {
-                    SaiServer.Instance.QuestProgressor.ClaimDailyQuestAssignment(
-                        assignmentId: assignmentId,
-                        onSuccess: _ => ownerList?.Refresh(),
-                        onError: err => this.OnQuestActionFailed(button, action, questId, err)
-                    );
-                }
-            };
-
-            return button;
+                SaiServer.Instance.QuestProgressor.CheckDailyQuestAssignment(
+                    assignmentId: assignmentId,
+                    onSuccess: _ => ownerList?.Refresh(),
+                    onError: err => this.OnQuestActionFailed(button, action, questId, err));
+            }
+            else
+            {
+                SaiServer.Instance.QuestProgressor.ClaimDailyQuestAssignment(
+                    assignmentId: assignmentId,
+                    onSuccess: _ => ownerList?.Refresh(),
+                    onError: err => this.OnQuestActionFailed(button, action, questId, err));
+            }
         }
 
         private void OnQuestActionFailed(Button button, string action, string questId, string error)

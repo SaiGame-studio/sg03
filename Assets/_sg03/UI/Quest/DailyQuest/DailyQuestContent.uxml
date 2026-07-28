@@ -31,6 +31,11 @@
             <ui:ScrollView class="dq-quest-detail-panel__scroll">
                 <ui:VisualElement name="QuestDetailContent" class="dq-quest-detail-panel__content" />
             </ui:ScrollView>
+            <ui:VisualElement name="QuestDetailActions" class="dq-quest-detail-panel__actions">
+                <ui:Button name="QuestDetailStartButton" text="Start" class="dq-quest-detail-panel__action" />
+                <ui:Button name="QuestDetailCheckButton" text="Check" class="dq-quest-detail-panel__action" />
+                <ui:Button name="QuestDetailClaimButton" text="Claim" class="dq-quest-detail-panel__action dq-quest-detail-panel__action--claim" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 

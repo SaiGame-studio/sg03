@@ -66,6 +66,81 @@
     min-height: 0;
 }
 
+/* Subtle, compact scrollbar for the detail drawer. */
+.dq-quest-detail-panel__scroll .unity-scroll-view__vertical-scroller {
+    width: 9px;
+    margin-left: 5px;
+    background-color: transparent;
+    border-radius: 2px;
+}
+
+.dq-quest-detail-panel__scroll .unity-scroller__low-button,
+.dq-quest-detail-panel__scroll .unity-scroller__high-button {
+    display: none;
+}
+
+.dq-quest-detail-panel__scroll .unity-scroller__slider {
+    background-color: transparent;
+}
+
+.dq-quest-detail-panel__scroll .unity-base-slider__tracker {
+    background-color: transparent;
+    border-width: 0;
+}
+
+.dq-quest-detail-panel__scroll .unity-base-slider__dragger {
+    width: 9px;
+    min-width: 9px;
+    max-width: 9px;
+    min-height: 20px;
+    align-self: center;
+    background-color: rgba(130, 160, 220, 0.34);
+    border-width: 0;
+    border-radius: 2px;
+}
+
+.dq-quest-detail-panel__scroll .unity-base-slider__dragger:hover,
+.dq-quest-detail-panel__scroll .unity-base-slider__dragger:active {
+    background-color: rgba(145, 190, 255, 0.82);
+}
+
+.dq-quest-detail-panel__actions {
+    flex-direction: row;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top-width: 1px;
+    border-color: rgba(80, 100, 160, 0.35);
+}
+
+.dq-quest-detail-panel__action {
+    flex: 1;
+    height: 32px;
+    margin-right: 6px;
+    color: rgb(220, 235, 255);
+    background-color: rgba(50, 90, 190, 0.8);
+    border-color: rgba(105, 165, 255, 0.85);
+    border-width: 1px;
+    border-radius: 6px;
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.dq-quest-detail-panel__action:last-child {
+    margin-right: 0;
+}
+
+.dq-quest-detail-panel__action:disabled {
+    color: rgb(115, 130, 165);
+    background-color: rgba(40, 48, 70, 0.8);
+    border-color: rgba(80, 100, 160, 0.28);
+}
+
+.dq-quest-detail-panel__action--claim:enabled {
+    color: rgb(35, 28, 10);
+    background-color: rgb(255, 210, 60);
+    border-color: rgba(220, 170, 20, 0.9);
+}
+
 .dq-quest-detail-panel__content {
     flex-direction: column;
     padding-top: 14px;
