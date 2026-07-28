@@ -34,6 +34,8 @@ namespace SG03.UI
         private readonly Dictionary<QuestList, DailyQuestEntryData[]> next7DaysCache = new Dictionary<QuestList, DailyQuestEntryData[]>();
         private readonly Dictionary<QuestList, DailyQuestEntryData[]> next30DaysCache = new Dictionary<QuestList, DailyQuestEntryData[]>();
         private QuestList selectedPoolList;
+        private DailyTimeframe thisWeekTimeframe;
+        private DailyTimeframeResponse thisWeekResponse;
         private bool hasCheckedOnOpen;
         private DateRange selectedRange = DateRange.Next7Days;
         private DateTime selectedDay = DateTime.Today;
@@ -241,6 +243,12 @@ namespace SG03.UI
 
         private void RefreshSelectedPool()
         {
+            if (this.selectedRange == DateRange.ThisWeek)
+            {
+                this.LoadThisWeekTimeframe();
+                return;
+            }
+
             if (this.selectedRange == DateRange.Next7Days || this.selectedRange == DateRange.Next30Days)
             {
                 this.LoadSelectedRange(this.refreshButton, forceRefresh: true);
@@ -251,6 +259,42 @@ namespace SG03.UI
             this.Render();
         }
 
+        private void LoadThisWeekTimeframe()
+        {
+            if (this.selectedPoolList == null) return;
+
+            this.thisWeekTimeframe ??= UnityEngine.Object.FindFirstObjectByType<DailyTimeframe>(UnityEngine.FindObjectsInactive.Include);
+            if (this.thisWeekTimeframe == null)
+            {
+                UnityEngine.Debug.LogWarning("[DailyQuestContentUI] DailyTimeframe was not found.");
+                return;
+            }
+
+            string poolKey = this.selectedPoolList.PoolKey;
+            if (this.poolDataByList.TryGetValue(this.selectedPoolList, out DailyQuestPoolData pool))
+                poolKey = pool.pool_key;
+            if (string.IsNullOrEmpty(poolKey)) return;
+
+            DateTime start = this.GetThisWeekStart();
+            this.thisWeekTimeframe.GetTimeframe(
+                requestedPoolKey: poolKey,
+                requestedStartDate: start.ToString("yyyy-MM-dd"),
+                requestedEndDate: start.AddDays(6).ToString("yyyy-MM-dd"),
+                onSuccess: response =>
+                {
+                    this.thisWeekResponse = response;
+                    this.Render();
+                },
+                onError: error => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Load this week failed: {error}")
+            );
+        }
+
+        private DateTime GetThisWeekStart()
+        {
+            DateTime today = DateTime.Today;
+            return today.AddDays(-((int)today.DayOfWeek + 6) % 7);
+        }
+
         private void SelectRange(DateRange range)
         {
             this.selectedRange = range;
@@ -258,6 +302,8 @@ namespace SG03.UI
             this.UpdateAssignAheadButtonVisibility();
             this.ShowSelectedTab();
 
+            if (range == DateRange.ThisWeek)
+                this.LoadThisWeekTimeframe();
             if (range == DateRange.Next7Days || range == DateRange.Next30Days)
                 this.LoadSelectedRange(null, forceRefresh: false);
         }
@@ -288,7 +334,7 @@ namespace SG03.UI
             content.style.alignSelf = Align.Stretch;
             this.tabContent.Add(content);
 
-            if ((this.selectedRange != DateRange.Next7Days && this.selectedRange != DateRange.Next30Days) || this.lists == null) return;
+            if ((this.selectedRange != DateRange.ThisWeek && this.selectedRange != DateRange.Next7Days && this.selectedRange != DateRange.Next30Days) || this.lists == null) return;
 
             this.weekGrid = content.Q("WeekGrid");
             this.daySelector = content.Q("DaySelector");
@@ -333,6 +379,11 @@ namespace SG03.UI
         private void Render()
         {
             if (this.weekGrid == null) return;
+            if (this.selectedRange == DateRange.ThisWeek)
+            {
+                this.RenderThisWeek();
+                return;
+            }
 
             // Collect all entries from all lists into a date → entries map.
             Dictionary<string, List<DailyQuestEntryData>> byDate =
@@ -357,7 +408,37 @@ namespace SG03.UI
             }
 
             int displayedDayCount = this.selectedRange == DateRange.Next30Days ? 30 : 7;
-            this.BuildDaySelector(byDate, displayedDayCount);
+            this.RenderDateMap(byDate, totalLoaded, displayedDayCount, DateTime.Today);
+        }
+
+        private void RenderThisWeek()
+        {
+            Dictionary<string, List<DailyQuestEntryData>> byDate = new Dictionary<string, List<DailyQuestEntryData>>();
+            int totalLoaded = 0;
+
+            if (this.thisWeekResponse?.days != null)
+            {
+                foreach (DailyDayData day in this.thisWeekResponse.days)
+                {
+                    if (day?.quests == null) continue;
+                    string date = day.date;
+                    if (string.IsNullOrEmpty(date)) continue;
+                    if (!byDate.ContainsKey(date)) byDate[date] = new List<DailyQuestEntryData>();
+                    byDate[date].AddRange(day.quests);
+                    totalLoaded += day.quests.Length;
+                }
+            }
+
+            this.RenderDateMap(byDate, totalLoaded, 7, this.GetThisWeekStart());
+        }
+
+        private void RenderDateMap(
+            Dictionary<string, List<DailyQuestEntryData>> byDate,
+            int totalLoaded,
+            int displayedDayCount,
+            DateTime startDay)
+        {
+            this.BuildDaySelector(byDate, displayedDayCount, startDay);
 
             // No data loaded at all → show empty state.
             if (totalLoaded == 0)
@@ -423,18 +504,21 @@ namespace SG03.UI
             }
         }
 
-        private void BuildDaySelector(Dictionary<string, List<DailyQuestEntryData>> questsByDate, int dayCount)
+        private void BuildDaySelector(
+            Dictionary<string, List<DailyQuestEntryData>> questsByDate,
+            int dayCount,
+            DateTime startDay)
         {
             if (this.daySelector == null) return;
 
             this.daySelector.Clear();
             DateTime today = DateTime.Today;
-            if (this.selectedDay < today || this.selectedDay > today.AddDays(dayCount - 1))
-                this.selectedDay = today;
+            if (this.selectedDay < startDay || this.selectedDay > startDay.AddDays(dayCount - 1))
+                this.selectedDay = startDay;
 
             for (int i = 0; i < dayCount; i++)
             {
-                DateTime day = today.AddDays(i);
+                DateTime day = startDay.AddDays(i);
                 string dayKey = day.ToString("yyyy-MM-dd");
                 questsByDate.TryGetValue(dayKey, out List<DailyQuestEntryData> quests);
                 int questCount = quests?.Count ?? 0;

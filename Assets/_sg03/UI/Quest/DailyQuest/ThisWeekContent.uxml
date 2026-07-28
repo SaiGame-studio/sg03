@@ -1,5 +1,11 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <ui:VisualElement class="dq-coming-soon">
-        <ui:Label text="Coming soon" class="dq-coming-soon__label" />
+    <ui:VisualElement class="dq-day-grid-container">
+        <ui:VisualElement name="DaySelector" class="dq-day-selector" />
+        <ui:ScrollView class="dq-quest-grid-scroll">
+            <ui:VisualElement name="WeekGrid" class="dq-quest-grid" />
+        </ui:ScrollView>
+    </ui:VisualElement>
+    <ui:VisualElement name="EmptyState" class="dq-empty">
+        <ui:Label text="No daily quests loaded." class="dq-empty__label" />
     </ui:VisualElement>
 </ui:UXML>
