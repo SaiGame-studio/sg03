@@ -72,7 +72,7 @@ namespace SG03.Quest
 
         // Calls GetPools on the manager, finds this list's pool, then loads
         // today's quest entries and stores them in Entries.
-        public void Refresh()
+        public void Refresh(Action<DailyQuestEntryData[]> onSuccess = null)
         {
             if (this.manager == null)
             {
@@ -84,7 +84,11 @@ namespace SG03.Quest
                 this.poolKey,
                 this.refreshMode,
                 this.daysAhead,
-                onSuccess: entries => this.SetEntries(entries),
+                onSuccess: entries =>
+                {
+                    this.SetEntries(entries);
+                    onSuccess?.Invoke(entries);
+                },
                 onError:   err     => Debug.LogWarning(transform.name + ": Refresh failed — " + err, gameObject)
             );
         }

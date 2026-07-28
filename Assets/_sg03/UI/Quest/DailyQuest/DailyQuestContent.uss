@@ -6,10 +6,242 @@
     flex-direction: column;
     width: 100%;
     align-self: stretch;
+    position: relative;
+    overflow: hidden;
+}
+
+.dq-quest-detail-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 380px;
+    flex-direction: column;
+    background-color: rgb(20, 26, 45);
+    border-left-width: 1px;
+    border-color: rgba(105, 165, 255, 0.6);
+    padding: 16px;
+    transition-property: right;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out;
+}
+
+.dq-quest-detail-panel--hidden {
+    right: -412px;
+}
+
+.dq-quest-detail-panel--open {
+    right: 0;
+}
+
+.dq-quest-detail-panel__header {
+    flex-direction: row;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom-width: 1px;
+    border-color: rgba(80, 100, 160, 0.35);
+}
+
+.dq-quest-detail-panel__title {
+    flex: 1;
+    color: rgb(220, 235, 255);
+    font-size: 17px;
+    -unity-font-style: bold;
+}
+
+.dq-quest-detail-panel__close {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: rgb(190, 205, 245);
+    background-color: rgba(50, 65, 105, 0.7);
+    border-color: rgba(105, 165, 255, 0.55);
+    border-width: 1px;
+    border-radius: 6px;
+    font-size: 20px;
+}
+
+.dq-quest-detail-panel__scroll {
+    flex: 1;
+    min-height: 0;
+}
+
+/* Subtle, compact scrollbar for the detail drawer. */
+.dq-quest-detail-panel__scroll .unity-scroll-view__vertical-scroller {
+    width: 9px;
+    margin-left: 5px;
+    background-color: transparent;
+    border-radius: 2px;
+}
+
+.dq-quest-detail-panel__scroll .unity-scroller__low-button,
+.dq-quest-detail-panel__scroll .unity-scroller__high-button {
+    display: none;
+}
+
+.dq-quest-detail-panel__scroll .unity-scroller__slider {
+    background-color: transparent;
+}
+
+.dq-quest-detail-panel__scroll .unity-base-slider__tracker {
+    background-color: transparent;
+    border-width: 0;
+}
+
+.dq-quest-detail-panel__scroll .unity-base-slider__dragger {
+    width: 9px;
+    min-width: 9px;
+    max-width: 9px;
+    min-height: 20px;
+    align-self: center;
+    background-color: rgba(130, 160, 220, 0.34);
+    border-width: 0;
+    border-radius: 2px;
+}
+
+.dq-quest-detail-panel__scroll .unity-base-slider__dragger:hover,
+.dq-quest-detail-panel__scroll .unity-base-slider__dragger:active {
+    background-color: rgba(145, 190, 255, 0.82);
+}
+
+.dq-quest-detail-panel__actions {
+    flex-direction: row;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top-width: 1px;
+    border-color: rgba(80, 100, 160, 0.35);
+}
+
+.dq-quest-detail-panel__action {
+    flex: 1;
+    height: 32px;
+    margin-right: 6px;
+    color: rgb(220, 235, 255);
+    background-color: rgba(50, 90, 190, 0.8);
+    border-color: rgba(105, 165, 255, 0.85);
+    border-width: 1px;
+    border-radius: 6px;
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.dq-quest-detail-panel__action--last {
+    margin-right: 0;
+}
+
+.dq-quest-detail-panel__action:disabled {
+    color: rgb(115, 130, 165);
+    background-color: rgba(40, 48, 70, 0.8);
+    border-color: rgba(80, 100, 160, 0.28);
+}
+
+.dq-quest-detail-panel__action--claim:enabled {
+    color: rgb(35, 28, 10);
+    background-color: rgb(255, 210, 60);
+    border-color: rgba(220, 170, 20, 0.9);
+}
+
+.dq-quest-detail-panel__content {
+    flex-direction: column;
+    padding-top: 14px;
+    padding-right: 4px;
+}
+
+.dq-quest-detail__name {
+    color: rgb(225, 235, 255);
+    font-size: 18px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 10px;
+}
+
+.dq-quest-detail__description {
+    color: rgb(170, 185, 220);
+    font-size: 12px;
+    white-space: normal;
+    margin-bottom: 14px;
+}
+
+.dq-quest-detail__section {
+    color: rgb(130, 180, 255);
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.dq-quest-detail__condition {
+    flex-direction: column;
+    background-color: rgba(35, 45, 75, 0.7);
+    border-left-width: 3px;
+    border-color: rgb(100, 160, 255);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+}
+
+.dq-quest-detail__condition-type {
+    color: rgb(220, 235, 255);
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.dq-quest-detail__condition-rule {
+    color: rgb(165, 185, 225);
+    font-size: 11px;
+    white-space: normal;
+    margin-top: 2px;
+}
+
+.dq-quest-detail__reward {
+    flex-direction: column;
+    background-color: rgba(42, 52, 82, 0.72);
+    border-left-width: 3px;
+    border-color: rgb(225, 178, 65);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+}
+
+.dq-quest-detail__reward-name {
+    color: rgb(255, 225, 140);
+    font-size: 12px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 3px;
+}
+
+.dq-quest-detail__reward-info {
+    color: rgb(175, 192, 230);
+    font-size: 11px;
+    white-space: normal;
+    margin-top: 1px;
+}
+
+.dq-quest-detail__row {
+    flex-direction: row;
+    padding: 4px 0;
+    border-bottom-width: 1px;
+    border-color: rgba(80, 100, 160, 0.16);
+}
+
+.dq-quest-detail__key {
+    width: 110px;
+    color: rgb(125, 145, 190);
+    font-size: 11px;
+}
+
+.dq-quest-detail__value {
+    flex: 1;
+    color: rgb(205, 215, 245);
+    font-size: 11px;
+    white-space: normal;
 }
 
 /* ---- Header ---- */
 .dq-header {
+    position: relative;
     flex-direction: row;
     align-items: center;
     padding-bottom: 16px;
@@ -25,6 +257,21 @@
     letter-spacing: 0.5px;
 }
 
+.dq-header__server-time {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+    height: 22px;
+    color: rgb(160, 180, 225);
+    font-size: 13px;
+    -unity-text-align: middle-right;
+}
+
 /* ============================================================
    7-day week grid
    ============================================================ */
@@ -35,8 +282,149 @@
     min-height: 260px;
 }
 
+.dq-day-selector {
+    flex-direction: row;
+    align-items: stretch;
+    margin-bottom: 12px;
+}
+
+.dq-day-selector__button {
+    flex: 1;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 58px;
+    margin-right: 6px;
+    color: rgb(160, 175, 220);
+    background-color: rgba(30, 36, 58, 0.75);
+    border-color: rgba(80, 100, 160, 0.35);
+    border-width: 1px;
+    border-radius: 8px;
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.dq-day-selector__button--last {
+    margin-right: 0;
+}
+
+.dq-day-selector__button:hover {
+    background-color: rgba(50, 65, 105, 0.9);
+}
+
+.dq-day-selector__button--today {
+    color: rgb(225, 240, 255);
+    background-color: rgba(45, 105, 225, 0.75);
+    border-color: rgb(115, 180, 255);
+    border-width: 2px;
+}
+
+.dq-day-selector__button--active {
+    color: rgb(220, 235, 255);
+    background-color: rgba(60, 105, 210, 0.65);
+    border-color: rgba(105, 165, 255, 0.85);
+}
+
+.dq-day-selector__button--today.dq-day-selector__button--active {
+    background-color: rgb(55, 120, 245);
+    border-color: rgb(160, 210, 255);
+}
+
+.dq-day-selector__header {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.dq-day-selector__weekday {
+    -unity-text-align: middle-left;
+}
+
+.dq-day-selector__date {
+    -unity-text-align: middle-right;
+}
+
+.dq-day-selector__quest-count {
+    width: 100%;
+    margin-top: 2px;
+    -unity-text-align: middle-center;
+}
+
+.dq-day-selector__quest-count--empty {
+    color: rgb(105, 115, 140);
+}
+
+.dq-day-selector--30 {
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: 190px;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: space-between;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.dq-day-grid-container--30 {
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.dq-day-grid-container--30 .dq-quest-grid-scroll {
+    min-height: 0;
+}
+
+.dq-day-selector--30 .dq-day-selector__button {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 9.2%;
+    width: 9.2%;
+    height: 40px;
+    min-height: 40px;
+    margin-right: 0;
+    margin-bottom: 4px;
+    font-size: 10px;
+    padding: 2px 4px;
+}
+
+.dq-quest-grid {
+    flex: 1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    padding: 2px;
+}
+
+.dq-quest-grid-scroll {
+    flex: 1;
+    min-height: 260px;
+}
+
+.dq-quest-grid .dq-quest-item {
+    flex-grow: 0;
+    flex-shrink: 1;
+    width: 31%;
+    min-width: 180px;
+    min-height: 180px;
+    margin: 4px;
+}
+
+.dq-quest-grid__empty {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    color: rgb(120, 135, 175);
+    background-color: rgba(18, 22, 36, 1);
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.2);
+    border-radius: 12px;
+}
+
 .dq-range-tabs {
     flex-direction: row;
+    align-items: center;
     margin-bottom: 14px;
 }
 
@@ -59,6 +447,58 @@
     color: rgb(220, 235, 255);
     background-color: rgba(60, 105, 210, 0.65);
     border-color: rgba(105, 165, 255, 0.85);
+}
+
+.dq-refresh-button {
+    width: 30px;
+    height: 30px;
+    margin-left: 8px;
+    color: rgb(155, 170, 215);
+    background-color: rgba(30, 36, 58, 0.75);
+    border-color: rgba(80, 100, 160, 0.35);
+    border-width: 1px;
+    border-radius: 7px;
+    font-size: 18px;
+    padding: 0;
+}
+
+.dq-refresh-button:hover {
+    color: rgb(220, 235, 255);
+    background-color: rgba(50, 65, 105, 0.9);
+}
+
+.dq-pool-dropdown {
+    min-width: 180px;
+    margin-left: 8px;
+    color: rgb(155, 170, 215);
+    font-size: 12px;
+}
+
+.dq-pool-dropdown--right {
+    margin-left: auto;
+}
+
+.dq-assign-ahead-button {
+    margin-left: auto;
+    color: rgb(220, 235, 255);
+    background-color: rgba(50, 90, 190, 0.8);
+    border-color: rgba(105, 165, 255, 0.85);
+    border-width: 1px;
+    border-radius: 7px;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.dq-assign-ahead-button:hover {
+    background-color: rgba(70, 115, 220, 0.85);
+}
+
+.dq-pool-dropdown .unity-base-field__input {
+    color: rgb(155, 170, 215);
+    background-color: rgba(30, 36, 58, 0.75);
+    border-color: rgba(80, 100, 160, 0.35);
+    border-width: 1px;
+    border-radius: 7px;
 }
 
 .dq-day-grid-scroll {
@@ -176,6 +616,7 @@
 }
 
 .dq-quest-item {
+    position: relative;
     flex: 1;
     flex-direction: column;
     align-items: stretch;
@@ -185,6 +626,39 @@
     border-color: rgba(80, 100, 160, 0.15);
     padding: 7px 8px;
     margin-bottom: 6px;
+    transition-property: background-color, border-color;
+    transition-duration: 0.14s;
+    cursor: link;
+}
+
+.dq-quest-item:hover {
+    background-color: rgba(48, 62, 100, 0.86);
+    border-color: rgba(115, 170, 255, 0.72);
+}
+
+.dq-quest-item:active {
+    background-color: rgba(58, 80, 130, 0.94);
+    border-color: rgb(135, 190, 255);
+}
+
+.dq-quest-item--selected {
+    background-color: rgba(48, 70, 118, 0.9);
+    border-color: rgb(105, 175, 255);
+}
+
+.dq-quest-item__selection-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    display: none;
+    background-color: rgb(115, 190, 255);
+    border-radius: 3px;
+}
+
+.dq-quest-item--selected .dq-quest-item__selection-indicator {
+    display: flex;
 }
 
 /* Spacer that pushes bottom content to the bottom of the quest card */
@@ -199,17 +673,23 @@
     margin-top: 4px;
 }
 
-.dq-quest-item__claim-btn {
+.dq-quest-item__action-btn {
     font-size: 10px;
-    color: rgb(20, 20, 30);
-    background-color: rgb(255, 210, 60);
-    border-color: rgba(220, 170, 20, 0.9);
+    color: rgb(220, 235, 255);
+    background-color: rgba(50, 90, 190, 0.8);
+    border-color: rgba(105, 165, 255, 0.85);
     border-width: 1px;
     border-radius: 6px;
     padding: 3px 8px;
     margin-bottom: 4px;
     -unity-font-style: bold;
     cursor: link;
+}
+
+.dq-quest-item__action-btn--completed {
+    color: rgb(20, 20, 30);
+    background-color: rgb(255, 210, 60);
+    border-color: rgba(220, 170, 20, 0.9);
 }
 
 .dq-quest-item__name {
@@ -259,6 +739,20 @@
     color: rgb(180, 120, 100);
     -unity-text-align: middle-left;
     margin-top: 3px;
+}
+
+.dq-quest-item__start-date {
+    font-size: 9px;
+    color: rgb(145, 175, 230);
+    -unity-text-align: middle-left;
+    margin-top: 3px;
+}
+
+.dq-quest-item__availability {
+    color: rgb(255, 190, 100);
+    background-color: rgba(110, 75, 15, 0.65);
+    border-color: rgba(230, 170, 45, 0.9);
+    -unity-text-align: middle-center;
 }
 
 /* ---- Rewards row ---- */

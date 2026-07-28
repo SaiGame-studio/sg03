@@ -4,6 +4,7 @@ using System.Globalization;
 using UnityEngine.UIElements;
 using SaiGame.Services;
 using SG03.Quest;
+using SG03.UI.Components;
 
 namespace SG03.UI
 {
@@ -14,22 +15,44 @@ namespace SG03.UI
     public class DailyQuestContentUI
     {
         private VisualElement weekGrid;
+        private VisualElement daySelector;
         private VisualElement emptyState;
         private readonly VisualElement tabContent;
         private readonly Button thisWeekTab;
         private readonly Button next7DaysTab;
         private readonly Button next30DaysTab;
         private readonly Button thisMonthTab;
+        private readonly DropdownField poolDropdown;
+        private readonly Button assignAheadButton;
+        private readonly Button refreshButton;
+        private readonly VisualElement questDetailPanel;
+        private readonly VisualElement questDetailContent;
+        private readonly Button closeQuestDetailButton;
+        private readonly Button questDetailStartButton;
+        private readonly Button questDetailCheckButton;
+        private readonly Button questDetailClaimButton;
+        private readonly VisualElement serverTimeLabel;
+        private readonly ServerTimeLabelComponent serverTime;
         private readonly VisualTreeAsset thisWeekAsset;
         private readonly VisualTreeAsset thisMonthAsset;
         private readonly VisualTreeAsset next7DaysAsset;
         private readonly VisualTreeAsset next30DaysAsset;
         private QuestList[] lists;
+        private readonly List<QuestList> poolLists = new List<QuestList>();
+        private readonly Dictionary<QuestList, DailyQuestPoolData> poolDataByList = new Dictionary<QuestList, DailyQuestPoolData>();
+        private readonly Dictionary<QuestList, DailyQuestEntryData[]> next7DaysCache = new Dictionary<QuestList, DailyQuestEntryData[]>();
+        private readonly Dictionary<QuestList, DailyQuestEntryData[]> next30DaysCache = new Dictionary<QuestList, DailyQuestEntryData[]>();
+        private QuestList selectedPoolList;
+        private DailyTimeframe thisWeekTimeframe;
+        private DailyTimeframeResponse thisWeekResponse;
+        private DailyTimeframeResponse thisMonthResponse;
+        private VisualElement selectedQuestItem;
+        private int questDetailRequestVersion;
         private bool hasCheckedOnOpen;
         private DateRange selectedRange = DateRange.Next7Days;
+        private DateTime selectedDay;
 
-        // Vietnamese weekday names (Monday=2 … Saturday=7, Sunday=CN)
-        private static readonly string[] DayNames = { "CN", "2", "3", "4", "5", "6", "7" };
+        private static readonly string[] DayNames = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 
         private enum DateRange
         {
@@ -55,17 +78,37 @@ namespace SG03.UI
             this.next7DaysTab   = root.Q<Button>("Next7DaysTab");
             this.next30DaysTab  = root.Q<Button>("Next30DaysTab");
             this.thisMonthTab   = root.Q<Button>("ThisMonthTab");
+            this.poolDropdown   = root.Q<DropdownField>("PoolDropdown");
+            this.assignAheadButton = root.Q<Button>("AssignAheadButton");
+            this.refreshButton  = root.Q<Button>("RefreshButton");
+            this.questDetailPanel = root.Q("QuestDetailPanel");
+            this.questDetailContent = root.Q("QuestDetailContent");
+            this.closeQuestDetailButton = root.Q<Button>("CloseQuestDetailButton");
+            this.questDetailStartButton = root.Q<Button>("QuestDetailStartButton");
+            this.questDetailCheckButton = root.Q<Button>("QuestDetailCheckButton");
+            this.questDetailClaimButton = root.Q<Button>("QuestDetailClaimButton");
+            this.serverTimeLabel = root.Q("ServerTimeLabel");
+            if (this.serverTimeLabel != null)
+                this.serverTime = new ServerTimeLabelComponent(this.serverTimeLabel);
 
             this.thisWeekTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisWeek));
             this.next7DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next7Days));
             this.next30DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next30Days));
             this.thisMonthTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisMonth));
+            this.poolDropdown?.RegisterValueChangedCallback(this.OnPoolChanged);
+            this.assignAheadButton?.RegisterCallback<ClickEvent>(_ => this.AssignAhead());
+            this.refreshButton?.RegisterCallback<ClickEvent>(_ => this.RefreshSelectedPool());
+            this.closeQuestDetailButton?.RegisterCallback<ClickEvent>(_ => this.HideQuestDetail());
+            this.UpdateAssignAheadButtonVisibility();
+            this.UpdateHeaderAlignment();
 
             QuestDailyManager manager = UnityEngine.Object.FindFirstObjectByType<QuestDailyManager>(UnityEngine.FindObjectsInactive.Include);
             if (manager == null) { this.ShowSelectedTab(); return; }
 
             this.lists = manager.QuestLists;
             if (this.lists == null || this.lists.Length == 0) { this.ShowSelectedTab(); return; }
+
+            this.LoadPoolChoices();
 
             // Subscribe permanently — re-render on every future data update.
             foreach (QuestList list in this.lists)
@@ -93,11 +136,300 @@ namespace SG03.UI
 
         private void OnAnyListUpdated() => this.Render();
 
+        private void LoadPoolChoices()
+        {
+            if (SaiServer.Instance?.DailyQuest == null)
+            {
+                this.SetPoolChoices(null);
+                return;
+            }
+
+            SaiServer.Instance.DailyQuest.GetPools(
+                onSuccess: response => this.SetPoolChoices(response?.pools),
+                onError: error =>
+                {
+                    UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Load pools failed: {error}");
+                    this.SetPoolChoices(null);
+                }
+            );
+        }
+
+        private void SetPoolChoices(DailyQuestPoolData[] pools)
+        {
+            if (this.poolDropdown == null || this.lists == null) return;
+
+            QuestList previousSelection = this.selectedPoolList;
+            this.poolLists.Clear();
+            this.poolDataByList.Clear();
+            List<string> choices = new List<string>();
+
+            foreach (QuestList list in this.lists)
+            {
+                if (list == null) continue;
+
+                DailyQuestPoolData pool = null;
+                if (pools != null)
+                {
+                    foreach (DailyQuestPoolData candidate in pools)
+                    {
+                        if (candidate != null && (candidate.pool_key == list.PoolKey || candidate.id == list.PoolKey))
+                        {
+                            pool = candidate;
+                            break;
+                        }
+                    }
+                }
+
+                this.poolLists.Add(list);
+                if (pool != null) this.poolDataByList[list] = pool;
+                choices.Add(pool == null
+                    ? list.PoolKey
+                    : $"{pool.display_name} ({pool.pool_key})");
+            }
+
+            this.poolDropdown.choices = choices;
+            int selectedIndex = this.poolLists.IndexOf(previousSelection);
+            if (selectedIndex < 0 && this.poolLists.Count > 0) selectedIndex = 0;
+
+            this.selectedPoolList = selectedIndex >= 0 ? this.poolLists[selectedIndex] : null;
+            this.poolDropdown.index = selectedIndex;
+            this.UpdateAssignAheadButtonVisibility();
+            this.Render();
+        }
+
+        private void OnPoolChanged(ChangeEvent<string> evt)
+        {
+            int index = this.poolDropdown?.index ?? -1;
+            if (index < 0 || index >= this.poolLists.Count) return;
+
+            this.selectedPoolList = this.poolLists[index];
+            if (this.selectedRange == DateRange.Next7Days || this.selectedRange == DateRange.Next30Days)
+                this.LoadSelectedRange(null, forceRefresh: false);
+            else if (this.selectedRange == DateRange.ThisWeek)
+                this.LoadThisWeekTimeframe();
+            else if (this.selectedRange == DateRange.ThisMonth)
+                this.LoadThisMonthTimeframe();
+        }
+
+        private void AssignAhead()
+        {
+            this.LoadSelectedRange(this.assignAheadButton, forceRefresh: true);
+        }
+
+        private void LoadSelectedRange(Button triggerButton, bool forceRefresh)
+        {
+            if (this.selectedRange != DateRange.Next7Days && this.selectedRange != DateRange.Next30Days) return;
+            if (this.selectedPoolList == null || SaiServer.Instance?.DailyQuest == null) return;
+            if (!this.poolDataByList.TryGetValue(this.selectedPoolList, out DailyQuestPoolData pool)) return;
+
+            QuestList targetList = this.selectedPoolList;
+            Dictionary<QuestList, DailyQuestEntryData[]> cache = this.selectedRange == DateRange.Next30Days
+                ? this.next30DaysCache
+                : this.next7DaysCache;
+
+            if (!forceRefresh && cache.TryGetValue(targetList, out DailyQuestEntryData[] cachedEntries))
+            {
+                targetList.SetEntries(cachedEntries);
+                return;
+            }
+
+            int daysAhead = this.selectedRange == DateRange.Next30Days ? 30 : 7;
+            triggerButton?.SetEnabled(false);
+            SaiServer.Instance.DailyQuest.AssignAhead(
+                dqPoolId: pool.id,
+                daysAhead: daysAhead,
+                onSuccess: response =>
+                {
+                    triggerButton?.SetEnabled(true);
+                    DailyQuestEntryData[] entries = this.FlattenAssignedDays(response?.days);
+                    cache[targetList] = entries;
+                    targetList.SetEntries(entries);
+                },
+                onError: error =>
+                {
+                    triggerButton?.SetEnabled(true);
+                    UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Assign ahead failed ({pool.pool_key}): {error}");
+                }
+            );
+        }
+
+        private DailyQuestEntryData[] FlattenAssignedDays(DailyDayData[] days)
+        {
+            if (days == null) return Array.Empty<DailyQuestEntryData>();
+
+            List<DailyQuestEntryData> entries = new List<DailyQuestEntryData>();
+            foreach (DailyDayData day in days)
+            {
+                if (day?.quests == null) continue;
+                entries.AddRange(day.quests);
+            }
+            return entries.ToArray();
+        }
+
+        private void RefreshSelectedPool()
+        {
+            if (this.selectedRange == DateRange.ThisWeek)
+            {
+                this.LoadThisWeekTimeframe();
+                return;
+            }
+
+            if (this.selectedRange == DateRange.ThisMonth)
+            {
+                this.LoadThisMonthTimeframe();
+                return;
+            }
+
+            if (this.selectedRange == DateRange.Next7Days || this.selectedRange == DateRange.Next30Days)
+            {
+                this.LoadSelectedRange(this.refreshButton, forceRefresh: true);
+                return;
+            }
+
+            this.selectedPoolList?.Refresh();
+            this.Render();
+        }
+
+        private void LoadThisWeekTimeframe()
+        {
+            if (this.selectedPoolList == null) return;
+
+            this.thisWeekTimeframe ??= UnityEngine.Object.FindFirstObjectByType<DailyTimeframe>(UnityEngine.FindObjectsInactive.Include);
+            if (this.thisWeekTimeframe == null)
+            {
+                UnityEngine.Debug.LogWarning("[DailyQuestContentUI] DailyTimeframe was not found.");
+                return;
+            }
+
+            string poolKey = this.selectedPoolList.PoolKey;
+            if (this.poolDataByList.TryGetValue(this.selectedPoolList, out DailyQuestPoolData pool))
+                poolKey = pool.pool_key;
+            if (string.IsNullOrEmpty(poolKey)) return;
+
+            if (!this.TryGetThisWeekStart(out DateTime start)) return;
+            this.thisWeekTimeframe.GetTimeframe(
+                requestedPoolKey: poolKey,
+                requestedStartDate: start.ToString("yyyy-MM-dd"),
+                requestedEndDate: start.AddDays(6).ToString("yyyy-MM-dd"),
+                onSuccess: response =>
+                {
+                    this.thisWeekResponse = response;
+                    this.Render();
+                },
+                onError: error => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Load this week failed: {error}")
+            );
+        }
+
+        private bool TryGetThisWeekStart(out DateTime start)
+        {
+            if (!TryGetServerDate(out DateTime today))
+            {
+                start = default;
+                return false;
+            }
+
+            start = today.AddDays(-((int)today.DayOfWeek + 6) % 7);
+            return true;
+        }
+
+        private bool TryGetThisMonthStart(out DateTime start)
+        {
+            if (!TryGetServerDate(out DateTime today))
+            {
+                start = default;
+                return false;
+            }
+
+            start = new DateTime(today.Year, today.Month, 1);
+            return true;
+        }
+
+        private static bool TryGetServerDate(out DateTime date)
+        {
+            if (TryGetServerTime(out DateTime serverTime))
+            {
+                date = serverTime.Date;
+                return true;
+            }
+
+            date = default;
+            return false;
+        }
+
+        private static bool TryGetServerTime(out DateTime serverTime)
+        {
+            SaiServer server = SaiServer.Instance;
+            if (server != null && server.HasServerTime)
+            {
+                serverTime = server.CurrentServerTime;
+                return true;
+            }
+
+            serverTime = default;
+            return false;
+        }
+
+        private void LoadThisMonthTimeframe()
+        {
+            if (this.selectedPoolList == null) return;
+
+            this.thisWeekTimeframe ??= UnityEngine.Object.FindFirstObjectByType<DailyTimeframe>(UnityEngine.FindObjectsInactive.Include);
+            if (this.thisWeekTimeframe == null)
+            {
+                UnityEngine.Debug.LogWarning("[DailyQuestContentUI] DailyTimeframe was not found.");
+                return;
+            }
+
+            string poolKey = this.selectedPoolList.PoolKey;
+            if (this.poolDataByList.TryGetValue(this.selectedPoolList, out DailyQuestPoolData pool))
+                poolKey = pool.pool_key;
+            if (string.IsNullOrEmpty(poolKey)) return;
+
+            if (!this.TryGetThisMonthStart(out DateTime start)) return;
+            DateTime end = start.AddMonths(1).AddDays(-1);
+            this.thisWeekTimeframe.GetTimeframe(
+                requestedPoolKey: poolKey,
+                requestedStartDate: start.ToString("yyyy-MM-dd"),
+                requestedEndDate: end.ToString("yyyy-MM-dd"),
+                onSuccess: response =>
+                {
+                    this.thisMonthResponse = response;
+                    this.Render();
+                },
+                onError: error => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Load this month failed: {error}")
+            );
+        }
+
         private void SelectRange(DateRange range)
         {
             this.selectedRange = range;
             this.UpdateRangeTabStates();
+            this.UpdateAssignAheadButtonVisibility();
+            this.UpdateHeaderAlignment();
             this.ShowSelectedTab();
+
+            if (range == DateRange.ThisWeek)
+                this.LoadThisWeekTimeframe();
+            if (range == DateRange.ThisMonth)
+                this.LoadThisMonthTimeframe();
+            if (range == DateRange.Next7Days || range == DateRange.Next30Days)
+                this.LoadSelectedRange(null, forceRefresh: false);
+        }
+
+        private void UpdateAssignAheadButtonVisibility()
+        {
+            if (this.assignAheadButton == null) return;
+            bool isVisible = this.selectedRange == DateRange.Next7Days || this.selectedRange == DateRange.Next30Days;
+            this.assignAheadButton.style.display = isVisible ? DisplayStyle.Flex : DisplayStyle.None;
+            this.assignAheadButton.SetEnabled(isVisible && this.selectedPoolList != null && this.poolDataByList.ContainsKey(this.selectedPoolList));
+        }
+
+        private void UpdateHeaderAlignment()
+        {
+            if (this.poolDropdown == null) return;
+            bool alignRight = this.selectedRange == DateRange.ThisWeek || this.selectedRange == DateRange.ThisMonth;
+            if (alignRight) this.poolDropdown.AddToClassList("dq-pool-dropdown--right");
+            else this.poolDropdown.RemoveFromClassList("dq-pool-dropdown--right");
         }
 
         private void ShowSelectedTab()
@@ -106,6 +438,7 @@ namespace SG03.UI
 
             this.tabContent.Clear();
             this.weekGrid = null;
+            this.daySelector = null;
             this.emptyState = null;
 
             VisualTreeAsset asset = this.GetSelectedTabAsset();
@@ -117,9 +450,10 @@ namespace SG03.UI
             content.style.alignSelf = Align.Stretch;
             this.tabContent.Add(content);
 
-            if (this.selectedRange != DateRange.Next7Days || this.lists == null) return;
+            if (this.lists == null) return;
 
             this.weekGrid = content.Q("WeekGrid");
+            this.daySelector = content.Q("DaySelector");
             this.emptyState = content.Q("EmptyState");
             this.Render();
         }
@@ -161,13 +495,23 @@ namespace SG03.UI
         private void Render()
         {
             if (this.weekGrid == null) return;
+            if (this.selectedRange == DateRange.ThisWeek)
+            {
+                this.RenderThisWeek();
+                return;
+            }
+            if (this.selectedRange == DateRange.ThisMonth)
+            {
+                this.RenderThisMonth();
+                return;
+            }
 
             // Collect all entries from all lists into a date → entries map.
             Dictionary<string, List<DailyQuestEntryData>> byDate =
                 new Dictionary<string, List<DailyQuestEntryData>>();
 
             int totalLoaded = 0;
-            foreach (QuestList list in this.lists)
+            foreach (QuestList list in this.GetDisplayedLists())
             {
                 if (list?.Entries == null) continue;
                 foreach (DailyQuestEntryData entry in list.Entries)
@@ -184,6 +528,77 @@ namespace SG03.UI
                 }
             }
 
+            if (!TryGetServerDate(out DateTime today))
+            {
+                this.ShowEmpty();
+                return;
+            }
+
+            int displayedDayCount = this.selectedRange == DateRange.Next30Days ? 30 : 7;
+            this.RenderDateMap(byDate, totalLoaded, displayedDayCount, today, today);
+        }
+
+        private void RenderThisWeek()
+        {
+            Dictionary<string, List<DailyQuestEntryData>> byDate = new Dictionary<string, List<DailyQuestEntryData>>();
+            int totalLoaded = 0;
+
+            if (this.thisWeekResponse?.days != null)
+            {
+                foreach (DailyDayData day in this.thisWeekResponse.days)
+                {
+                    if (day?.quests == null) continue;
+                    string date = day.date;
+                    if (string.IsNullOrEmpty(date)) continue;
+                    if (!byDate.ContainsKey(date)) byDate[date] = new List<DailyQuestEntryData>();
+                    byDate[date].AddRange(day.quests);
+                    totalLoaded += day.quests.Length;
+                }
+            }
+
+            if (!this.TryGetThisWeekStart(out DateTime start) || !TryGetServerDate(out DateTime today))
+            {
+                this.ShowEmpty();
+                return;
+            }
+
+            this.RenderDateMap(byDate, totalLoaded, 7, start, today);
+        }
+
+        private void RenderThisMonth()
+        {
+            Dictionary<string, List<DailyQuestEntryData>> byDate = new Dictionary<string, List<DailyQuestEntryData>>();
+            int totalLoaded = 0;
+
+            if (this.thisMonthResponse?.days != null)
+            {
+                foreach (DailyDayData day in this.thisMonthResponse.days)
+                {
+                    if (day?.quests == null || string.IsNullOrEmpty(day.date)) continue;
+                    if (!byDate.ContainsKey(day.date)) byDate[day.date] = new List<DailyQuestEntryData>();
+                    byDate[day.date].AddRange(day.quests);
+                    totalLoaded += day.quests.Length;
+                }
+            }
+
+            if (!this.TryGetThisMonthStart(out DateTime start) || !TryGetServerDate(out DateTime today))
+            {
+                this.ShowEmpty();
+                return;
+            }
+
+            this.RenderDateMap(byDate, totalLoaded, DateTime.DaysInMonth(start.Year, start.Month), start, today);
+        }
+
+        private void RenderDateMap(
+            Dictionary<string, List<DailyQuestEntryData>> byDate,
+            int totalLoaded,
+            int displayedDayCount,
+            DateTime startDay,
+            DateTime today)
+        {
+            this.BuildDaySelector(byDate, displayedDayCount, startDay, today);
+
             // No data loaded at all → show empty state.
             if (totalLoaded == 0)
             {
@@ -198,14 +613,13 @@ namespace SG03.UI
             this.weekGrid.Clear();
             this.weekGrid.style.display = DisplayStyle.Flex;
 
-            DateTime today = DateTime.Today;
-            for (int i = 0; i < 7; i++)
-            {
-                DateTime day = today.AddDays(i);
-                string key = day.ToString("yyyy-MM-dd");
-                byDate.TryGetValue(key, out List<DailyQuestEntryData> entries);
-                this.weekGrid.Add(this.BuildDayCard(day, day == today, entries));
-            }
+            string selectedDayKey = this.selectedDay.ToString("yyyy-MM-dd");
+            byDate.TryGetValue(selectedDayKey, out List<DailyQuestEntryData> selectedEntries);
+            if (selectedEntries == null || selectedEntries.Count == 0)
+                this.weekGrid.Add(this.BuildNoQuestPlaceholder());
+            else
+                foreach (DailyQuestEntryData entry in selectedEntries)
+                    this.weekGrid.Add(this.BuildQuestItem(entry));
 
             if (!this.hasCheckedOnOpen)
             {
@@ -220,7 +634,8 @@ namespace SG03.UI
         {
             if (SaiServer.Instance?.QuestProgressor == null) return;
 
-            string todayKey = DateTime.Today.ToString("yyyy-MM-dd");
+            if (!TryGetServerDate(out DateTime today)) return;
+            string todayKey = today.ToString("yyyy-MM-dd");
 
             foreach (QuestList list in this.lists)
             {
@@ -236,66 +651,85 @@ namespace SG03.UI
                     string date = raw.Length >= 10 ? raw.Substring(0, 10) : raw;
                     if (date != todayKey) continue;
 
-                    string questId = entry.quest?.id;
-                    if (string.IsNullOrEmpty(questId)) continue;
+                    string assignmentId = entry.assignment?.id;
+                    if (string.IsNullOrEmpty(assignmentId)) continue;
 
                     QuestList ownerList = list;
-                    SaiServer.Instance.QuestProgressor.CheckQuest(
-                        questId,
+                    SaiServer.Instance.QuestProgressor.CheckDailyQuestAssignment(
+                        assignmentId: assignmentId,
                         onSuccess: _ => ownerList.Refresh(),
-                        onError: err => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] CheckQuest failed ({questId}): {err}")
+                        onError: err => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Check daily quest failed ({assignmentId}): {err}")
                     );
                 }
             }
         }
 
-        private VisualElement BuildDayCard(DateTime day, bool isToday, List<DailyQuestEntryData> entries)
+        private void BuildDaySelector(
+            Dictionary<string, List<DailyQuestEntryData>> questsByDate,
+            int dayCount,
+            DateTime startDay,
+            DateTime today)
         {
-            VisualElement card = new VisualElement();
-            card.AddToClassList("dq-day-card");
-            if (isToday) card.AddToClassList("dq-day-card--today");
+            if (this.daySelector == null) return;
 
-            // Header
-            VisualElement header = new VisualElement();
-            header.AddToClassList("dq-day-card__header");
+            this.daySelector.Clear();
+            if (this.selectedDay < startDay || this.selectedDay > startDay.AddDays(dayCount - 1))
+                this.selectedDay = startDay;
 
-            Label dayName = new Label(DayNames[(int)day.DayOfWeek]);
-            dayName.AddToClassList("dq-day-card__day-name");
-            header.Add(dayName);
-
-            Label dateLabel = new Label(day.ToString("dd/MM"));
-            dateLabel.AddToClassList("dq-day-card__date");
-            header.Add(dateLabel);
-
-            card.Add(header);
-
-            // Quest list
-            VisualElement questsArea = new VisualElement();
-            questsArea.AddToClassList("dq-day-card__quests");
-
-            if (entries == null || entries.Count == 0)
+            for (int i = 0; i < dayCount; i++)
             {
-                VisualElement noQuest = new VisualElement();
-                noQuest.AddToClassList("dq-day-card__no-quest");
-                Label noQuestIcon = new Label("—");
-                noQuestIcon.AddToClassList("dq-day-card__no-quest-icon");
-                noQuest.Add(noQuestIcon);
-                questsArea.Add(noQuest);
-            }
-            else
-            {
-                foreach (DailyQuestEntryData entry in entries)
-                    questsArea.Add(this.BuildQuestItem(entry));
-            }
+                DateTime day = startDay.AddDays(i);
+                string dayKey = day.ToString("yyyy-MM-dd");
+                questsByDate.TryGetValue(dayKey, out List<DailyQuestEntryData> quests);
+                int questCount = quests?.Count ?? 0;
+                string questLabel = questCount == 1 ? "1 quest" : $"{questCount} quests";
+                Button dayButton = new Button();
+                dayButton.AddToClassList("dq-day-selector__button");
+                if (i == dayCount - 1) dayButton.AddToClassList("dq-day-selector__button--last");
 
-            card.Add(questsArea);
-            return card;
+                VisualElement dayHeader = new VisualElement();
+                dayHeader.AddToClassList("dq-day-selector__header");
+                Label dayName = new Label(DayNames[(int)day.DayOfWeek]);
+                dayName.AddToClassList("dq-day-selector__weekday");
+                Label date = new Label(day.ToString("dd/MM"));
+                date.AddToClassList("dq-day-selector__date");
+                dayHeader.Add(dayName);
+                dayHeader.Add(date);
+                dayButton.Add(dayHeader);
+
+                Label questCountLabel = new Label(questLabel);
+                questCountLabel.AddToClassList("dq-day-selector__quest-count");
+                if (questCount == 0) questCountLabel.AddToClassList("dq-day-selector__quest-count--empty");
+                dayButton.Add(questCountLabel);
+
+                if (day == today) dayButton.AddToClassList("dq-day-selector__button--today");
+                if (day == this.selectedDay) dayButton.AddToClassList("dq-day-selector__button--active");
+                dayButton.clicked += () =>
+                {
+                    this.selectedDay = day;
+                    this.Render();
+                };
+                this.daySelector.Add(dayButton);
+            }
+        }
+
+        private VisualElement BuildNoQuestPlaceholder()
+        {
+            VisualElement noQuest = new VisualElement();
+            noQuest.AddToClassList("dq-quest-grid__empty");
+            noQuest.Add(new Label("No quests for this day.") { name = "NoQuestLabel" });
+            return noQuest;
         }
 
         private VisualElement BuildQuestItem(DailyQuestEntryData entry)
         {
             VisualElement item = new VisualElement();
             item.AddToClassList("dq-quest-item");
+            item.RegisterCallback<ClickEvent>(_ => this.ShowQuestDetail(entry, item));
+
+            VisualElement selectionIndicator = new VisualElement();
+            selectionIndicator.AddToClassList("dq-quest-item__selection-indicator");
+            item.Add(selectionIndicator);
 
             Label nameLabel = new Label(entry.quest?.name ?? "—");
             nameLabel.AddToClassList("dq-quest-item__name");
@@ -304,40 +738,17 @@ namespace SG03.UI
             if (entry.rewards != null && entry.rewards.Length > 0)
                 item.Add(this.BuildRewardRow(entry.rewards));
 
-            // Spacer pushes bottom content to the bottom of the card.
+            // Spacer pushes the status and timing details to the bottom of the card.
             VisualElement spacer = new VisualElement();
             spacer.AddToClassList("dq-quest-item__spacer");
             item.Add(spacer);
 
-            // Bottom section: claim button (if completed) then status label.
+            // Actions are kept in the Quest Detail panel footer.
             VisualElement bottom = new VisualElement();
             bottom.AddToClassList("dq-quest-item__bottom");
 
-            if (entry.status == "completed")
-            {
-                string questId = entry.quest?.id;
-                QuestList ownerList = this.FindOwnerList(questId);
-
-                Button claimBtn = new Button();
-                claimBtn.text = "Claim";
-                claimBtn.AddToClassList("dq-quest-item__claim-btn");
-                claimBtn.clicked += () =>
-                {
-                    if (string.IsNullOrEmpty(questId)) return;
-                    if (SaiServer.Instance?.QuestProgressor == null) return;
-                    claimBtn.SetEnabled(false);
-                    SaiServer.Instance.QuestProgressor.ClaimQuest(
-                        questId,
-                        onSuccess: _ => ownerList?.Refresh(),
-                        onError: err =>
-                        {
-                            claimBtn.SetEnabled(true);
-                            UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] ClaimQuest failed ({questId}): {err}");
-                        }
-                    );
-                };
-                bottom.Add(claimBtn);
-            }
+            string assignedDate = entry.assignment?.assigned_date;
+            bool assignedInFuture = IsInFuture(assignedDate);
 
             string statusText = this.StatusLabel(entry.status);
             if (!string.IsNullOrEmpty(statusText))
@@ -348,10 +759,14 @@ namespace SG03.UI
                 bottom.Add(statusLabel);
             }
 
-            string assignedDate = entry.assignment?.assigned_date;
             string expiresAt    = entry.assignment?.expires_at;
+            if (!string.IsNullOrEmpty(assignedDate))
+            {
+                Label startDateLabel = new Label($"Start: {ShortDate(assignedDate)}");
+                startDateLabel.AddToClassList("dq-quest-item__start-date");
+                bottom.Add(startDateLabel);
+            }
 
-            bool assignedInFuture = IsInFuture(assignedDate);
             if (assignedInFuture)
             {
                 // Quest hasn't started yet — show when it will begin.
@@ -370,18 +785,517 @@ namespace SG03.UI
             return item;
         }
 
+        private void ShowQuestDetail(DailyQuestEntryData entry, VisualElement questItem)
+        {
+            if (entry == null || this.questDetailPanel == null || this.questDetailContent == null) return;
+
+            int requestVersion = ++this.questDetailRequestVersion;
+            if (this.questDetailPanel.ClassListContains("dq-quest-detail-panel--open"))
+            {
+                this.HideQuestDetail();
+                this.questDetailPanel.schedule.Execute(() =>
+                {
+                    if (requestVersion == this.questDetailRequestVersion)
+                    {
+                        this.SetSelectedQuestItem(questItem);
+                        this.OpenQuestDetailAndLoadClaim(entry, requestVersion);
+                    }
+                }).StartingIn(260);
+                return;
+            }
+
+            this.SetSelectedQuestItem(questItem);
+            this.OpenQuestDetailAndLoadClaim(entry, requestVersion);
+        }
+
+        private void SetSelectedQuestItem(VisualElement questItem)
+        {
+            this.selectedQuestItem?.RemoveFromClassList("dq-quest-item--selected");
+            this.selectedQuestItem = questItem;
+            this.selectedQuestItem?.AddToClassList("dq-quest-item--selected");
+        }
+
+        private void OpenQuestDetailAndLoadClaim(DailyQuestEntryData entry, int requestVersion)
+        {
+            this.OpenQuestDetail(entry);
+            this.LoadQuestClaim(entry, requestVersion);
+        }
+
+        private void OpenQuestDetail(DailyQuestEntryData entry)
+        {
+            if (entry == null || this.questDetailPanel == null || this.questDetailContent == null) return;
+
+            this.ConfigureQuestDetailActions(entry);
+
+            this.questDetailContent.Clear();
+            this.questDetailContent.Add(this.CreateDetailLabel(entry.quest?.name ?? "Quest", "dq-quest-detail__name"));
+            if (!string.IsNullOrEmpty(entry.quest?.description))
+                this.questDetailContent.Add(this.CreateDetailLabel(entry.quest.description, "dq-quest-detail__description"));
+
+            this.AddDetailSection("Status");
+            string statusLabel = this.StatusLabel(entry.status);
+            this.AddDetailRow("Status", string.IsNullOrEmpty(statusLabel) ? entry.status : statusLabel);
+            this.AddDetailRow("Quest type", entry.quest?.quest_type);
+            this.AddDetailRow("Code", entry.quest?.code_name);
+            this.AddDetailRow("Quest ID", entry.quest?.id ?? entry.assignment?.quest_definition_id);
+            this.AddConditionDetails(entry.quest?.conditions);
+
+            this.AddDetailSection("Assignment");
+            this.AddDetailRow("Assignment ID", entry.assignment?.id);
+            this.AddDetailRow("Pool ID", entry.assignment?.pool_id);
+            this.AddDetailRow("Assigned", entry.assignment?.assigned_date);
+            this.AddDetailRow("Expires", entry.assignment?.expires_at);
+            this.AddDetailRow("Created", entry.assignment?.created_at);
+
+            this.AddDetailSection("Progress");
+            this.AddDetailRow("Progress status", entry.progress?.status);
+            this.AddDetailRow("Completed", entry.progress?.completed_at);
+            this.AddDetailRow("Claimed", entry.progress?.claimed_at);
+            this.AddDetailRow("Reset", entry.progress?.reset_at);
+            this.AddDetailRow("Progress data", entry.progress?.progress_data_json);
+
+            this.AddDetailSection("Expected rewards");
+            if (entry.rewards == null || entry.rewards.Length == 0)
+                this.AddDetailRow("Rewards", "No reward data");
+            else
+            {
+                foreach (DailyRewardData reward in entry.rewards)
+                {
+                    string quantity = reward.quantity_min == reward.quantity_max
+                        ? reward.quantity_min.ToString()
+                        : $"{reward.quantity_min}–{reward.quantity_max}";
+                    this.AddRewardDetail(
+                        reward.reward_type,
+                        reward.item_definition_id,
+                        quantity,
+                        reward.item_definition);
+                }
+            }
+
+            this.AddClaimedRewardDetails(entry);
+
+            this.questDetailPanel.RemoveFromClassList("dq-quest-detail-panel--hidden");
+            this.questDetailPanel.AddToClassList("dq-quest-detail-panel--open");
+        }
+
+        private void LoadQuestClaim(DailyQuestEntryData entry, int requestVersion)
+        {
+            string progressId = entry.progress?.id;
+            QuestHistory history = SaiServer.Instance?.QuestHistory;
+            if (string.IsNullOrEmpty(progressId) || history == null) return;
+
+            history.GetClaims(
+                limit: 50,
+                progressId: progressId,
+                onSuccess: response =>
+                {
+                    if (requestVersion != this.questDetailRequestVersion) return;
+
+                    QuestClaimRecord claim = null;
+                    if (response?.claims != null)
+                    {
+                        foreach (QuestClaimRecord candidate in response.claims)
+                        {
+                            if (candidate?.progress_id == progressId)
+                            {
+                                claim = candidate;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (claim != null) this.OpenQuestClaimDetail(claim, entry);
+                },
+                onError: error => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Load quest claim failed ({progressId}): {error}")
+            );
+        }
+
+        private void OpenQuestClaimDetail(QuestClaimRecord claim, DailyQuestEntryData entry)
+        {
+            if (claim == null || this.questDetailContent == null) return;
+
+            QuestDefinitionData quest = claim.quest_definition;
+            this.questDetailContent.Clear();
+            this.questDetailContent.Add(this.CreateDetailLabel(quest?.name ?? "Quest claim", "dq-quest-detail__name"));
+            if (!string.IsNullOrEmpty(quest?.description))
+                this.questDetailContent.Add(this.CreateDetailLabel(quest.description, "dq-quest-detail__description"));
+
+            this.AddDetailSection("Claim");
+            this.AddDetailRow("Status", "Claimed");
+            this.AddDetailRow("Claim ID", claim.id);
+            this.AddDetailRow("Progress ID", claim.progress_id);
+            this.AddDetailRow("Claimed at", claim.claimed_at);
+            this.AddDetailRow("Idempotency key", claim.idempotency_key);
+
+            this.AddDetailSection("Quest");
+            this.AddDetailRow("Quest type", quest?.quest_type);
+            this.AddDetailRow("Code", quest?.code_name);
+            this.AddDetailRow("Quest ID", claim.quest_definition_id);
+            this.AddConditionDetails(quest?.conditions);
+
+            this.AddDetailSection("Expected rewards");
+            if (quest?.rewards == null || quest.rewards.Length == 0)
+                this.AddDetailRow("Rewards", "No reward data");
+            else
+            {
+                foreach (QuestReward reward in quest.rewards)
+                {
+                    if (reward == null) continue;
+                    int min = reward.quantity_min > 0
+                        ? reward.quantity_min
+                        : reward.amount;
+                    int max = reward.quantity_max > 0 ? reward.quantity_max : min;
+                    string quantity = min == max ? min.ToString() : $"{min}–{max}";
+                    this.AddRewardDetail(
+                        reward.reward_type,
+                        reward.item_definition_id,
+                        quantity,
+                        this.FindItemDefinition(entry, reward.item_definition_id));
+                }
+            }
+
+            this.AddDetailSection("Received rewards");
+            if (claim.rewards_granted == null || claim.rewards_granted.Length == 0)
+                this.AddDetailRow("Rewards", "No granted reward data");
+            else
+            {
+                foreach (ClaimQuestGrantedReward reward in claim.rewards_granted)
+                {
+                    if (reward == null) continue;
+                    int quantity = reward.quantity > 0 ? reward.quantity : reward.amount;
+                    this.AddRewardDetail(
+                        reward.reward_type,
+                        reward.item_definition_id,
+                        quantity.ToString(),
+                        this.FindItemDefinition(entry, reward.item_definition_id));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Daily assignments include resolved item definitions. Match by ID so the compact
+        /// reward objects returned by quest-claims can show readable item information.
+        /// </summary>
+        private ItemDefinitionData FindItemDefinition(DailyQuestEntryData entry, string itemDefinitionId)
+        {
+            if (string.IsNullOrEmpty(itemDefinitionId)) return null;
+
+            if (entry?.rewards != null)
+            {
+                foreach (DailyRewardData reward in entry.rewards)
+                {
+                    if (reward?.item_definition_id == itemDefinitionId && reward.item_definition != null)
+                        return reward.item_definition;
+                }
+            }
+
+            InventoryItemData[] items = SaiServer.Instance?.PlayerItem?.CurrentInventory?.items;
+            if (items == null) return null;
+
+            foreach (InventoryItemData item in items)
+            {
+                if (item?.item_definition_id == itemDefinitionId && item.definition != null)
+                    return item.definition;
+            }
+
+            return null;
+        }
+
+        private void AddRewardDetail(
+            string rewardType,
+            string itemDefinitionId,
+            string quantity,
+            ItemDefinitionData definition)
+        {
+            if (definition == null)
+            {
+                this.AddDetailRow(itemDefinitionId ?? rewardType ?? "Reward", quantity);
+                return;
+            }
+
+            VisualElement card = new VisualElement();
+            card.AddToClassList("dq-quest-detail__reward");
+
+            string itemName = !string.IsNullOrEmpty(definition.name)
+                ? definition.name
+                : (!string.IsNullOrEmpty(definition.item_code) ? definition.item_code : "Item");
+            card.Add(this.CreateDetailLabel($"{itemName} x {quantity}", "dq-quest-detail__reward-name"));
+
+            if (!string.IsNullOrEmpty(definition.item_code))
+                card.Add(this.CreateDetailLabel($"Code: {definition.item_code}", "dq-quest-detail__reward-info"));
+
+            string classification = "";
+            if (!string.IsNullOrEmpty(definition.category)) classification = definition.category;
+            if (!string.IsNullOrEmpty(definition.rarity))
+                classification = string.IsNullOrEmpty(classification)
+                    ? definition.rarity
+                    : $"{classification} / {definition.rarity}";
+            if (!string.IsNullOrEmpty(classification))
+                card.Add(this.CreateDetailLabel(classification, "dq-quest-detail__reward-info"));
+
+            string description = definition.ParsedMetadata?.description;
+            if (string.IsNullOrEmpty(description)) description = definition.ParsedMetadata?.flavor_text;
+            if (!string.IsNullOrEmpty(description))
+                card.Add(this.CreateDetailLabel(description, "dq-quest-detail__reward-info"));
+
+            card.Add(this.CreateDetailLabel($"Quantity: {quantity}", "dq-quest-detail__reward-info"));
+            this.questDetailContent.Add(card);
+        }
+
+        private void HideQuestDetail()
+        {
+            if (this.questDetailPanel == null) return;
+            this.ClearQuestDetailActions();
+            this.SetSelectedQuestItem(null);
+            this.questDetailPanel.RemoveFromClassList("dq-quest-detail-panel--open");
+            this.questDetailPanel.AddToClassList("dq-quest-detail-panel--hidden");
+        }
+
+        private void AddDetailSection(string text)
+        {
+            this.questDetailContent.Add(this.CreateDetailLabel(text, "dq-quest-detail__section"));
+        }
+
+        private void AddConditionDetails(QuestConditions conditions)
+        {
+            if (conditions?.clauses == null || conditions.clauses.Length == 0) return;
+
+            string operation = string.IsNullOrEmpty(conditions.operator_type)
+                ? "AND"
+                : conditions.operator_type.ToUpperInvariant();
+            this.AddDetailSection($"Conditions · {operation}");
+
+            foreach (QuestClause clause in conditions.clauses)
+            {
+                if (clause == null) continue;
+
+                VisualElement card = new VisualElement();
+                card.AddToClassList("dq-quest-detail__condition");
+                string clauseType = string.IsNullOrEmpty(clause.type) ? "Requirement" : clause.type;
+                card.Add(this.CreateDetailLabel(clauseType, "dq-quest-detail__condition-type"));
+                if (clause.items != null)
+                {
+                    foreach (QuestClauseItem item in clause.items)
+                    {
+                        if (item == null) continue;
+                        card.Add(this.CreateDetailLabel(
+                            $"Item: {item.item_definition_id} × {item.quantity}",
+                            "dq-quest-detail__condition-rule"));
+                    }
+                }
+
+                if (clause.packs != null && !string.IsNullOrEmpty(clause.packs.gacha_pack_id))
+                {
+                    card.Add(this.CreateDetailLabel(
+                        $"Gacha pack: {clause.packs.gacha_pack_id} × {clause.packs.quantity}",
+                        "dq-quest-detail__condition-rule"));
+                }
+
+                this.questDetailContent.Add(card);
+            }
+        }
+
+        private void AddClaimedRewardDetails(DailyQuestEntryData entry)
+        {
+            if (entry.status != "claimed") return;
+
+            ClaimQuestResponse claim = SaiServer.Instance?.QuestProgressor?.LastClaimedQuest;
+            string questId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
+            if (claim == null || claim.quest_definition_id != questId || claim.rewards_granted == null)
+            {
+                this.AddDetailSection("Received rewards");
+                this.AddDetailRow("Status", "Claimed — actual reward details are unavailable in this session.");
+                return;
+            }
+
+            this.AddDetailSection("Received rewards");
+            this.AddDetailRow("Claimed at", claim.claimed_at);
+            foreach (ClaimQuestGrantedReward reward in claim.rewards_granted)
+            {
+                if (reward == null) continue;
+                int quantity = reward.quantity > 0 ? reward.quantity : reward.amount;
+                this.AddRewardDetail(
+                    reward.reward_type,
+                    reward.item_definition_id,
+                    quantity.ToString(),
+                    this.FindItemDefinition(entry, reward.item_definition_id));
+            }
+        }
+
+        private void AddDetailRow(string key, string value)
+        {
+            if (string.IsNullOrEmpty(value)) return;
+
+            VisualElement row = new VisualElement();
+            row.AddToClassList("dq-quest-detail__row");
+            row.Add(this.CreateDetailLabel(key, "dq-quest-detail__key"));
+            row.Add(this.CreateDetailLabel(value, "dq-quest-detail__value"));
+            this.questDetailContent.Add(row);
+        }
+
+        private Label CreateDetailLabel(string text, string className)
+        {
+            Label label = new Label(text);
+            label.AddToClassList(className);
+            return label;
+        }
+
+        private void ConfigureQuestDetailActions(DailyQuestEntryData entry)
+        {
+            string assignmentId = entry.assignment?.id;
+            string questId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
+            QuestList ownerList = this.FindOwnerList(questId);
+            bool canStart = entry.status == "not_started" && !IsInFuture(entry.assignment?.assigned_date);
+            bool canCheck = entry.status == "in_progress";
+            bool canClaim = entry.status == "completed";
+
+            this.ConfigureQuestDetailAction(this.questDetailStartButton, "Start", canStart, entry, assignmentId, questId, ownerList);
+            this.ConfigureQuestDetailAction(this.questDetailCheckButton, "Check", canCheck, entry, assignmentId, questId, ownerList);
+            this.ConfigureQuestDetailAction(this.questDetailClaimButton, "Claim", canClaim, entry, assignmentId, questId, ownerList);
+        }
+
+        private void ConfigureQuestDetailAction(
+            Button button,
+            string action,
+            bool enabled,
+            DailyQuestEntryData entry,
+            string assignmentId,
+            string questId,
+            QuestList ownerList)
+        {
+            if (button == null) return;
+
+            button.clicked -= button.userData as Action;
+            Action onClick = () => this.RunQuestDetailAction(button, action, assignmentId, questId, ownerList);
+            button.userData = onClick;
+            button.clicked += onClick;
+            button.SetEnabled(enabled && !string.IsNullOrEmpty(assignmentId));
+            button.tooltip = enabled ? action : this.GetQuestActionUnavailableReason(action, entry);
+        }
+
+        private string GetQuestActionUnavailableReason(string action, DailyQuestEntryData entry)
+        {
+            if (action == "Start" && IsInFuture(entry.assignment?.assigned_date))
+                return "Not available yet";
+            return $"Quest must be {action.ToLowerInvariant()}able first.";
+        }
+
+        private void ClearQuestDetailActions()
+        {
+            this.ClearQuestDetailAction(this.questDetailStartButton);
+            this.ClearQuestDetailAction(this.questDetailCheckButton);
+            this.ClearQuestDetailAction(this.questDetailClaimButton);
+        }
+
+        private void ClearQuestDetailAction(Button button)
+        {
+            if (button == null) return;
+            button.clicked -= button.userData as Action;
+            button.userData = null;
+            button.SetEnabled(false);
+        }
+
+        private void RunQuestDetailAction(
+            Button button,
+            string action,
+            string assignmentId,
+            string questId,
+            QuestList ownerList)
+        {
+            if (SaiServer.Instance?.QuestProgressor == null || string.IsNullOrEmpty(assignmentId)) return;
+
+            this.InvalidateFutureRangeCaches();
+            button.SetEnabled(false);
+            if (action == "Start")
+            {
+                SaiServer.Instance.QuestProgressor.StartDailyQuestAssignment(
+                    assignmentId: assignmentId,
+                    onSuccess: _ => this.ReloadOpenQuestDetail(ownerList, assignmentId),
+                    onError: err => this.OnQuestActionFailed(button, action, questId, err));
+            }
+            else if (action == "Check")
+            {
+                SaiServer.Instance.QuestProgressor.CheckDailyQuestAssignment(
+                    assignmentId: assignmentId,
+                    onSuccess: _ => this.ReloadOpenQuestDetail(ownerList, assignmentId),
+                    onError: err => this.OnQuestActionFailed(button, action, questId, err));
+            }
+            else
+            {
+                SaiServer.Instance.QuestProgressor.ClaimDailyQuestAssignment(
+                    assignmentId: assignmentId,
+                    onSuccess: _ => this.ReloadOpenQuestDetail(ownerList, assignmentId),
+                    onError: err => this.OnQuestActionFailed(button, action, questId, err));
+            }
+        }
+
+        private void InvalidateFutureRangeCaches()
+        {
+            this.next7DaysCache.Clear();
+            this.next30DaysCache.Clear();
+        }
+
+        private void ReloadOpenQuestDetail(QuestList ownerList, string assignmentId)
+        {
+            if (ownerList == null || string.IsNullOrEmpty(assignmentId)) return;
+
+            int requestVersion = ++this.questDetailRequestVersion;
+            ownerList.Refresh(entries =>
+            {
+                if (requestVersion != this.questDetailRequestVersion) return;
+
+                DailyQuestEntryData refreshedEntry = this.FindEntryByAssignmentId(entries, assignmentId);
+                if (refreshedEntry != null)
+                    this.OpenQuestDetailAndLoadClaim(refreshedEntry, requestVersion);
+            });
+        }
+
+        private DailyQuestEntryData FindEntryByAssignmentId(DailyQuestEntryData[] entries, string assignmentId)
+        {
+            if (entries == null) return null;
+
+            foreach (DailyQuestEntryData entry in entries)
+            {
+                if (entry?.assignment?.id == assignmentId) return entry;
+            }
+
+            return null;
+        }
+
+        private void OnQuestActionFailed(Button button, string action, string questId, string error)
+        {
+            button.SetEnabled(true);
+            UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] {action} quest failed ({questId}): {error}");
+        }
+
         private QuestList FindOwnerList(string questId)
         {
             if (string.IsNullOrEmpty(questId)) return null;
+            if (this.selectedPoolList != null && this.ListContainsQuest(this.selectedPoolList, questId))
+                return this.selectedPoolList;
             foreach (QuestList list in this.lists)
             {
-                if (list?.Entries == null) continue;
-                foreach (DailyQuestEntryData entry in list.Entries)
-                {
-                    if (entry.quest?.id == questId) return list;
-                }
+                if (this.ListContainsQuest(list, questId)) return list;
             }
             return null;
+        }
+
+        private IEnumerable<QuestList> GetDisplayedLists()
+        {
+            if (this.selectedPoolList != null) yield return this.selectedPoolList;
+            else if (this.lists != null)
+                foreach (QuestList list in this.lists) yield return list;
+        }
+
+        private bool ListContainsQuest(QuestList list, string questId)
+        {
+            if (list?.Entries == null) return false;
+            foreach (DailyQuestEntryData entry in list.Entries)
+            {
+                string entryQuestId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
+                if (entryQuestId == questId) return true;
+            }
+            return false;
         }
 
         private VisualElement BuildRewardRow(DailyRewardData[] rewards)
@@ -436,7 +1350,8 @@ namespace SG03.UI
             if (!DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime target))
                 return isoTimestamp;
 
-            TimeSpan diff = target.ToUniversalTime() - DateTime.UtcNow;
+            if (!TryGetServerTime(out DateTime serverTime)) return string.Empty;
+            TimeSpan diff = target - serverTime;
 
             if (diff.TotalSeconds <= 0) return "now";
             if (diff.TotalSeconds < 60)  return $"in {(int)diff.TotalSeconds}s";
@@ -445,13 +1360,23 @@ namespace SG03.UI
             return $"in {(int)diff.TotalDays}d";
         }
 
+        private static string ShortDate(string isoTimestamp)
+        {
+            if (DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime date))
+                return date.ToString("dd/MM");
+
+            return isoTimestamp != null && isoTimestamp.Length >= 10
+                ? $"{isoTimestamp.Substring(8, 2)}/{isoTimestamp.Substring(5, 2)}"
+                : isoTimestamp;
+        }
+
         private static bool IsInFuture(string isoTimestamp)
         {
             if (string.IsNullOrEmpty(isoTimestamp)) return false;
             // assigned_date may be a date-only string "yyyy-MM-dd"; treat it as start of that UTC day.
             if (!DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime target))
                 return false;
-            return target.ToUniversalTime() > DateTime.UtcNow;
+            return TryGetServerTime(out DateTime serverTime) && target > serverTime;
         }
 
         private static string TimeAgo(string isoTimestamp)
@@ -461,7 +1386,8 @@ namespace SG03.UI
             if (!DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime target))
                 return isoTimestamp;
 
-            TimeSpan diff = target.ToUniversalTime() - DateTime.UtcNow;
+            if (!TryGetServerTime(out DateTime serverTime)) return string.Empty;
+            TimeSpan diff = target - serverTime;
 
             if (diff.TotalSeconds <= 0) return "Expired";
             if (diff.TotalSeconds < 60)  return $"{(int)diff.TotalSeconds}s left";

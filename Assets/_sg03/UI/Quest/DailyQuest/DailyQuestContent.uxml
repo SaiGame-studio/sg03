@@ -9,6 +9,7 @@
     <ui:VisualElement class="dq-content">
         <ui:VisualElement class="dq-header">
             <ui:Label text="Daily Quest" class="dq-header__title" />
+            <ui:VisualElement name="ServerTimeLabel" class="dq-header__server-time" />
         </ui:VisualElement>
 
         <ui:VisualElement class="dq-range-tabs">
@@ -16,9 +17,27 @@
             <ui:Button name="ThisMonthTab" text="This Month" class="dq-range-tab" />
             <ui:Button name="Next7DaysTab" text="Next 7 Days" class="dq-range-tab dq-range-tab--active" />
             <ui:Button name="Next30DaysTab" text="Next 30 Days" class="dq-range-tab" />
+            <ui:Button name="AssignAheadButton" text="Assign Ahead" tooltip="Assign quests for the selected range" class="dq-assign-ahead-button" />
+            <ui:DropdownField name="PoolDropdown" class="dq-pool-dropdown" />
+            <ui:Button name="RefreshButton" text="↻" tooltip="Refresh" class="dq-refresh-button" />
         </ui:VisualElement>
 
         <ui:VisualElement name="DailyQuestTabContent" class="dq-tab-content" />
+
+        <ui:VisualElement name="QuestDetailPanel" class="dq-quest-detail-panel dq-quest-detail-panel--hidden">
+            <ui:VisualElement class="dq-quest-detail-panel__header">
+                <ui:Label text="Quest Details" class="dq-quest-detail-panel__title" />
+                <ui:Button name="CloseQuestDetailButton" text="×" tooltip="Close" class="dq-quest-detail-panel__close" />
+            </ui:VisualElement>
+            <ui:ScrollView class="dq-quest-detail-panel__scroll">
+                <ui:VisualElement name="QuestDetailContent" class="dq-quest-detail-panel__content" />
+            </ui:ScrollView>
+            <ui:VisualElement name="QuestDetailActions" class="dq-quest-detail-panel__actions">
+                <ui:Button name="QuestDetailStartButton" text="Start" class="dq-quest-detail-panel__action" />
+                <ui:Button name="QuestDetailCheckButton" text="Check" class="dq-quest-detail-panel__action" />
+                <ui:Button name="QuestDetailClaimButton" text="Claim" class="dq-quest-detail-panel__action dq-quest-detail-panel__action--claim dq-quest-detail-panel__action--last" />
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 
 </ui:UXML>
