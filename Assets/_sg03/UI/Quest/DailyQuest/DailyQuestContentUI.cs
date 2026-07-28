@@ -14,6 +14,7 @@ namespace SG03.UI
     public class DailyQuestContentUI
     {
         private VisualElement weekGrid;
+        private VisualElement daySelector;
         private VisualElement emptyState;
         private readonly VisualElement tabContent;
         private readonly Button thisWeekTab;
@@ -31,6 +32,7 @@ namespace SG03.UI
         private QuestList selectedPoolList;
         private bool hasCheckedOnOpen;
         private DateRange selectedRange = DateRange.Next7Days;
+        private DateTime selectedDay = DateTime.Today;
 
         // Vietnamese weekday names (Monday=2 … Saturday=7, Sunday=CN)
         private static readonly string[] DayNames = { "CN", "2", "3", "4", "5", "6", "7" };
@@ -189,6 +191,7 @@ namespace SG03.UI
 
             this.tabContent.Clear();
             this.weekGrid = null;
+            this.daySelector = null;
             this.emptyState = null;
 
             VisualTreeAsset asset = this.GetSelectedTabAsset();
@@ -203,6 +206,7 @@ namespace SG03.UI
             if (this.selectedRange != DateRange.Next7Days || this.lists == null) return;
 
             this.weekGrid = content.Q("WeekGrid");
+            this.daySelector = content.Q("DaySelector");
             this.emptyState = content.Q("EmptyState");
             this.Render();
         }
@@ -267,6 +271,8 @@ namespace SG03.UI
                 }
             }
 
+            this.BuildDaySelector();
+
             // No data loaded at all → show empty state.
             if (totalLoaded == 0)
             {
@@ -281,14 +287,13 @@ namespace SG03.UI
             this.weekGrid.Clear();
             this.weekGrid.style.display = DisplayStyle.Flex;
 
-            DateTime today = DateTime.Today;
-            for (int i = 0; i < 7; i++)
-            {
-                DateTime day = today.AddDays(i);
-                string key = day.ToString("yyyy-MM-dd");
-                byDate.TryGetValue(key, out List<DailyQuestEntryData> entries);
-                this.weekGrid.Add(this.BuildDayCard(day, day == today, entries));
-            }
+            string selectedDayKey = this.selectedDay.ToString("yyyy-MM-dd");
+            byDate.TryGetValue(selectedDayKey, out List<DailyQuestEntryData> selectedEntries);
+            if (selectedEntries == null || selectedEntries.Count == 0)
+                this.weekGrid.Add(this.BuildNoQuestPlaceholder());
+            else
+                foreach (DailyQuestEntryData entry in selectedEntries)
+                    this.weekGrid.Add(this.BuildQuestItem(entry));
 
             if (!this.hasCheckedOnOpen)
             {
@@ -332,47 +337,37 @@ namespace SG03.UI
             }
         }
 
-        private VisualElement BuildDayCard(DateTime day, bool isToday, List<DailyQuestEntryData> entries)
+        private void BuildDaySelector()
         {
-            VisualElement card = new VisualElement();
-            card.AddToClassList("dq-day-card");
-            if (isToday) card.AddToClassList("dq-day-card--today");
+            if (this.daySelector == null) return;
 
-            // Header
-            VisualElement header = new VisualElement();
-            header.AddToClassList("dq-day-card__header");
+            this.daySelector.Clear();
+            DateTime today = DateTime.Today;
+            if (this.selectedDay < today || this.selectedDay > today.AddDays(6))
+                this.selectedDay = today;
 
-            Label dayName = new Label(DayNames[(int)day.DayOfWeek]);
-            dayName.AddToClassList("dq-day-card__day-name");
-            header.Add(dayName);
-
-            Label dateLabel = new Label(day.ToString("dd/MM"));
-            dateLabel.AddToClassList("dq-day-card__date");
-            header.Add(dateLabel);
-
-            card.Add(header);
-
-            // Quest list
-            VisualElement questsArea = new VisualElement();
-            questsArea.AddToClassList("dq-day-card__quests");
-
-            if (entries == null || entries.Count == 0)
+            for (int i = 0; i < 7; i++)
             {
-                VisualElement noQuest = new VisualElement();
-                noQuest.AddToClassList("dq-day-card__no-quest");
-                Label noQuestIcon = new Label("—");
-                noQuestIcon.AddToClassList("dq-day-card__no-quest-icon");
-                noQuest.Add(noQuestIcon);
-                questsArea.Add(noQuest);
+                DateTime day = today.AddDays(i);
+                Button dayButton = new Button { text = $"{DayNames[(int)day.DayOfWeek]}\n{day:dd/MM}" };
+                dayButton.AddToClassList("dq-day-selector__button");
+                if (day == today) dayButton.AddToClassList("dq-day-selector__button--today");
+                if (day == this.selectedDay) dayButton.AddToClassList("dq-day-selector__button--active");
+                dayButton.clicked += () =>
+                {
+                    this.selectedDay = day;
+                    this.Render();
+                };
+                this.daySelector.Add(dayButton);
             }
-            else
-            {
-                foreach (DailyQuestEntryData entry in entries)
-                    questsArea.Add(this.BuildQuestItem(entry));
-            }
+        }
 
-            card.Add(questsArea);
-            return card;
+        private VisualElement BuildNoQuestPlaceholder()
+        {
+            VisualElement noQuest = new VisualElement();
+            noQuest.AddToClassList("dq-quest-grid__empty");
+            noQuest.Add(new Label("No quests for this day.") { name = "NoQuestLabel" });
+            return noQuest;
         }
 
         private VisualElement BuildQuestItem(DailyQuestEntryData entry)
@@ -400,7 +395,6 @@ namespace SG03.UI
             string assignmentId = entry.assignment?.id;
             QuestList ownerList = this.FindOwnerList(questId);
             Button actionButton = this.BuildQuestActionButton(entry.status, assignmentId, questId, ownerList);
-            if (actionButton != null) bottom.Add(actionButton);
 
             string statusText = this.StatusLabel(entry.status);
             if (!string.IsNullOrEmpty(statusText))
@@ -428,6 +422,9 @@ namespace SG03.UI
                 expiresLabel.AddToClassList("dq-quest-item__expires");
                 bottom.Add(expiresLabel);
             }
+
+            // The action is always the last element so it stays below status and timing details.
+            if (actionButton != null) bottom.Add(actionButton);
 
             item.Add(bottom);
             return item;

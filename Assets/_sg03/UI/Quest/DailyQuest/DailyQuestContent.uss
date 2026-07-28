@@ -35,6 +35,79 @@
     min-height: 260px;
 }
 
+.dq-day-selector {
+    flex-direction: row;
+    align-items: stretch;
+    margin-bottom: 12px;
+}
+
+.dq-day-selector__button {
+    flex: 1;
+    min-height: 58px;
+    margin-right: 6px;
+    color: rgb(160, 175, 220);
+    background-color: rgba(30, 36, 58, 0.75);
+    border-color: rgba(80, 100, 160, 0.35);
+    border-width: 1px;
+    border-radius: 8px;
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.dq-day-selector__button:last-child {
+    margin-right: 0;
+}
+
+.dq-day-selector__button:hover {
+    background-color: rgba(50, 65, 105, 0.9);
+}
+
+.dq-day-selector__button--today {
+    border-color: rgba(90, 150, 255, 0.7);
+    color: rgb(130, 180, 255);
+}
+
+.dq-day-selector__button--active {
+    color: rgb(220, 235, 255);
+    background-color: rgba(60, 105, 210, 0.65);
+    border-color: rgba(105, 165, 255, 0.85);
+}
+
+.dq-quest-grid {
+    flex: 1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    padding: 2px;
+}
+
+.dq-quest-grid-scroll {
+    flex: 1;
+    min-height: 260px;
+}
+
+.dq-quest-grid .dq-quest-item {
+    flex-grow: 0;
+    flex-shrink: 1;
+    width: 31%;
+    min-width: 180px;
+    min-height: 180px;
+    margin: 4px;
+}
+
+.dq-quest-grid__empty {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    color: rgb(120, 135, 175);
+    background-color: rgba(18, 22, 36, 1);
+    border-width: 1px;
+    border-color: rgba(80, 100, 160, 0.2);
+    border-radius: 12px;
+}
+
 .dq-range-tabs {
     flex-direction: row;
     margin-bottom: 14px;
