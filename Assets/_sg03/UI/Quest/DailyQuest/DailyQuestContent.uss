@@ -341,7 +341,7 @@
 .dq-day-selector--30 {
     flex-grow: 0;
     flex-shrink: 0;
-    height: 160px;
+    height: 190px;
     flex-wrap: wrap;
     align-content: flex-start;
     justify-content: space-between;
@@ -455,6 +455,10 @@
     margin-left: 8px;
     color: rgb(155, 170, 215);
     font-size: 12px;
+}
+
+.dq-pool-dropdown--right {
+    margin-left: auto;
 }
 
 .dq-assign-ahead-button {
@@ -595,6 +599,7 @@
 }
 
 .dq-quest-item {
+    position: relative;
     flex: 1;
     flex-direction: column;
     align-items: stretch;
@@ -604,6 +609,39 @@
     border-color: rgba(80, 100, 160, 0.15);
     padding: 7px 8px;
     margin-bottom: 6px;
+    transition-property: background-color, border-color;
+    transition-duration: 0.14s;
+    cursor: link;
+}
+
+.dq-quest-item:hover {
+    background-color: rgba(48, 62, 100, 0.86);
+    border-color: rgba(115, 170, 255, 0.72);
+}
+
+.dq-quest-item:active {
+    background-color: rgba(58, 80, 130, 0.94);
+    border-color: rgb(135, 190, 255);
+}
+
+.dq-quest-item--selected {
+    background-color: rgba(48, 70, 118, 0.9);
+    border-color: rgb(105, 175, 255);
+}
+
+.dq-quest-item__selection-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    display: none;
+    background-color: rgb(115, 190, 255);
+    border-radius: 3px;
+}
+
+.dq-quest-item--selected .dq-quest-item__selection-indicator {
+    display: flex;
 }
 
 /* Spacer that pushes bottom content to the bottom of the quest card */
@@ -682,6 +720,13 @@
 .dq-quest-item__expires {
     font-size: 9px;
     color: rgb(180, 120, 100);
+    -unity-text-align: middle-left;
+    margin-top: 3px;
+}
+
+.dq-quest-item__start-date {
+    font-size: 9px;
+    color: rgb(145, 175, 230);
     -unity-text-align: middle-left;
     margin-top: 3px;
 }

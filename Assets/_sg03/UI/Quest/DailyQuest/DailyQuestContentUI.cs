@@ -42,6 +42,8 @@ namespace SG03.UI
         private QuestList selectedPoolList;
         private DailyTimeframe thisWeekTimeframe;
         private DailyTimeframeResponse thisWeekResponse;
+        private DailyTimeframeResponse thisMonthResponse;
+        private VisualElement selectedQuestItem;
         private int questDetailRequestVersion;
         private bool hasCheckedOnOpen;
         private DateRange selectedRange = DateRange.Next7Days;
@@ -92,6 +94,7 @@ namespace SG03.UI
             this.refreshButton?.RegisterCallback<ClickEvent>(_ => this.RefreshSelectedPool());
             this.closeQuestDetailButton?.RegisterCallback<ClickEvent>(_ => this.HideQuestDetail());
             this.UpdateAssignAheadButtonVisibility();
+            this.UpdateHeaderAlignment();
 
             QuestDailyManager manager = UnityEngine.Object.FindFirstObjectByType<QuestDailyManager>(UnityEngine.FindObjectsInactive.Include);
             if (manager == null) { this.ShowSelectedTab(); return; }
@@ -196,8 +199,10 @@ namespace SG03.UI
             this.selectedPoolList = this.poolLists[index];
             if (this.selectedRange == DateRange.Next7Days || this.selectedRange == DateRange.Next30Days)
                 this.LoadSelectedRange(null, forceRefresh: false);
-            else
-                this.RefreshSelectedPool();
+            else if (this.selectedRange == DateRange.ThisWeek)
+                this.LoadThisWeekTimeframe();
+            else if (this.selectedRange == DateRange.ThisMonth)
+                this.LoadThisMonthTimeframe();
         }
 
         private void AssignAhead()
@@ -263,6 +268,12 @@ namespace SG03.UI
                 return;
             }
 
+            if (this.selectedRange == DateRange.ThisMonth)
+            {
+                this.LoadThisMonthTimeframe();
+                return;
+            }
+
             if (this.selectedRange == DateRange.Next7Days || this.selectedRange == DateRange.Next30Days)
             {
                 this.LoadSelectedRange(this.refreshButton, forceRefresh: true);
@@ -309,15 +320,55 @@ namespace SG03.UI
             return today.AddDays(-((int)today.DayOfWeek + 6) % 7);
         }
 
+        private DateTime GetThisMonthStart()
+        {
+            DateTime today = DateTime.Today;
+            return new DateTime(today.Year, today.Month, 1);
+        }
+
+        private void LoadThisMonthTimeframe()
+        {
+            if (this.selectedPoolList == null) return;
+
+            this.thisWeekTimeframe ??= UnityEngine.Object.FindFirstObjectByType<DailyTimeframe>(UnityEngine.FindObjectsInactive.Include);
+            if (this.thisWeekTimeframe == null)
+            {
+                UnityEngine.Debug.LogWarning("[DailyQuestContentUI] DailyTimeframe was not found.");
+                return;
+            }
+
+            string poolKey = this.selectedPoolList.PoolKey;
+            if (this.poolDataByList.TryGetValue(this.selectedPoolList, out DailyQuestPoolData pool))
+                poolKey = pool.pool_key;
+            if (string.IsNullOrEmpty(poolKey)) return;
+
+            DateTime start = this.GetThisMonthStart();
+            DateTime end = start.AddMonths(1).AddDays(-1);
+            this.thisWeekTimeframe.GetTimeframe(
+                requestedPoolKey: poolKey,
+                requestedStartDate: start.ToString("yyyy-MM-dd"),
+                requestedEndDate: end.ToString("yyyy-MM-dd"),
+                onSuccess: response =>
+                {
+                    this.thisMonthResponse = response;
+                    this.Render();
+                },
+                onError: error => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Load this month failed: {error}")
+            );
+        }
+
         private void SelectRange(DateRange range)
         {
             this.selectedRange = range;
             this.UpdateRangeTabStates();
             this.UpdateAssignAheadButtonVisibility();
+            this.UpdateHeaderAlignment();
             this.ShowSelectedTab();
 
             if (range == DateRange.ThisWeek)
                 this.LoadThisWeekTimeframe();
+            if (range == DateRange.ThisMonth)
+                this.LoadThisMonthTimeframe();
             if (range == DateRange.Next7Days || range == DateRange.Next30Days)
                 this.LoadSelectedRange(null, forceRefresh: false);
         }
@@ -328,6 +379,14 @@ namespace SG03.UI
             bool isVisible = this.selectedRange == DateRange.Next7Days || this.selectedRange == DateRange.Next30Days;
             this.assignAheadButton.style.display = isVisible ? DisplayStyle.Flex : DisplayStyle.None;
             this.assignAheadButton.SetEnabled(isVisible && this.selectedPoolList != null && this.poolDataByList.ContainsKey(this.selectedPoolList));
+        }
+
+        private void UpdateHeaderAlignment()
+        {
+            if (this.poolDropdown == null) return;
+            bool alignRight = this.selectedRange == DateRange.ThisWeek || this.selectedRange == DateRange.ThisMonth;
+            if (alignRight) this.poolDropdown.AddToClassList("dq-pool-dropdown--right");
+            else this.poolDropdown.RemoveFromClassList("dq-pool-dropdown--right");
         }
 
         private void ShowSelectedTab()
@@ -348,7 +407,7 @@ namespace SG03.UI
             content.style.alignSelf = Align.Stretch;
             this.tabContent.Add(content);
 
-            if ((this.selectedRange != DateRange.ThisWeek && this.selectedRange != DateRange.Next7Days && this.selectedRange != DateRange.Next30Days) || this.lists == null) return;
+            if (this.lists == null) return;
 
             this.weekGrid = content.Q("WeekGrid");
             this.daySelector = content.Q("DaySelector");
@@ -398,6 +457,11 @@ namespace SG03.UI
                 this.RenderThisWeek();
                 return;
             }
+            if (this.selectedRange == DateRange.ThisMonth)
+            {
+                this.RenderThisMonth();
+                return;
+            }
 
             // Collect all entries from all lists into a date → entries map.
             Dictionary<string, List<DailyQuestEntryData>> byDate =
@@ -444,6 +508,26 @@ namespace SG03.UI
             }
 
             this.RenderDateMap(byDate, totalLoaded, 7, this.GetThisWeekStart());
+        }
+
+        private void RenderThisMonth()
+        {
+            Dictionary<string, List<DailyQuestEntryData>> byDate = new Dictionary<string, List<DailyQuestEntryData>>();
+            int totalLoaded = 0;
+
+            if (this.thisMonthResponse?.days != null)
+            {
+                foreach (DailyDayData day in this.thisMonthResponse.days)
+                {
+                    if (day?.quests == null || string.IsNullOrEmpty(day.date)) continue;
+                    if (!byDate.ContainsKey(day.date)) byDate[day.date] = new List<DailyQuestEntryData>();
+                    byDate[day.date].AddRange(day.quests);
+                    totalLoaded += day.quests.Length;
+                }
+            }
+
+            DateTime start = this.GetThisMonthStart();
+            this.RenderDateMap(byDate, totalLoaded, DateTime.DaysInMonth(start.Year, start.Month), start);
         }
 
         private void RenderDateMap(
@@ -578,7 +662,11 @@ namespace SG03.UI
         {
             VisualElement item = new VisualElement();
             item.AddToClassList("dq-quest-item");
-            item.RegisterCallback<ClickEvent>(_ => this.ShowQuestDetail(entry));
+            item.RegisterCallback<ClickEvent>(_ => this.ShowQuestDetail(entry, item));
+
+            VisualElement selectionIndicator = new VisualElement();
+            selectionIndicator.AddToClassList("dq-quest-item__selection-indicator");
+            item.Add(selectionIndicator);
 
             Label nameLabel = new Label(entry.quest?.name ?? "—");
             nameLabel.AddToClassList("dq-quest-item__name");
@@ -609,6 +697,12 @@ namespace SG03.UI
             }
 
             string expiresAt    = entry.assignment?.expires_at;
+            if (!string.IsNullOrEmpty(assignedDate))
+            {
+                Label startDateLabel = new Label($"Start: {ShortDate(assignedDate)}");
+                startDateLabel.AddToClassList("dq-quest-item__start-date");
+                bottom.Add(startDateLabel);
+            }
 
             if (assignedInFuture)
             {
@@ -628,7 +722,7 @@ namespace SG03.UI
             return item;
         }
 
-        private void ShowQuestDetail(DailyQuestEntryData entry)
+        private void ShowQuestDetail(DailyQuestEntryData entry, VisualElement questItem)
         {
             if (entry == null || this.questDetailPanel == null || this.questDetailContent == null) return;
 
@@ -639,12 +733,23 @@ namespace SG03.UI
                 this.questDetailPanel.schedule.Execute(() =>
                 {
                     if (requestVersion == this.questDetailRequestVersion)
+                    {
+                        this.SetSelectedQuestItem(questItem);
                         this.OpenQuestDetailAndLoadClaim(entry, requestVersion);
+                    }
                 }).StartingIn(260);
                 return;
             }
 
+            this.SetSelectedQuestItem(questItem);
             this.OpenQuestDetailAndLoadClaim(entry, requestVersion);
+        }
+
+        private void SetSelectedQuestItem(VisualElement questItem)
+        {
+            this.selectedQuestItem?.RemoveFromClassList("dq-quest-item--selected");
+            this.selectedQuestItem = questItem;
+            this.selectedQuestItem?.AddToClassList("dq-quest-item--selected");
         }
 
         private void OpenQuestDetailAndLoadClaim(DailyQuestEntryData entry, int requestVersion)
@@ -878,6 +983,7 @@ namespace SG03.UI
         {
             if (this.questDetailPanel == null) return;
             this.ClearQuestDetailActions();
+            this.SetSelectedQuestItem(null);
             this.questDetailPanel.RemoveFromClassList("dq-quest-detail-panel--open");
             this.questDetailPanel.AddToClassList("dq-quest-detail-panel--hidden");
         }
@@ -1157,6 +1263,16 @@ namespace SG03.UI
             if (diff.TotalMinutes < 60)  return $"in {(int)diff.TotalMinutes}m";
             if (diff.TotalHours < 24)    return $"in {(int)diff.TotalHours}h";
             return $"in {(int)diff.TotalDays}d";
+        }
+
+        private static string ShortDate(string isoTimestamp)
+        {
+            if (DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime date))
+                return date.ToString("dd/MM");
+
+            return isoTimestamp != null && isoTimestamp.Length >= 10
+                ? $"{isoTimestamp.Substring(8, 2)}/{isoTimestamp.Substring(5, 2)}"
+                : isoTimestamp;
         }
 
         private static bool IsInFuture(string isoTimestamp)
