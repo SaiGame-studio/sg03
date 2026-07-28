@@ -20,11 +20,15 @@ namespace SG03.UI
         private readonly Button next7DaysTab;
         private readonly Button next30DaysTab;
         private readonly Button thisMonthTab;
+        private readonly DropdownField poolDropdown;
+        private readonly Button refreshButton;
         private readonly VisualTreeAsset thisWeekAsset;
         private readonly VisualTreeAsset thisMonthAsset;
         private readonly VisualTreeAsset next7DaysAsset;
         private readonly VisualTreeAsset next30DaysAsset;
         private QuestList[] lists;
+        private readonly List<QuestList> poolLists = new List<QuestList>();
+        private QuestList selectedPoolList;
         private bool hasCheckedOnOpen;
         private DateRange selectedRange = DateRange.Next7Days;
 
@@ -55,17 +59,23 @@ namespace SG03.UI
             this.next7DaysTab   = root.Q<Button>("Next7DaysTab");
             this.next30DaysTab  = root.Q<Button>("Next30DaysTab");
             this.thisMonthTab   = root.Q<Button>("ThisMonthTab");
+            this.poolDropdown   = root.Q<DropdownField>("PoolDropdown");
+            this.refreshButton  = root.Q<Button>("RefreshButton");
 
             this.thisWeekTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisWeek));
             this.next7DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next7Days));
             this.next30DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next30Days));
             this.thisMonthTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisMonth));
+            this.poolDropdown?.RegisterValueChangedCallback(this.OnPoolChanged);
+            this.refreshButton?.RegisterCallback<ClickEvent>(_ => this.RefreshSelectedPool());
 
             QuestDailyManager manager = UnityEngine.Object.FindFirstObjectByType<QuestDailyManager>(UnityEngine.FindObjectsInactive.Include);
             if (manager == null) { this.ShowSelectedTab(); return; }
 
             this.lists = manager.QuestLists;
             if (this.lists == null || this.lists.Length == 0) { this.ShowSelectedTab(); return; }
+
+            this.LoadPoolChoices();
 
             // Subscribe permanently — re-render on every future data update.
             foreach (QuestList list in this.lists)
@@ -92,6 +102,79 @@ namespace SG03.UI
         }
 
         private void OnAnyListUpdated() => this.Render();
+
+        private void LoadPoolChoices()
+        {
+            if (SaiServer.Instance?.DailyQuest == null)
+            {
+                this.SetPoolChoices(null);
+                return;
+            }
+
+            SaiServer.Instance.DailyQuest.GetPools(
+                onSuccess: response => this.SetPoolChoices(response?.pools),
+                onError: error =>
+                {
+                    UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Load pools failed: {error}");
+                    this.SetPoolChoices(null);
+                }
+            );
+        }
+
+        private void SetPoolChoices(DailyQuestPoolData[] pools)
+        {
+            if (this.poolDropdown == null || this.lists == null) return;
+
+            QuestList previousSelection = this.selectedPoolList;
+            this.poolLists.Clear();
+            List<string> choices = new List<string>();
+
+            foreach (QuestList list in this.lists)
+            {
+                if (list == null) continue;
+
+                DailyQuestPoolData pool = null;
+                if (pools != null)
+                {
+                    foreach (DailyQuestPoolData candidate in pools)
+                    {
+                        if (candidate != null && (candidate.pool_key == list.PoolKey || candidate.id == list.PoolKey))
+                        {
+                            pool = candidate;
+                            break;
+                        }
+                    }
+                }
+
+                this.poolLists.Add(list);
+                choices.Add(pool == null
+                    ? list.PoolKey
+                    : $"{pool.display_name} ({pool.pool_key})");
+            }
+
+            this.poolDropdown.choices = choices;
+            int selectedIndex = this.poolLists.IndexOf(previousSelection);
+            if (selectedIndex < 0 && this.poolLists.Count > 0) selectedIndex = 0;
+
+            this.selectedPoolList = selectedIndex >= 0 ? this.poolLists[selectedIndex] : null;
+            this.poolDropdown.index = selectedIndex;
+            this.Render();
+        }
+
+        private void OnPoolChanged(ChangeEvent<string> evt)
+        {
+            int index = this.poolDropdown?.index ?? -1;
+            if (index < 0 || index >= this.poolLists.Count) return;
+
+            this.selectedPoolList = this.poolLists[index];
+            this.RefreshSelectedPool();
+        }
+
+        private void RefreshSelectedPool()
+        {
+            this.selectedPoolList?.Refresh();
+            this.Render();
+        }
 
         private void SelectRange(DateRange range)
         {
@@ -167,7 +250,7 @@ namespace SG03.UI
                 new Dictionary<string, List<DailyQuestEntryData>>();
 
             int totalLoaded = 0;
-            foreach (QuestList list in this.lists)
+            foreach (QuestList list in this.GetDisplayedLists())
             {
                 if (list?.Entries == null) continue;
                 foreach (DailyQuestEntryData entry in list.Entries)
@@ -236,14 +319,14 @@ namespace SG03.UI
                     string date = raw.Length >= 10 ? raw.Substring(0, 10) : raw;
                     if (date != todayKey) continue;
 
-                    string questId = entry.quest?.id;
-                    if (string.IsNullOrEmpty(questId)) continue;
+                    string assignmentId = entry.assignment?.id;
+                    if (string.IsNullOrEmpty(assignmentId)) continue;
 
                     QuestList ownerList = list;
-                    SaiServer.Instance.QuestProgressor.CheckQuest(
-                        questId,
+                    SaiServer.Instance.QuestProgressor.CheckDailyQuestAssignment(
+                        assignmentId: assignmentId,
                         onSuccess: _ => ownerList.Refresh(),
-                        onError: err => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] CheckQuest failed ({questId}): {err}")
+                        onError: err => UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Check daily quest failed ({assignmentId}): {err}")
                     );
                 }
             }
@@ -313,31 +396,11 @@ namespace SG03.UI
             VisualElement bottom = new VisualElement();
             bottom.AddToClassList("dq-quest-item__bottom");
 
-            if (entry.status == "completed")
-            {
-                string questId = entry.quest?.id;
-                QuestList ownerList = this.FindOwnerList(questId);
-
-                Button claimBtn = new Button();
-                claimBtn.text = "Claim";
-                claimBtn.AddToClassList("dq-quest-item__claim-btn");
-                claimBtn.clicked += () =>
-                {
-                    if (string.IsNullOrEmpty(questId)) return;
-                    if (SaiServer.Instance?.QuestProgressor == null) return;
-                    claimBtn.SetEnabled(false);
-                    SaiServer.Instance.QuestProgressor.ClaimQuest(
-                        questId,
-                        onSuccess: _ => ownerList?.Refresh(),
-                        onError: err =>
-                        {
-                            claimBtn.SetEnabled(true);
-                            UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] ClaimQuest failed ({questId}): {err}");
-                        }
-                    );
-                };
-                bottom.Add(claimBtn);
-            }
+            string questId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
+            string assignmentId = entry.assignment?.id;
+            QuestList ownerList = this.FindOwnerList(questId);
+            Button actionButton = this.BuildQuestActionButton(entry.status, assignmentId, questId, ownerList);
+            if (actionButton != null) bottom.Add(actionButton);
 
             string statusText = this.StatusLabel(entry.status);
             if (!string.IsNullOrEmpty(statusText))
@@ -370,18 +433,90 @@ namespace SG03.UI
             return item;
         }
 
+        private Button BuildQuestActionButton(string status, string assignmentId, string questId, QuestList ownerList)
+        {
+            if (string.IsNullOrEmpty(assignmentId)) return null;
+
+            string action;
+            switch (status)
+            {
+                case "not_started": action = "Start"; break;
+                case "in_progress": action = "Check"; break;
+                case "completed": action = "Claim"; break;
+                default: return null;
+            }
+
+            Button button = new Button { text = action };
+            button.AddToClassList("dq-quest-item__action-btn");
+            button.AddToClassList($"dq-quest-item__action-btn--{status}");
+            button.clicked += () =>
+            {
+                if (SaiServer.Instance?.QuestProgressor == null) return;
+
+                button.SetEnabled(false);
+                if (status == "not_started")
+                {
+                    SaiServer.Instance.QuestProgressor.StartDailyQuestAssignment(
+                        assignmentId: assignmentId,
+                        onSuccess: _ => ownerList?.Refresh(),
+                        onError: err => this.OnQuestActionFailed(button, action, questId, err)
+                    );
+                }
+                else if (status == "in_progress")
+                {
+                    SaiServer.Instance.QuestProgressor.CheckDailyQuestAssignment(
+                        assignmentId: assignmentId,
+                        onSuccess: _ => ownerList?.Refresh(),
+                        onError: err => this.OnQuestActionFailed(button, action, questId, err)
+                    );
+                }
+                else
+                {
+                    SaiServer.Instance.QuestProgressor.ClaimDailyQuestAssignment(
+                        assignmentId: assignmentId,
+                        onSuccess: _ => ownerList?.Refresh(),
+                        onError: err => this.OnQuestActionFailed(button, action, questId, err)
+                    );
+                }
+            };
+
+            return button;
+        }
+
+        private void OnQuestActionFailed(Button button, string action, string questId, string error)
+        {
+            button.SetEnabled(true);
+            UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] {action} quest failed ({questId}): {error}");
+        }
+
         private QuestList FindOwnerList(string questId)
         {
             if (string.IsNullOrEmpty(questId)) return null;
+            if (this.selectedPoolList != null && this.ListContainsQuest(this.selectedPoolList, questId))
+                return this.selectedPoolList;
             foreach (QuestList list in this.lists)
             {
-                if (list?.Entries == null) continue;
-                foreach (DailyQuestEntryData entry in list.Entries)
-                {
-                    if (entry.quest?.id == questId) return list;
-                }
+                if (this.ListContainsQuest(list, questId)) return list;
             }
             return null;
+        }
+
+        private IEnumerable<QuestList> GetDisplayedLists()
+        {
+            if (this.selectedPoolList != null) yield return this.selectedPoolList;
+            else if (this.lists != null)
+                foreach (QuestList list in this.lists) yield return list;
+        }
+
+        private bool ListContainsQuest(QuestList list, string questId)
+        {
+            if (list?.Entries == null) return false;
+            foreach (DailyQuestEntryData entry in list.Entries)
+            {
+                string entryQuestId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
+                if (entryQuestId == questId) return true;
+            }
+            return false;
         }
 
         private VisualElement BuildRewardRow(DailyRewardData[] rewards)
