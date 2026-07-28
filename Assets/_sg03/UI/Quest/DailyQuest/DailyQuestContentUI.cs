@@ -50,7 +50,7 @@ namespace SG03.UI
         private int questDetailRequestVersion;
         private bool hasCheckedOnOpen;
         private DateRange selectedRange = DateRange.Next7Days;
-        private DateTime selectedDay = DateTime.Today;
+        private DateTime selectedDay;
 
         private static readonly string[] DayNames = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 
@@ -306,7 +306,7 @@ namespace SG03.UI
                 poolKey = pool.pool_key;
             if (string.IsNullOrEmpty(poolKey)) return;
 
-            DateTime start = this.GetThisWeekStart();
+            if (!this.TryGetThisWeekStart(out DateTime start)) return;
             this.thisWeekTimeframe.GetTimeframe(
                 requestedPoolKey: poolKey,
                 requestedStartDate: start.ToString("yyyy-MM-dd"),
@@ -320,16 +320,53 @@ namespace SG03.UI
             );
         }
 
-        private DateTime GetThisWeekStart()
+        private bool TryGetThisWeekStart(out DateTime start)
         {
-            DateTime today = DateTime.Today;
-            return today.AddDays(-((int)today.DayOfWeek + 6) % 7);
+            if (!TryGetServerDate(out DateTime today))
+            {
+                start = default;
+                return false;
+            }
+
+            start = today.AddDays(-((int)today.DayOfWeek + 6) % 7);
+            return true;
         }
 
-        private DateTime GetThisMonthStart()
+        private bool TryGetThisMonthStart(out DateTime start)
         {
-            DateTime today = DateTime.Today;
-            return new DateTime(today.Year, today.Month, 1);
+            if (!TryGetServerDate(out DateTime today))
+            {
+                start = default;
+                return false;
+            }
+
+            start = new DateTime(today.Year, today.Month, 1);
+            return true;
+        }
+
+        private static bool TryGetServerDate(out DateTime date)
+        {
+            if (TryGetServerTime(out DateTime serverTime))
+            {
+                date = serverTime.Date;
+                return true;
+            }
+
+            date = default;
+            return false;
+        }
+
+        private static bool TryGetServerTime(out DateTime serverTime)
+        {
+            SaiServer server = SaiServer.Instance;
+            if (server != null && server.HasServerTime)
+            {
+                serverTime = server.CurrentServerTime;
+                return true;
+            }
+
+            serverTime = default;
+            return false;
         }
 
         private void LoadThisMonthTimeframe()
@@ -348,7 +385,7 @@ namespace SG03.UI
                 poolKey = pool.pool_key;
             if (string.IsNullOrEmpty(poolKey)) return;
 
-            DateTime start = this.GetThisMonthStart();
+            if (!this.TryGetThisMonthStart(out DateTime start)) return;
             DateTime end = start.AddMonths(1).AddDays(-1);
             this.thisWeekTimeframe.GetTimeframe(
                 requestedPoolKey: poolKey,
@@ -491,8 +528,14 @@ namespace SG03.UI
                 }
             }
 
+            if (!TryGetServerDate(out DateTime today))
+            {
+                this.ShowEmpty();
+                return;
+            }
+
             int displayedDayCount = this.selectedRange == DateRange.Next30Days ? 30 : 7;
-            this.RenderDateMap(byDate, totalLoaded, displayedDayCount, DateTime.Today);
+            this.RenderDateMap(byDate, totalLoaded, displayedDayCount, today, today);
         }
 
         private void RenderThisWeek()
@@ -513,7 +556,13 @@ namespace SG03.UI
                 }
             }
 
-            this.RenderDateMap(byDate, totalLoaded, 7, this.GetThisWeekStart());
+            if (!this.TryGetThisWeekStart(out DateTime start) || !TryGetServerDate(out DateTime today))
+            {
+                this.ShowEmpty();
+                return;
+            }
+
+            this.RenderDateMap(byDate, totalLoaded, 7, start, today);
         }
 
         private void RenderThisMonth()
@@ -532,17 +581,23 @@ namespace SG03.UI
                 }
             }
 
-            DateTime start = this.GetThisMonthStart();
-            this.RenderDateMap(byDate, totalLoaded, DateTime.DaysInMonth(start.Year, start.Month), start);
+            if (!this.TryGetThisMonthStart(out DateTime start) || !TryGetServerDate(out DateTime today))
+            {
+                this.ShowEmpty();
+                return;
+            }
+
+            this.RenderDateMap(byDate, totalLoaded, DateTime.DaysInMonth(start.Year, start.Month), start, today);
         }
 
         private void RenderDateMap(
             Dictionary<string, List<DailyQuestEntryData>> byDate,
             int totalLoaded,
             int displayedDayCount,
-            DateTime startDay)
+            DateTime startDay,
+            DateTime today)
         {
-            this.BuildDaySelector(byDate, displayedDayCount, startDay);
+            this.BuildDaySelector(byDate, displayedDayCount, startDay, today);
 
             // No data loaded at all → show empty state.
             if (totalLoaded == 0)
@@ -579,7 +634,8 @@ namespace SG03.UI
         {
             if (SaiServer.Instance?.QuestProgressor == null) return;
 
-            string todayKey = DateTime.Today.ToString("yyyy-MM-dd");
+            if (!TryGetServerDate(out DateTime today)) return;
+            string todayKey = today.ToString("yyyy-MM-dd");
 
             foreach (QuestList list in this.lists)
             {
@@ -611,12 +667,12 @@ namespace SG03.UI
         private void BuildDaySelector(
             Dictionary<string, List<DailyQuestEntryData>> questsByDate,
             int dayCount,
-            DateTime startDay)
+            DateTime startDay,
+            DateTime today)
         {
             if (this.daySelector == null) return;
 
             this.daySelector.Clear();
-            DateTime today = DateTime.Today;
             if (this.selectedDay < startDay || this.selectedDay > startDay.AddDays(dayCount - 1))
                 this.selectedDay = startDay;
 
@@ -1148,28 +1204,62 @@ namespace SG03.UI
         {
             if (SaiServer.Instance?.QuestProgressor == null || string.IsNullOrEmpty(assignmentId)) return;
 
+            this.InvalidateFutureRangeCaches();
             button.SetEnabled(false);
             if (action == "Start")
             {
                 SaiServer.Instance.QuestProgressor.StartDailyQuestAssignment(
                     assignmentId: assignmentId,
-                    onSuccess: _ => ownerList?.Refresh(),
+                    onSuccess: _ => this.ReloadOpenQuestDetail(ownerList, assignmentId),
                     onError: err => this.OnQuestActionFailed(button, action, questId, err));
             }
             else if (action == "Check")
             {
                 SaiServer.Instance.QuestProgressor.CheckDailyQuestAssignment(
                     assignmentId: assignmentId,
-                    onSuccess: _ => ownerList?.Refresh(),
+                    onSuccess: _ => this.ReloadOpenQuestDetail(ownerList, assignmentId),
                     onError: err => this.OnQuestActionFailed(button, action, questId, err));
             }
             else
             {
                 SaiServer.Instance.QuestProgressor.ClaimDailyQuestAssignment(
                     assignmentId: assignmentId,
-                    onSuccess: _ => ownerList?.Refresh(),
+                    onSuccess: _ => this.ReloadOpenQuestDetail(ownerList, assignmentId),
                     onError: err => this.OnQuestActionFailed(button, action, questId, err));
             }
+        }
+
+        private void InvalidateFutureRangeCaches()
+        {
+            this.next7DaysCache.Clear();
+            this.next30DaysCache.Clear();
+        }
+
+        private void ReloadOpenQuestDetail(QuestList ownerList, string assignmentId)
+        {
+            if (ownerList == null || string.IsNullOrEmpty(assignmentId)) return;
+
+            int requestVersion = ++this.questDetailRequestVersion;
+            ownerList.Refresh(entries =>
+            {
+                if (requestVersion != this.questDetailRequestVersion) return;
+
+                DailyQuestEntryData refreshedEntry = this.FindEntryByAssignmentId(entries, assignmentId);
+                if (refreshedEntry != null)
+                    this.OpenQuestDetailAndLoadClaim(refreshedEntry, requestVersion);
+            });
+        }
+
+        private DailyQuestEntryData FindEntryByAssignmentId(DailyQuestEntryData[] entries, string assignmentId)
+        {
+            if (entries == null) return null;
+
+            foreach (DailyQuestEntryData entry in entries)
+            {
+                if (entry?.assignment?.id == assignmentId) return entry;
+            }
+
+            return null;
         }
 
         private void OnQuestActionFailed(Button button, string action, string questId, string error)
@@ -1260,7 +1350,8 @@ namespace SG03.UI
             if (!DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime target))
                 return isoTimestamp;
 
-            TimeSpan diff = target.ToUniversalTime() - DateTime.UtcNow;
+            if (!TryGetServerTime(out DateTime serverTime)) return string.Empty;
+            TimeSpan diff = target - serverTime;
 
             if (diff.TotalSeconds <= 0) return "now";
             if (diff.TotalSeconds < 60)  return $"in {(int)diff.TotalSeconds}s";
@@ -1285,7 +1376,7 @@ namespace SG03.UI
             // assigned_date may be a date-only string "yyyy-MM-dd"; treat it as start of that UTC day.
             if (!DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime target))
                 return false;
-            return target.ToUniversalTime() > DateTime.UtcNow;
+            return TryGetServerTime(out DateTime serverTime) && target > serverTime;
         }
 
         private static string TimeAgo(string isoTimestamp)
@@ -1295,7 +1386,8 @@ namespace SG03.UI
             if (!DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime target))
                 return isoTimestamp;
 
-            TimeSpan diff = target.ToUniversalTime() - DateTime.UtcNow;
+            if (!TryGetServerTime(out DateTime serverTime)) return string.Empty;
+            TimeSpan diff = target - serverTime;
 
             if (diff.TotalSeconds <= 0) return "Expired";
             if (diff.TotalSeconds < 60)  return $"{(int)diff.TotalSeconds}s left";

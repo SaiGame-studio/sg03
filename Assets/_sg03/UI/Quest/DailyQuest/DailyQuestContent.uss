@@ -424,6 +424,7 @@
 
 .dq-range-tabs {
     flex-direction: row;
+    align-items: center;
     margin-bottom: 14px;
 }
 
