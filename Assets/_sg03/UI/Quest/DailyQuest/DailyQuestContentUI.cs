@@ -30,6 +30,7 @@ namespace SG03.UI
         private readonly Button questDetailStartButton;
         private readonly Button questDetailCheckButton;
         private readonly Button questDetailClaimButton;
+        private readonly Label serverTimeLabel;
         private readonly VisualTreeAsset thisWeekAsset;
         private readonly VisualTreeAsset thisMonthAsset;
         private readonly VisualTreeAsset next7DaysAsset;
@@ -84,6 +85,7 @@ namespace SG03.UI
             this.questDetailStartButton = root.Q<Button>("QuestDetailStartButton");
             this.questDetailCheckButton = root.Q<Button>("QuestDetailCheckButton");
             this.questDetailClaimButton = root.Q<Button>("QuestDetailClaimButton");
+            this.serverTimeLabel = root.Q<Label>("ServerTimeLabel");
 
             this.thisWeekTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.ThisWeek));
             this.next7DaysTab?.RegisterCallback<ClickEvent>(_ => this.SelectRange(DateRange.Next7Days));
@@ -95,6 +97,8 @@ namespace SG03.UI
             this.closeQuestDetailButton?.RegisterCallback<ClickEvent>(_ => this.HideQuestDetail());
             this.UpdateAssignAheadButtonVisibility();
             this.UpdateHeaderAlignment();
+            this.UpdateServerTime();
+            this.serverTimeLabel?.schedule.Execute(this.UpdateServerTime).Every(1000);
 
             QuestDailyManager manager = UnityEngine.Object.FindFirstObjectByType<QuestDailyManager>(UnityEngine.FindObjectsInactive.Include);
             if (manager == null) { this.ShowSelectedTab(); return; }
@@ -129,6 +133,16 @@ namespace SG03.UI
         }
 
         private void OnAnyListUpdated() => this.Render();
+
+        private void UpdateServerTime()
+        {
+            if (this.serverTimeLabel == null) return;
+
+            SaiServer server = SaiServer.Instance;
+            this.serverTimeLabel.text = server != null && server.HasServerTime
+                ? server.CurrentServerTime.ToString("MMM dd | HH:mm:ss", CultureInfo.InvariantCulture)
+                : "--- -- | --:--:--";
+        }
 
         private void LoadPoolChoices()
         {
@@ -623,6 +637,7 @@ namespace SG03.UI
                 string questLabel = questCount == 1 ? "1 quest" : $"{questCount} quests";
                 Button dayButton = new Button();
                 dayButton.AddToClassList("dq-day-selector__button");
+                if (i == dayCount - 1) dayButton.AddToClassList("dq-day-selector__button--last");
 
                 VisualElement dayHeader = new VisualElement();
                 dayHeader.AddToClassList("dq-day-selector__header");
@@ -880,7 +895,7 @@ namespace SG03.UI
                     if (reward == null) continue;
                     int min = reward.quantity_min > 0
                         ? reward.quantity_min
-                        : (reward.quantity > 0 ? reward.quantity : reward.amount);
+                        : reward.amount;
                     int max = reward.quantity_max > 0 ? reward.quantity_max : min;
                     string quantity = min == max ? min.ToString() : $"{min}–{max}";
                     this.AddRewardDetail(
@@ -1010,9 +1025,6 @@ namespace SG03.UI
                 card.AddToClassList("dq-quest-detail__condition");
                 string clauseType = string.IsNullOrEmpty(clause.type) ? "Requirement" : clause.type;
                 card.Add(this.CreateDetailLabel(clauseType, "dq-quest-detail__condition-type"));
-                if (clause.target > 0)
-                    card.Add(this.CreateDetailLabel($"Target: {clause.target}", "dq-quest-detail__condition-rule"));
-
                 if (clause.items != null)
                 {
                     foreach (QuestClauseItem item in clause.items)

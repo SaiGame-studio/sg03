@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
@@ -10,7 +11,7 @@ namespace SaiGame.Services
     [DefaultExecutionOrder(-100)]
     public class SaiServer : SaiSingleton<SaiServer>
     {
-        public const string PACKAGE_VERSION = "0.2.44";
+        public const string PACKAGE_VERSION = "0.2.45";
         public const string PACKAGE_NAME = "Sai Server";
 
         [SerializeField] protected SaiAuth saiAuth;
@@ -49,6 +50,14 @@ namespace SaiGame.Services
 
         [Header("API Settings")]
         [SerializeField] protected int requestTimeout = 30;
+
+        [Header("Server Time")]
+        [SerializeField] protected string serverTime = "";
+        [SerializeField] protected long serverTimestamp;
+        [SerializeField] protected string serverTimezone = "";
+        [SerializeField] protected string serverTimeError = "";
+        [NonSerialized] private DateTime serverTimeAtSync;
+        [NonSerialized] private float serverTimeSyncRealtime;
 
         [SerializeField] protected bool showButtonsLog = true;
         [SerializeField] protected bool showCallbackLog = true;
@@ -143,6 +152,20 @@ namespace SaiGame.Services
         public GoogleBackendLogin GoogleBackendLogin => this.googleBackendLogin;
 
         public string GameId => this.NormalizeInput(this.gameId);
+
+        public bool HasServerTime => this.serverTimestamp > 0;
+
+        public DateTime CurrentServerTime => !this.HasServerTime
+            ? DateTime.MinValue
+            : this.serverTimeAtSync.AddSeconds(Time.realtimeSinceStartup - this.serverTimeSyncRealtime);
+
+        [Serializable]
+        private class ServerTimeResponse
+        {
+            public string server_time;
+            public long timestamp;
+            public string timezone;
+        }
 
         private string NormalizeInput(string value)
         {
@@ -375,6 +398,8 @@ namespace SaiGame.Services
             this.SyncLegacyServerFieldsFromEndpoint();
             this.LoadSaiAuth();
             this.LoadGoogleBackendLogin();
+
+            this.RegisterLoginListeners();
             this.LoadGamerProgress();
             this.LoadMailbox();
             this.LoadPlayerEvent();
@@ -396,6 +421,76 @@ namespace SaiGame.Services
             this.LoadItemSwap();
             this.LoadBattleSessions();
             this.LoadBattleScript();
+        }
+
+        protected virtual void RegisterLoginListeners()
+        {
+            if (this.saiAuth != null)
+            {
+                this.saiAuth.OnLoginSuccess -= this.HandleLoginSuccess;
+                this.saiAuth.OnLoginSuccess += this.HandleLoginSuccess;
+            }
+
+            if (this.googleBackendLogin != null)
+            {
+                this.googleBackendLogin.OnLoginSuccess -= this.HandleLoginSuccess;
+                this.googleBackendLogin.OnLoginSuccess += this.HandleLoginSuccess;
+            }
+        }
+
+        protected virtual void OnDestroy()
+        {
+            if (this.saiAuth != null)
+                this.saiAuth.OnLoginSuccess -= this.HandleLoginSuccess;
+
+            if (this.googleBackendLogin != null)
+                this.googleBackendLogin.OnLoginSuccess -= this.HandleLoginSuccess;
+        }
+
+        protected virtual void HandleLoginSuccess(LoginResponse _)
+        {
+            if (!this.IsAuthenticated)
+                return;
+
+            StartCoroutine(this.GetServerTimeCoroutine());
+        }
+
+        private IEnumerator GetServerTimeCoroutine()
+        {
+            yield return this.GetRequest(
+                "/api/v1/time",
+                response =>
+                {
+                    try
+                    {
+                        ServerTimeResponse serverTimeResponse = JsonUtility.FromJson<ServerTimeResponse>(response);
+                        this.serverTime = serverTimeResponse.server_time ?? string.Empty;
+                        this.serverTimestamp = serverTimeResponse.timestamp;
+                        this.serverTimezone = serverTimeResponse.timezone ?? string.Empty;
+                        this.serverTimeAtSync = this.ParseServerTime(serverTimeResponse.server_time, serverTimeResponse.timestamp);
+                        this.serverTimeSyncRealtime = Time.realtimeSinceStartup;
+                        this.serverTimeError = string.Empty;
+                    }
+                    catch (Exception exception)
+                    {
+                        this.serverTimeError = $"Parse server time response failed: {exception.Message}";
+                        Debug.LogWarning($"[SaiServer] {this.serverTimeError}", gameObject);
+                    }
+                },
+                error =>
+                {
+                    this.serverTimeError = error;
+                    Debug.LogWarning($"[SaiServer] Server time request failed: {error}", gameObject);
+                }
+            );
+        }
+
+        private DateTime ParseServerTime(string value, long timestamp)
+        {
+            if (DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out DateTimeOffset parsed))
+                return parsed.DateTime;
+
+            return DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime;
         }
 
 

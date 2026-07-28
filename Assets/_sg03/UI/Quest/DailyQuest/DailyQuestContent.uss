@@ -125,7 +125,7 @@
     -unity-font-style: bold;
 }
 
-.dq-quest-detail-panel__action:last-child {
+.dq-quest-detail-panel__action--last {
     margin-right: 0;
 }
 
@@ -256,6 +256,15 @@
     letter-spacing: 0.5px;
 }
 
+.dq-header__server-time {
+    margin-left: auto;
+    width: 150px;
+    min-width: 150px;
+    color: rgb(160, 180, 225);
+    font-size: 13px;
+    -unity-text-align: middle-right;
+}
+
 /* ============================================================
    7-day week grid
    ============================================================ */
@@ -288,7 +297,7 @@
     -unity-text-align: middle-center;
 }
 
-.dq-day-selector__button:last-child {
+.dq-day-selector__button--last {
     margin-right: 0;
 }
 

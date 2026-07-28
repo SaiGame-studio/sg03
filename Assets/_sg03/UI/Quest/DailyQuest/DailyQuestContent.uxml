@@ -9,6 +9,7 @@
     <ui:VisualElement class="dq-content">
         <ui:VisualElement class="dq-header">
             <ui:Label text="Daily Quest" class="dq-header__title" />
+            <ui:Label name="ServerTimeLabel" class="dq-header__server-time" />
         </ui:VisualElement>
 
         <ui:VisualElement class="dq-range-tabs">
@@ -34,7 +35,7 @@
             <ui:VisualElement name="QuestDetailActions" class="dq-quest-detail-panel__actions">
                 <ui:Button name="QuestDetailStartButton" text="Start" class="dq-quest-detail-panel__action" />
                 <ui:Button name="QuestDetailCheckButton" text="Check" class="dq-quest-detail-panel__action" />
-                <ui:Button name="QuestDetailClaimButton" text="Claim" class="dq-quest-detail-panel__action dq-quest-detail-panel__action--claim" />
+                <ui:Button name="QuestDetailClaimButton" text="Claim" class="dq-quest-detail-panel__action dq-quest-detail-panel__action--claim dq-quest-detail-panel__action--last" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
