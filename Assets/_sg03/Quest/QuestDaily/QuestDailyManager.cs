@@ -122,6 +122,7 @@ namespace SG03.Quest
         {
             if (response == null) return;
             this.pools = response.pools;
+            this.SynchronizeQuestLists(this.pools);
         }
 
         private void OnTodayQuestsReceived(TodayQuestResponse response)
