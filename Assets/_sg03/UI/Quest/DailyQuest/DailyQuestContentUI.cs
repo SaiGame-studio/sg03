@@ -821,7 +821,7 @@ namespace SG03.UI
             int requestVersion = ++this.questDetailRequestVersion;
             if (this.questDetailPanel.ClassListContains("dq-quest-detail-panel--open"))
             {
-                this.HideQuestDetail();
+                this.HideQuestDetail(invalidatePendingRequests: false);
                 this.questDetailPanel.schedule.Execute(() =>
                 {
                     if (requestVersion == this.questDetailRequestVersion)
@@ -1073,11 +1073,26 @@ namespace SG03.UI
 
         private void HideQuestDetail()
         {
+            this.HideQuestDetail(invalidatePendingRequests: true);
+        }
+
+        private void HideQuestDetail(bool invalidatePendingRequests)
+        {
             if (this.questDetailPanel == null) return;
+            if (invalidatePendingRequests) this.questDetailRequestVersion++;
             this.ClearQuestDetailActions();
             this.SetSelectedQuestItem(null);
             this.questDetailPanel.RemoveFromClassList("dq-quest-detail-panel--open");
             this.questDetailPanel.AddToClassList("dq-quest-detail-panel--hidden");
+        }
+
+        public bool CloseQuestDetailOnEscape()
+        {
+            if (this.questDetailPanel == null
+                || !this.questDetailPanel.ClassListContains("dq-quest-detail-panel--open")) return false;
+
+            this.HideQuestDetail();
+            return true;
         }
 
         private void AddDetailSection(string text)
