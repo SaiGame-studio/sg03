@@ -440,8 +440,9 @@ namespace SG03.UI
             // Art area
             VisualElement artArea = new VisualElement();
             artArea.AddToClassList("desk-card__art-area");
-            Label artIcon = new Label("🃏");
+            Image artIcon = new Image { scaleMode = ScaleMode.ScaleToFit };
             artIcon.AddToClassList("desk-card__art-icon");
+            this.LoadCardArt(artIcon, item);
             artArea.Add(artIcon);
 
             // Keep quantity within the art area so it cannot overlap card details.
