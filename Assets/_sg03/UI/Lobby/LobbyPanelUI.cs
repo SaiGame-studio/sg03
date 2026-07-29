@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using UnityEngine.InputSystem;
 using SaiGame.Services;
 
 namespace SG03.UI
@@ -38,6 +39,7 @@ namespace SG03.UI
 
         [Header("Scene Navigation")]
         [SerializeField] private string gameSceneName = "2-game";
+        private QuestPanelUI questPanel;
 
         // Provides access to every SaiServer service (Auth, GamerProgress, Shop, …).
         protected SaiServer Server => this.saiServer;
@@ -316,7 +318,7 @@ namespace SG03.UI
 
             this.contentArea.Add(panelRoot);
 
-            var questPanel = new QuestPanelUI(
+            this.questPanel = new QuestPanelUI(
                 panelRoot,
                 this.dailyQuestContentAsset,
                 this.mainQuestContentAsset,
@@ -325,7 +327,13 @@ namespace SG03.UI
                 this.next7DaysContentAsset,
                 this.next30DaysContentAsset);
 
-            questPanel.ShowQuest(type);
+            this.questPanel.ShowQuest(type);
+        }
+
+        private void Update()
+        {
+            if (Keyboard.current?.escapeKey.wasPressedThisFrame == true)
+                this.questPanel?.CloseQuestDetailOnEscape();
         }
 
         // ------------------------------------------------------------------

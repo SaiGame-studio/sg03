@@ -17,6 +17,7 @@ namespace SG03.UI
         private readonly VisualTreeAsset thisMonthAsset;
         private readonly VisualTreeAsset next7DaysAsset;
         private readonly VisualTreeAsset next30DaysAsset;
+        private DailyQuestContentUI dailyQuestContent;
 
         public QuestPanelUI(
             VisualElement panelRoot,
@@ -71,13 +72,16 @@ namespace SG03.UI
             content.style.width      = new StyleLength(new Length(100, LengthUnit.Percent));
             this.contentArea.Add(content);
 
+            this.dailyQuestContent = null;
             if (type == QuestType.Daily)
-                new DailyQuestContentUI(
+                this.dailyQuestContent = new DailyQuestContentUI(
                     content,
                     this.thisWeekAsset,
                     this.thisMonthAsset,
                     this.next7DaysAsset,
                     this.next30DaysAsset);
         }
+
+        public bool CloseQuestDetailOnEscape() => this.dailyQuestContent?.CloseQuestDetailOnEscape() ?? false;
     }
 }

@@ -415,7 +415,7 @@ MonoBehaviour:
   despawn: {fileID: 0}
   card: {fileID: 6448500482708191787}
   loader: {fileID: 9041437042871058224}
-  movement: {fileID: 0}
+  movement: {fileID: 4051116045650226938}
   cardOwner: 0
   codeName: 
   inventoryItemId: 
@@ -443,7 +443,6 @@ MonoBehaviour:
       atk_deduct: 0
       def_add: 0
       def_deduct: 0
-      stun_count: 0
       summon_count: 0
       hp_restore: 0
     metadata:
@@ -456,8 +455,10 @@ MonoBehaviour:
       abilities: 
       summon: 
   expose: 0
+  isTrigger: 0
+  isHover: 0
   cardHolder: {fileID: 0}
-  reviewMovement: {fileID: 0}
+  reviewMovement: {fileID: 811396000192289789}
 --- !u!114 &4051116045650226938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -474,7 +475,6 @@ MonoBehaviour:
   duration: 1
   ease: 6
   lineOffsetY: 0.2
-  hoverOffsetY: 0.3
   hoverDuration: 0.15
   hoverEase: 6
   selectedOffsetY: 1.5
@@ -505,13 +505,6 @@ MonoBehaviour:
   attackBackstepRatio: 0.15
   attackBackstepDuration: 0.12
   attackBackstepEase: 6
-  abilityRiseHeight: 1.2
-  abilityScalePeak: 1.15
-  abilityRiseDuration: 0.18
-  abilityHoldDuration: 0.12
-  abilityReturnDuration: 0.22
-  abilityRiseEase: 27
-  abilityReturnEase: 5
   location: 0
   faceState: 0
 --- !u!1 &2634467069902684173

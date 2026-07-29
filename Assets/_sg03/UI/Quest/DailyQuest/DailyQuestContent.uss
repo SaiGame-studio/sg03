@@ -628,7 +628,7 @@
     margin-bottom: 6px;
     transition-property: background-color, border-color;
     transition-duration: 0.14s;
-    cursor: link;
+    cursor: default;
 }
 
 .dq-quest-item:hover {
@@ -683,7 +683,7 @@
     padding: 3px 8px;
     margin-bottom: 4px;
     -unity-font-style: bold;
-    cursor: link;
+    cursor: default;
 }
 
 .dq-quest-item__action-btn--completed {

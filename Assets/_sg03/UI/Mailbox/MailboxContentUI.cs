@@ -13,7 +13,10 @@ namespace SG03.UI
         private readonly VisualElement emptyState;
         private readonly VisualElement loadingState;
         private readonly Button refreshBtn;
+        private readonly Button claimAllBtn;
+        private readonly Button deleteAllClaimedBtn;
         private readonly MailboxList list;
+        private bool isBulkActionRunning;
 
         public MailboxContentUI(VisualElement root)
         {
@@ -21,12 +24,20 @@ namespace SG03.UI
             this.emptyState   = root.Q("EmptyState");
             this.loadingState = root.Q("LoadingState");
             this.refreshBtn   = root.Q<Button>("RefreshBtn");
+            this.claimAllBtn  = root.Q<Button>("ClaimAllBtn");
+            this.deleteAllClaimedBtn = root.Q<Button>("DeleteAllClaimedBtn");
 
             this.list = new MailboxList();
             this.list.OnDataUpdated += this.Render;
 
             if (this.refreshBtn != null)
                 this.refreshBtn.RegisterCallback<ClickEvent>(_ => this.DoRefresh());
+
+            if (this.claimAllBtn != null)
+                this.claimAllBtn.RegisterCallback<ClickEvent>(_ => this.ClaimAll());
+
+            if (this.deleteAllClaimedBtn != null)
+                this.deleteAllClaimedBtn.RegisterCallback<ClickEvent>(_ => this.DeleteAllClaimed());
 
             this.ShowLoading();
             this.DoRefresh();
@@ -36,6 +47,42 @@ namespace SG03.UI
         {
             this.ShowLoading();
             this.list.Refresh();
+        }
+
+        private void ClaimAll()
+        {
+            if (this.isBulkActionRunning) return;
+
+            this.isBulkActionRunning = true;
+            this.UpdateHeaderActions();
+            this.list.ClaimAllMessages(
+                onSuccess: _ =>
+                {
+                    this.isBulkActionRunning = false;
+                    this.DoRefresh();
+                },
+                onError: error =>
+                {
+                    this.isBulkActionRunning = false;
+                    this.UpdateHeaderActions();
+                    Debug.LogWarning($"[MailboxContentUI] ClaimAllMessages failed: {error}");
+                }
+            );
+        }
+
+        private void DeleteAllClaimed()
+        {
+            if (this.isBulkActionRunning) return;
+
+            this.isBulkActionRunning = true;
+            this.UpdateHeaderActions();
+            this.list.DeleteAllClaimedMessages((deletedCount, lastError) =>
+            {
+                this.isBulkActionRunning = false;
+                if (!string.IsNullOrEmpty(lastError))
+                    Debug.LogWarning($"[MailboxContentUI] Deleted {deletedCount} claimed messages. Last error: {lastError}");
+                this.DoRefresh();
+            });
         }
 
         private void ShowLoading()
@@ -67,6 +114,7 @@ namespace SG03.UI
             if (messages == null || messages.Length == 0)
             {
                 this.ShowEmpty();
+                this.UpdateHeaderActions();
                 return;
             }
 
@@ -75,6 +123,29 @@ namespace SG03.UI
                 this.mailList.Add(this.BuildMessageRow(msg));
 
             this.ShowList();
+            this.UpdateHeaderActions();
+        }
+
+        private void UpdateHeaderActions()
+        {
+            MailboxMessage[] messages = this.list.Messages;
+            bool canClaimAll = false;
+            bool canDeleteAllClaimed = false;
+
+            if (messages != null)
+            {
+                foreach (MailboxMessage message in messages)
+                {
+                    bool hasAttachments = message.attachments != null && message.attachments.Length > 0;
+                    if (hasAttachments && string.IsNullOrEmpty(message.claimed_at)) canClaimAll = true;
+                    if (!string.IsNullOrEmpty(message.claimed_at)) canDeleteAllClaimed = true;
+                }
+            }
+
+            if (this.claimAllBtn != null)
+                this.claimAllBtn.SetEnabled(!this.isBulkActionRunning && canClaimAll);
+            if (this.deleteAllClaimedBtn != null)
+                this.deleteAllClaimedBtn.SetEnabled(!this.isBulkActionRunning && canDeleteAllClaimed);
         }
 
         private VisualElement BuildMessageRow(MailboxMessage msg)

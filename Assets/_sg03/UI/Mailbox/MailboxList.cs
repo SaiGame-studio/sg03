@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using SaiGame.Services;
 
 namespace SG03.UI
@@ -68,6 +69,46 @@ namespace SG03.UI
             }
 
             this.mailbox.DeleteMessage(messageId, onSuccess, onError);
+        }
+
+        public void ClaimAllMessages(Action<MailboxMessage[]> onSuccess, Action<string> onError)
+        {
+            if (this.mailbox == null)
+            {
+                onError?.Invoke("Mailbox service not available.");
+                return;
+            }
+
+            this.mailbox.ClaimAllMessages(onSuccess, onError);
+        }
+
+        // The mailbox API only exposes deletion for one message at a time, so delete
+        // claimed messages sequentially to avoid racing its local message cache.
+        public void DeleteAllClaimedMessages(Action<int, string> onComplete)
+        {
+            var messageIds = new List<string>();
+            foreach (MailboxMessage message in this.Messages ?? Array.Empty<MailboxMessage>())
+            {
+                if (!string.IsNullOrEmpty(message.id) && !string.IsNullOrEmpty(message.claimed_at))
+                    messageIds.Add(message.id);
+            }
+
+            this.DeleteClaimedMessages(messageIds, 0, 0, null, onComplete);
+        }
+
+        private void DeleteClaimedMessages(List<string> messageIds, int index, int deletedCount, string lastError, Action<int, string> onComplete)
+        {
+            if (index >= messageIds.Count)
+            {
+                onComplete?.Invoke(deletedCount, lastError);
+                return;
+            }
+
+            this.DeleteMessage(
+                messageIds[index],
+                _ => this.DeleteClaimedMessages(messageIds, index + 1, deletedCount + 1, lastError, onComplete),
+                error => this.DeleteClaimedMessages(messageIds, index + 1, deletedCount, error, onComplete)
+            );
         }
     }
 }

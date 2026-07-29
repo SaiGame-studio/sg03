@@ -70,6 +70,14 @@ namespace SG03.Quest
             this.OnDataUpdated?.Invoke();
         }
 
+        // Used by QuestPoolManager for pools returned by the server that do
+        // not yet have a serialized QuestList in the prefab.
+        public void Initialize(string key, QuestPoolManager owner)
+        {
+            this.poolKey = key;
+            this.manager = owner;
+        }
+
         // Calls GetPools on the manager, finds this list's pool, then loads
         // today's quest entries and stores them in Entries.
         public void Refresh(Action<DailyQuestEntryData[]> onSuccess = null)

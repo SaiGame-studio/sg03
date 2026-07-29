@@ -21,6 +21,44 @@
     background-color: transparent;
 }
 
+/* Compact scrollbar shared with Inventory and Daily Quest details. */
+.desk-root .unity-scroll-view__vertical-scroller {
+    width: 9px;
+    margin-left: 5px;
+    background-color: transparent;
+    border-radius: 2px;
+}
+
+.desk-root .unity-scroller__low-button,
+.desk-root .unity-scroller__high-button {
+    display: none;
+}
+
+.desk-root .unity-scroller__slider {
+    background-color: transparent;
+}
+
+.desk-root .unity-base-slider__tracker {
+    background-color: transparent;
+    border-width: 0;
+}
+
+.desk-root .unity-base-slider__dragger {
+    width: 9px;
+    min-width: 9px;
+    max-width: 9px;
+    min-height: 20px;
+    align-self: center;
+    background-color: rgba(130, 160, 220, 0.34);
+    border-width: 0;
+    border-radius: 2px;
+}
+
+.desk-root .unity-base-slider__dragger:hover,
+.desk-root .unity-base-slider__dragger:active {
+    background-color: rgba(145, 190, 255, 0.82);
+}
+
 /* ============================================================
    Header bar
    ============================================================ */
@@ -339,9 +377,9 @@
 }
 
 .desk-slot__item-icon {
-    font-size: 28px;
-    -unity-text-align: middle-center;
-    margin-bottom: 6px;
+    height: 70px;
+    flex-shrink: 0;
+    margin-bottom: 0;
 }
 
 .desk-slot__item-name {
@@ -737,7 +775,13 @@
     flex-direction: column;
     align-items: stretch;
     transition-duration: 0.12s;
-    cursor: link;
+    cursor: default;
+    overflow: hidden;
+}
+
+.desk-card,
+.desk-card * {
+    position: relative;
 }
 
 .desk-card:hover {
@@ -745,18 +789,61 @@
     background-color: rgba(28, 36, 64, 1);
 }
 
+.desk-card__actions {
+    flex-direction: row;
+    height: 16px;
+    min-height: 16px;
+    margin: 0 3px 3px 3px;
+}
+
+.desk-card__action-btn {
+    flex: 1;
+    height: 16px;
+    font-size: 8px;
+    padding: 0px 2px;
+    margin: 0 1px;
+    border-radius: 4px;
+    border-width: 1px;
+    -unity-text-align: middle-center;
+    transition-duration: 0.1s;
+    cursor: link;
+}
+
+.desk-card__view-btn {
+    border-color: rgba(80, 130, 230, 0.5);
+    background-color: rgba(30, 60, 130, 0.8);
+    color: rgb(150, 195, 255);
+}
+
+.desk-card__view-btn:hover {
+    background-color: rgba(50, 90, 180, 0.9);
+    color: rgb(200, 225, 255);
+}
+
+.desk-card__add-btn {
+    border-color: rgba(80, 190, 120, 0.55);
+    background-color: rgba(25, 110, 60, 0.8);
+    color: rgb(145, 240, 175);
+}
+
+.desk-card__add-btn:hover {
+    background-color: rgba(35, 150, 80, 0.9);
+    color: rgb(205, 255, 220);
+}
+
 /* Art area — top portion of the card */
 .desk-card__art-area {
-    height: 68px;
-    min-height: 68px;
+    height: 64px;
+    min-height: 64px;
     align-items: center;
     justify-content: center;
     background-color: rgba(8, 10, 22, 0.85);
 }
 
 .desk-card__art-icon {
-    font-size: 36px;
-    -unity-text-align: middle-center;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
 }
 
 /* Info area — bottom portion */
@@ -764,25 +851,30 @@
     flex: 1;
     flex-direction: column;
     align-items: center;
-    padding: 4px 4px 3px 4px;
+    padding: 0 4px 0 4px;
     background-color: rgba(12, 15, 28, 0.9);
+    overflow: hidden;
 }
 
 .desk-card__name {
+    height: 18px;
+    min-height: 18px;
     font-size: 9px;
     color: rgb(210, 220, 255);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     white-space: normal;
     -unity-word-wrap: true;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 .desk-card__rarity {
+    height: 9px;
+    min-height: 9px;
     font-size: 8px;
     color: rgb(110, 125, 175);
     -unity-text-align: middle-center;
-    margin-bottom: 1px;
+    margin-bottom: 0;
 }
 
 /* Rarity color overrides */
@@ -799,9 +891,9 @@
 .desk-card--rarity-legendary { border-color: rgba(220, 160,  30, 0.6);  }
 
 .desk-card__qty {
-    position: absolute;
-    top: 4px;
-    right: 4px;
+    align-self: auto;
+    top: 0;
+    right: 0;
     font-size: 9px;
     color: rgb(10, 15, 30);
     background-color: rgb(100, 200, 120);

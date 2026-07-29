@@ -39,6 +39,7 @@ namespace SG03.UI
         private readonly VisualTreeAsset next30DaysAsset;
         private QuestList[] lists;
         private readonly List<QuestList> poolLists = new List<QuestList>();
+        private readonly HashSet<QuestList> subscribedLists = new HashSet<QuestList>();
         private readonly Dictionary<QuestList, DailyQuestPoolData> poolDataByList = new Dictionary<QuestList, DailyQuestPoolData>();
         private readonly Dictionary<QuestList, DailyQuestEntryData[]> next7DaysCache = new Dictionary<QuestList, DailyQuestEntryData[]>();
         private readonly Dictionary<QuestList, DailyQuestEntryData[]> next30DaysCache = new Dictionary<QuestList, DailyQuestEntryData[]>();
@@ -111,11 +112,7 @@ namespace SG03.UI
             this.LoadPoolChoices();
 
             // Subscribe permanently — re-render on every future data update.
-            foreach (QuestList list in this.lists)
-            {
-                if (list == null) continue;
-                list.OnDataUpdated += this.OnAnyListUpdated;
-            }
+            this.SubscribeToLists();
 
             // If some lists have no data yet, refresh them; otherwise render now.
             int pendingCount = 0;
@@ -136,27 +133,38 @@ namespace SG03.UI
 
         private void OnAnyListUpdated() => this.Render();
 
-        private void LoadPoolChoices()
+        private void LoadPoolChoices(Action onComplete = null)
         {
             if (SaiServer.Instance?.DailyQuest == null)
             {
                 this.SetPoolChoices(null);
+                onComplete?.Invoke();
                 return;
             }
 
             SaiServer.Instance.DailyQuest.GetPools(
-                onSuccess: response => this.SetPoolChoices(response?.pools),
+                onSuccess: response =>
+                {
+                    this.SetPoolChoices(response?.pools);
+                    onComplete?.Invoke();
+                },
                 onError: error =>
                 {
                     UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] Load pools failed: {error}");
                     this.SetPoolChoices(null);
+                    onComplete?.Invoke();
                 }
             );
         }
 
         private void SetPoolChoices(DailyQuestPoolData[] pools)
         {
-            if (this.poolDropdown == null || this.lists == null) return;
+            if (this.poolDropdown == null) return;
+
+            QuestDailyManager manager = UnityEngine.Object.FindFirstObjectByType<QuestDailyManager>(UnityEngine.FindObjectsInactive.Include);
+            if (manager != null) this.lists = manager.QuestLists;
+            if (this.lists == null) return;
+            this.SubscribeToLists();
 
             QuestList previousSelection = this.selectedPoolList;
             this.poolLists.Clear();
@@ -195,6 +203,17 @@ namespace SG03.UI
             this.poolDropdown.index = selectedIndex;
             this.UpdateAssignAheadButtonVisibility();
             this.Render();
+        }
+
+        private void SubscribeToLists()
+        {
+            if (this.lists == null) return;
+
+            foreach (QuestList list in this.lists)
+            {
+                if (list == null || !this.subscribedLists.Add(list)) continue;
+                list.OnDataUpdated += this.OnAnyListUpdated;
+            }
         }
 
         private void OnPoolChanged(ChangeEvent<string> evt)
@@ -267,6 +286,16 @@ namespace SG03.UI
         }
 
         private void RefreshSelectedPool()
+        {
+            this.refreshButton?.SetEnabled(false);
+            this.LoadPoolChoices(() =>
+            {
+                this.refreshButton?.SetEnabled(true);
+                this.RefreshSelectedPoolData();
+            });
+        }
+
+        private void RefreshSelectedPoolData()
         {
             if (this.selectedRange == DateRange.ThisWeek)
             {
@@ -792,7 +821,7 @@ namespace SG03.UI
             int requestVersion = ++this.questDetailRequestVersion;
             if (this.questDetailPanel.ClassListContains("dq-quest-detail-panel--open"))
             {
-                this.HideQuestDetail();
+                this.HideQuestDetail(invalidatePendingRequests: false);
                 this.questDetailPanel.schedule.Execute(() =>
                 {
                     if (requestVersion == this.questDetailRequestVersion)
@@ -1044,11 +1073,26 @@ namespace SG03.UI
 
         private void HideQuestDetail()
         {
+            this.HideQuestDetail(invalidatePendingRequests: true);
+        }
+
+        private void HideQuestDetail(bool invalidatePendingRequests)
+        {
             if (this.questDetailPanel == null) return;
+            if (invalidatePendingRequests) this.questDetailRequestVersion++;
             this.ClearQuestDetailActions();
             this.SetSelectedQuestItem(null);
             this.questDetailPanel.RemoveFromClassList("dq-quest-detail-panel--open");
             this.questDetailPanel.AddToClassList("dq-quest-detail-panel--hidden");
+        }
+
+        public bool CloseQuestDetailOnEscape()
+        {
+            if (this.questDetailPanel == null
+                || !this.questDetailPanel.ClassListContains("dq-quest-detail-panel--open")) return false;
+
+            this.HideQuestDetail();
+            return true;
         }
 
         private void AddDetailSection(string text)
