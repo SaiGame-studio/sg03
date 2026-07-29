@@ -39,7 +39,9 @@
 }
 
 .mb-header__refresh-btn {
-    padding: 6px 14px;
+    width: 34px;
+    height: 30px;
+    padding: 0;
     border-radius: 8px;
     border-width: 1px;
     border-color: rgba(80, 100, 160, 0.4);
@@ -47,6 +49,35 @@
     color: rgb(150, 160, 200);
     font-size: 12px;
     transition-duration: 0.1s;
+}
+
+.mb-header__action-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border-width: 1px;
+    font-size: 12px;
+    margin-right: 8px;
+    transition-duration: 0.1s;
+}
+
+.mb-header__claim-all-btn {
+    border-color: rgba(80, 140, 255, 0.6);
+    background-color: rgba(50, 100, 220, 0.8);
+    color: rgb(235, 242, 255);
+}
+
+.mb-header__claim-all-btn:hover {
+    background-color: rgba(70, 125, 255, 0.95);
+}
+
+.mb-header__delete-all-claimed-btn {
+    border-color: rgba(210, 80, 80, 0.55);
+    background-color: rgba(130, 40, 40, 0.65);
+    color: rgb(255, 210, 210);
+}
+
+.mb-header__delete-all-claimed-btn:hover {
+    background-color: rgba(180, 50, 50, 0.85);
 }
 
 .mb-header__refresh-btn:hover {
