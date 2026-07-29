@@ -121,6 +121,44 @@
     padding: 16px;
 }
 
+/* Match the compact vertical scrollbar used by the Quest Details drawer. */
+.inv-grid .unity-scroll-view__vertical-scroller {
+    width: 9px;
+    margin-left: 5px;
+    background-color: transparent;
+    border-radius: 2px;
+}
+
+.inv-grid .unity-scroller__low-button,
+.inv-grid .unity-scroller__high-button {
+    display: none;
+}
+
+.inv-grid .unity-scroller__slider {
+    background-color: transparent;
+}
+
+.inv-grid .unity-base-slider__tracker {
+    background-color: transparent;
+    border-width: 0;
+}
+
+.inv-grid .unity-base-slider__dragger {
+    width: 9px;
+    min-width: 9px;
+    max-width: 9px;
+    min-height: 20px;
+    align-self: center;
+    background-color: rgba(130, 160, 220, 0.34);
+    border-width: 0;
+    border-radius: 2px;
+}
+
+.inv-grid .unity-base-slider__dragger:hover,
+.inv-grid .unity-base-slider__dragger:active {
+    background-color: rgba(145, 190, 255, 0.82);
+}
+
 /* ============================================================
    Item card
    ============================================================ */

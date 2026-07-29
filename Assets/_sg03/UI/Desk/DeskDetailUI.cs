@@ -384,7 +384,6 @@ namespace SG03.UI
             // Quantity badge — top-right corner
             Label qtyLabel = new Label($"x{stack.Count}");
             qtyLabel.AddToClassList("desk-card__qty");
-            card.Add(qtyLabel);
 
             // Art area
             VisualElement artArea = new VisualElement();
@@ -392,6 +391,9 @@ namespace SG03.UI
             Label artIcon = new Label("🃏");
             artIcon.AddToClassList("desk-card__art-icon");
             artArea.Add(artIcon);
+
+            // Keep quantity within the art area so it cannot overlap card details.
+            artArea.Add(qtyLabel);
             card.Add(artArea);
 
             // Info area
@@ -413,7 +415,33 @@ namespace SG03.UI
 
             card.Add(info);
 
-            card.RegisterCallback<ClickEvent>(_ => this.OnInventoryItemClicked(stack, card));
+            VisualElement actions = new VisualElement();
+            actions.AddToClassList("desk-card__actions");
+
+            Button viewBtn = new Button { text = "\U0001F441" };
+            viewBtn.AddToClassList("desk-card__action-btn");
+            viewBtn.AddToClassList("desk-card__view-btn");
+            InventoryItemData capturedItem = item;
+            string capturedId = item.id;
+            viewBtn.RegisterCallback<ClickEvent>(e =>
+            {
+                e.StopPropagation();
+                this.ShowCardViewer(capturedItem, capturedId);
+            });
+            actions.Add(viewBtn);
+
+            Button addBtn = new Button { text = "+" };
+            addBtn.AddToClassList("desk-card__action-btn");
+            addBtn.AddToClassList("desk-card__add-btn");
+            addBtn.RegisterCallback<ClickEvent>(e =>
+            {
+                e.StopPropagation();
+                this.OnInventoryItemClicked(stack, card);
+            });
+            actions.Add(addBtn);
+
+            card.Add(actions);
+
             return card;
         }
 
