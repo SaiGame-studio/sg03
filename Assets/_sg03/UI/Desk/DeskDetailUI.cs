@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using SaiGame.Services;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
 
 namespace SG03.UI
@@ -31,6 +34,9 @@ namespace SG03.UI
         private InventoryItemData[] allInventoryItems = Array.Empty<InventoryItemData>();
         private string searchText = string.Empty;
         private int pendingApiRequests = 0;
+        private readonly Dictionary<string, Texture2D> cardArtCache = new();
+        private readonly Dictionary<string, List<Image>> pendingCardArtImages = new();
+        private readonly Dictionary<string, AsyncOperationHandle<CardData>> cardArtHandles = new();
 
         public event Action OnBackRequested;
         public event Action OnCardViewerShown;
@@ -253,8 +259,9 @@ namespace SG03.UI
                 break;
             }
 
-            Label itemIcon = new Label("🃏");
+            Image itemIcon = new Image { scaleMode = ScaleMode.ScaleToFit };
             itemIcon.AddToClassList("desk-slot__item-icon");
+            this.LoadCardArt(itemIcon, foundItem);
             tile.Add(itemIcon);
 
             Label itemName = new Label(name);
@@ -294,6 +301,51 @@ namespace SG03.UI
         }
 
         // ── Inventory list ────────────────────────────────────────────────────
+
+        private void LoadCardArt(Image target, InventoryItemData item)
+        {
+            string itemCode = item?.definition?.item_code;
+            if (string.IsNullOrEmpty(itemCode)) return;
+
+            if (this.cardArtCache.TryGetValue(itemCode, out Texture2D cachedArt))
+            {
+                target.image = cachedArt;
+                return;
+            }
+
+            if (this.pendingCardArtImages.TryGetValue(itemCode, out List<Image> pendingImages))
+            {
+                pendingImages.Add(target);
+                return;
+            }
+
+            if (CardDataManager.Instance == null
+                || !CardLoader.TryResolveAddressByAssetName(
+                    CardDataManager.Instance.CardAddresses,
+                    itemCode,
+                    out string cardAddress))
+                return;
+
+            this.pendingCardArtImages[itemCode] = new List<Image> { target };
+            AsyncOperationHandle<CardData> handle = Addressables.LoadAssetAsync<CardData>(cardAddress);
+            this.cardArtHandles[itemCode] = handle;
+            handle.Completed += operation =>
+            {
+                this.pendingCardArtImages.TryGetValue(itemCode, out List<Image> images);
+                this.pendingCardArtImages.Remove(itemCode);
+
+                if (operation.Status != AsyncOperationStatus.Succeeded
+                    || operation.Result?.CharacterTexture == null)
+                    return;
+
+                Texture2D artwork = operation.Result.CharacterTexture;
+                this.cardArtCache[itemCode] = artwork;
+                if (images == null) return;
+
+                foreach (Image image in images)
+                    image.image = artwork;
+            };
+        }
 
         private void LoadInventory()
         {

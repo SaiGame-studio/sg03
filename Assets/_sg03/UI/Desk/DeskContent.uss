@@ -377,9 +377,9 @@
 }
 
 .desk-slot__item-icon {
-    font-size: 28px;
-    -unity-text-align: middle-center;
-    margin-bottom: 6px;
+    height: 70px;
+    flex-shrink: 0;
+    margin-bottom: 0;
 }
 
 .desk-slot__item-name {
