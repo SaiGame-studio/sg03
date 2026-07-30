@@ -155,6 +155,19 @@
     -unity-font-style: bold;
 }
 
+.dq-quest-detail-panel__unavailable-message {
+    display: none;
+    flex-grow: 1;
+    padding: 8px 10px;
+    color: rgb(190, 215, 255);
+    background-color: rgba(50, 90, 150, 0.25);
+    border-color: rgba(110, 165, 255, 0.5);
+    border-width: 1px;
+    border-radius: 6px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
 .dq-quest-detail-panel__action:disabled {
     color: rgb(115, 130, 165);
     background-color: rgba(40, 48, 70, 0.8);
