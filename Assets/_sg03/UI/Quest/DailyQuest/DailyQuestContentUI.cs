@@ -33,6 +33,7 @@ namespace SG03.UI
         private readonly Button questDetailClaimButton;
         private readonly Label questDetailExpiredMessage;
         private readonly Label questDetailClaimedMessage;
+        private readonly Label questDetailUnavailableMessage;
         private readonly VisualElement serverTimeLabel;
         private readonly ServerTimeLabelComponent serverTime;
         private readonly VisualTreeAsset thisWeekAsset;
@@ -92,6 +93,7 @@ namespace SG03.UI
             this.questDetailClaimButton = root.Q<Button>("QuestDetailClaimButton");
             this.questDetailExpiredMessage = root.Q<Label>("QuestDetailExpiredMessage");
             this.questDetailClaimedMessage = root.Q<Label>("QuestDetailClaimedMessage");
+            this.questDetailUnavailableMessage = root.Q<Label>("QuestDetailUnavailableMessage");
             this.serverTimeLabel = root.Q("ServerTimeLabel");
             if (this.serverTimeLabel != null)
                 this.serverTime = new ServerTimeLabelComponent(this.serverTimeLabel);
@@ -550,7 +552,7 @@ namespace SG03.UI
                 foreach (DailyQuestEntryData entry in list.Entries)
                 {
                     totalLoaded++;
-                    string raw = entry.assignment?.assigned_date;
+                    string raw = entry.assignment?.available_at;
                     if (string.IsNullOrEmpty(raw)) continue;
                     // Normalize: take only the date part (yyyy-MM-dd) in case server
                     // returns a full ISO datetime string.
@@ -678,7 +680,7 @@ namespace SG03.UI
                 {
                     if (entry.status != "in_progress") continue;
 
-                    string raw = entry.assignment?.assigned_date;
+                    string raw = entry.assignment?.available_at;
                     if (string.IsNullOrEmpty(raw)) continue;
 
                     string date = raw.Length >= 10 ? raw.Substring(0, 10) : raw;
@@ -780,8 +782,8 @@ namespace SG03.UI
             VisualElement bottom = new VisualElement();
             bottom.AddToClassList("dq-quest-item__bottom");
 
-            string assignedDate = entry.assignment?.assigned_date;
-            bool assignedInFuture = IsInFuture(assignedDate);
+            string availableAt = entry.assignment?.available_at;
+            bool availableInFuture = IsInFuture(availableAt);
 
             string statusText = this.StatusLabel(entry.status);
             if (!string.IsNullOrEmpty(statusText))
@@ -793,17 +795,17 @@ namespace SG03.UI
             }
 
             string expiresAt    = entry.assignment?.expires_at;
-            if (!string.IsNullOrEmpty(assignedDate))
+            if (!string.IsNullOrEmpty(availableAt))
             {
-                Label startDateLabel = new Label($"Start: {ShortDate(assignedDate)}");
+                Label startDateLabel = new Label($"Available: {ShortDate(availableAt)}");
                 startDateLabel.AddToClassList("dq-quest-item__start-date");
                 bottom.Add(startDateLabel);
             }
 
-            if (assignedInFuture)
+            if (availableInFuture)
             {
                 // Quest hasn't started yet — show when it will begin.
-                Label startsLabel = new Label($"Starts {TimeIn(assignedDate)}");
+                Label startsLabel = new Label($"Available {TimeIn(availableAt)}");
                 startsLabel.AddToClassList("dq-quest-item__expires");
                 bottom.Add(startsLabel);
             }
@@ -876,7 +878,7 @@ namespace SG03.UI
             this.AddDetailSection("Assignment");
             this.AddDetailRow("Assignment ID", entry.assignment?.id);
             this.AddDetailRow("Pool ID", entry.assignment?.pool_id);
-            this.AddDetailRow("Assigned", entry.assignment?.assigned_date);
+            this.AddDetailRow("Available", entry.assignment?.available_at);
             this.AddDetailRow("Expires", entry.assignment?.expires_at);
             this.AddDetailRow("Created", entry.assignment?.created_at);
 
@@ -1192,8 +1194,9 @@ namespace SG03.UI
         {
             bool isClaimed = entry?.status == "claimed";
             bool isExpired = IsQuestExpired(entry);
-            this.SetQuestDetailActionState(isExpired, isClaimed);
-            if (isExpired || isClaimed)
+            bool isUnavailable = !isClaimed && !isExpired && IsInFuture(entry?.assignment?.available_at);
+            this.SetQuestDetailActionState(isExpired, isClaimed, isUnavailable);
+            if (isExpired || isClaimed || isUnavailable)
             {
                 this.ClearQuestDetailActions();
                 return;
@@ -1202,7 +1205,7 @@ namespace SG03.UI
             string assignmentId = entry.assignment?.id;
             string questId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
             QuestList ownerList = this.FindOwnerList(questId);
-            bool canStart = entry.status == "not_started" && !IsInFuture(entry.assignment?.assigned_date);
+            bool canStart = entry.status == "not_started" && !IsInFuture(entry.assignment?.available_at);
             bool canCheck = entry.status == "in_progress";
             bool canClaim = entry.status == "completed";
 
@@ -1232,7 +1235,7 @@ namespace SG03.UI
 
         private string GetQuestActionUnavailableReason(string action, DailyQuestEntryData entry)
         {
-            if (action == "Start" && IsInFuture(entry.assignment?.assigned_date))
+            if (action == "Start" && IsInFuture(entry.assignment?.available_at))
                 return "Not available yet";
             return $"Quest must be {action.ToLowerInvariant()}able first.";
         }
@@ -1244,9 +1247,9 @@ namespace SG03.UI
             this.ClearQuestDetailAction(this.questDetailClaimButton);
         }
 
-        private void SetQuestDetailActionState(bool isExpired, bool isClaimed)
+        private void SetQuestDetailActionState(bool isExpired, bool isClaimed, bool isUnavailable)
         {
-            bool hideActions = isExpired || isClaimed;
+            bool hideActions = isExpired || isClaimed || isUnavailable;
             if (this.questDetailStartButton != null)
                 this.questDetailStartButton.style.display = hideActions ? DisplayStyle.None : DisplayStyle.Flex;
             if (this.questDetailCheckButton != null)
@@ -1257,6 +1260,8 @@ namespace SG03.UI
                 this.questDetailExpiredMessage.style.display = isExpired ? DisplayStyle.Flex : DisplayStyle.None;
             if (this.questDetailClaimedMessage != null)
                 this.questDetailClaimedMessage.style.display = isClaimed ? DisplayStyle.Flex : DisplayStyle.None;
+            if (this.questDetailUnavailableMessage != null)
+                this.questDetailUnavailableMessage.style.display = isUnavailable ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         private static bool IsQuestExpired(DailyQuestEntryData entry)
@@ -1459,7 +1464,6 @@ namespace SG03.UI
         private static bool IsInFuture(string isoTimestamp)
         {
             if (string.IsNullOrEmpty(isoTimestamp)) return false;
-            // assigned_date may be a date-only string "yyyy-MM-dd"; treat it as start of that UTC day.
             if (!DateTime.TryParse(isoTimestamp, null, DateTimeStyles.RoundtripKind, out DateTime target))
                 return false;
             return TryGetServerTime(out DateTime serverTime) && target > serverTime;
