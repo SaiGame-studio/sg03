@@ -36,6 +36,8 @@
                 <ui:Button name="QuestDetailStartButton" text="Start" class="dq-quest-detail-panel__action" />
                 <ui:Button name="QuestDetailCheckButton" text="Check" class="dq-quest-detail-panel__action" />
                 <ui:Button name="QuestDetailClaimButton" text="Claim" class="dq-quest-detail-panel__action dq-quest-detail-panel__action--claim dq-quest-detail-panel__action--last" />
+                <ui:Label name="QuestDetailExpiredMessage" text="This quest has expired." class="dq-quest-detail-panel__expired-message" />
+                <ui:Label name="QuestDetailClaimedMessage" text="Quest claimed successfully." class="dq-quest-detail-panel__claimed-message" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

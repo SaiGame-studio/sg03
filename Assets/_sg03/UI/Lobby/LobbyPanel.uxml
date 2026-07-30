@@ -27,7 +27,6 @@
 
             <!-- Bottom navigation bar -->
             <ui:VisualElement name="BottomMenu" class="lobby-bottom-menu">
-                <ui:Button name="BtnProfile"   text="👤 Profile"   class="lobby-bottom-btn" />
                 <ui:Button name="BtnDesk"      text="🃏 Desk"      class="lobby-bottom-btn" />
                 <ui:Button name="BtnInventory" text="🎒 Inventory" class="lobby-bottom-btn" />
                 <ui:Button name="BtnMailbox"   text="📬 Mailbox"   class="lobby-bottom-btn" />

@@ -31,6 +31,8 @@ namespace SG03.UI
         private readonly Button questDetailStartButton;
         private readonly Button questDetailCheckButton;
         private readonly Button questDetailClaimButton;
+        private readonly Label questDetailExpiredMessage;
+        private readonly Label questDetailClaimedMessage;
         private readonly VisualElement serverTimeLabel;
         private readonly ServerTimeLabelComponent serverTime;
         private readonly VisualTreeAsset thisWeekAsset;
@@ -88,6 +90,8 @@ namespace SG03.UI
             this.questDetailStartButton = root.Q<Button>("QuestDetailStartButton");
             this.questDetailCheckButton = root.Q<Button>("QuestDetailCheckButton");
             this.questDetailClaimButton = root.Q<Button>("QuestDetailClaimButton");
+            this.questDetailExpiredMessage = root.Q<Label>("QuestDetailExpiredMessage");
+            this.questDetailClaimedMessage = root.Q<Label>("QuestDetailClaimedMessage");
             this.serverTimeLabel = root.Q("ServerTimeLabel");
             if (this.serverTimeLabel != null)
                 this.serverTime = new ServerTimeLabelComponent(this.serverTimeLabel);
@@ -1186,6 +1190,15 @@ namespace SG03.UI
 
         private void ConfigureQuestDetailActions(DailyQuestEntryData entry)
         {
+            bool isClaimed = entry?.status == "claimed";
+            bool isExpired = IsQuestExpired(entry);
+            this.SetQuestDetailActionState(isExpired, isClaimed);
+            if (isExpired || isClaimed)
+            {
+                this.ClearQuestDetailActions();
+                return;
+            }
+
             string assignmentId = entry.assignment?.id;
             string questId = entry.quest?.id ?? entry.assignment?.quest_definition_id;
             QuestList ownerList = this.FindOwnerList(questId);
@@ -1229,6 +1242,35 @@ namespace SG03.UI
             this.ClearQuestDetailAction(this.questDetailStartButton);
             this.ClearQuestDetailAction(this.questDetailCheckButton);
             this.ClearQuestDetailAction(this.questDetailClaimButton);
+        }
+
+        private void SetQuestDetailActionState(bool isExpired, bool isClaimed)
+        {
+            bool hideActions = isExpired || isClaimed;
+            if (this.questDetailStartButton != null)
+                this.questDetailStartButton.style.display = hideActions ? DisplayStyle.None : DisplayStyle.Flex;
+            if (this.questDetailCheckButton != null)
+                this.questDetailCheckButton.style.display = hideActions ? DisplayStyle.None : DisplayStyle.Flex;
+            if (this.questDetailClaimButton != null)
+                this.questDetailClaimButton.style.display = hideActions ? DisplayStyle.None : DisplayStyle.Flex;
+            if (this.questDetailExpiredMessage != null)
+                this.questDetailExpiredMessage.style.display = isExpired ? DisplayStyle.Flex : DisplayStyle.None;
+            if (this.questDetailClaimedMessage != null)
+                this.questDetailClaimedMessage.style.display = isClaimed ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        private static bool IsQuestExpired(DailyQuestEntryData entry)
+        {
+            // A completed claim remains claimed even after the assignment's expiry time.
+            if (entry?.status == "claimed") return false;
+            if (entry?.status == "expired") return true;
+
+            string expiresAt = entry?.assignment?.expires_at;
+            if (string.IsNullOrEmpty(expiresAt)
+                || !DateTime.TryParse(expiresAt, null, DateTimeStyles.RoundtripKind, out DateTime expiration))
+                return false;
+
+            return TryGetServerTime(out DateTime serverTime) && expiration <= serverTime;
         }
 
         private void ClearQuestDetailAction(Button button)

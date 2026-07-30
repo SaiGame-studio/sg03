@@ -129,6 +129,32 @@
     margin-right: 0;
 }
 
+.dq-quest-detail-panel__expired-message {
+    display: none;
+    flex-grow: 1;
+    padding: 8px 10px;
+    color: rgb(255, 185, 185);
+    background-color: rgba(150, 50, 50, 0.25);
+    border-color: rgba(255, 120, 120, 0.5);
+    border-width: 1px;
+    border-radius: 6px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
+.dq-quest-detail-panel__claimed-message {
+    display: none;
+    flex-grow: 1;
+    padding: 8px 10px;
+    color: rgb(175, 255, 195);
+    background-color: rgba(50, 150, 80, 0.25);
+    border-color: rgba(110, 230, 140, 0.5);
+    border-width: 1px;
+    border-radius: 6px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
 .dq-quest-detail-panel__action:disabled {
     color: rgb(115, 130, 165);
     background-color: rgba(40, 48, 70, 0.8);
