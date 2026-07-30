@@ -171,7 +171,6 @@ namespace SG03.UI
 
         // Bottom buttons
         private Button btnPlay;
-        private Button btnProfile;
         private Button btnDesk;
         private Button btnInventory;
         private Button btnMailbox;
@@ -224,13 +223,11 @@ namespace SG03.UI
 
             // Bottom buttons
             this.btnPlay      = root.Q<Button>("BtnPlay");
-            this.btnProfile   = root.Q<Button>("BtnProfile");
             this.btnDesk      = root.Q<Button>("BtnDesk");
             this.btnInventory = root.Q<Button>("BtnInventory");
             this.btnMailbox   = root.Q<Button>("BtnMailbox");
 
             this.btnPlay?.RegisterCallback<ClickEvent>(_ => this.OnPlayClicked());
-            this.btnProfile?.RegisterCallback<ClickEvent>(_ => this.OnProfileClicked());
             this.btnDesk?.RegisterCallback<ClickEvent>(_ => this.OnDeskClicked());
             this.btnInventory?.RegisterCallback<ClickEvent>(_ => this.OnInventoryClicked());
             this.btnMailbox?.RegisterCallback<ClickEvent>(_ => this.OnMailboxClicked());
@@ -359,7 +356,6 @@ namespace SG03.UI
 
             new InventoryContentUI(content);
         }
-        protected virtual void OnProfileClicked()   { }
         protected virtual void OnDeskClicked()
         {
             if (this.contentArea == null || this.deskContentBehaviour == null) return;
