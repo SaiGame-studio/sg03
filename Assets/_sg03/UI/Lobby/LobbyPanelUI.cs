@@ -190,6 +190,7 @@ namespace SG03.UI
         {
             base.Start();
             this.InitializeStandalonePanel();
+            this.OnQuestTabClicked();
         }
 
         private void InitializeStandalonePanel()
@@ -215,7 +216,7 @@ namespace SG03.UI
             this.homeTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.homeTab));
             this.shopTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.shopTab));
 
-            // Quest tab opens the panel with Daily Quest selected.
+            // Quest tab opens the panel with Main Quest selected.
             if (this.questTab != null)
             {
                 this.questTab.RegisterCallback<ClickEvent>(_ => this.OnQuestTabClicked());
@@ -278,7 +279,7 @@ namespace SG03.UI
         private void OnQuestTabClicked()
         {
             this.OnTopTabClicked(this.questTab);
-            this.LoadQuestPanel(QuestType.Daily);
+            this.LoadQuestPanel(QuestType.Main);
         }
 
         private void LoadDailyQuestTabContentAssets()

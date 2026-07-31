@@ -21,13 +21,13 @@
             <ui:VisualElement class="quest-sidebar__divider" />
 
             <!-- Nav items -->
-            <ui:Button name="DailyQuestNavBtn" class="quest-nav-btn quest-nav-btn--active">
-                <ui:Label text="📅" class="quest-nav-btn__icon" />
-                <ui:Label text="Daily Quest" class="quest-nav-btn__label" />
-            </ui:Button>
-            <ui:Button name="MainQuestNavBtn" class="quest-nav-btn">
+            <ui:Button name="MainQuestNavBtn" class="quest-nav-btn quest-nav-btn--active">
                 <ui:Label text="🗺" class="quest-nav-btn__icon" />
                 <ui:Label text="Main Quest" class="quest-nav-btn__label" />
+            </ui:Button>
+            <ui:Button name="DailyQuestNavBtn" class="quest-nav-btn">
+                <ui:Label text="📅" class="quest-nav-btn__icon" />
+                <ui:Label text="Daily Quest" class="quest-nav-btn__label" />
             </ui:Button>
 
         </ui:VisualElement>

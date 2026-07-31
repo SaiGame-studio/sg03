@@ -4,12 +4,16 @@
          noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
          editor-extension-mode="False">
 
-    <!-- Main Quest — "Coming Soon" content, included into QuestPanel's QuestContentArea -->
-    <ui:VisualElement class="quest-coming-soon">
-        <ui:Label text="⚔" class="quest-coming-soon__icon" />
-        <ui:Label text="Main Quest" class="quest-coming-soon__title" />
-        <ui:Label text="COMING SOON" class="quest-coming-soon__badge" />
-        <ui:Label text="The main story quests are currently in development.&#10;Prepare yourself for the adventure ahead!" class="quest-coming-soon__desc" />
+    <ui:VisualElement name="MainQuestRoot" class="main-quest-root">
+        <ui:VisualElement class="main-quest-header">
+            <ui:VisualElement class="main-quest-header__copy">
+                <ui:Label text="MAIN QUEST" class="main-quest-header__title" />
+                <ui:Label name="MainQuestChainName" text="Loading quest chain..." class="main-quest-header__subtitle" />
+            </ui:VisualElement>
+            <ui:Button name="MainQuestRefreshButton" text="Refresh" class="main-quest-refresh-button" />
+        </ui:VisualElement>
+        <ui:Label name="MainQuestState" class="main-quest-state" />
+        <ui:VisualElement name="MainQuestGraphHost" class="main-quest-graph-host" />
     </ui:VisualElement>
 
 </ui:UXML>

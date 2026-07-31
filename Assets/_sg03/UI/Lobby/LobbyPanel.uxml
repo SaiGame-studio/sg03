@@ -15,9 +15,8 @@
             <ui:VisualElement name="TopMenu" class="lobby-top-menu">
                 <ui:Label name="AppTitle" text="SaiGame" class="lobby-top-menu__title" />
                 <ui:VisualElement name="TopMenuTabs" class="lobby-top-menu__tabs">
-                    <ui:Button name="HomeTab"    text="Home"    class="lobby-tab lobby-tab--active" />
+                    <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab lobby-tab--active" />
                     <ui:Button name="ShopTab"    text="Shop"    class="lobby-tab" />
-                    <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab" />
                 </ui:VisualElement>
                 <ui:Label name="PlayerNameLabel" text="👤 Guest" class="lobby-top-menu__player-name" />
             </ui:VisualElement>
