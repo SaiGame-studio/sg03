@@ -177,6 +177,7 @@ namespace SG03.UI
 
         // Player name label (top-right of TopMenu)
         private Label playerNameLabel;
+        private SaiAuth subscribedAuth;
 
         // Lobby background elements toggled during immersive mode
         private VisualElement lobbyRoot;
@@ -238,8 +239,12 @@ namespace SG03.UI
             this.RefreshPlayerName();
 
             // Subscribe so name updates if lobby is loaded before login completes
-            if (this.saiServer?.SaiAuth != null)
-                this.saiServer.SaiAuth.OnLoginSuccess += this.OnLoginSuccess;
+            SaiAuth auth = this.GetSaiAuth();
+            if (auth != null)
+            {
+                auth.OnLoginSuccess += this.OnLoginSuccess;
+                this.subscribedAuth = auth;
+            }
 
             // Content area
             this.contentArea = root.Q("ContentArea");
@@ -251,12 +256,28 @@ namespace SG03.UI
                 new LobbyAspectRatioKeeper(this.lobbyRoot, this.lobbyViewport);
         }
 
-        private void OnLoginSuccess(LoginResponse _) => this.RefreshPlayerName();
+        private void OnLoginSuccess(LoginResponse response)
+        {
+            this.SetPlayerName(response?.user);
+        }
 
         private void RefreshPlayerName()
         {
+            UserData user = this.GetSaiAuth()?.CurrentUser;
+            this.SetPlayerName(user);
+        }
+
+        private SaiAuth GetSaiAuth()
+        {
+            // SaiServer is persistent. The serialized scene reference can point to a
+            // duplicate that Unity destroys when moving from login to lobby.
+            SaiServer activeServer = SaiServer.Instance;
+            return activeServer != null ? activeServer.SaiAuth : this.saiServer?.SaiAuth;
+        }
+
+        private void SetPlayerName(UserData user)
+        {
             if (this.playerNameLabel == null) return;
-            UserData user = this.saiServer != null ? this.saiServer.CurrentUser : null;
             string name = user?.display_name;
             if (string.IsNullOrEmpty(name)) name = user?.username;
             this.playerNameLabel.text = string.IsNullOrEmpty(name) ? "👤 Guest" : $"👤 {name}";
@@ -388,8 +409,9 @@ namespace SG03.UI
 
         private void UnsubscribeFromLoginSuccess()
         {
-            if (this.saiServer?.SaiAuth == null) return;
-            this.saiServer.SaiAuth.OnLoginSuccess -= this.OnLoginSuccess;
+            if (this.subscribedAuth == null) return;
+            this.subscribedAuth.OnLoginSuccess -= this.OnLoginSuccess;
+            this.subscribedAuth = null;
         }
 
         // ------------------------------------------------------------------
