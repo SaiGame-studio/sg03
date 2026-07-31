@@ -41,8 +41,18 @@ namespace SG03.UI
 
         private void LoadSaiAuth()
         {
+            // SaiServer persists across scene changes. Do not keep the serialized
+            // scene reference because it can point to the duplicate SaiServer that
+            // Unity destroys when returning to the login scene.
+            SaiAuth activeAuth = SaiServer.Instance?.SaiAuth;
+            if (activeAuth != null)
+            {
+                this.saiAuth = activeAuth;
+                return;
+            }
+
             if (this.saiAuth != null) return;
-            this.saiAuth = this.GetComponentInParent<SaiAuth>();
+            this.saiAuth = FindFirstObjectByType<SaiAuth>(FindObjectsInactive.Include);
             Debug.LogWarning(this.transform.name + ": LoadSaiAuth", this.gameObject);
         }
 

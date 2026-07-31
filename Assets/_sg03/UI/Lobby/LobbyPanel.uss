@@ -87,6 +87,23 @@
     -unity-text-align: middle-right;
 }
 
+.lobby-top-menu__logout {
+    width: 30px;
+    height: 30px;
+    margin-left: 8px;
+    padding: 0;
+    font-size: 18px;
+    color: rgb(180, 195, 240);
+    background-color: transparent;
+    border-width: 0;
+    -unity-text-align: middle-center;
+}
+
+.lobby-top-menu__logout:hover {
+    color: rgb(255, 140, 140);
+    background-color: rgba(220, 80, 80, 0.18);
+}
+
 /* ============================================================
    Content area
    ============================================================ */

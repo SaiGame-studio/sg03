@@ -19,6 +19,7 @@
                     <ui:Button name="ShopTab"    text="Shop"    class="lobby-tab" />
                 </ui:VisualElement>
                 <ui:Label name="PlayerNameLabel" text="👤 Guest" class="lobby-top-menu__player-name" />
+                <ui:Button name="BtnLogout" text="⎋" tooltip="Log out" class="lobby-top-menu__logout" />
             </ui:VisualElement>
 
             <!-- Content area (expands to fill remaining space) -->

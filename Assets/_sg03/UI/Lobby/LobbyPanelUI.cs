@@ -177,7 +177,9 @@ namespace SG03.UI
 
         // Player name label (top-right of TopMenu)
         private Label playerNameLabel;
+        private Button btnLogout;
         private SaiAuth subscribedAuth;
+        private SaiAuth logoutAuth;
 
         // Lobby background elements toggled during immersive mode
         private VisualElement lobbyRoot;
@@ -236,6 +238,8 @@ namespace SG03.UI
 
             // Player name (top-right)
             this.playerNameLabel = root.Q<Label>("PlayerNameLabel");
+            this.btnLogout = root.Q<Button>("BtnLogout");
+            this.btnLogout?.RegisterCallback<ClickEvent>(_ => this.OnLogoutClicked());
             this.RefreshPlayerName();
 
             // Subscribe so name updates if lobby is loaded before login completes
@@ -281,6 +285,30 @@ namespace SG03.UI
             string name = user?.display_name;
             if (string.IsNullOrEmpty(name)) name = user?.username;
             this.playerNameLabel.text = string.IsNullOrEmpty(name) ? "👤 Guest" : $"👤 {name}";
+        }
+
+        private void OnLogoutClicked()
+        {
+            SaiAuth auth = this.GetSaiAuth();
+            if (auth == null) return;
+
+            this.btnLogout?.SetEnabled(false);
+            this.logoutAuth = auth;
+            auth.OnLogoutSuccess += this.OnLogoutFinished;
+            auth.OnLogoutFailure += this.OnLogoutFailed;
+            auth.Logout();
+        }
+
+        private void OnLogoutFinished()
+        {
+            this.UnsubscribeFromLogout();
+            SceneManager.LoadScene("0-login");
+        }
+
+        private void OnLogoutFailed(string _)
+        {
+            // SaiAuth clears local credentials even when the server request fails.
+            this.OnLogoutFinished();
         }
 
         // ------------------------------------------------------------------
@@ -405,6 +433,7 @@ namespace SG03.UI
         protected virtual void OnDestroy()
         {
             this.UnsubscribeFromLoginSuccess();
+            this.UnsubscribeFromLogout();
         }
 
         private void UnsubscribeFromLoginSuccess()
@@ -412,6 +441,14 @@ namespace SG03.UI
             if (this.subscribedAuth == null) return;
             this.subscribedAuth.OnLoginSuccess -= this.OnLoginSuccess;
             this.subscribedAuth = null;
+        }
+
+        private void UnsubscribeFromLogout()
+        {
+            if (this.logoutAuth == null) return;
+            this.logoutAuth.OnLogoutSuccess -= this.OnLogoutFinished;
+            this.logoutAuth.OnLogoutFailure -= this.OnLogoutFailed;
+            this.logoutAuth = null;
         }
 
         // ------------------------------------------------------------------
