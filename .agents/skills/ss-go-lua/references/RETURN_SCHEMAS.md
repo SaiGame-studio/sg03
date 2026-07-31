@@ -22,7 +22,7 @@ This reference defines the Lua table fields returned by the ss-go runtime. Field
 | `game.get_container_def_by_id` | `SSItemContainerDefinition` |
 | `game.get_container_by_id` | `SSItemContainer` |
 | `game.get_gacha_pack_by_id` | `SSGachaPack` |
-| `game.open_gacha_pack` | `SSGachaOpenResult` |
+| `game.open_gacha_pack`, `game.open_gacha_pack_by_code_name`, `game.open_reward_gacha_pack`, `game.open_reward_gacha_pack_by_code_name` | `SSGachaOpenResult` |
 | `game.get_quest_def_by_id` | `SSQuestDefinition` |
 | `game.get_event_type_by_id`, `game.get_event_type_by_name` | `SSGameEventType` |
 | `game.get_entity_def_by_id`, `game.get_entity_def_by_key` | `SSEntityDefinition` |
@@ -145,6 +145,8 @@ All lookup functions also return `err` as their second result. Do not access the
 | `items` | `SSGachaGrantedItem[]` |
 
 `SSGachaGrantedItem` has `item_definition_id` (UUID), `name` (string), `quantity` (integer), `rarity` (string), and `category` (string).
+
+`game.open_gacha_pack` and `game.open_gacha_pack_by_code_name` check and consume the pack's `key_requirements` from the supplied `container_id`; omit `container_id` only for packs with no key requirements. The code-name variants resolve only packs in the current game. `game.open_reward_gacha_pack` and `game.open_reward_gacha_pack_by_code_name` intentionally bypass this consumption. They are free-reward APIs: call them only after checking server-authoritative state and use a stable idempotency key derived from the reward event to avoid duplicate grants.
 
 ## Quest schema
 

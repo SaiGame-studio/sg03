@@ -96,7 +96,10 @@ Concrete fields for every table or list result are defined in `RETURN_SCHEMAS.md
 | `game.get_container_def_by_id(id)` | `SSItemContainerDefinition, err` | Fetches an item container definition by UUID. |
 | `game.get_container_by_id(id)` | `SSItemContainer, err` | Fetches a player container by UUID. |
 | `game.get_gacha_pack_by_id(id)` | `SSGachaPack, err` | Fetches a gacha pack definition by UUID. |
-| `game.open_gacha_pack(pack_id [, container_id [, idempotency_key]])` | `SSGachaOpenResult, err` | Opens one gacha pack for the authenticated player. |
+| `game.open_gacha_pack(pack_id [, container_id [, idempotency_key]])` | `SSGachaOpenResult, err` | Opens one gacha pack and consumes its configured key requirements from `container_id`. |
+| `game.open_gacha_pack_by_code_name(code_name [, container_id [, idempotency_key]])` | `SSGachaOpenResult, err` | Resolves a game-scoped pack by `code_name`, then opens it with the same key requirement behavior. |
+| `game.open_reward_gacha_pack(pack_id [, idempotency_key])` | `SSGachaOpenResult, err` | Opens a free reward pack without consuming key requirements; only use after server-authoritative reward validation. |
+| `game.open_reward_gacha_pack_by_code_name(code_name [, idempotency_key])` | `SSGachaOpenResult, err` | Resolves a game-scoped free reward pack by `code_name`; only use after server-authoritative reward validation. |
 | `game.get_quest_def_by_id(id)` | `SSQuestDefinition, err` | Fetches a quest definition by UUID. |
 | `game.get_event_type_by_id(id_or_name)` | `SSGameEventType, err` | Fetches an event type by UUID or name. |
 | `game.get_event_type_by_name(name)` | `SSGameEventType, err` | Fetches an event type by name. |
@@ -117,7 +120,7 @@ Concrete fields for every table or list result are defined in `RETURN_SCHEMAS.md
 | `game.battle_session_update(session_id, state)` | `err` | Overwrites battle state. |
 | `game.battle_session_end(session_id [, end_data])` | `err` | Ends a battle session. |
 | `game.battle_session_flee(session_id)` | `err` | Marks a battle session as fled. |
-| `game.open_entity_drop_packs(session_id, entity_def_id, pack_ids)` | `SSEntityDropPackResult[], err` | Opens enemy drop packs. Max 7 pack IDs. |
+| `game.open_entity_drop_packs(session_id, entity_def_id, pack_ids)` | `SSEntityDropPackResult[], err` | Opens enemy drop packs. Uses the player's main inventory for configured key requirements. Max 7 pack IDs. |
 
 ## Library Scripts & `require` Directives
 
@@ -174,6 +177,7 @@ Reject or rewrite scripts that:
 - Use `os`, `io`, filesystem, network, dynamic code loading, or bytecode APIs.
 - Depend on wall-clock randomness for security-critical outcomes without a server-provided seed.
 - Modify data outside `output` unless using an explicit documented side-effect helper.
+- Call `game.open_reward_gacha_pack` without first proving a server-authoritative reward condition and deriving an idempotency key from that event.
 - Ignore `err` from `game.*` before reading returned data.
 - Use `require` directives inside a library script.
 - Define non-function top-level values in a library script.

@@ -386,6 +386,30 @@ function SSGameAPI.get_gacha_pack_by_id(id) end
 ---@return LuaError err
 function SSGameAPI.open_gacha_pack(pack_id, container_id, idempotency_key) end
 
+---Resolve a game-scoped gacha pack by code name, then open it for the authenticated player.
+---@param code_name string
+---@param container_id? UUID
+---@param idempotency_key? string
+---@return SSGachaOpenResult|nil result
+---@return LuaError err
+function SSGameAPI.open_gacha_pack_by_code_name(code_name, container_id, idempotency_key) end
+
+---Open a server-authorized reward gacha pack without consuming key requirements.
+---Use only after server-authoritative reward validation and with an idempotency key derived from that event.
+---@param pack_id UUID
+---@param idempotency_key? string
+---@return SSGachaOpenResult|nil result
+---@return LuaError err
+function SSGameAPI.open_reward_gacha_pack(pack_id, idempotency_key) end
+
+---Resolve a game-scoped reward gacha pack by code name and open it without consuming key requirements.
+---Use only after server-authoritative reward validation and with an idempotency key derived from that event.
+---@param code_name string
+---@param idempotency_key? string
+---@return SSGachaOpenResult|nil result
+---@return LuaError err
+function SSGameAPI.open_reward_gacha_pack_by_code_name(code_name, idempotency_key) end
+
 ---Fetch a quest definition by UUID.
 ---@param id UUID
 ---@return SSQuestDefinition|nil quest_def

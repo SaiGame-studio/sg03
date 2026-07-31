@@ -16,6 +16,7 @@ local load_session       -- forward declaration
 local determine_winner -- forward declaration
 local end_session      -- forward declaration
 local open_drop_packs  -- forward declaration
+local open_win_game_pack -- forward declaration
 
 -- Process and flatten drop packs results into a list of items with definition_id, name, and quantity
 local function process_drops(pack_results)
@@ -72,6 +73,13 @@ local function main()
     if winner == "alpha" then
         local drops, drop_err = open_drop_packs(session_id, state)
         if drop_err ~= nil then output.error = drop_err ; return end
+
+        -- Award the battle-win pack after entity drops. This reward API intentionally
+        -- bypasses the pack's key requirements; the winning battle session is the
+        -- server-authoritative condition, and session_id makes retries idempotent.
+        local win_pack, win_pack_err = open_win_game_pack(session_id)
+        if win_pack_err ~= nil then output.error = win_pack_err ; return end
+        output.win_game_pack = win_pack.items or {}
 
         -- Flatten the drops list to return to the client
         local flat_drops = process_drops(drops)
@@ -143,6 +151,15 @@ open_drop_packs = function(session_id, state)
     local drops, err = game.open_entity_drop_packs(session_id, enemy.id, pack_ids)
     if err ~= nil then return nil, err end
     return drops or {}, nil
+end
+
+open_win_game_pack = function(session_id)
+    local result, err = game.open_reward_gacha_pack_by_code_name(
+        "win_game_pack",
+        "battle-win-game-pack:" .. session_id
+    )
+    if err ~= nil then return nil, err end
+    return result, nil
 end
 
 main()
