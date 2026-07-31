@@ -517,6 +517,10 @@ PrefabInstance:
       value: 443
       objectReference: {fileID: 0}
     - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: gameId
+      value: 2e352068-3b3a-4a31-9e47-564f4dd3af13
+      objectReference: {fileID: 0}
+    - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: useHttps
       value: 1
       objectReference: {fileID: 0}

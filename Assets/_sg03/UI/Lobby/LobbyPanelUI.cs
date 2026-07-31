@@ -178,6 +178,10 @@ namespace SG03.UI
         // Player name label (top-right of TopMenu)
         private Label playerNameLabel;
         private Button btnLogout;
+        private Button btnQuitGame;
+        private Button btnCancelQuit;
+        private Button btnConfirmQuit;
+        private VisualElement quitConfirmOverlay;
         private SaiAuth subscribedAuth;
         private SaiAuth logoutAuth;
 
@@ -239,7 +243,14 @@ namespace SG03.UI
             // Player name (top-right)
             this.playerNameLabel = root.Q<Label>("PlayerNameLabel");
             this.btnLogout = root.Q<Button>("BtnLogout");
+            this.btnQuitGame = root.Q<Button>("BtnQuitGame");
+            this.btnCancelQuit = root.Q<Button>("BtnCancelQuit");
+            this.btnConfirmQuit = root.Q<Button>("BtnConfirmQuit");
+            this.quitConfirmOverlay = root.Q("QuitConfirmOverlay");
             this.btnLogout?.RegisterCallback<ClickEvent>(_ => this.OnLogoutClicked());
+            this.btnQuitGame?.RegisterCallback<ClickEvent>(_ => this.ShowQuitConfirmation());
+            this.btnCancelQuit?.RegisterCallback<ClickEvent>(_ => this.HideQuitConfirmation());
+            this.btnConfirmQuit?.RegisterCallback<ClickEvent>(_ => this.QuitGame());
             this.RefreshPlayerName();
 
             // Subscribe so name updates if lobby is loaded before login completes
@@ -309,6 +320,27 @@ namespace SG03.UI
         {
             // SaiAuth clears local credentials even when the server request fails.
             this.OnLogoutFinished();
+        }
+
+        private void ShowQuitConfirmation()
+        {
+            if (this.quitConfirmOverlay != null)
+                this.quitConfirmOverlay.style.display = DisplayStyle.Flex;
+        }
+
+        private void HideQuitConfirmation()
+        {
+            if (this.quitConfirmOverlay != null)
+                this.quitConfirmOverlay.style.display = DisplayStyle.None;
+        }
+
+        private void QuitGame()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
 
         // ------------------------------------------------------------------
