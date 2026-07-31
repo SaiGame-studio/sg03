@@ -30,6 +30,7 @@ namespace SG03.UI
     {
         public string definition_id;
         public string name;
+        public string category;
         public int quantity;
     }
 
@@ -119,16 +120,35 @@ namespace SG03.UI
                 rewardsTitle.style.marginBottom = 8;
                 rewardsContainer.Add(rewardsTitle);
 
-                foreach (var drop in this.drops)
+                for (int i = 0; i < this.drops.Length; i++)
                 {
-                    Label dropLabel = new Label { name = $"BattleResultPopupDrop_{drop.definition_id}" };
-                    string displayName = !string.IsNullOrEmpty(drop.name) ? drop.name : drop.definition_id;
-                    dropLabel.text = $"{displayName} x{drop.quantity}";
-                    dropLabel.style.color = new Color(0.8f, 0.9f, 1f);
-                    dropLabel.style.fontSize = 14;
-                    dropLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-                    dropLabel.style.marginBottom = 4;
-                    rewardsContainer.Add(dropLabel);
+                    BattleEndDropItem drop = this.drops[i];
+                    if (drop == null || this.IsQuestReward(drop)) continue;
+
+                    this.AddRewardLabel(rewardsContainer, drop, i, "Reward");
+                }
+
+                bool hasQuestRewards = false;
+                for (int i = 0; i < this.drops.Length; i++)
+                {
+                    BattleEndDropItem drop = this.drops[i];
+                    if (drop == null || !this.IsQuestReward(drop)) continue;
+
+                    if (!hasQuestRewards)
+                    {
+                        Label questRewardsTitle = new Label { name = "BattleResultPopupQuestRewardsTitle" };
+                        questRewardsTitle.text = "QUEST REWARDS";
+                        questRewardsTitle.style.color = new Color(0.75f, 0.65f, 1f);
+                        questRewardsTitle.style.fontSize = 12;
+                        questRewardsTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
+                        questRewardsTitle.style.letterSpacing = 1.5f;
+                        questRewardsTitle.style.marginTop = 10;
+                        questRewardsTitle.style.marginBottom = 8;
+                        rewardsContainer.Add(questRewardsTitle);
+                        hasQuestRewards = true;
+                    }
+
+                    this.AddRewardLabel(rewardsContainer, drop, i, "Quest");
                 }
 
                 card.Add(rewardsContainer);
@@ -164,6 +184,32 @@ namespace SG03.UI
             card.Add(btnRow);
 
             parent.Add(this.overlay);
+        }
+
+        private bool IsQuestReward(BattleEndDropItem drop)
+        {
+            return this.GetRewardCategory(drop) == BattleRewardCategory.Quest;
+        }
+
+        private BattleRewardCategory GetRewardCategory(BattleEndDropItem drop)
+        {
+            string category = (drop?.category ?? string.Empty).Trim().ToLowerInvariant();
+            string questCategory = BattleRewardCategory.Quest.ToString().ToLowerInvariant();
+            return string.Equals(category, questCategory, StringComparison.Ordinal)
+                ? BattleRewardCategory.Quest
+                : BattleRewardCategory.Unknown;
+        }
+
+        private void AddRewardLabel(VisualElement container, BattleEndDropItem drop, int index, string group)
+        {
+            Label dropLabel = new Label { name = $"BattleResultPopup{group}Drop_{index}" };
+            string displayName = !string.IsNullOrEmpty(drop.name) ? drop.name : "Unknown item";
+            dropLabel.text = $"{displayName} x{drop.quantity}";
+            dropLabel.style.color = new Color(0.8f, 0.9f, 1f);
+            dropLabel.style.fontSize = 14;
+            dropLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            dropLabel.style.marginBottom = 4;
+            container.Add(dropLabel);
         }
 
         private void OnContinuePlayClicked()
