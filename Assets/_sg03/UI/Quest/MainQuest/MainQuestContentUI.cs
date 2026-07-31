@@ -90,7 +90,7 @@ namespace SG03.UI
 
             this.StopWaitingForLogin();
 
-            this.ShowState("Loading main quest...");
+            this.ShowState("Loading main quest...", clearGraph: false);
             ChainQuestData activeChain = this.GetActiveChain();
             if (activeChain != null)
             {
@@ -163,7 +163,8 @@ namespace SG03.UI
             List<QuestFlowNode> nodes = new List<QuestFlowNode>();
             List<QuestFlowEdge> edges = new List<QuestFlowEdge>();
             foreach (LayoutNode root in roots) this.AppendGraphData(root, nodes, edges);
-            this.graph.SetGraph(nodes, edges);
+            if (this.graph.UpdateNodeStatuses(nodes)) return;
+            this.graph.SetGraph(nodes, edges, fitView: !this.graph.HasNodes);
         }
 
         private LayoutNode CreateLayoutNode(QuestTreeNode node, int depth)
@@ -203,9 +204,9 @@ namespace SG03.UI
         private float GetX(LayoutNode node) => CanvasPadding + node.depth * (CardWidth + ColumnGap);
         private float GetY(LayoutNode node) => CanvasPadding + node.row * RowGap;
 
-        private void ShowState(string message)
+        private void ShowState(string message, bool clearGraph = true)
         {
-            this.graph?.SetGraph(new List<QuestFlowNode>(), new List<QuestFlowEdge>());
+            if (clearGraph) this.graph?.SetGraph(new List<QuestFlowNode>(), new List<QuestFlowEdge>());
             if (this.state == null) return;
             this.state.text = message;
             this.state.style.display = DisplayStyle.Flex;
@@ -439,17 +440,23 @@ namespace SG03.UI
 
         private void StartSelectedQuest()
         {
-            SaiServer.Instance?.QuestProgressor?.StartQuest(this.selectedDetailNode?.id, _ => this.ShowQuestDetail(this.selectedDetailNode), this.RenderQuestDetailError);
+            SaiServer.Instance?.QuestProgressor?.StartQuest(this.selectedDetailNode?.id, _ => this.RefreshQuestTreeAndDetail(), this.RenderQuestDetailError);
         }
 
         private void CheckSelectedQuest()
         {
-            SaiServer.Instance?.QuestProgressor?.CheckQuest(this.selectedDetailNode?.id, _ => this.ShowQuestDetail(this.selectedDetailNode), this.RenderQuestDetailError);
+            SaiServer.Instance?.QuestProgressor?.CheckQuest(this.selectedDetailNode?.id, _ => this.RefreshQuestTreeAndDetail(), this.RenderQuestDetailError);
         }
 
         private void ClaimSelectedQuest()
         {
-            SaiServer.Instance?.QuestProgressor?.ClaimQuest(this.selectedDetailNode?.id, _ => this.ShowQuestDetail(this.selectedDetailNode), this.RenderQuestDetailError);
+            SaiServer.Instance?.QuestProgressor?.ClaimQuest(this.selectedDetailNode?.id, _ => this.RefreshQuestTreeAndDetail(), this.RenderQuestDetailError);
+        }
+
+        private void RefreshQuestTreeAndDetail()
+        {
+            this.LoadTree();
+            if (this.selectedDetailNode != null) this.ShowQuestDetail(this.selectedDetailNode);
         }
 
         private void HideQuestDetail()

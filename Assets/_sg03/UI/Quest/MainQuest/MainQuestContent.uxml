@@ -10,10 +10,10 @@
                 <ui:Label text="MAIN QUEST" class="main-quest-header__title" />
                 <ui:Label name="MainQuestChainName" text="Loading quest chain..." class="main-quest-header__subtitle" />
             </ui:VisualElement>
-            <ui:Button name="MainQuestRefreshButton" text="Refresh" class="main-quest-refresh-button" />
+            <ui:Button name="MainQuestRefreshButton" text="&#x21BB;" tooltip="Refresh" class="main-quest-refresh-button" />
         </ui:VisualElement>
-        <ui:Label name="MainQuestState" class="main-quest-state" />
         <ui:VisualElement name="MainQuestGraphHost" class="main-quest-graph-host" />
+        <ui:Label name="MainQuestState" class="main-quest-state" />
         <ui:VisualElement name="MainQuestDetailPanel" class="main-quest-detail-panel main-quest-detail-panel--hidden">
             <ui:VisualElement class="main-quest-detail-panel__header">
                 <ui:Label text="Quest Details" class="main-quest-detail-panel__title" />

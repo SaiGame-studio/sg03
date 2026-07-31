@@ -21,6 +21,7 @@ namespace SG03.UI
         private readonly VisualElement edgeLayer;
         private readonly VisualElement nodeLayer;
         private readonly Dictionary<string, QuestFlowNode> nodesById = new Dictionary<string, QuestFlowNode>();
+        private readonly Dictionary<string, Button> nodeElementsById = new Dictionary<string, Button>();
         private Vector2 pan;
         private float zoom = 1f;
         private bool isPanning;
@@ -54,9 +55,12 @@ namespace SG03.UI
             this.viewport.RegisterCallback<GeometryChangedEvent>(_ => this.ApplyTransform());
         }
 
-        public void SetGraph(IList<QuestFlowNode> nodes, IList<QuestFlowEdge> edges)
+        public bool HasNodes => this.nodesById.Count > 0;
+
+        public void SetGraph(IList<QuestFlowNode> nodes, IList<QuestFlowEdge> edges, bool fitView = true)
         {
             this.nodesById.Clear();
+            this.nodeElementsById.Clear();
             this.edgeLayer.Clear();
             this.nodeLayer.Clear();
             if (nodes == null) return;
@@ -70,8 +74,38 @@ namespace SG03.UI
             Rect bounds = this.GetBounds();
             this.canvas.style.width = bounds.xMax + 96f;
             this.canvas.style.height = bounds.yMax + 96f;
+            if (!fitView) return;
+
             this.FitView();
             this.viewport.schedule.Execute(this.FitView);
+        }
+
+        public bool UpdateNodeStatuses(IList<QuestFlowNode> nodes)
+        {
+            if (nodes == null || nodes.Count != this.nodesById.Count) return false;
+
+            foreach (QuestFlowNode node in nodes)
+            {
+                if (node == null || string.IsNullOrEmpty(node.id) || !this.nodesById.ContainsKey(node.id)) return false;
+            }
+
+            foreach (QuestFlowNode node in nodes)
+            {
+                QuestFlowNode currentNode = this.nodesById[node.id];
+                currentNode.status = node.status;
+
+                Button element = this.nodeElementsById[node.id];
+                element.RemoveFromClassList("quest-flow-node--pending");
+                element.RemoveFromClassList("quest-flow-node--active");
+                element.RemoveFromClassList("quest-flow-node--completed");
+                element.RemoveFromClassList("quest-flow-node--locked");
+                element.AddToClassList($"quest-flow-node--{GetStatusClass(node.status)}");
+
+                Label status = element.Q<Label>($"QuestFlowNodeStatus_{node.id}");
+                if (status != null) status.text = string.IsNullOrEmpty(node.status) ? "unknown" : node.status;
+            }
+
+            return true;
         }
 
         public void FitView()
@@ -115,6 +149,7 @@ namespace SG03.UI
         private void AddNode(QuestFlowNode node)
         {
             Button element = new Button();
+            element.name = $"QuestFlowNode_{node.id}";
             element.AddToClassList("quest-flow-node");
             element.AddToClassList($"quest-flow-node--{GetStatusClass(node.status)}");
             element.style.left = node.position.x;
@@ -132,10 +167,12 @@ namespace SG03.UI
                 element.Add(subtitle);
             }
             Label status = new Label(string.IsNullOrEmpty(node.status) ? "unknown" : node.status);
+            status.name = $"QuestFlowNodeStatus_{node.id}";
             status.AddToClassList("quest-flow-node__status");
             element.Add(status);
             element.clicked += () => this.NodeClicked?.Invoke(node);
             this.nodeLayer.Add(element);
+            this.nodeElementsById[node.id] = element;
         }
 
         private void AddEdge(QuestFlowEdge edge)
