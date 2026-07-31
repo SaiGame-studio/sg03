@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
+using SG03.UI.Components;
 
 namespace SG03.UI
 {
@@ -440,17 +441,22 @@ namespace SG03.UI
 
         private void StartSelectedQuest()
         {
-            SaiServer.Instance?.QuestProgressor?.StartQuest(this.selectedDetailNode?.id, _ => this.RefreshQuestTreeAndDetail(), this.RenderQuestDetailError);
+            QuestActionRequest.RunDefinitionAction(this.selectedDetailNode?.id, "start", this.RefreshQuestTreeAndDetail, this.ShowQuestActionError);
         }
 
         private void CheckSelectedQuest()
         {
-            SaiServer.Instance?.QuestProgressor?.CheckQuest(this.selectedDetailNode?.id, _ => this.RefreshQuestTreeAndDetail(), this.RenderQuestDetailError);
+            QuestActionRequest.RunDefinitionAction(this.selectedDetailNode?.id, "check", this.RefreshQuestTreeAndDetail, this.ShowQuestActionError);
         }
 
         private void ClaimSelectedQuest()
         {
-            SaiServer.Instance?.QuestProgressor?.ClaimQuest(this.selectedDetailNode?.id, _ => this.RefreshQuestTreeAndDetail(), this.RenderQuestDetailError);
+            QuestActionRequest.RunDefinitionAction(this.selectedDetailNode?.id, "claim", this.RefreshQuestTreeAndDetail, this.ShowQuestActionError);
+        }
+
+        private void ShowQuestActionError(string error)
+        {
+            ToastMessage.ShowError(QuestActionErrorFormatter.Format(error), this.detailPanel);
         }
 
         private void RefreshQuestTreeAndDetail()
