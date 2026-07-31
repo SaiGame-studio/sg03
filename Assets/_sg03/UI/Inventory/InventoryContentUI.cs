@@ -15,6 +15,7 @@ namespace SG03.UI
         private readonly VisualElement categoryBar;
         private readonly Button refreshBtn;
         private readonly InventoryList list;
+        private readonly GachaPackDetailUI gachaPackDetail;
 
         private string activeCategory = string.Empty;
         private readonly List<Button> categoryTabs = new List<Button>();
@@ -26,6 +27,8 @@ namespace SG03.UI
             this.loadingState = root.Q("LoadingState");
             this.categoryBar  = root.Q("CategoryBar");
             this.refreshBtn   = root.Q<Button>("RefreshBtn");
+            this.gachaPackDetail = new GachaPackDetailUI(root);
+            this.gachaPackDetail.OnPackOpened += this.HandleGachaPackOpened;
 
             // Allow the grid content container to wrap cards like a flex grid.
             if (this.itemGrid != null)
@@ -54,6 +57,12 @@ namespace SG03.UI
         {
             this.ShowLoading();
             this.list.Refresh(this.activeCategory);
+        }
+
+        private void HandleGachaPackOpened()
+        {
+            this.gachaPackDetail.Hide();
+            this.DoRefresh();
         }
 
         // ── Category bar ──────────────────────────────────────────────────────
@@ -161,6 +170,12 @@ namespace SG03.UI
             if (!string.IsNullOrEmpty(rarity))
                 card.AddToClassList($"inv-item-card--{rarity}");
 
+            if (IsGachaPack(item))
+            {
+                card.AddToClassList("inv-item-card--gacha-pack");
+                card.RegisterCallback<ClickEvent>(_ => this.gachaPackDetail.Show(item));
+            }
+
             // Quantity row (top-right badge)
             VisualElement qtyRow = new VisualElement();
             qtyRow.AddToClassList("inv-item-card__qty-row");
@@ -208,6 +223,11 @@ namespace SG03.UI
             }
 
             return card;
+        }
+
+        private static bool IsGachaPack(InventoryItemData item)
+        {
+            return string.Equals(item?.definition?.category, "gacha_pack", System.StringComparison.OrdinalIgnoreCase);
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

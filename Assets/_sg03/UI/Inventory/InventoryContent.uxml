@@ -33,6 +33,22 @@
         <!-- Scrollable item grid (populated at runtime) -->
         <ui:ScrollView name="ItemGrid" class="inv-grid" />
 
+        <!-- Gacha pack detail drawer -->
+        <ui:VisualElement name="GachaPackDetailPanel" class="gacha-pack-detail-panel gacha-pack-detail-panel--hidden">
+            <ui:VisualElement class="gacha-pack-detail-panel__header">
+                <ui:Label text="Gacha Pack Details" class="gacha-pack-detail-panel__title" />
+                <ui:Button name="CloseGachaPackDetailButton" text="×" tooltip="Close" class="gacha-pack-detail-panel__close" />
+            </ui:VisualElement>
+            <ui:ScrollView class="gacha-pack-detail-panel__scroll">
+                <ui:VisualElement name="GachaPackDetailContent" class="gacha-pack-detail-panel__content" />
+            </ui:ScrollView>
+            <ui:VisualElement class="gacha-pack-detail-panel__actions">
+                <ui:DropdownField name="GachaPackSelector" class="gacha-pack-detail-panel__selector" />
+                <ui:Button name="OpenGachaPackButton" text="Open Pack" class="gacha-pack-detail-panel__open-button" />
+                <ui:Label name="GachaPackOpenStatus" text="" class="gacha-pack-detail-panel__status" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
     </ui:VisualElement>
 
 </ui:UXML>
