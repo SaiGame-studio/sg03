@@ -87,6 +87,9 @@ namespace SG03.UI
                 this.mainQuestContent = new MainQuestContentUI(content);
         }
 
-        public bool CloseQuestDetailOnEscape() => this.dailyQuestContent?.CloseQuestDetailOnEscape() ?? false;
+        public bool CloseQuestDetailOnEscape()
+            => this.dailyQuestContent?.CloseQuestDetailOnEscape()
+               ?? this.mainQuestContent?.CloseQuestDetailOnEscape()
+               ?? false;
     }
 }
