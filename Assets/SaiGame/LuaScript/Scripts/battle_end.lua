@@ -16,32 +16,42 @@ local load_session       -- forward declaration
 local determine_winner -- forward declaration
 local end_session      -- forward declaration
 local open_drop_packs  -- forward declaration
+local open_win_game_pack -- forward declaration
 
--- Process and flatten drop packs results into a list of items with definition_id, name, and quantity
-local function process_drops(pack_results)
-    local item_list = {}
-    local item_map = {}
-    for _, pack in ipairs(pack_results) do
-        if pack.success and pack.items then
-            for _, item in ipairs(pack.items) do
-                local def_id = item.item_definition_id
-                if def_id then
-                    if item_map[def_id] then
-                        item_map[def_id].quantity = item_map[def_id].quantity + (item.quantity or 1)
-                    else
-                        local entry = {
-                            definition_id = def_id,
-                            name = item.name or def_id,
-                            quantity = item.quantity or 1
-                        }
-                        table.insert(item_list, entry)
-                        item_map[def_id] = entry
-                    end
-                end
+-- Add granted items to the reward list, combining matching item definitions.
+local function add_granted_items(item_list, item_map, items)
+    if items == nil then return end
+
+    for _, item in ipairs(items) do
+        local def_id = item.item_definition_id
+        if def_id then
+            if item_map[def_id] then
+                item_map[def_id].quantity = item_map[def_id].quantity + (item.quantity or 1)
+            else
+                local entry = {
+                    definition_id = def_id,
+                    name = item.name or "Unknown item",
+                    category = item.category,
+                    quantity = item.quantity or 1
+                }
+                table.insert(item_list, entry)
+                item_map[def_id] = entry
             end
         end
     end
-    return item_list
+end
+
+-- Flatten successful entity drop pack results into a reward list.
+local function process_drops(pack_results, item_list, item_map)
+    item_list = item_list or {}
+    item_map = item_map or {}
+
+    for _, pack in ipairs(pack_results) do
+        if pack.success and pack.items then
+            add_granted_items(item_list, item_map, pack.items)
+        end
+    end
+    return item_list, item_map
 end
 
 local function main()
@@ -73,14 +83,21 @@ local function main()
         local drops, drop_err = open_drop_packs(session_id, state)
         if drop_err ~= nil then output.error = drop_err ; return end
 
-        -- Flatten the drops list to return to the client
-        local flat_drops = process_drops(drops)
+        -- Award the battle-win pack after entity drops. This reward API intentionally
+        -- bypasses the pack's key requirements; the winning battle session is the
+        -- server-authoritative condition, and session_id makes retries idempotent.
+        local win_pack, win_pack_err = open_win_game_pack(session_id)
+        if win_pack_err ~= nil then output.error = win_pack_err ; return end
+
+        -- Combine entity drops and the winning pack into one client reward list.
+        local flat_drops, item_map = process_drops(drops)
+        add_granted_items(flat_drops, item_map, win_pack.items)
         output.drops = flat_drops
 
         -- Log drops/rewards
         if flat_drops ~= nil and #flat_drops > 0 then
             for _, drop in ipairs(flat_drops) do
-                game.log("Reward obtained: " .. tostring(drop.name) .. " (ID: " .. tostring(drop.definition_id) .. ") x" .. tostring(drop.quantity))
+                game.log("Reward obtained: " .. tostring(drop.name) .. " x" .. tostring(drop.quantity))
             end
         else
             game.log("No rewards obtained.")
@@ -143,6 +160,15 @@ open_drop_packs = function(session_id, state)
     local drops, err = game.open_entity_drop_packs(session_id, enemy.id, pack_ids)
     if err ~= nil then return nil, err end
     return drops or {}, nil
+end
+
+open_win_game_pack = function(session_id)
+    local result, err = game.open_reward_gacha_pack_by_code_name(
+        "win_game_pack",
+        "battle-win-game-pack:" .. session_id
+    )
+    if err ~= nil then return nil, err end
+    return result, nil
 end
 
 main()

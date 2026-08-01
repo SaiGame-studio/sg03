@@ -175,6 +175,15 @@
     margin-bottom: 10px;
 }
 
+.inv-item-card--gacha-pack {
+    cursor: link;
+}
+
+.inv-item-card--gacha-pack:hover {
+    background-color: rgba(34, 43, 70, 1);
+    border-color: rgba(105, 165, 255, 0.8);
+}
+
 /* Rarity left border accent */
 .inv-item-card--common {
     border-left-width: 3px;
@@ -285,4 +294,149 @@
     font-size: 10px;
     color: rgb(90, 105, 145);
     margin-top: 4px;
+}
+
+/* ============================================================
+   Gacha pack detail drawer
+   ============================================================ */
+.gacha-pack-detail-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 340px;
+    flex-direction: column;
+    background-color: rgb(18, 23, 40);
+    border-left-width: 1px;
+    border-left-color: rgba(105, 165, 255, 0.55);
+}
+
+.gacha-pack-detail-panel--hidden {
+    display: none;
+}
+
+.gacha-pack-detail-panel--open {
+    display: flex;
+}
+
+.gacha-pack-detail-panel__header {
+    min-height: 56px;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 18px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(80, 100, 160, 0.35);
+}
+
+.gacha-pack-detail-panel__title {
+    flex: 1;
+    color: rgb(220, 230, 255);
+    font-size: 15px;
+    -unity-font-style: bold;
+}
+
+.gacha-pack-detail-panel__close {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(100, 130, 200, 0.45);
+    background-color: rgba(35, 45, 76, 0.8);
+    color: rgb(190, 205, 255);
+    font-size: 18px;
+}
+
+.gacha-pack-detail-panel__scroll {
+    flex: 1;
+}
+
+.gacha-pack-detail-panel__content {
+    padding: 18px;
+}
+
+.gacha-pack-detail-panel__actions {
+    padding: 14px 18px 18px 18px;
+    border-top-width: 1px;
+    border-top-color: rgba(80, 100, 160, 0.35);
+}
+
+.gacha-pack-detail-panel__selector {
+    margin-bottom: 10px;
+    color: rgb(200, 215, 255);
+}
+
+.gacha-pack-detail-panel__selector .unity-base-field__input {
+    background-color: rgb(24, 31, 54);
+    border-width: 1px;
+    border-color: rgba(90, 130, 220, 0.5);
+    color: rgb(205, 220, 255);
+    border-radius: 6px;
+}
+
+.gacha-pack-detail-panel__open-button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 7px;
+    border-width: 0;
+    background-color: rgb(56, 105, 225);
+    color: rgb(245, 248, 255);
+    -unity-font-style: bold;
+}
+
+.gacha-pack-detail-panel__open-button:hover {
+    background-color: rgb(76, 130, 250);
+}
+
+.gacha-pack-detail-panel__status {
+    color: rgb(140, 180, 255);
+    font-size: 11px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-top: 9px;
+}
+
+.gacha-pack-detail__name {
+    color: rgb(230, 235, 255);
+    font-size: 20px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 14px;
+}
+
+.gacha-pack-detail__quantity,
+.gacha-pack-detail__rarity {
+    color: rgb(155, 180, 245);
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.gacha-pack-detail__section-title {
+    color: rgb(190, 205, 255);
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-top: 18px;
+    margin-bottom: 7px;
+}
+
+.gacha-pack-detail__description {
+    color: rgb(175, 185, 215);
+    font-size: 12px;
+    white-space: normal;
+}
+
+.gacha-pack-detail__pack-id {
+    color: rgb(125, 175, 255);
+    font-size: 11px;
+    white-space: normal;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    background-color: rgba(30, 42, 75, 0.75);
+    border-radius: 5px;
+}
+
+.gacha-pack-detail__empty {
+    color: rgb(125, 140, 180);
+    font-size: 12px;
+    white-space: normal;
 }

@@ -4,12 +4,33 @@
          noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
          editor-extension-mode="False">
 
-    <!-- Main Quest — "Coming Soon" content, included into QuestPanel's QuestContentArea -->
-    <ui:VisualElement class="quest-coming-soon">
-        <ui:Label text="⚔" class="quest-coming-soon__icon" />
-        <ui:Label text="Main Quest" class="quest-coming-soon__title" />
-        <ui:Label text="COMING SOON" class="quest-coming-soon__badge" />
-        <ui:Label text="The main story quests are currently in development.&#10;Prepare yourself for the adventure ahead!" class="quest-coming-soon__desc" />
+    <ui:VisualElement name="MainQuestRoot" class="main-quest-root">
+        <ui:VisualElement class="main-quest-header">
+            <ui:VisualElement class="main-quest-header__copy">
+                <ui:Label text="MAIN QUEST" class="main-quest-header__title" />
+                <ui:Label name="MainQuestChainName" text="Loading quest chain..." class="main-quest-header__subtitle" />
+            </ui:VisualElement>
+            <ui:Button name="MainQuestRefreshButton" text="&#x21BB;" tooltip="Refresh" class="main-quest-refresh-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="MainQuestGraphHost" class="main-quest-graph-host" />
+        <ui:Label name="MainQuestState" class="main-quest-state" />
+        <ui:VisualElement name="MainQuestDetailPanel" class="main-quest-detail-panel main-quest-detail-panel--hidden">
+            <ui:VisualElement class="main-quest-detail-panel__header">
+                <ui:Label text="Quest Details" class="main-quest-detail-panel__title" />
+                <ui:Button name="CloseMainQuestDetailButton" text="×" tooltip="Close" class="main-quest-detail-panel__close" />
+            </ui:VisualElement>
+            <ui:ScrollView class="main-quest-detail-panel__scroll">
+                <ui:VisualElement name="MainQuestDetailContent" class="main-quest-detail-panel__content" />
+            </ui:ScrollView>
+            <ui:VisualElement class="main-quest-detail-panel__actions">
+                <ui:Button name="MainQuestDetailStartButton" text="Start" class="main-quest-detail-panel__action" />
+                <ui:Button name="MainQuestDetailCheckButton" text="Check" class="main-quest-detail-panel__action" />
+                <ui:Button name="MainQuestDetailClaimButton" text="Claim" class="main-quest-detail-panel__action main-quest-detail-panel__action--claim main-quest-detail-panel__action--last" />
+                <ui:Label name="MainQuestDetailExpiredMessage" text="This quest has expired." class="main-quest-detail-panel__expired-message" />
+                <ui:Label name="MainQuestDetailClaimedMessage" text="Quest claimed successfully." class="main-quest-detail-panel__claimed-message" />
+                <ui:Label name="MainQuestDetailUnavailableMessage" text="This quest is not available yet." class="main-quest-detail-panel__unavailable-message" />
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 
 </ui:UXML>

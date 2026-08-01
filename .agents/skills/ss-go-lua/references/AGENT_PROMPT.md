@@ -36,6 +36,9 @@ Available game API only:
 - game.get_container_by_id(id) -> SSItemContainer, err
 - game.get_gacha_pack_by_id(id) -> SSGachaPack, err
 - game.open_gacha_pack(pack_id [, container_id [, idempotency_key]]) -> SSGachaOpenResult, err
+- game.open_gacha_pack_by_code_name(code_name [, container_id [, idempotency_key]]) -> SSGachaOpenResult, err
+- game.open_reward_gacha_pack(pack_id [, idempotency_key]) -> SSGachaOpenResult, err (free reward; only after server-authoritative validation and with an event-derived idempotency key)
+- game.open_reward_gacha_pack_by_code_name(code_name [, idempotency_key]) -> SSGachaOpenResult, err (free reward; only after server-authoritative validation and with an event-derived idempotency key)
 - game.get_quest_def_by_id(id) -> SSQuestDefinition, err
 - game.get_event_type_by_id(id_or_name) -> SSGameEventType, err
 - game.get_event_type_by_name(name) -> SSGameEventType, err

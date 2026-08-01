@@ -3453,7 +3453,7 @@ MonoBehaviour:
   lampOfSoulCtrl: {fileID: 0}
   cylinderRenderer: {fileID: 1043868439}
   outlineMaterial: {fileID: 2100000, guid: c8394e1b80c54625b81a70c8a61ed303, type: 2}
-  outlineHoverMaterial: {fileID: 0}
+  outlineHoverMaterial: {fileID: 2100000, guid: d9494e1b80c54625b81a70c8a61ed304, type: 2}
   isHovered: 0
 --- !u!21 &1061435743
 Material:

@@ -1293,30 +1293,30 @@ namespace SG03.UI
             string questId,
             QuestList ownerList)
         {
-            if (SaiServer.Instance?.QuestProgressor == null || string.IsNullOrEmpty(assignmentId)) return;
+            if (SaiServer.Instance == null || string.IsNullOrEmpty(assignmentId)) return;
 
             this.InvalidateFutureRangeCaches();
             button.SetEnabled(false);
             if (action == "Start")
             {
-                SaiServer.Instance.QuestProgressor.StartDailyQuestAssignment(
-                    assignmentId: assignmentId,
-                    onSuccess: _ => this.ReloadOpenQuestDetail(ownerList, assignmentId),
-                    onError: err => this.OnQuestActionFailed(button, action, questId, err));
+                QuestActionRequest.RunDailyAssignmentAction(
+                    assignmentId, "start",
+                    () => this.ReloadOpenQuestDetail(ownerList, assignmentId),
+                    err => this.OnQuestActionFailed(button, action, questId, err));
             }
             else if (action == "Check")
             {
-                SaiServer.Instance.QuestProgressor.CheckDailyQuestAssignment(
-                    assignmentId: assignmentId,
-                    onSuccess: _ => this.ReloadOpenQuestDetail(ownerList, assignmentId),
-                    onError: err => this.OnQuestActionFailed(button, action, questId, err));
+                QuestActionRequest.RunDailyAssignmentAction(
+                    assignmentId, "check",
+                    () => this.ReloadOpenQuestDetail(ownerList, assignmentId),
+                    err => this.OnQuestActionFailed(button, action, questId, err));
             }
             else
             {
-                SaiServer.Instance.QuestProgressor.ClaimDailyQuestAssignment(
-                    assignmentId: assignmentId,
-                    onSuccess: _ => this.ReloadOpenQuestDetail(ownerList, assignmentId),
-                    onError: err => this.OnQuestActionFailed(button, action, questId, err));
+                QuestActionRequest.RunDailyAssignmentAction(
+                    assignmentId, "claim",
+                    () => this.ReloadOpenQuestDetail(ownerList, assignmentId),
+                    err => this.OnQuestActionFailed(button, action, questId, err));
             }
         }
 
@@ -1356,7 +1356,13 @@ namespace SG03.UI
         private void OnQuestActionFailed(Button button, string action, string questId, string error)
         {
             button.SetEnabled(true);
+            this.ShowQuestActionError(error);
             UnityEngine.Debug.LogWarning($"[DailyQuestContentUI] {action} quest failed ({questId}): {error}");
+        }
+
+        private void ShowQuestActionError(string error)
+        {
+            ToastMessage.ShowError(QuestActionErrorFormatter.Format(error), this.questDetailPanel);
         }
 
         private QuestList FindOwnerList(string questId)

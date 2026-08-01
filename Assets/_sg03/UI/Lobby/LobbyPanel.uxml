@@ -15,11 +15,16 @@
             <ui:VisualElement name="TopMenu" class="lobby-top-menu">
                 <ui:Label name="AppTitle" text="SaiGame" class="lobby-top-menu__title" />
                 <ui:VisualElement name="TopMenuTabs" class="lobby-top-menu__tabs">
-                    <ui:Button name="HomeTab"    text="Home"    class="lobby-tab lobby-tab--active" />
+                    <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab lobby-tab--active" />
                     <ui:Button name="ShopTab"    text="Shop"    class="lobby-tab" />
-                    <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab" />
                 </ui:VisualElement>
                 <ui:Label name="PlayerNameLabel" text="👤 Guest" class="lobby-top-menu__player-name" />
+                <ui:Button name="BtnLogout" text="←" tooltip="Log out" class="lobby-top-menu__logout" />
+                <ui:Button name="BtnQuitGame" tooltip="Power off" class="lobby-top-menu__quit">
+                    <ui:VisualElement class="power-off-icon">
+                        <ui:VisualElement class="power-off-icon__stem" />
+                    </ui:VisualElement>
+                </ui:Button>
             </ui:VisualElement>
 
             <!-- Content area (expands to fill remaining space) -->
@@ -31,6 +36,17 @@
                 <ui:Button name="BtnInventory" text="🎒 Inventory" class="lobby-bottom-btn" />
                 <ui:Button name="BtnMailbox"   text="📬 Mailbox"   class="lobby-bottom-btn" />
                 <ui:Button name="BtnPlay"      text="▶  Play"      class="lobby-bottom-btn lobby-bottom-btn--primary" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="QuitConfirmOverlay" class="quit-confirm-overlay" style="display: none;">
+                <ui:VisualElement class="quit-confirm-card">
+                    <ui:Label text="Quit game?" class="quit-confirm-title" />
+                    <ui:Label text="Are you sure you want to close the game?" class="quit-confirm-message" />
+                    <ui:VisualElement class="quit-confirm-actions">
+                        <ui:Button name="BtnCancelQuit" text="Cancel" class="quit-confirm-button" />
+                        <ui:Button name="BtnConfirmQuit" text="Quit" class="quit-confirm-button quit-confirm-button--danger" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
 
         </ui:VisualElement>

@@ -1,3 +1,6 @@
+using System;
+using System.Text;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace SG03.UI
@@ -18,6 +21,7 @@ namespace SG03.UI
         private readonly VisualTreeAsset next7DaysAsset;
         private readonly VisualTreeAsset next30DaysAsset;
         private DailyQuestContentUI dailyQuestContent;
+        private MainQuestContentUI mainQuestContent;
 
         public QuestPanelUI(
             VisualElement panelRoot,
@@ -73,6 +77,8 @@ namespace SG03.UI
             this.contentArea.Add(content);
 
             this.dailyQuestContent = null;
+            this.mainQuestContent?.Dispose();
+            this.mainQuestContent = null;
             if (type == QuestType.Daily)
                 this.dailyQuestContent = new DailyQuestContentUI(
                     content,
@@ -80,8 +86,75 @@ namespace SG03.UI
                     this.thisMonthAsset,
                     this.next7DaysAsset,
                     this.next30DaysAsset);
+            else
+                this.mainQuestContent = new MainQuestContentUI(content);
         }
 
-        public bool CloseQuestDetailOnEscape() => this.dailyQuestContent?.CloseQuestDetailOnEscape() ?? false;
+        public bool CloseQuestDetailOnEscape()
+            => this.dailyQuestContent?.CloseQuestDetailOnEscape()
+               ?? this.mainQuestContent?.CloseQuestDetailOnEscape()
+               ?? false;
+    }
+
+    /// <summary>Converts quest API error payloads into messages suitable for the quest detail UI.</summary>
+    internal static class QuestActionErrorFormatter
+    {
+        [Serializable]
+        private class QuestApiError
+        {
+            public string error;
+            public string message;
+            public RequiredQuest[] required_quests;
+        }
+
+        [Serializable]
+        private class RequiredQuest
+        {
+            public string name;
+        }
+
+        public static string Format(string error)
+        {
+            if (string.IsNullOrWhiteSpace(error)) return "The quest action failed.";
+
+            string json = ExtractRawResponse(error);
+            try
+            {
+                QuestApiError response = JsonUtility.FromJson<QuestApiError>(json);
+                if (response == null || (string.IsNullOrWhiteSpace(response.error) && string.IsNullOrWhiteSpace(response.message)))
+                    return error;
+
+                StringBuilder message = new StringBuilder();
+                if (!string.IsNullOrWhiteSpace(response.error)) message.Append(response.error);
+                if (!string.IsNullOrWhiteSpace(response.message))
+                {
+                    if (message.Length > 0) message.AppendLine();
+                    message.Append(response.message);
+                }
+
+                if (response.required_quests != null)
+                {
+                    foreach (RequiredQuest quest in response.required_quests)
+                    {
+                        if (string.IsNullOrWhiteSpace(quest?.name)) continue;
+                        if (message.Length > 0) message.AppendLine();
+                        message.Append("Required quest: ").Append(quest.name);
+                    }
+                }
+
+                return message.Length > 0 ? message.ToString() : error;
+            }
+            catch (Exception)
+            {
+                return error;
+            }
+        }
+
+        private static string ExtractRawResponse(string error)
+        {
+            const string marker = "Raw Data:";
+            int markerIndex = error.IndexOf(marker, StringComparison.Ordinal);
+            return markerIndex < 0 ? error : error.Substring(markerIndex + marker.Length).Trim();
+        }
     }
 }

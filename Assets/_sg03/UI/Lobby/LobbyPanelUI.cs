@@ -177,6 +177,13 @@ namespace SG03.UI
 
         // Player name label (top-right of TopMenu)
         private Label playerNameLabel;
+        private Button btnLogout;
+        private Button btnQuitGame;
+        private Button btnCancelQuit;
+        private Button btnConfirmQuit;
+        private VisualElement quitConfirmOverlay;
+        private SaiAuth subscribedAuth;
+        private SaiAuth logoutAuth;
 
         // Lobby background elements toggled during immersive mode
         private VisualElement lobbyRoot;
@@ -190,6 +197,7 @@ namespace SG03.UI
         {
             base.Start();
             this.InitializeStandalonePanel();
+            this.OnQuestTabClicked();
         }
 
         private void InitializeStandalonePanel()
@@ -215,7 +223,7 @@ namespace SG03.UI
             this.homeTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.homeTab));
             this.shopTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.shopTab));
 
-            // Quest tab opens the panel with Daily Quest selected.
+            // Quest tab opens the panel with Main Quest selected.
             if (this.questTab != null)
             {
                 this.questTab.RegisterCallback<ClickEvent>(_ => this.OnQuestTabClicked());
@@ -234,11 +242,24 @@ namespace SG03.UI
 
             // Player name (top-right)
             this.playerNameLabel = root.Q<Label>("PlayerNameLabel");
+            this.btnLogout = root.Q<Button>("BtnLogout");
+            this.btnQuitGame = root.Q<Button>("BtnQuitGame");
+            this.btnCancelQuit = root.Q<Button>("BtnCancelQuit");
+            this.btnConfirmQuit = root.Q<Button>("BtnConfirmQuit");
+            this.quitConfirmOverlay = root.Q("QuitConfirmOverlay");
+            this.btnLogout?.RegisterCallback<ClickEvent>(_ => this.OnLogoutClicked());
+            this.btnQuitGame?.RegisterCallback<ClickEvent>(_ => this.ShowQuitConfirmation());
+            this.btnCancelQuit?.RegisterCallback<ClickEvent>(_ => this.HideQuitConfirmation());
+            this.btnConfirmQuit?.RegisterCallback<ClickEvent>(_ => this.QuitGame());
             this.RefreshPlayerName();
 
             // Subscribe so name updates if lobby is loaded before login completes
-            if (this.saiServer?.SaiAuth != null)
-                this.saiServer.SaiAuth.OnLoginSuccess += this.OnLoginSuccess;
+            SaiAuth auth = this.GetSaiAuth();
+            if (auth != null)
+            {
+                auth.OnLoginSuccess += this.OnLoginSuccess;
+                this.subscribedAuth = auth;
+            }
 
             // Content area
             this.contentArea = root.Q("ContentArea");
@@ -250,15 +271,76 @@ namespace SG03.UI
                 new LobbyAspectRatioKeeper(this.lobbyRoot, this.lobbyViewport);
         }
 
-        private void OnLoginSuccess(LoginResponse _) => this.RefreshPlayerName();
+        private void OnLoginSuccess(LoginResponse response)
+        {
+            this.SetPlayerName(response?.user);
+        }
 
         private void RefreshPlayerName()
         {
+            UserData user = this.GetSaiAuth()?.CurrentUser;
+            this.SetPlayerName(user);
+        }
+
+        private SaiAuth GetSaiAuth()
+        {
+            // SaiServer is persistent. The serialized scene reference can point to a
+            // duplicate that Unity destroys when moving from login to lobby.
+            SaiServer activeServer = SaiServer.Instance;
+            return activeServer != null ? activeServer.SaiAuth : this.saiServer?.SaiAuth;
+        }
+
+        private void SetPlayerName(UserData user)
+        {
             if (this.playerNameLabel == null) return;
-            UserData user = this.saiServer != null ? this.saiServer.CurrentUser : null;
             string name = user?.display_name;
             if (string.IsNullOrEmpty(name)) name = user?.username;
             this.playerNameLabel.text = string.IsNullOrEmpty(name) ? "👤 Guest" : $"👤 {name}";
+        }
+
+        private void OnLogoutClicked()
+        {
+            SaiAuth auth = this.GetSaiAuth();
+            if (auth == null) return;
+
+            this.btnLogout?.SetEnabled(false);
+            this.logoutAuth = auth;
+            auth.OnLogoutSuccess += this.OnLogoutFinished;
+            auth.OnLogoutFailure += this.OnLogoutFailed;
+            auth.Logout();
+        }
+
+        private void OnLogoutFinished()
+        {
+            this.UnsubscribeFromLogout();
+            SceneManager.LoadScene("0-login");
+        }
+
+        private void OnLogoutFailed(string _)
+        {
+            // SaiAuth clears local credentials even when the server request fails.
+            this.OnLogoutFinished();
+        }
+
+        private void ShowQuitConfirmation()
+        {
+            if (this.quitConfirmOverlay != null)
+                this.quitConfirmOverlay.style.display = DisplayStyle.Flex;
+        }
+
+        private void HideQuitConfirmation()
+        {
+            if (this.quitConfirmOverlay != null)
+                this.quitConfirmOverlay.style.display = DisplayStyle.None;
+        }
+
+        private void QuitGame()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
 
         // ------------------------------------------------------------------
@@ -278,7 +360,7 @@ namespace SG03.UI
         private void OnQuestTabClicked()
         {
             this.OnTopTabClicked(this.questTab);
-            this.LoadQuestPanel(QuestType.Daily);
+            this.LoadQuestPanel(QuestType.Main);
         }
 
         private void LoadDailyQuestTabContentAssets()
@@ -383,12 +465,22 @@ namespace SG03.UI
         protected virtual void OnDestroy()
         {
             this.UnsubscribeFromLoginSuccess();
+            this.UnsubscribeFromLogout();
         }
 
         private void UnsubscribeFromLoginSuccess()
         {
-            if (this.saiServer?.SaiAuth == null) return;
-            this.saiServer.SaiAuth.OnLoginSuccess -= this.OnLoginSuccess;
+            if (this.subscribedAuth == null) return;
+            this.subscribedAuth.OnLoginSuccess -= this.OnLoginSuccess;
+            this.subscribedAuth = null;
+        }
+
+        private void UnsubscribeFromLogout()
+        {
+            if (this.logoutAuth == null) return;
+            this.logoutAuth.OnLogoutSuccess -= this.OnLogoutFinished;
+            this.logoutAuth.OnLogoutFailure -= this.OnLogoutFailed;
+            this.logoutAuth = null;
         }
 
         // ------------------------------------------------------------------

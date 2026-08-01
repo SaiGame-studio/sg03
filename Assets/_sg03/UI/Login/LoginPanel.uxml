@@ -15,6 +15,14 @@
             <!-- Title -->
             <ui:Label name="TitleLabel" text="Login" class="panel-title" />
 
+            <!-- Registration-only fields -->
+            <ui:VisualElement name="RegisterFields">
+                <ui:Label text="Email" class="field-label" />
+                <ui:TextField name="RegisterEmailField"
+                              placeholder-text="Enter email"
+                              class="input-field" />
+            </ui:VisualElement>
+
             <!-- Username -->
             <ui:Label text="Username or Email" class="field-label" />
             <ui:TextField name="UsernameField"
@@ -31,8 +39,11 @@
             <!-- Divider -->
             <ui:VisualElement class="divider" />
 
-            <!-- Login button -->
+            <!-- Primary action -->
             <ui:Button name="LoginButton" text="Log In" class="btn-primary" />
+
+            <!-- Switch between login and registration -->
+            <ui:Button name="AuthModeButton" text="Create an account" class="btn-secondary" />
 
             <!-- Feedback message -->
             <ui:Label name="MessageLabel" text="" class="feedback" />

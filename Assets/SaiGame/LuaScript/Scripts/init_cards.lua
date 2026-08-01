@@ -113,8 +113,8 @@ local function omega_draw_random(state, card_count, start_slot)
 end
 -- ─────────────────────────────────────────────────────────────────────────────
 
--- Draws Alpha's opening hand: exactly the 3 preset cards chosen by the player
--- (choose_card_1/2/3 from alpha_preset_metadata). No random fill.
+-- Draws Alpha's opening hand from the preset cards chosen by the player
+-- (choose_card_1/2/3 from alpha_preset_metadata). Empty preset slots are skipped.
 -- Returns: hand, err
 local function alpha_choose_cards(state)
     lib_battle_common.dlog("[init_cards] == alpha_choose_cards ==")
@@ -130,21 +130,17 @@ local function alpha_choose_cards(state)
 
     local slot_names   = { "choose_card_1", "choose_card_2", "choose_card_3" }
     local preset_uuids = { preset.choose_card_1, preset.choose_card_2, preset.choose_card_3 }
-    for i, uid in ipairs(preset_uuids) do
-        if uid == nil or uid == "" then
-            return nil, "alpha_preset_metadata." .. slot_names[i] .. " is missing"
-        end
-    end
-
     local hand = {}
     for i, uid in ipairs(preset_uuids) do
-        local card = find_and_remove(source, uid)
-        if card == nil then
-            return nil, "preset card " .. slot_names[i] .. " (" .. uid .. ") not found in alpha_the_source"
+        if uid ~= nil and uid ~= "" then
+            local card = find_and_remove(source, uid)
+            if card == nil then
+                return nil, "preset card " .. slot_names[i] .. " (" .. uid .. ") not found in alpha_the_source"
+            end
+            card.slot_index  = #hand
+            card.trigger     = false
+            table.insert(hand, card)
         end
-        card.slot_index  = i - 1
-        card.trigger     = false
-        table.insert(hand, card)
     end
 
     for _, hand_card in ipairs(hand) do
@@ -209,13 +205,13 @@ local function omega_choose_cards(state)
     return hand, nil
 end
 
--- Draws alpha's opening hand: 3 preset chosen cards + 2 random from alpha_the_source.
+-- Draws alpha's opening hand: preset chosen cards plus random cards to reach 5.
 -- Returns err or nil.
 local function alpha_init_cards(state)
     local alpha_hand, alpha_err = alpha_choose_cards(state)
     if alpha_err ~= nil then return alpha_err end
 
-    local random_hand, random_err = alpha_draw_random(state, 2, #alpha_hand)
+    local random_hand, random_err = alpha_draw_random(state, 5 - #alpha_hand, #alpha_hand)
     if random_err ~= nil then return random_err end
     for _, card in ipairs(random_hand) do table.insert(alpha_hand, card) end
 

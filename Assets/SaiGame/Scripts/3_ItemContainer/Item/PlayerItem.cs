@@ -243,6 +243,80 @@ namespace SaiGame.Services
             );
         }
 
+        /// <summary>
+        /// Fetches one item definition by ID.
+        /// Endpoint: GET /api/v1/games/{gameId}/items/{itemDefinitionId}
+        /// </summary>
+        public void GetItemDefinition(
+            string itemDefinitionId,
+            System.Action<ItemDefinitionData> onSuccess = null,
+            System.Action<string> onError = null)
+        {
+            if (SaiServer.Instance == null)
+            {
+                onError?.Invoke("SaiServer not found!");
+                return;
+            }
+            if (!SaiServer.Instance.IsAuthenticated)
+            {
+                onError?.Invoke("Not authenticated! Please login first.");
+                return;
+            }
+            if (string.IsNullOrEmpty(itemDefinitionId))
+            {
+                onError?.Invoke("itemDefinitionId cannot be empty.");
+                return;
+            }
+            StartCoroutine(this.GetItemDefinitionCoroutine(itemDefinitionId, onSuccess, onError));
+        }
+
+        private IEnumerator GetItemDefinitionCoroutine(
+            string itemDefinitionId,
+            System.Action<ItemDefinitionData> onSuccess,
+            System.Action<string> onError)
+        {
+            string endpoint = $"/api/v1/games/{SaiServer.Instance.GameId}/items/{itemDefinitionId}";
+            yield return SaiServer.Instance.GetRequest(endpoint,
+                response =>
+                {
+                    try
+                    {
+                        ItemDefinitionData definition = JsonUtility.FromJson<ItemDefinitionData>(response);
+                        if (string.IsNullOrEmpty(definition?.name))
+                        {
+                            string wrappedDefinition = ExtractJsonObject(response, "item_definition")
+                                ?? ExtractJsonObject(response, "item")
+                                ?? ExtractJsonObject(response, "data");
+                            if (!string.IsNullOrEmpty(wrappedDefinition))
+                                definition = JsonUtility.FromJson<ItemDefinitionData>(wrappedDefinition);
+                        }
+                        onSuccess?.Invoke(definition);
+                    }
+                    catch (System.Exception e) { onError?.Invoke($"Parse item definition response error: {e.Message}"); }
+                },
+                onError);
+        }
+
+        private static string ExtractJsonObject(string json, string key)
+        {
+            string searchKey = "\"" + key + "\"";
+            int keyIndex = json.IndexOf(searchKey, StringComparison.Ordinal);
+            if (keyIndex < 0) return null;
+            int colonIndex = json.IndexOf(':', keyIndex + searchKey.Length);
+            if (colonIndex < 0) return null;
+            int start = colonIndex + 1;
+            while (start < json.Length && char.IsWhiteSpace(json[start])) start++;
+            if (start >= json.Length || json[start] != '{') return null;
+
+            int depth = 0;
+            for (int i = start; i < json.Length; i++)
+            {
+                if (json[i] == '{') depth++;
+                else if (json[i] == '}' && --depth == 0) return json.Substring(start, i - start + 1);
+            }
+            return null;
+        }
+
         // ── Update Item Public Properties (client_writable) ────────────────────
 
         /// <summary>

@@ -5,3 +5,7 @@
 .card {
     width: 380px;
 }
+
+#RegisterFields {
+    display: none;
+}

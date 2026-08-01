@@ -22,10 +22,15 @@ namespace SG03.UI
 
         private TextField usernameField;
         private TextField passwordField;
+        private TextField registerEmailField;
         private Button loginButton;
+        private Button authModeButton;
         private Label feedbackLabel;
+        private Label titleLabel;
+        private VisualElement registerFields;
         private VisualElement root;
         private bool authEventsSubscribed;
+        private bool isRegisterMode;
 
         protected override void LoadComponents()
         {
@@ -36,8 +41,18 @@ namespace SG03.UI
 
         private void LoadSaiAuth()
         {
+            // SaiServer persists across scene changes. Do not keep the serialized
+            // scene reference because it can point to the duplicate SaiServer that
+            // Unity destroys when returning to the login scene.
+            SaiAuth activeAuth = SaiServer.Instance?.SaiAuth;
+            if (activeAuth != null)
+            {
+                this.saiAuth = activeAuth;
+                return;
+            }
+
             if (this.saiAuth != null) return;
-            this.saiAuth = this.GetComponentInParent<SaiAuth>();
+            this.saiAuth = FindFirstObjectByType<SaiAuth>(FindObjectsInactive.Include);
             Debug.LogWarning(this.transform.name + ": LoadSaiAuth", this.gameObject);
         }
 
@@ -80,11 +95,19 @@ namespace SG03.UI
         {
             this.usernameField = root.Q<TextField>("UsernameField");
             this.passwordField = root.Q<TextField>("PasswordField");
+            this.registerEmailField = root.Q<TextField>("RegisterEmailField");
             this.loginButton   = root.Q<Button>("LoginButton");
+            this.authModeButton = root.Q<Button>("AuthModeButton");
+            this.titleLabel = root.Q<Label>("TitleLabel");
+            this.registerFields = root.Q<VisualElement>("RegisterFields");
 
             if (this.loginButton != null)
                 this.loginButton.clicked += this.OnLoginButtonClicked;
 
+            if (this.authModeButton != null)
+                this.authModeButton.clicked += this.OnAuthModeButtonClicked;
+
+            this.RefreshAuthMode();
             this.SubscribeToAuthEvents();
         }
 
@@ -119,6 +142,12 @@ namespace SG03.UI
             this.HideFeedback();
             this.loginButton.SetEnabled(false);
 
+            if (this.isRegisterMode)
+            {
+                this.Register();
+                return;
+            }
+
             this.saiAuth?.Login(
                 this.usernameField.value,
                 this.passwordField.value,
@@ -126,9 +155,96 @@ namespace SG03.UI
                 onError:   _ => this.loginButton.SetEnabled(true));
         }
 
+        private void Register()
+        {
+            if (this.saiAuth == null)
+            {
+                this.loginButton.SetEnabled(true);
+                this.ShowFeedback("SaiServer not found.", isError: true);
+                return;
+            }
+
+            this.saiAuth.Register(
+                this.registerEmailField.value,
+                this.usernameField.value,
+                this.passwordField.value,
+                onSuccess: _ =>
+                {
+                    this.loginButton.SetEnabled(true);
+                    this.isRegisterMode = false;
+                    this.RefreshAuthMode();
+                    this.ShowFeedback("Registration successful. Please log in.", isError: false);
+                },
+                onError: error =>
+                {
+                    this.loginButton.SetEnabled(true);
+                    this.ShowFeedback(error, isError: true);
+                });
+        }
+
+        private void OnAuthModeButtonClicked()
+        {
+            this.isRegisterMode = !this.isRegisterMode;
+            this.HideFeedback();
+            this.RefreshAuthMode();
+        }
+
+        private void RefreshAuthMode()
+        {
+            if (this.registerFields != null)
+                this.registerFields.style.display = this.isRegisterMode ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (this.titleLabel != null)
+                this.titleLabel.text = this.isRegisterMode ? "Create Account" : "Login";
+
+            if (this.usernameField != null)
+            {
+                this.usernameField.label = string.Empty;
+                this.usernameField.textEdition.placeholder = this.isRegisterMode
+                    ? "Choose a username"
+                    : "Enter username or email";
+            }
+
+            if (this.loginButton != null)
+                this.loginButton.text = this.isRegisterMode ? "Create Account" : "Log In";
+
+            if (this.authModeButton != null)
+                this.authModeButton.text = this.isRegisterMode ? "Back to login" : "Create an account";
+        }
+
         private void HandleLoginSuccess(LoginResponse response)
         {
+            this.EnsurePlayerProfile();
             SceneManager.LoadScene(this.nextScenes);
+        }
+
+        private void EnsurePlayerProfile()
+        {
+            GamerProgress gamerProgress = SaiServer.Instance?.GamerProgress;
+            if (gamerProgress == null) return;
+
+            gamerProgress.GetProgress(
+                onSuccess: _ => { },
+                onError: error =>
+                {
+                    if (!IsMissingPlayerProfileError(error)) return;
+
+                    gamerProgress.CreateProgress(
+                        onSuccess: _ => { },
+                        onError: _ => { });
+                });
+        }
+
+        private static bool IsMissingPlayerProfileError(string error)
+        {
+            if (string.IsNullOrEmpty(error)) return false;
+
+            string normalizedError = error.ToLowerInvariant();
+            bool isProfileError = normalizedError.Contains("profile")
+                || normalizedError.Contains("gamer progress");
+            bool isNotFound = normalizedError.Contains("response code: 404");
+
+            return isProfileError && isNotFound;
         }
 
         private void HandleLoginFailure(string error)
@@ -165,6 +281,9 @@ namespace SG03.UI
         {
             if (this.loginButton != null)
                 this.loginButton.clicked -= this.OnLoginButtonClicked;
+
+            if (this.authModeButton != null)
+                this.authModeButton.clicked -= this.OnAuthModeButtonClicked;
         }
     }
 }
