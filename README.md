@@ -10,7 +10,7 @@ Các tính năng chính trong dự án bao gồm:
 * **Hệ thống tương tác:** Kéo thả bài, chọn mục tiêu tấn công và tương tác vật lý/giao diện người dùng.
 
 ## Game IDS
-- sg03-dev: 2e352068-3b3a-4a31-9e47-564f4dd3af13
+- sg03-dev: 2e352068-3b3a-4a31-9e47-564f4dd3af13 (dùng cái này nhé)
 - sg03-ready: 019f49a1-350b-72c4-ac8f-8fe4f7d1418e
 ---
 
