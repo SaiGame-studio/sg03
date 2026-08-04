@@ -196,8 +196,8 @@ namespace SG03.UI
         private Label soulEnergyClaimValue;
         private Label soulEnergyFullLabel;
         private Label soulEnergyFullValue;
-        private PlayerItem subscribedPlayerItem;
         private ItemGenerator subscribedItemGenerator;
+        private InventoryItemData[] soulCurrencyItems = System.Array.Empty<InventoryItemData>();
 
         // Lobby background elements toggled during immersive mode
         private VisualElement lobbyRoot;
@@ -329,14 +329,7 @@ namespace SG03.UI
         private void SubscribeSoulEnergyData()
         {
             SaiServer activeServer = SaiServer.Instance;
-            PlayerItem playerItem = activeServer?.PlayerItem;
             ItemGenerator itemGenerator = activeServer?.ItemGenerator;
-
-            if (playerItem != null)
-            {
-                playerItem.OnGetItemsSuccess += this.OnSoulEnergyInventoryUpdated;
-                this.subscribedPlayerItem = playerItem;
-            }
 
             if (itemGenerator != null)
             {
@@ -346,7 +339,7 @@ namespace SG03.UI
         }
 
         /// <summary>
-        /// Loads the inventory and generator data used by the Soul Energy badge.
+        /// Loads the currency and generator data used by the Soul Energy badge.
         /// This is called again after login so the lobby also works when opened directly.
         /// </summary>
         private void LoadSoulEnergy()
@@ -356,13 +349,27 @@ namespace SG03.UI
             SaiServer activeServer = SaiServer.Instance;
             if (activeServer == null || !activeServer.IsAuthenticated) return;
 
-            activeServer.PlayerItem?.GetItems(limit: 1000);
+            this.LoadSoulCurrencies(activeServer);
             activeServer.ItemGenerator?.GetGenerators();
         }
 
-        private void OnSoulEnergyInventoryUpdated(InventoryResponse _)
+        /// <summary>
+        /// Loads currency items into a private cache so other inventory refreshes cannot
+        /// overwrite the Soul Energy count.
+        /// </summary>
+        private void LoadSoulCurrencies(SaiServer activeServer)
         {
-            this.RefreshSoulEnergy();
+            string endpoint = $"/api/v1/games/{activeServer.GameId}/inventory?limit=1000&offset=0&include_metadata=true&category=currency";
+            this.StartCoroutine(activeServer.GetRequest(
+                endpoint,
+                response =>
+                {
+                    string sanitized = InventoryJsonHelper.StringifyObjectFields(response);
+                    InventoryResponse currencies = JsonUtility.FromJson<InventoryResponse>(sanitized);
+                    this.soulCurrencyItems = currencies?.items ?? System.Array.Empty<InventoryItemData>();
+                    this.RefreshSoulEnergy();
+                },
+                _ => { }));
         }
 
         private void OnSoulEnergyGeneratorsUpdated(GeneratorsResponse _)
@@ -374,7 +381,7 @@ namespace SG03.UI
         {
             if (this.soulEnergy == null) return;
 
-            InventoryItemData[] items = SaiServer.Instance?.PlayerItem?.CurrentInventory?.items;
+            InventoryItemData[] items = this.soulCurrencyItems;
             GeneratorData[] generators = SaiServer.Instance?.ItemGenerator?.CurrentGenerators?.generators;
             GeneratorData soulGenerator = this.FindSoulGenerator(generators, items);
             if (soulGenerator == null)
@@ -391,7 +398,7 @@ namespace SG03.UI
 
         private void ShowSoulEnergyPopup()
         {
-            InventoryItemData[] items = SaiServer.Instance?.PlayerItem?.CurrentInventory?.items;
+            InventoryItemData[] items = this.soulCurrencyItems;
             ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
             GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators, items);
             if (this.soulEnergyPopup == null || soulGenerator == null) return;
@@ -429,7 +436,7 @@ namespace SG03.UI
         private void ClaimSoul()
         {
             ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
-            InventoryItemData[] items = SaiServer.Instance?.PlayerItem?.CurrentInventory?.items;
+            InventoryItemData[] items = this.soulCurrencyItems;
             GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators, items);
             if (itemGenerator == null || soulGenerator == null || soulGenerator.GetCurrentPendingUnits() <= 0) return;
 
@@ -706,12 +713,6 @@ namespace SG03.UI
 
         private void UnsubscribeFromSoulEnergyData()
         {
-            if (this.subscribedPlayerItem != null)
-            {
-                this.subscribedPlayerItem.OnGetItemsSuccess -= this.OnSoulEnergyInventoryUpdated;
-                this.subscribedPlayerItem = null;
-            }
-
             if (this.subscribedItemGenerator != null)
             {
                 this.subscribedItemGenerator.OnGetGeneratorsSuccess -= this.OnSoulEnergyGeneratorsUpdated;
