@@ -1,4 +1,5 @@
 using System;
+using SG03.UI.Components;
 using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -211,6 +212,7 @@ namespace SG03.UI
                         onError: err =>
                         {
                             claimBtn.SetEnabled(true);
+                            ToastMessage.ShowError(QuestActionErrorFormatter.Format(err), claimBtn);
                             Debug.LogWarning($"[MailboxContentUI] ClaimMessage failed ({msgId}): {err}");
                         }
                     );

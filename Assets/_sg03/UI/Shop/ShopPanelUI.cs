@@ -1,0 +1,320 @@
+using System;
+using SaiGame.Services;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+namespace SG03.UI
+{
+    /// <summary>Displays the server-provided shop list in ShopSideBar.</summary>
+    public class ShopPanelUI
+    {
+        private readonly ScrollView shopList;
+        private readonly Label contentTitle;
+        private readonly Label contentDescription;
+        private readonly Label itemsStatus;
+        private readonly ScrollView itemList;
+        private readonly Shop shop;
+        private readonly CurrencyWallet currencyWallet;
+        private Button selectedShopButton;
+        private ShopData selectedShop;
+        private ShopItemViewData[] currentItems;
+        private ShopCurrencyData currentShopCurrency;
+
+        public ShopPanelUI(VisualElement panelRoot, Shop shop, CurrencyWallet currencyWallet)
+        {
+            this.shopList = panelRoot.Q<ScrollView>("ShopList");
+            this.contentTitle = panelRoot.Q<Label>("ShopContentTitle");
+            this.contentDescription = panelRoot.Q<Label>("ShopContentDescription");
+            this.itemsStatus = panelRoot.Q<Label>("ShopItemsStatus");
+            this.itemList = panelRoot.Q<ScrollView>("ShopItemList");
+            this.shop = shop;
+            this.currencyWallet = currencyWallet;
+            if (this.currencyWallet != null)
+                this.currencyWallet.OnBalancesUpdated += this.RefreshItemAffordability;
+
+            this.ShowSidebarState("Loading shops...");
+            if (shop == null)
+            {
+                this.ShowSidebarState("Shop service is unavailable.", true);
+                return;
+            }
+
+            this.shop.GetShops(
+                onSuccess: response => this.ShowShops(response?.shops),
+                onError: error => this.ShowSidebarState(string.IsNullOrWhiteSpace(error) ? "Unable to load shops." : error, true));
+        }
+
+        private void ShowShops(ShopData[] shops)
+        {
+            if (this.shopList == null) return;
+            this.shopList.Clear();
+            this.selectedShopButton = null;
+
+            if (shops == null || shops.Length == 0)
+            {
+                this.ShowSidebarState("No shops available.");
+                return;
+            }
+
+            foreach (ShopData shop in shops)
+            {
+                if (shop == null) continue;
+                this.shopList.Add(this.BuildShopButton(shop));
+            }
+        }
+
+        private Button BuildShopButton(ShopData shop)
+        {
+            Button button = new Button();
+            button.AddToClassList("shop-nav-btn");
+
+            Label name = new Label(string.IsNullOrWhiteSpace(shop.name) ? shop.shop_key : shop.name);
+            name.AddToClassList("shop-nav-btn__name");
+            button.Add(name);
+
+            string meta = string.IsNullOrWhiteSpace(shop.shop_type) ? $"{shop.item_count} items" : $"{shop.shop_type} · {shop.item_count} items";
+            Label details = new Label(meta);
+            details.AddToClassList("shop-nav-btn__meta");
+            button.Add(details);
+
+            button.RegisterCallback<ClickEvent>(_ => this.SelectShop(shop, button));
+            return button;
+        }
+
+        private void SelectShop(ShopData shop, Button button)
+        {
+            this.selectedShopButton?.RemoveFromClassList("shop-nav-btn--active");
+            this.selectedShopButton = button;
+            this.selectedShopButton.AddToClassList("shop-nav-btn--active");
+            this.selectedShop = shop;
+
+            if (this.contentTitle != null)
+                this.contentTitle.text = string.IsNullOrWhiteSpace(shop.name) ? shop.shop_key : shop.name;
+            if (this.contentDescription != null)
+                this.contentDescription.text = string.IsNullOrWhiteSpace(shop.description)
+                    ? $"{shop.item_count} items available."
+                    : shop.description;
+
+            this.itemList?.Clear();
+            this.ShowItemsState("Loading items...");
+            this.LoadShopItems(shop.id);
+        }
+
+        // ShopItemsResponse in the read-only SaiGame dependency does not yet contain
+        // the new item-level and shop-level `currency` objects. Parse this endpoint
+        // locally until that dependency model is updated.
+        private void LoadShopItems(string shopId)
+        {
+            SaiServer server = SaiServer.Instance;
+            if (server == null)
+            {
+                this.ShowItemsState("Shop service is unavailable.", true);
+                return;
+            }
+
+            string endpoint = $"/api/v1/games/{server.GameId}/shops/{shopId}/items";
+            server.StartCoroutine(server.GetRequest(
+                endpoint,
+                response =>
+                {
+                    if (!this.IsSelectedShop(shopId)) return;
+                    try
+                    {
+                        ShopItemsWithCurrencyResponse data = JsonUtility.FromJson<ShopItemsWithCurrencyResponse>(response);
+                        this.ShowItems(data?.items, data?.currency);
+                    }
+                    catch (Exception exception)
+                    {
+                        this.ShowItemsState($"Unable to read shop items: {exception.Message}", true);
+                    }
+                },
+                error =>
+                {
+                    if (this.IsSelectedShop(shopId))
+                        this.ShowItemsState(string.IsNullOrWhiteSpace(error) ? "Unable to load shop items." : error, true);
+                }));
+        }
+
+        private void ShowItems(ShopItemViewData[] items, ShopCurrencyData shopCurrency)
+        {
+            if (this.itemList == null) return;
+            this.itemList.Clear();
+            this.currentItems = items;
+            this.currentShopCurrency = shopCurrency;
+
+            if (items == null || items.Length == 0)
+            {
+                this.ShowItemsState("This shop has no items available.");
+                return;
+            }
+
+            this.ShowItemsState(string.Empty);
+            foreach (ShopItemViewData item in items)
+            {
+                if (item == null) continue;
+                item.shop_currency = shopCurrency;
+                this.itemList.Add(this.BuildItemCard(item));
+            }
+        }
+
+        private VisualElement BuildItemCard(ShopItemViewData item)
+        {
+            VisualElement card = new VisualElement();
+            card.AddToClassList("shop-item-card");
+
+            VisualElement details = new VisualElement();
+            details.AddToClassList("shop-item-card__details");
+            Label name = new Label(string.IsNullOrWhiteSpace(item.display_name) ? item.item_def_id : item.display_name);
+            name.AddToClassList("shop-item-card__name");
+            details.Add(name);
+
+            if (!string.IsNullOrWhiteSpace(item.description))
+            {
+                Label description = new Label(item.description);
+                description.AddToClassList("shop-item-card__description");
+                details.Add(description);
+            }
+
+            Label meta = new Label(this.BuildItemMeta(item));
+            meta.AddToClassList("shop-item-card__meta");
+            details.Add(meta);
+            card.Add(details);
+
+            Button buyButton = new Button { text = $"Buy · {item.price} {this.GetCurrencyName(item)}" };
+            buyButton.AddToClassList("shop-item-card__buy");
+            bool canPurchase = !string.IsNullOrWhiteSpace(item.id)
+                && (item.purchase_limit <= 0 || item.purchased_count < item.purchase_limit);
+            string currencyDefinitionId = this.GetCurrencyItemDefinitionId(item);
+            canPurchase &= this.currencyWallet != null
+                && this.currencyWallet.IsLoaded
+                && this.currencyWallet.CanAfford(currencyDefinitionId, item.price);
+            buyButton.SetEnabled(canPurchase);
+            buyButton.RegisterCallback<ClickEvent>(_ => this.PurchaseItem(item, buyButton));
+            card.Add(buyButton);
+            return card;
+        }
+
+        private void PurchaseItem(ShopItemViewData item, Button buyButton)
+        {
+            if (this.selectedShop == null || string.IsNullOrWhiteSpace(item.id)) return;
+
+            string shopId = this.selectedShop.id;
+            buyButton.SetEnabled(false);
+            this.ShowItemsState("Purchasing...");
+            this.shop.PurchaseItem(
+                shopId,
+                item.id,
+                quantity: 1,
+                idempotencyKey: Guid.NewGuid().ToString("N"),
+                onSuccess: _ =>
+                {
+                    if (!this.IsSelectedShop(shopId)) return;
+                    this.ShowItemsState("Purchase successful.");
+                    this.currencyWallet?.Refresh();
+                    this.LoadShopItems(shopId);
+                },
+                onError: error =>
+                {
+                    if (!this.IsSelectedShop(shopId)) return;
+                    buyButton.SetEnabled(true);
+                    this.ShowItemsState(string.IsNullOrWhiteSpace(error) ? "Purchase failed." : error, true);
+                });
+        }
+
+        private bool IsSelectedShop(string shopId)
+            => this.selectedShop != null && this.selectedShop.id == shopId;
+
+        private string BuildItemMeta(ShopItemViewData item)
+        {
+            string currency = this.GetCurrencyName(item);
+            string stock = item.stock < 0 ? "Unlimited stock" : $"Stock: {item.stock}";
+            if (item.purchase_limit > 0)
+                stock += $" · Limit: {item.purchased_count}/{item.purchase_limit}";
+            return $"{item.price} {currency} · {stock}";
+        }
+
+        private string GetCurrencyName(ShopItemViewData item)
+        {
+            string currency = item.currency?.item_name;
+            if (string.IsNullOrWhiteSpace(currency)) currency = item.shop_currency?.item_name;
+            if (string.IsNullOrWhiteSpace(currency)) currency = item.currency_item_def_id;
+            return string.IsNullOrWhiteSpace(currency) ? "currency" : currency;
+        }
+
+        private string GetCurrencyItemDefinitionId(ShopItemViewData item)
+        {
+            string currencyDefinitionId = item.currency?.item_def_id;
+            if (string.IsNullOrWhiteSpace(currencyDefinitionId)) currencyDefinitionId = item.shop_currency?.item_def_id;
+            return string.IsNullOrWhiteSpace(currencyDefinitionId) ? item.currency_item_def_id : currencyDefinitionId;
+        }
+
+        private void RefreshItemAffordability()
+        {
+            if (this.currentItems != null)
+                this.ShowItems(this.currentItems, this.currentShopCurrency);
+        }
+
+        public void Dispose()
+        {
+            if (this.currencyWallet != null)
+                this.currencyWallet.OnBalancesUpdated -= this.RefreshItemAffordability;
+        }
+
+        [Serializable]
+        private class ShopItemsWithCurrencyResponse
+        {
+            public ShopCurrencyData currency;
+            public ShopItemViewData[] items;
+        }
+
+        [Serializable]
+        private class ShopCurrencyData
+        {
+            public string item_def_id;
+            public string item_code;
+            public string item_name;
+        }
+
+        [Serializable]
+        private class ShopItemViewData
+        {
+            public string id;
+            public string item_def_id;
+            public string display_name;
+            public string description;
+            public int price;
+            public string currency_item_def_id;
+            public string purchase_limit_type;
+            public int purchase_limit;
+            public int stock;
+            public int purchased_count;
+            public ShopCurrencyData currency;
+
+            // Assigned from the response's shared currency when an item has none.
+            [NonSerialized] public ShopCurrencyData shop_currency;
+        }
+
+        private void ShowItemsState(string message, bool isError = false)
+        {
+            if (this.itemsStatus == null) return;
+            this.itemsStatus.text = message;
+            this.itemsStatus.style.display = string.IsNullOrWhiteSpace(message)
+                ? DisplayStyle.None
+                : DisplayStyle.Flex;
+            if (isError)
+                this.itemsStatus.AddToClassList("shop-items__status--error");
+            else
+                this.itemsStatus.RemoveFromClassList("shop-items__status--error");
+        }
+
+        private void ShowSidebarState(string message, bool isError = false)
+        {
+            if (this.shopList == null) return;
+            this.shopList.Clear();
+            Label state = new Label(message);
+            state.AddToClassList("shop-sidebar__state");
+            if (isError) state.AddToClassList("shop-sidebar__state--error");
+            this.shopList.Add(state);
+        }
+    }
+}
