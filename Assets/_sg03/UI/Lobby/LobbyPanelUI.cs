@@ -201,10 +201,15 @@ namespace SG03.UI
         private VisualElement soulEnergyPopup;
         private VisualElement soulEnergyClaimRow;
         private Label soulEnergyClaimValue;
+        private VisualElement soulEnergyNextClaimRow;
+        private Label soulEnergyNextClaimValue;
         private Label soulEnergyFullLabel;
         private Label soulEnergyFullValue;
+        private IVisualElementScheduledItem soulEnergyPopupRefreshSchedule;
         private ItemGenerator subscribedItemGenerator;
         private CurrencyWallet subscribedCurrencyWallet;
+        private Coroutine soulAutoClaimCoroutine;
+        private bool isSoulClaimInProgress;
 
         // Lobby background elements toggled during immersive mode
         private VisualElement lobbyRoot;
@@ -298,11 +303,12 @@ namespace SG03.UI
             this.soulEnergyPopup = root.Q("SoulEnergyPopup");
             this.soulEnergyClaimRow = root.Q("SoulEnergyClaimRow");
             this.soulEnergyClaimValue = root.Q<Label>("SoulEnergyClaimValue");
+            this.soulEnergyNextClaimRow = root.Q("SoulEnergyNextClaimRow");
+            this.soulEnergyNextClaimValue = root.Q<Label>("SoulEnergyNextClaimValue");
             this.soulEnergyFullLabel = root.Q<Label>("SoulEnergyFullLabel");
             this.soulEnergyFullValue = root.Q<Label>("SoulEnergyFullValue");
             this.soulEnergy?.RegisterCallback<PointerEnterEvent>(_ => this.ShowSoulEnergyPopup());
             this.soulEnergy?.RegisterCallback<PointerLeaveEvent>(_ => this.HideSoulEnergyPopup());
-            this.soulEnergy?.RegisterCallback<ClickEvent>(_ => this.ClaimSoul());
             this.SubscribeSoulEnergyData();
             this.LoadSoulEnergy();
 
@@ -383,16 +389,19 @@ namespace SG03.UI
             if (activeServer == null || !activeServer.IsAuthenticated) return;
 
             activeServer.ItemGenerator?.GetGenerators();
+            this.RestartSoulAutoClaimTimer();
         }
 
         private void OnSoulEnergyGeneratorsUpdated(GeneratorsResponse _)
         {
             this.RefreshSoulEnergy();
+            this.RestartSoulAutoClaimTimer();
         }
 
         private void OnSoulEnergyCurrenciesUpdated()
         {
             this.RefreshSoulEnergy();
+            this.RestartSoulAutoClaimTimer();
         }
 
         private void RefreshSoulEnergy()
@@ -410,6 +419,15 @@ namespace SG03.UI
 
         private void ShowSoulEnergyPopup()
         {
+            this.RefreshSoulEnergyPopup();
+            if (this.soulEnergyPopupRefreshSchedule == null)
+                this.soulEnergyPopupRefreshSchedule = this.soulEnergyPopup.schedule.Execute(this.RefreshSoulEnergyPopup).Every(1000);
+            else
+                this.soulEnergyPopupRefreshSchedule.Resume();
+        }
+
+        private void RefreshSoulEnergyPopup()
+        {
             ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
             GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators);
             if (this.soulEnergyPopup == null || soulGenerator == null) return;
@@ -419,7 +437,11 @@ namespace SG03.UI
             int currentSoul = this.currencyWallet?.GetBalanceByItemCode(SoulItemCode) ?? 0;
             int collectCap = this.GetSoulCollectCap(soulGenerator);
             bool isFull = SoulEnergyUtility.IsFull(currentSoul, collectCap);
-            this.soulEnergyClaimRow.style.display = isFull ? DisplayStyle.None : DisplayStyle.Flex;
+            bool hasClaimableSoul = soulGenerator.GetCurrentPendingUnits() > 0;
+            this.soulEnergyClaimRow.style.display = !isFull && hasClaimableSoul ? DisplayStyle.Flex : DisplayStyle.None;
+            this.soulEnergyNextClaimRow.style.display = !isFull && !hasClaimableSoul ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!hasClaimableSoul && this.soulEnergyNextClaimValue != null)
+                this.soulEnergyNextClaimValue.text = FormatCountdown(soulGenerator.GetDynamicNextTickSeconds());
             this.soulEnergyFullLabel.text = isFull ? "Already full" : "Full in";
             this.soulEnergyFullValue.text = isFull
                 ? string.Empty
@@ -442,24 +464,81 @@ namespace SG03.UI
         {
             if (this.soulEnergyPopup != null)
                 this.soulEnergyPopup.style.display = DisplayStyle.None;
+            this.soulEnergyPopupRefreshSchedule?.Pause();
         }
 
         private void ClaimSoul()
         {
+            if (this.isSoulClaimInProgress) return;
+
             ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
             GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators);
             if (itemGenerator == null || soulGenerator == null || soulGenerator.GetCurrentPendingUnits() <= 0) return;
 
+            this.isSoulClaimInProgress = true;
             this.soulEnergy?.SetEnabled(false);
             itemGenerator.CollectGenerator(
                 soulGenerator.inventory_item_id,
                 onSuccess: _ =>
                 {
+                    this.isSoulClaimInProgress = false;
                     this.soulEnergy?.SetEnabled(true);
                     this.currencyWallet?.Refresh();
                     this.LoadSoulEnergy();
                 },
-                onError: _ => this.soulEnergy?.SetEnabled(true));
+                onError: _ =>
+                {
+                    this.isSoulClaimInProgress = false;
+                    this.soulEnergy?.SetEnabled(true);
+                    this.RestartSoulAutoClaimTimer();
+                });
+        }
+
+        /// <summary>
+        /// Schedules a collect just after the next generator tick. The dynamic tick
+        /// countdown is derived from ItemGenerator's production interval.
+        /// </summary>
+        private void RestartSoulAutoClaimTimer()
+        {
+            this.StopSoulAutoClaimTimer();
+            if (this.isSoulClaimInProgress) return;
+
+            ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
+            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators);
+            if (soulGenerator == null || this.IsSoulStorageFull(soulGenerator)) return;
+
+            int secondsUntilClaim = soulGenerator.GetCurrentPendingUnits() > 0
+                ? 2
+                : soulGenerator.GetDynamicNextTickSeconds() + 2;
+            this.soulAutoClaimCoroutine = this.StartCoroutine(this.AutoClaimSoulAfterDelay(secondsUntilClaim));
+        }
+
+        private System.Collections.IEnumerator AutoClaimSoulAfterDelay(int secondsUntilClaim)
+        {
+            yield return new WaitForSecondsRealtime(Mathf.Max(0, secondsUntilClaim));
+            this.soulAutoClaimCoroutine = null;
+
+            ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
+            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators);
+            if (soulGenerator == null || this.IsSoulStorageFull(soulGenerator)) yield break;
+
+            if (soulGenerator.GetCurrentPendingUnits() > 0)
+                this.ClaimSoul();
+            else
+                this.RestartSoulAutoClaimTimer();
+        }
+
+        private bool IsSoulStorageFull(GeneratorData soulGenerator)
+        {
+            int currentSoul = this.currencyWallet?.GetBalanceByItemCode(SoulItemCode) ?? 0;
+            return SoulEnergyUtility.IsFull(currentSoul, this.GetSoulCollectCap(soulGenerator));
+        }
+
+        private void StopSoulAutoClaimTimer()
+        {
+            if (this.soulAutoClaimCoroutine == null) return;
+            this.StopCoroutine(this.soulAutoClaimCoroutine);
+            this.soulAutoClaimCoroutine = null;
         }
 
         private GeneratorData FindSoulGenerator(GeneratorData[] generators)
@@ -514,6 +593,14 @@ namespace SG03.UI
             return expectedSoul.expected_min == expectedSoul.expected_max
                 ? expectedSoul.expected_min.ToString()
                 : $"{expectedSoul.expected_min}–{expectedSoul.expected_max}";
+        }
+
+        private static string FormatCountdown(int seconds)
+        {
+            System.TimeSpan time = System.TimeSpan.FromSeconds(Mathf.Max(0, seconds));
+            return time.TotalHours >= 1
+                ? $"{(int)time.TotalHours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"
+                : $"{time.Minutes:D2}:{time.Seconds:D2}";
         }
 
         private void OnLogoutClicked()
@@ -710,6 +797,7 @@ namespace SG03.UI
 
         protected virtual void OnDestroy()
         {
+            this.StopSoulAutoClaimTimer();
             this.DisposeShopPanel();
             this.UnsubscribeFromLoginSuccess();
             this.UnsubscribeFromLogout();

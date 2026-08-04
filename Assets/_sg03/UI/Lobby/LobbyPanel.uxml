@@ -17,7 +17,7 @@
                 <ui:VisualElement name="TopMenuTabs" class="lobby-top-menu__tabs">
                     <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab lobby-tab--active" />
                     <ui:Button name="ShopTab"    text="Shop"    class="lobby-tab" />
-                    <ui:Button name="SoulEnergy" class="soul-energy" tooltip="Claim Soul">
+                    <ui:Button name="SoulEnergy" class="soul-energy" tooltip="Soul Collector">
                         <ui:Label text="✦" tooltip="Soul Energy" class="soul-energy__icon" />
                         <ui:Label name="SoulEnergyValue" text="0 / 0" class="soul-energy__value" />
                     </ui:Button>
@@ -60,6 +60,10 @@
             <ui:VisualElement name="SoulEnergyClaimRow" class="soul-energy-popup__row">
                 <ui:Label text="Claim now" class="soul-energy-popup__label" />
                 <ui:Label name="SoulEnergyClaimValue" text="0" class="soul-energy-popup__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="SoulEnergyNextClaimRow" class="soul-energy-popup__row" style="display: none;">
+                <ui:Label text="Next claim in" class="soul-energy-popup__label" />
+                <ui:Label name="SoulEnergyNextClaimValue" text="—" class="soul-energy-popup__value" />
             </ui:VisualElement>
             <ui:VisualElement name="SoulEnergyFullRow" class="soul-energy-popup__row">
                 <ui:Label name="SoulEnergyFullLabel" text="Full in" class="soul-energy-popup__label" />
