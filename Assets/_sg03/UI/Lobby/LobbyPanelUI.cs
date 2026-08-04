@@ -10,6 +10,9 @@ namespace SG03.UI
     // Access all SaiServer services via the Server property.
     public class LobbyPanelUI : SaiBehaviour
     {
+        private const string SoulGeneratorItemCode = "soul_generaror";
+        private const string SoulItemCode = "soul";
+
         public string PanelId => "Lobby";
 
         [Header("Panel")]
@@ -185,6 +188,17 @@ namespace SG03.UI
         private SaiAuth subscribedAuth;
         private SaiAuth logoutAuth;
 
+        // Soul Energy indicator (shown only when the player owns soul_generaror).
+        private VisualElement soulEnergy;
+        private Label soulEnergyValue;
+        private VisualElement soulEnergyPopup;
+        private VisualElement soulEnergyClaimRow;
+        private Label soulEnergyClaimValue;
+        private Label soulEnergyFullLabel;
+        private Label soulEnergyFullValue;
+        private PlayerItem subscribedPlayerItem;
+        private ItemGenerator subscribedItemGenerator;
+
         // Lobby background elements toggled during immersive mode
         private VisualElement lobbyRoot;
         private VisualElement lobbyViewport;
@@ -253,6 +267,19 @@ namespace SG03.UI
             this.btnConfirmQuit?.RegisterCallback<ClickEvent>(_ => this.QuitGame());
             this.RefreshPlayerName();
 
+            this.soulEnergy = root.Q("SoulEnergy");
+            this.soulEnergyValue = root.Q<Label>("SoulEnergyValue");
+            this.soulEnergyPopup = root.Q("SoulEnergyPopup");
+            this.soulEnergyClaimRow = root.Q("SoulEnergyClaimRow");
+            this.soulEnergyClaimValue = root.Q<Label>("SoulEnergyClaimValue");
+            this.soulEnergyFullLabel = root.Q<Label>("SoulEnergyFullLabel");
+            this.soulEnergyFullValue = root.Q<Label>("SoulEnergyFullValue");
+            this.soulEnergy?.RegisterCallback<PointerEnterEvent>(_ => this.ShowSoulEnergyPopup());
+            this.soulEnergy?.RegisterCallback<PointerLeaveEvent>(_ => this.HideSoulEnergyPopup());
+            this.soulEnergy?.RegisterCallback<ClickEvent>(_ => this.ClaimSoul());
+            this.SubscribeSoulEnergyData();
+            this.LoadSoulEnergy();
+
             // Subscribe so name updates if lobby is loaded before login completes
             SaiAuth auth = this.GetSaiAuth();
             if (auth != null)
@@ -274,6 +301,7 @@ namespace SG03.UI
         private void OnLoginSuccess(LoginResponse response)
         {
             this.SetPlayerName(response?.user);
+            this.LoadSoulEnergy();
         }
 
         private void RefreshPlayerName()
@@ -296,6 +324,213 @@ namespace SG03.UI
             string name = user?.display_name;
             if (string.IsNullOrEmpty(name)) name = user?.username;
             this.playerNameLabel.text = string.IsNullOrEmpty(name) ? "👤 Guest" : $"👤 {name}";
+        }
+
+        private void SubscribeSoulEnergyData()
+        {
+            SaiServer activeServer = SaiServer.Instance;
+            PlayerItem playerItem = activeServer?.PlayerItem;
+            ItemGenerator itemGenerator = activeServer?.ItemGenerator;
+
+            if (playerItem != null)
+            {
+                playerItem.OnGetItemsSuccess += this.OnSoulEnergyInventoryUpdated;
+                this.subscribedPlayerItem = playerItem;
+            }
+
+            if (itemGenerator != null)
+            {
+                itemGenerator.OnGetGeneratorsSuccess += this.OnSoulEnergyGeneratorsUpdated;
+                this.subscribedItemGenerator = itemGenerator;
+            }
+        }
+
+        /// <summary>
+        /// Loads the inventory and generator data used by the Soul Energy badge.
+        /// This is called again after login so the lobby also works when opened directly.
+        /// </summary>
+        private void LoadSoulEnergy()
+        {
+            this.RefreshSoulEnergy();
+
+            SaiServer activeServer = SaiServer.Instance;
+            if (activeServer == null || !activeServer.IsAuthenticated) return;
+
+            activeServer.PlayerItem?.GetItems(limit: 1000);
+            activeServer.ItemGenerator?.GetGenerators();
+        }
+
+        private void OnSoulEnergyInventoryUpdated(InventoryResponse _)
+        {
+            this.RefreshSoulEnergy();
+        }
+
+        private void OnSoulEnergyGeneratorsUpdated(GeneratorsResponse _)
+        {
+            this.RefreshSoulEnergy();
+        }
+
+        private void RefreshSoulEnergy()
+        {
+            if (this.soulEnergy == null) return;
+
+            InventoryItemData[] items = SaiServer.Instance?.PlayerItem?.CurrentInventory?.items;
+            GeneratorData[] generators = SaiServer.Instance?.ItemGenerator?.CurrentGenerators?.generators;
+            GeneratorData soulGenerator = this.FindSoulGenerator(generators, items);
+            if (soulGenerator == null)
+            {
+                this.soulEnergy.style.display = DisplayStyle.None;
+                return;
+            }
+
+            int current = GetItemQuantity(items, SoulItemCode);
+            int collectCap = GetSoulCollectCap(soulGenerator, items);
+            this.soulEnergyValue.text = $"{current} / {collectCap}";
+            this.soulEnergy.style.display = DisplayStyle.Flex;
+        }
+
+        private void ShowSoulEnergyPopup()
+        {
+            InventoryItemData[] items = SaiServer.Instance?.PlayerItem?.CurrentInventory?.items;
+            ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
+            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators, items);
+            if (this.soulEnergyPopup == null || soulGenerator == null) return;
+
+            GeneratorExpectedOutput expectedSoul = GetSoulExpectedOutput(itemGenerator, soulGenerator, items);
+            this.soulEnergyClaimValue.text = FormatExpectedSoulAmount(expectedSoul);
+            int currentSoul = GetItemQuantity(items, SoulItemCode);
+            int collectCap = GetSoulCollectCap(soulGenerator, items);
+            bool isFull = SoulEnergyUtility.IsFull(currentSoul, collectCap);
+            this.soulEnergyClaimRow.style.display = isFull ? DisplayStyle.None : DisplayStyle.Flex;
+            this.soulEnergyFullLabel.text = isFull ? "Already full" : "Full in";
+            this.soulEnergyFullValue.text = isFull
+                ? string.Empty
+                : itemGenerator.GetGeneratorTimeUntilFull(soulGenerator.inventory_item_id);
+            this.PositionSoulEnergyPopup();
+            this.soulEnergyPopup.style.display = DisplayStyle.Flex;
+        }
+
+        private void PositionSoulEnergyPopup()
+        {
+            if (this.soulEnergyPopup == null || this.soulEnergy == null || this.lobbyRoot == null) return;
+
+            Rect soulBounds = this.soulEnergy.worldBound;
+            Rect rootBounds = this.lobbyRoot.worldBound;
+            this.soulEnergyPopup.style.left = soulBounds.xMax - rootBounds.xMin - 164f;
+            this.soulEnergyPopup.style.top = soulBounds.yMax - rootBounds.yMin + 6f;
+        }
+
+        private void HideSoulEnergyPopup()
+        {
+            if (this.soulEnergyPopup != null)
+                this.soulEnergyPopup.style.display = DisplayStyle.None;
+        }
+
+        private void ClaimSoul()
+        {
+            ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
+            InventoryItemData[] items = SaiServer.Instance?.PlayerItem?.CurrentInventory?.items;
+            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators, items);
+            if (itemGenerator == null || soulGenerator == null || soulGenerator.GetCurrentPendingUnits() <= 0) return;
+
+            this.soulEnergy?.SetEnabled(false);
+            itemGenerator.CollectGenerator(
+                soulGenerator.inventory_item_id,
+                onSuccess: _ =>
+                {
+                    this.soulEnergy?.SetEnabled(true);
+                    this.LoadSoulEnergy();
+                },
+                onError: _ => this.soulEnergy?.SetEnabled(true));
+        }
+
+        private GeneratorData FindSoulGenerator(GeneratorData[] generators, InventoryItemData[] items)
+        {
+            if (generators == null) return null;
+
+            foreach (GeneratorData generator in generators)
+            {
+                if (generator == null) continue;
+                if (string.Equals(generator.definition?.item_code, SoulGeneratorItemCode, System.StringComparison.OrdinalIgnoreCase))
+                    return generator;
+
+                foreach (InventoryItemData item in items ?? System.Array.Empty<InventoryItemData>())
+                {
+                    if (item?.id != generator.inventory_item_id) continue;
+                    if (string.Equals(item.definition?.item_code, SoulGeneratorItemCode, System.StringComparison.OrdinalIgnoreCase))
+                        return generator;
+                }
+            }
+
+            return null;
+        }
+
+        private static int GetItemQuantity(InventoryItemData[] items, string itemCode)
+        {
+            int quantity = 0;
+            foreach (InventoryItemData item in items ?? System.Array.Empty<InventoryItemData>())
+            {
+                if (string.Equals(item?.definition?.item_code, itemCode, System.StringComparison.OrdinalIgnoreCase))
+                    quantity += item.quantity;
+            }
+
+            return quantity;
+        }
+
+        private static int GetSoulCollectCap(GeneratorData generator, InventoryItemData[] items)
+        {
+            string soulDefinitionId = null;
+            foreach (InventoryItemData item in items ?? System.Array.Empty<InventoryItemData>())
+            {
+                if (string.Equals(item?.definition?.item_code, SoulItemCode, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    soulDefinitionId = item.item_definition_id;
+                    break;
+                }
+            }
+
+            foreach (GeneratorOutputPool output in generator.output_pool ?? System.Array.Empty<GeneratorOutputPool>())
+            {
+                if (output == null) continue;
+                if (string.IsNullOrEmpty(soulDefinitionId) || output.item_definition_id == soulDefinitionId)
+                    return output.collect_cap;
+            }
+
+            return 0;
+        }
+
+        private static GeneratorExpectedOutput GetSoulExpectedOutput(
+            ItemGenerator itemGenerator,
+            GeneratorData generator,
+            InventoryItemData[] items)
+        {
+            if (itemGenerator == null || generator == null) return null;
+
+            string soulDefinitionId = null;
+            foreach (InventoryItemData item in items ?? System.Array.Empty<InventoryItemData>())
+            {
+                if (string.Equals(item?.definition?.item_code, SoulItemCode, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    soulDefinitionId = item.item_definition_id;
+                    break;
+                }
+            }
+
+            foreach (GeneratorExpectedOutput output in itemGenerator.GetGeneratorExpectedOutput(generator.inventory_item_id) ?? System.Array.Empty<GeneratorExpectedOutput>())
+            {
+                if (string.IsNullOrEmpty(soulDefinitionId) || output.item_definition_id == soulDefinitionId)
+                    return output;
+            }
+
+            return null;
+        }
+
+        private static string FormatExpectedSoulAmount(GeneratorExpectedOutput expectedSoul)
+        {
+            if (expectedSoul == null) return "0";
+            return expectedSoul.expected_min == expectedSoul.expected_max
+                ? expectedSoul.expected_min.ToString()
+                : $"{expectedSoul.expected_min}–{expectedSoul.expected_max}";
         }
 
         private void OnLogoutClicked()
@@ -466,6 +701,22 @@ namespace SG03.UI
         {
             this.UnsubscribeFromLoginSuccess();
             this.UnsubscribeFromLogout();
+            this.UnsubscribeFromSoulEnergyData();
+        }
+
+        private void UnsubscribeFromSoulEnergyData()
+        {
+            if (this.subscribedPlayerItem != null)
+            {
+                this.subscribedPlayerItem.OnGetItemsSuccess -= this.OnSoulEnergyInventoryUpdated;
+                this.subscribedPlayerItem = null;
+            }
+
+            if (this.subscribedItemGenerator != null)
+            {
+                this.subscribedItemGenerator.OnGetGeneratorsSuccess -= this.OnSoulEnergyGeneratorsUpdated;
+                this.subscribedItemGenerator = null;
+            }
         }
 
         private void UnsubscribeFromLoginSuccess()
@@ -496,6 +747,21 @@ namespace SG03.UI
         {
             this.lobbyRoot?.RemoveFromClassList("lobby-root--immersive");
             this.lobbyViewport?.RemoveFromClassList("lobby-viewport--immersive");
+        }
+    }
+
+    /// <summary>
+    /// Shared capacity rules for Soul Energy displays and interactions.
+    /// </summary>
+    public static class SoulEnergyUtility
+    {
+        /// <summary>
+        /// Returns true when the current Soul quantity has reached its collect cap.
+        /// A cap of zero means unlimited, so it can never be full.
+        /// </summary>
+        public static bool IsFull(int currentCount, int collectCap)
+        {
+            return collectCap > 0 && currentCount >= collectCap;
         }
     }
 }

@@ -87,6 +87,72 @@
     -unity-text-align: middle-right;
 }
 
+.soul-energy {
+    flex-direction: row;
+    align-items: center;
+    margin-left: auto;
+    padding: 0;
+    border-width: 0;
+    background-color: transparent;
+}
+
+.soul-energy__icon {
+    color: rgb(210, 190, 255);
+    font-size: 13px;
+    margin-right: 4px;
+    transition-duration: 0.12s;
+}
+
+.soul-energy__value {
+    color: rgb(214, 207, 240);
+    font-size: 10px;
+    transition-duration: 0.12s;
+}
+
+.soul-energy:hover {
+    background-color: transparent;
+}
+
+.soul-energy:hover .soul-energy__icon,
+.soul-energy:hover .soul-energy__value {
+    color: rgb(255, 220, 128);
+}
+
+.soul-energy-popup {
+    position: absolute;
+    width: 164px;
+    padding: 9px 10px;
+    background-color: rgb(23, 19, 42);
+    border-width: 1px;
+    border-radius: 6px;
+    border-color: rgba(132, 94, 255, 0.7);
+}
+
+.soul-energy-popup__title {
+    color: rgb(222, 212, 255);
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.soul-energy-popup__row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 2px;
+}
+
+.soul-energy-popup__label {
+    color: rgb(164, 155, 196);
+    font-size: 11px;
+}
+
+.soul-energy-popup__value {
+    color: rgb(235, 229, 255);
+    font-size: 11px;
+    -unity-font-style: bold;
+    margin-left: 14px;
+}
+
 .lobby-top-menu__logout {
     width: 30px;
     height: 30px;
