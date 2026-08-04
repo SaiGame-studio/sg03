@@ -21,6 +21,7 @@ namespace SG03.UI
         [Header("References")]
         [SerializeField] private SaiServer saiServer;
         [SerializeField] private UIDocument uiDocument;
+        [SerializeField] private CurrencyWallet currencyWallet;
 
         [Header("Quest Panel Assets")]
         [SerializeField] private VisualTreeAsset questPanelAsset;
@@ -30,6 +31,9 @@ namespace SG03.UI
         [SerializeField] private VisualTreeAsset thisMonthContentAsset;
         [SerializeField] private VisualTreeAsset next7DaysContentAsset;
         [SerializeField] private VisualTreeAsset next30DaysContentAsset;
+
+        [Header("Shop Panel Assets")]
+        [SerializeField] private VisualTreeAsset shopPanelAsset;
 
         [Header("Mailbox Panel Assets")]
         [SerializeField] private VisualTreeAsset mailboxContentAsset;
@@ -43,6 +47,7 @@ namespace SG03.UI
         [Header("Scene Navigation")]
         [SerializeField] private string gameSceneName = "2-game";
         private QuestPanelUI questPanel;
+        private ShopPanelUI shopPanel;
 
         // Provides access to every SaiServer service (Auth, GamerProgress, Shop, …).
         protected SaiServer Server => this.saiServer;
@@ -52,9 +57,11 @@ namespace SG03.UI
             base.LoadComponents();
             this.LoadSaiServer();
             this.LoadUIDocument();
+            this.LoadCurrencyWallet();
             this.LoadPanelSettings();
             this.LoadPanelAsset();
             this.LoadQuestPanelAsset();
+            this.LoadShopPanelAsset();
             this.LoadDailyQuestContentAsset();
             this.LoadMainQuestContentAsset();
             this.LoadDailyQuestTabContentAssets();
@@ -197,7 +204,7 @@ namespace SG03.UI
         private Label soulEnergyFullLabel;
         private Label soulEnergyFullValue;
         private ItemGenerator subscribedItemGenerator;
-        private InventoryItemData[] soulCurrencyItems = System.Array.Empty<InventoryItemData>();
+        private CurrencyWallet subscribedCurrencyWallet;
 
         // Lobby background elements toggled during immersive mode
         private VisualElement lobbyRoot;
@@ -211,7 +218,26 @@ namespace SG03.UI
         {
             base.Start();
             this.InitializeStandalonePanel();
+            this.currencyWallet?.Refresh();
             this.OnQuestTabClicked();
+        }
+
+        private void LoadCurrencyWallet()
+        {
+            if (this.currencyWallet != null) return;
+            this.currencyWallet = this.GetComponent<CurrencyWallet>();
+            if (this.currencyWallet == null)
+                this.currencyWallet = this.gameObject.AddComponent<CurrencyWallet>();
+        }
+
+        private void LoadShopPanelAsset()
+        {
+            if (this.shopPanelAsset != null) return;
+#if UNITY_EDITOR
+            this.shopPanelAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/_sg03/UI/Shop/ShopPanel.uxml");
+            Debug.LogWarning(this.transform.name + ": LoadShopPanelAsset", this.gameObject);
+#endif
         }
 
         private void InitializeStandalonePanel()
@@ -235,7 +261,7 @@ namespace SG03.UI
             this.shopTab    = root.Q<Button>("ShopTab");
             this.questTab   = root.Q<Button>("QuestTab");
             this.homeTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.homeTab));
-            this.shopTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.shopTab));
+            this.shopTab?.RegisterCallback<ClickEvent>(_ => this.OnShopTabClicked());
 
             // Quest tab opens the panel with Main Quest selected.
             if (this.questTab != null)
@@ -302,6 +328,7 @@ namespace SG03.UI
         {
             this.SetPlayerName(response?.user);
             this.LoadSoulEnergy();
+            this.currencyWallet?.Refresh();
         }
 
         private void RefreshPlayerName()
@@ -336,11 +363,17 @@ namespace SG03.UI
                 itemGenerator.OnGetGeneratorsSuccess += this.OnSoulEnergyGeneratorsUpdated;
                 this.subscribedItemGenerator = itemGenerator;
             }
+
+            if (this.currencyWallet != null)
+            {
+                this.currencyWallet.OnBalancesUpdated += this.OnSoulEnergyCurrenciesUpdated;
+                this.subscribedCurrencyWallet = this.currencyWallet;
+            }
         }
 
         /// <summary>
-        /// Loads the currency and generator data used by the Soul Energy badge.
-        /// This is called again after login so the lobby also works when opened directly.
+        /// Loads generator data used by the Soul Energy badge. Currency comes only
+        /// from CurrencyWallet's independent cache.
         /// </summary>
         private void LoadSoulEnergy()
         {
@@ -349,30 +382,15 @@ namespace SG03.UI
             SaiServer activeServer = SaiServer.Instance;
             if (activeServer == null || !activeServer.IsAuthenticated) return;
 
-            this.LoadSoulCurrencies(activeServer);
             activeServer.ItemGenerator?.GetGenerators();
         }
 
-        /// <summary>
-        /// Loads currency items into a private cache so other inventory refreshes cannot
-        /// overwrite the Soul Energy count.
-        /// </summary>
-        private void LoadSoulCurrencies(SaiServer activeServer)
+        private void OnSoulEnergyGeneratorsUpdated(GeneratorsResponse _)
         {
-            string endpoint = $"/api/v1/games/{activeServer.GameId}/inventory?limit=1000&offset=0&include_metadata=true&category=currency";
-            this.StartCoroutine(activeServer.GetRequest(
-                endpoint,
-                response =>
-                {
-                    string sanitized = InventoryJsonHelper.StringifyObjectFields(response);
-                    InventoryResponse currencies = JsonUtility.FromJson<InventoryResponse>(sanitized);
-                    this.soulCurrencyItems = currencies?.items ?? System.Array.Empty<InventoryItemData>();
-                    this.RefreshSoulEnergy();
-                },
-                _ => { }));
+            this.RefreshSoulEnergy();
         }
 
-        private void OnSoulEnergyGeneratorsUpdated(GeneratorsResponse _)
+        private void OnSoulEnergyCurrenciesUpdated()
         {
             this.RefreshSoulEnergy();
         }
@@ -381,32 +399,25 @@ namespace SG03.UI
         {
             if (this.soulEnergy == null) return;
 
-            InventoryItemData[] items = this.soulCurrencyItems;
             GeneratorData[] generators = SaiServer.Instance?.ItemGenerator?.CurrentGenerators?.generators;
-            GeneratorData soulGenerator = this.FindSoulGenerator(generators, items);
-            if (soulGenerator == null)
-            {
-                this.soulEnergy.style.display = DisplayStyle.None;
-                return;
-            }
+            GeneratorData soulGenerator = this.FindSoulGenerator(generators);
 
-            int current = GetItemQuantity(items, SoulItemCode);
-            int collectCap = GetSoulCollectCap(soulGenerator, items);
+            int current = this.currencyWallet?.GetBalanceByItemCode(SoulItemCode) ?? 0;
+            int collectCap = this.GetSoulCollectCap(soulGenerator);
             this.soulEnergyValue.text = $"{current} / {collectCap}";
             this.soulEnergy.style.display = DisplayStyle.Flex;
         }
 
         private void ShowSoulEnergyPopup()
         {
-            InventoryItemData[] items = this.soulCurrencyItems;
             ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
-            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators, items);
+            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators);
             if (this.soulEnergyPopup == null || soulGenerator == null) return;
 
-            GeneratorExpectedOutput expectedSoul = GetSoulExpectedOutput(itemGenerator, soulGenerator, items);
+            GeneratorExpectedOutput expectedSoul = this.GetSoulExpectedOutput(itemGenerator, soulGenerator);
             this.soulEnergyClaimValue.text = FormatExpectedSoulAmount(expectedSoul);
-            int currentSoul = GetItemQuantity(items, SoulItemCode);
-            int collectCap = GetSoulCollectCap(soulGenerator, items);
+            int currentSoul = this.currencyWallet?.GetBalanceByItemCode(SoulItemCode) ?? 0;
+            int collectCap = this.GetSoulCollectCap(soulGenerator);
             bool isFull = SoulEnergyUtility.IsFull(currentSoul, collectCap);
             this.soulEnergyClaimRow.style.display = isFull ? DisplayStyle.None : DisplayStyle.Flex;
             this.soulEnergyFullLabel.text = isFull ? "Already full" : "Full in";
@@ -436,8 +447,7 @@ namespace SG03.UI
         private void ClaimSoul()
         {
             ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
-            InventoryItemData[] items = this.soulCurrencyItems;
-            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators, items);
+            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators);
             if (itemGenerator == null || soulGenerator == null || soulGenerator.GetCurrentPendingUnits() <= 0) return;
 
             this.soulEnergy?.SetEnabled(false);
@@ -446,12 +456,13 @@ namespace SG03.UI
                 onSuccess: _ =>
                 {
                     this.soulEnergy?.SetEnabled(true);
+                    this.currencyWallet?.Refresh();
                     this.LoadSoulEnergy();
                 },
                 onError: _ => this.soulEnergy?.SetEnabled(true));
         }
 
-        private GeneratorData FindSoulGenerator(GeneratorData[] generators, InventoryItemData[] items)
+        private GeneratorData FindSoulGenerator(GeneratorData[] generators)
         {
             if (generators == null) return null;
 
@@ -460,41 +471,15 @@ namespace SG03.UI
                 if (generator == null) continue;
                 if (string.Equals(generator.definition?.item_code, SoulGeneratorItemCode, System.StringComparison.OrdinalIgnoreCase))
                     return generator;
-
-                foreach (InventoryItemData item in items ?? System.Array.Empty<InventoryItemData>())
-                {
-                    if (item?.id != generator.inventory_item_id) continue;
-                    if (string.Equals(item.definition?.item_code, SoulGeneratorItemCode, System.StringComparison.OrdinalIgnoreCase))
-                        return generator;
-                }
             }
 
             return null;
         }
 
-        private static int GetItemQuantity(InventoryItemData[] items, string itemCode)
+        private int GetSoulCollectCap(GeneratorData generator)
         {
-            int quantity = 0;
-            foreach (InventoryItemData item in items ?? System.Array.Empty<InventoryItemData>())
-            {
-                if (string.Equals(item?.definition?.item_code, itemCode, System.StringComparison.OrdinalIgnoreCase))
-                    quantity += item.quantity;
-            }
-
-            return quantity;
-        }
-
-        private static int GetSoulCollectCap(GeneratorData generator, InventoryItemData[] items)
-        {
-            string soulDefinitionId = null;
-            foreach (InventoryItemData item in items ?? System.Array.Empty<InventoryItemData>())
-            {
-                if (string.Equals(item?.definition?.item_code, SoulItemCode, System.StringComparison.OrdinalIgnoreCase))
-                {
-                    soulDefinitionId = item.item_definition_id;
-                    break;
-                }
-            }
+            if (generator == null) return 0;
+            string soulDefinitionId = this.currencyWallet?.GetDefinitionIdByItemCode(SoulItemCode);
 
             foreach (GeneratorOutputPool output in generator.output_pool ?? System.Array.Empty<GeneratorOutputPool>())
             {
@@ -506,22 +491,13 @@ namespace SG03.UI
             return 0;
         }
 
-        private static GeneratorExpectedOutput GetSoulExpectedOutput(
+        private GeneratorExpectedOutput GetSoulExpectedOutput(
             ItemGenerator itemGenerator,
-            GeneratorData generator,
-            InventoryItemData[] items)
+            GeneratorData generator)
         {
             if (itemGenerator == null || generator == null) return null;
 
-            string soulDefinitionId = null;
-            foreach (InventoryItemData item in items ?? System.Array.Empty<InventoryItemData>())
-            {
-                if (string.Equals(item?.definition?.item_code, SoulItemCode, System.StringComparison.OrdinalIgnoreCase))
-                {
-                    soulDefinitionId = item.item_definition_id;
-                    break;
-                }
-            }
+            string soulDefinitionId = this.currencyWallet?.GetDefinitionIdByItemCode(SoulItemCode);
 
             foreach (GeneratorExpectedOutput output in itemGenerator.GetGeneratorExpectedOutput(generator.inventory_item_id) ?? System.Array.Empty<GeneratorExpectedOutput>())
             {
@@ -605,6 +581,12 @@ namespace SG03.UI
             this.LoadQuestPanel(QuestType.Main);
         }
 
+        private void OnShopTabClicked()
+        {
+            this.OnTopTabClicked(this.shopTab);
+            this.LoadShopPanel();
+        }
+
         private void LoadDailyQuestTabContentAssets()
         {
 #if UNITY_EDITOR
@@ -627,6 +609,7 @@ namespace SG03.UI
         {
             if (this.contentArea == null || this.questPanelAsset == null) return;
 
+            this.DisposeShopPanel();
             this.contentArea.Clear();
             TemplateContainer panelRoot = this.questPanelAsset.Instantiate();
 
@@ -651,6 +634,24 @@ namespace SG03.UI
             this.questPanel.ShowQuest(type);
         }
 
+        private void LoadShopPanel()
+        {
+            if (this.contentArea == null || this.shopPanelAsset == null) return;
+
+            this.DisposeShopPanel();
+            this.contentArea.Clear();
+            TemplateContainer panelRoot = this.shopPanelAsset.Instantiate();
+            panelRoot.style.flexGrow = 1;
+            panelRoot.style.flexShrink = 1;
+            panelRoot.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
+            panelRoot.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
+            panelRoot.style.alignSelf = Align.Stretch;
+            this.contentArea.Add(panelRoot);
+
+            this.currencyWallet?.Refresh();
+            this.shopPanel = new ShopPanelUI(panelRoot, SaiServer.Instance?.Shop, this.currencyWallet);
+        }
+
         private void Update()
         {
             if (Keyboard.current?.escapeKey.wasPressedThisFrame == true)
@@ -669,6 +670,7 @@ namespace SG03.UI
         {
             if (this.contentArea == null || this.inventoryContentAsset == null) return;
 
+            this.DisposeShopPanel();
             this.contentArea.Clear();
             TemplateContainer content = this.inventoryContentAsset.Instantiate();
             content.style.flexGrow   = 1;
@@ -684,6 +686,7 @@ namespace SG03.UI
         {
             if (this.contentArea == null || this.deskContentBehaviour == null) return;
 
+            this.DisposeShopPanel();
             this.contentArea.Clear();
             this.deskContentBehaviour.Show(this.contentArea);
         }
@@ -692,6 +695,7 @@ namespace SG03.UI
         {
             if (this.contentArea == null || this.mailboxContentAsset == null) return;
 
+            this.DisposeShopPanel();
             this.contentArea.Clear();
             TemplateContainer content = this.mailboxContentAsset.Instantiate();
             content.style.flexGrow   = 1;
@@ -706,9 +710,16 @@ namespace SG03.UI
 
         protected virtual void OnDestroy()
         {
+            this.DisposeShopPanel();
             this.UnsubscribeFromLoginSuccess();
             this.UnsubscribeFromLogout();
             this.UnsubscribeFromSoulEnergyData();
+        }
+
+        private void DisposeShopPanel()
+        {
+            this.shopPanel?.Dispose();
+            this.shopPanel = null;
         }
 
         private void UnsubscribeFromSoulEnergyData()
@@ -717,6 +728,12 @@ namespace SG03.UI
             {
                 this.subscribedItemGenerator.OnGetGeneratorsSuccess -= this.OnSoulEnergyGeneratorsUpdated;
                 this.subscribedItemGenerator = null;
+            }
+
+            if (this.subscribedCurrencyWallet != null)
+            {
+                this.subscribedCurrencyWallet.OnBalancesUpdated -= this.OnSoulEnergyCurrenciesUpdated;
+                this.subscribedCurrencyWallet = null;
             }
         }
 

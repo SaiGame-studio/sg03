@@ -17,7 +17,7 @@
                 <ui:VisualElement name="TopMenuTabs" class="lobby-top-menu__tabs">
                     <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab lobby-tab--active" />
                     <ui:Button name="ShopTab"    text="Shop"    class="lobby-tab" />
-                    <ui:Button name="SoulEnergy" class="soul-energy" tooltip="Claim Soul" style="display: none;">
+                    <ui:Button name="SoulEnergy" class="soul-energy" tooltip="Claim Soul">
                         <ui:Label text="✦" tooltip="Soul Energy" class="soul-energy__icon" />
                         <ui:Label name="SoulEnergyValue" text="0 / 0" class="soul-energy__value" />
                     </ui:Button>

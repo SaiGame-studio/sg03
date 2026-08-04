@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="ShopPanel.uss" />
+
+    <ui:VisualElement name="ShopPanelRoot" class="shop-panel-root">
+        <ui:VisualElement name="ShopSideBar" class="shop-sidebar">
+            <ui:VisualElement class="shop-sidebar__header">
+                <ui:Label text="Shop" class="shop-sidebar__header-label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="shop-sidebar__divider" />
+            <ui:ScrollView name="ShopList" class="shop-sidebar__list" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="ShopContentArea" class="shop-content-area">
+            <ui:Label name="ShopContentTitle" text="Select a shop" class="shop-content__title" />
+            <ui:Label name="ShopContentDescription" text="Choose a shop from the sidebar to view its details." class="shop-content__description" />
+            <ui:Label name="ShopItemsStatus" class="shop-items__status" />
+            <ui:ScrollView name="ShopItemList" class="shop-item-list" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
