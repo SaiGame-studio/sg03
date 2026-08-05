@@ -364,6 +364,14 @@
     color: rgb(200, 215, 255);
 }
 
+.lobby-bottom-btn--active {
+    background-color: rgba(60, 110, 230, 0.25);
+    border-width: 1px;
+    border-color: rgb(110, 160, 255);
+    color: rgb(110, 160, 255);
+    -unity-font-style: bold;
+}
+
 .lobby-bottom-btn--primary {
     background-color: rgba(60, 110, 230, 1);
     color: rgb(240, 244, 255);

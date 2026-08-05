@@ -263,10 +263,10 @@ namespace SG03.UI
             this.btnInventory = root.Q<Button>("BtnInventory");
             this.btnMailbox   = root.Q<Button>("BtnMailbox");
 
-            this.btnPlay?.RegisterCallback<ClickEvent>(_ => this.OnPlayClicked());
-            this.btnDesk?.RegisterCallback<ClickEvent>(_ => this.OnDeskClicked());
-            this.btnInventory?.RegisterCallback<ClickEvent>(_ => this.OnInventoryClicked());
-            this.btnMailbox?.RegisterCallback<ClickEvent>(_ => this.OnMailboxClicked());
+            this.btnPlay?.RegisterCallback<ClickEvent>(_ => this.OnBottomButtonClicked(this.btnPlay, this.OnPlayClicked));
+            this.btnDesk?.RegisterCallback<ClickEvent>(_ => this.OnBottomButtonClicked(this.btnDesk, this.OnDeskClicked));
+            this.btnInventory?.RegisterCallback<ClickEvent>(_ => this.OnBottomButtonClicked(this.btnInventory, this.OnInventoryClicked));
+            this.btnMailbox?.RegisterCallback<ClickEvent>(_ => this.OnBottomButtonClicked(this.btnMailbox, this.OnMailboxClicked));
 
             // Player name (top-right)
             this.playerNameLabel = root.Q<Label>("PlayerNameLabel");
@@ -383,6 +383,7 @@ namespace SG03.UI
         // ------------------------------------------------------------------
         private void OnTopTabClicked(Button selected)
         {
+            this.ClearBottomButtonSelection();
             foreach (Button tab in new[] { this.homeTab, this.shopTab, this.questTab })
             {
                 if (tab == null) continue;
@@ -390,6 +391,24 @@ namespace SG03.UI
             }
 
             selected.AddToClassList("lobby-tab--active");
+        }
+
+        private void OnBottomButtonClicked(Button selected, System.Action action)
+        {
+            foreach (Button button in new[] { this.btnPlay, this.btnDesk, this.btnInventory, this.btnMailbox })
+                button?.RemoveFromClassList("lobby-bottom-btn--active");
+
+            selected?.AddToClassList("lobby-bottom-btn--active");
+            foreach (Button tab in new[] { this.homeTab, this.shopTab, this.questTab })
+                tab?.RemoveFromClassList("lobby-tab--active");
+
+            action?.Invoke();
+        }
+
+        private void ClearBottomButtonSelection()
+        {
+            foreach (Button button in new[] { this.btnPlay, this.btnDesk, this.btnInventory, this.btnMailbox })
+                button?.RemoveFromClassList("lobby-bottom-btn--active");
         }
 
         private void OnQuestTabClicked()
