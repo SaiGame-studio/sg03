@@ -13,6 +13,7 @@ namespace SG03.UI
     public class GameBattleActionsUI
     {
         private const string BattleModeNormal = "normal";
+        private const string DefaultEnemyCodeName = "goblin_shaman";
 
         private readonly Func<BattleScripts> getBattleScripts;
         private readonly Func<BattleStateCtrl> getBattleStateCtrl;
@@ -23,7 +24,7 @@ namespace SG03.UI
         private Button btnCheckStatus;
 
         private Button btnStartBattle;
-        private TextField enemyCodeNameInput;
+        private DropdownField enemyCodeNameInput;
 
         private bool battleStatusFirstCallDone;
 
@@ -47,7 +48,8 @@ namespace SG03.UI
             this.btnCheckStatus = root.Q<Button>("BtnCheckStatus");
 
             this.btnStartBattle = root.Q<Button>("BtnStartBattle");
-            this.enemyCodeNameInput = root.Q<TextField>("EnemyCodeNameInput");
+            this.enemyCodeNameInput = root.Q<DropdownField>("EnemyCodeNameInput");
+            this.enemyCodeNameInput?.SetValueWithoutNotify(DefaultEnemyCodeName);
         }
 
         private void RegisterCallbacks()
