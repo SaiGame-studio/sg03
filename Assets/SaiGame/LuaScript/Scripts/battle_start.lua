@@ -18,6 +18,7 @@ require "lib_battle_common"
 -- Deck size limits — shared with player deck validation
 local DECK_CARD_MIN = 25
 local DECK_CARD_MAX = 52
+local START_BATTLE_SOUL_COST = 5
 
 local function gen_id()
     local t = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
@@ -36,6 +37,7 @@ local build_state            -- forward declaration
 local load_player_the_source -- forward declaration
 local load_enemy_the_source  -- forward declaration
 local load_item_defs         -- forward declaration
+local charge_start_battle_fee -- forward declaration
 
 local function main()
     local err = validate_payload()
@@ -80,6 +82,9 @@ local function main()
     if defs_err ~= nil then output.error = defs_err ; return end
     state.item_defs = item_defs
     lib_battle_common.dlog("[battle_start] item_defs loaded: " .. tostring(#item_defs) .. " definitions")
+
+    local fee_err = charge_start_battle_fee()
+    if fee_err ~= nil then output.error = fee_err ; return end
 
     local session_id, create_err = game.battle_session_create(state)
     if create_err ~= nil then output.error = create_err ; return end
@@ -245,6 +250,17 @@ load_item_defs = function(player_source, enemy_source)
     local defs, fetch_err = game.get_item_defs_by_codes(codes)
     if fetch_err ~= nil then return nil, fetch_err end
     return defs or {}, nil
+end
+
+charge_start_battle_fee = function()
+    local soul_def, soul_err = game.get_item_def_by_code("soul")
+    if soul_err ~= nil then return soul_err end
+    if soul_def == nil then return "soul item definition not found" end
+
+    local deduct_err = game.deduct_item(soul_def.id, START_BATTLE_SOUL_COST)
+    if deduct_err ~= nil then return deduct_err end
+
+    return nil
 end
 
 main()

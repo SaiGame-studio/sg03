@@ -48,6 +48,7 @@
 .input-field .unity-text-input,
 .input-field .unity-base-text-field__input {
     background-color: rgb(14, 18, 30);
+    border-width: 0;
     color: rgb(230, 235, 255);
     -unity-text-input-placeholder-color: rgb(130, 145, 180);
     --unity-cursor-color: rgb(120, 180, 255);

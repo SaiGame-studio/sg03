@@ -16,7 +16,7 @@ namespace SG03.UI
 
         private readonly MonoBehaviour host;
         private readonly CurrencyWallet currencyWallet;
-        private readonly VisualElement lobbyRoot;
+        private readonly VisualElement panelRoot;
         private readonly VisualElement soulEnergy;
         private readonly Label soulEnergyValue;
         private readonly VisualElement soulEnergyPopup;
@@ -41,11 +41,12 @@ namespace SG03.UI
         private Coroutine autoClaimCoroutine;
         private bool isClaimInProgress;
 
-        public SoulEnergyUI(MonoBehaviour host, VisualElement root, CurrencyWallet currencyWallet)
+        public SoulEnergyUI(MonoBehaviour host, VisualElement root, CurrencyWallet currencyWallet, VisualElement mountPoint = null)
         {
             this.host = host;
             this.currencyWallet = currencyWallet;
-            this.lobbyRoot = root.Q("LobbyRoot");
+            this.panelRoot = root.Q("LobbyRoot") ?? root.Q("GameRoot") ?? root;
+            this.CreateVisualTreeIfMissing(root, mountPoint);
             this.soulEnergy = root.Q("SoulEnergy");
             this.soulEnergyValue = root.Q<Label>("SoulEnergyValue");
             this.soulEnergyPopup = root.Q("SoulEnergyPopup");
@@ -63,6 +64,54 @@ namespace SG03.UI
             this.greaterVesselValue = root.Q<Label>("GreaterVesselValue");
             this.topCurrencyPopup = root.Q("TopCurrencyPopup");
             this.topCurrencyPopupLabel = root.Q<Label>("TopCurrencyPopupLabel");
+        }
+
+        private void CreateVisualTreeIfMissing(VisualElement root, VisualElement mountPoint)
+        {
+            if (mountPoint == null) return;
+
+            root.Q("SoulEnergy")?.RemoveFromHierarchy();
+            root.Q("SoulEnergyPopup")?.RemoveFromHierarchy();
+
+            Button indicator = new Button { name = "SoulEnergy", tooltip = "Soul Collector" };
+            indicator.AddToClassList("soul-energy");
+            Label icon = new Label("✦") { tooltip = "Soul Energy" };
+            icon.AddToClassList("soul-energy__icon");
+            Label value = new Label("0 / 0") { name = "SoulEnergyValue" };
+            value.AddToClassList("soul-energy__value");
+            indicator.Add(icon);
+            indicator.Add(value);
+            mountPoint.Insert(0, indicator);
+
+            VisualElement popup = new VisualElement { name = "SoulEnergyPopup" };
+            popup.AddToClassList("soul-energy-popup");
+            popup.style.display = DisplayStyle.None;
+            popup.Add(this.CreateLabel("Soul Collector", "soul-energy-popup__title"));
+            popup.Add(this.CreatePopupRow("SoulEnergyClaimRow", "Claim now", "SoulEnergyClaimValue", "0"));
+
+            VisualElement nextClaimRow = this.CreatePopupRow("SoulEnergyNextClaimRow", "Next claim in", "SoulEnergyNextClaimValue", "—");
+            nextClaimRow.style.display = DisplayStyle.None;
+            popup.Add(nextClaimRow);
+            popup.Add(this.CreatePopupRow("SoulEnergyFullRow", "Full in", "SoulEnergyFullValue", "—"));
+            this.panelRoot.Add(popup);
+        }
+
+        private Label CreateLabel(string text, string className)
+        {
+            Label label = new Label(text);
+            label.AddToClassList(className);
+            return label;
+        }
+
+        private VisualElement CreatePopupRow(string rowName, string labelText, string valueName, string valueText)
+        {
+            VisualElement row = new VisualElement { name = rowName };
+            row.AddToClassList("soul-energy-popup__row");
+            row.Add(this.CreateLabel(labelText, "soul-energy-popup__label"));
+            Label value = this.CreateLabel(valueText, "soul-energy-popup__value");
+            value.name = valueName;
+            row.Add(value);
+            return row;
         }
 
         public void Initialize()
@@ -83,7 +132,7 @@ namespace SG03.UI
             SaiServer activeServer = SaiServer.Instance;
             if (activeServer == null || !activeServer.IsAuthenticated) return;
 
-            activeServer.ItemGenerator?.GetGenerators();
+            this.EnsureSoulGeneratorLoaded();
             this.RestartAutoClaimTimer();
         }
 
@@ -133,7 +182,16 @@ namespace SG03.UI
         {
             this.RefreshTopCurrencies();
             this.RefreshSoulEnergy();
+            this.EnsureSoulGeneratorLoaded();
             this.RestartAutoClaimTimer();
+        }
+
+        private void EnsureSoulGeneratorLoaded()
+        {
+            ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
+            if (itemGenerator == null) return;
+            if (this.FindSoulGenerator(itemGenerator.CurrentGenerators?.generators) != null) return;
+            itemGenerator.GetGenerators();
         }
 
         private void RefreshTopCurrencies()
@@ -150,10 +208,10 @@ namespace SG03.UI
 
         private void ShowTopCurrencyPopup(VisualElement currency, string currencyName)
         {
-            if (currency == null || this.topCurrencyPopup == null || this.topCurrencyPopupLabel == null || this.lobbyRoot == null) return;
+            if (currency == null || this.topCurrencyPopup == null || this.topCurrencyPopupLabel == null || this.panelRoot == null) return;
 
             Rect bounds = currency.worldBound;
-            Rect rootBounds = this.lobbyRoot.worldBound;
+            Rect rootBounds = this.panelRoot.worldBound;
             this.topCurrencyPopupLabel.text = currencyName;
             this.topCurrencyPopup.style.left = bounds.center.x - rootBounds.xMin - 44f;
             this.topCurrencyPopup.style.top = bounds.yMax - rootBounds.yMin + 6f;
@@ -212,9 +270,9 @@ namespace SG03.UI
 
         private void PositionSoulEnergyPopup()
         {
-            if (this.soulEnergyPopup == null || this.soulEnergy == null || this.lobbyRoot == null) return;
+            if (this.soulEnergyPopup == null || this.soulEnergy == null || this.panelRoot == null) return;
             Rect soulBounds = this.soulEnergy.worldBound;
-            Rect rootBounds = this.lobbyRoot.worldBound;
+            Rect rootBounds = this.panelRoot.worldBound;
             this.soulEnergyPopup.style.left = soulBounds.xMax - rootBounds.xMin - 164f;
             this.soulEnergyPopup.style.top = soulBounds.yMax - rootBounds.yMin + 6f;
         }

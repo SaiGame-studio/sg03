@@ -22,12 +22,16 @@ namespace SG03.UI
 
         private TextField usernameField;
         private TextField passwordField;
+        private TextField confirmPasswordField;
         private TextField registerEmailField;
         private Button loginButton;
         private Button authModeButton;
+        private Button passwordVisibilityButton;
+        private Button confirmPasswordVisibilityButton;
         private Label feedbackLabel;
         private Label titleLabel;
         private VisualElement registerFields;
+        private VisualElement confirmPasswordContainer;
         private VisualElement root;
         private bool authEventsSubscribed;
         private bool isRegisterMode;
@@ -95,17 +99,27 @@ namespace SG03.UI
         {
             this.usernameField = root.Q<TextField>("UsernameField");
             this.passwordField = root.Q<TextField>("PasswordField");
+            this.confirmPasswordField = root.Q<TextField>("ConfirmPasswordField");
             this.registerEmailField = root.Q<TextField>("RegisterEmailField");
             this.loginButton   = root.Q<Button>("LoginButton");
             this.authModeButton = root.Q<Button>("AuthModeButton");
+            this.passwordVisibilityButton = root.Q<Button>("PasswordVisibilityButton");
+            this.confirmPasswordVisibilityButton = root.Q<Button>("ConfirmPasswordVisibilityButton");
             this.titleLabel = root.Q<Label>("TitleLabel");
             this.registerFields = root.Q<VisualElement>("RegisterFields");
+            this.confirmPasswordContainer = root.Q<VisualElement>("ConfirmPasswordContainer");
 
             if (this.loginButton != null)
                 this.loginButton.clicked += this.OnLoginButtonClicked;
 
             if (this.authModeButton != null)
                 this.authModeButton.clicked += this.OnAuthModeButtonClicked;
+
+            if (this.passwordVisibilityButton != null)
+                this.passwordVisibilityButton.clicked += this.TogglePasswordVisibility;
+
+            if (this.confirmPasswordVisibilityButton != null)
+                this.confirmPasswordVisibilityButton.clicked += this.ToggleConfirmPasswordVisibility;
 
             this.RefreshAuthMode();
             this.SubscribeToAuthEvents();
@@ -116,7 +130,7 @@ namespace SG03.UI
             if (this.usernameField == null || this.saiAuth == null) return;
 
             this.usernameField.SetValueWithoutNotify(this.saiAuth.GetUsername());
-            this.passwordField.SetValueWithoutNotify(this.saiAuth.GetPassword());
+            this.passwordField?.SetValueWithoutNotify(string.Empty);
         }
 
         private void SubscribeToAuthEvents()
@@ -164,14 +178,27 @@ namespace SG03.UI
                 return;
             }
 
+            if (this.passwordField.value != this.confirmPasswordField?.value)
+            {
+                this.loginButton.SetEnabled(true);
+                this.ShowFeedback("Passwords do not match.", isError: true);
+                return;
+            }
+
+            string registeredUsername = this.usernameField.value;
+
             this.saiAuth.Register(
                 this.registerEmailField.value,
-                this.usernameField.value,
+                registeredUsername,
                 this.passwordField.value,
                 onSuccess: _ =>
                 {
                     this.loginButton.SetEnabled(true);
                     this.isRegisterMode = false;
+                    this.usernameField.SetValueWithoutNotify(registeredUsername);
+                    this.passwordField.SetValueWithoutNotify(string.Empty);
+                    this.confirmPasswordField?.SetValueWithoutNotify(string.Empty);
+                    this.registerEmailField?.SetValueWithoutNotify(string.Empty);
                     this.RefreshAuthMode();
                     this.ShowFeedback("Registration successful. Please log in.", isError: false);
                 },
@@ -185,14 +212,39 @@ namespace SG03.UI
         private void OnAuthModeButtonClicked()
         {
             this.isRegisterMode = !this.isRegisterMode;
+            this.passwordField?.SetValueWithoutNotify(string.Empty);
+            this.confirmPasswordField?.SetValueWithoutNotify(string.Empty);
+
             this.HideFeedback();
             this.RefreshAuthMode();
+        }
+
+        private void TogglePasswordVisibility()
+        {
+            this.TogglePasswordVisibility(this.passwordField, this.passwordVisibilityButton);
+        }
+
+        private void ToggleConfirmPasswordVisibility()
+        {
+            this.TogglePasswordVisibility(this.confirmPasswordField, this.confirmPasswordVisibilityButton);
+        }
+
+        private void TogglePasswordVisibility(TextField field, Button button)
+        {
+            if (field == null || button == null) return;
+
+            field.isPasswordField = !field.isPasswordField;
+            bool isPasswordHidden = field.isPasswordField;
+            button.tooltip = isPasswordHidden ? "Show password" : "Hide password";
         }
 
         private void RefreshAuthMode()
         {
             if (this.registerFields != null)
                 this.registerFields.style.display = this.isRegisterMode ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (this.confirmPasswordContainer != null)
+                this.confirmPasswordContainer.style.display = this.isRegisterMode ? DisplayStyle.Flex : DisplayStyle.None;
 
             if (this.titleLabel != null)
                 this.titleLabel.text = this.isRegisterMode ? "Create Account" : "Login";
@@ -284,6 +336,12 @@ namespace SG03.UI
 
             if (this.authModeButton != null)
                 this.authModeButton.clicked -= this.OnAuthModeButtonClicked;
+
+            if (this.passwordVisibilityButton != null)
+                this.passwordVisibilityButton.clicked -= this.TogglePasswordVisibility;
+
+            if (this.confirmPasswordVisibilityButton != null)
+                this.confirmPasswordVisibilityButton.clicked -= this.ToggleConfirmPasswordVisibility;
         }
     }
 }

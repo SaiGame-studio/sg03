@@ -13,6 +13,9 @@ namespace SG03.UI
     public class GameBattleActionsUI
     {
         private const string BattleModeNormal = "normal";
+        private const string DefaultEnemyCodeName = "goblin_shaman";
+        private const string NewGameButtonText = "Start with 5 soul";
+        private const string ResumeButtonText = "Resume";
 
         private readonly Func<BattleScripts> getBattleScripts;
         private readonly Func<BattleStateCtrl> getBattleStateCtrl;
@@ -20,12 +23,13 @@ namespace SG03.UI
         private PresetData selectedPreset;
 
         private Button btnEndBattle;
-        private Button btnCheckStatus;
-
         private Button btnStartBattle;
-        private TextField enemyCodeNameInput;
+        private DropdownField enemyCodeNameInput;
 
-        private bool battleStatusFirstCallDone;
+        private bool hasActiveBattleSession;
+
+        public event Action OnBattleStartedOrResumed;
+        public event Action OnBattleStarted;
 
         public GameBattleActionsUI(
             Func<BattleScripts> getBattleScripts,
@@ -44,17 +48,14 @@ namespace SG03.UI
         private void BindButtons(VisualElement root)
         {
             this.btnEndBattle = root.Q<Button>("BtnEndBattle");
-            this.btnCheckStatus = root.Q<Button>("BtnCheckStatus");
-
             this.btnStartBattle = root.Q<Button>("BtnStartBattle");
-            this.enemyCodeNameInput = root.Q<TextField>("EnemyCodeNameInput");
+            this.enemyCodeNameInput = root.Q<DropdownField>("EnemyCodeNameInput");
+            this.enemyCodeNameInput?.SetValueWithoutNotify(DefaultEnemyCodeName);
         }
 
         private void RegisterCallbacks()
         {
             this.btnEndBattle?.RegisterCallback<ClickEvent>(_ => this.OnEndBattleClicked());
-            this.btnCheckStatus?.RegisterCallback<ClickEvent>(_ => this.OnCheckStatusClicked());
-
             this.btnStartBattle?.RegisterCallback<ClickEvent>(_ => this.OnStartBattleClicked());
             this.enemyCodeNameInput?.RegisterValueChangedCallback(_ => this.ResetStartBattleButtonText());
         }
@@ -72,6 +73,21 @@ namespace SG03.UI
             this.selectedPreset = preset;
         }
 
+        public void SetBattleSessionAvailabilityLoading()
+        {
+            if (this.btnStartBattle == null) return;
+            this.btnStartBattle.SetEnabled(false);
+            this.btnStartBattle.text = "Checking...";
+        }
+
+        public void SetBattleSessionAvailability(bool hasActiveBattleSession)
+        {
+            this.hasActiveBattleSession = hasActiveBattleSession;
+            if (this.btnStartBattle == null) return;
+            this.btnStartBattle.SetEnabled(true);
+            this.btnStartBattle.text = this.hasActiveBattleSession ? ResumeButtonText : NewGameButtonText;
+        }
+
 
 
         protected virtual void OnEndBattleClicked()
@@ -79,64 +95,14 @@ namespace SG03.UI
             this.TriggerEndBattle();
         }
 
-        protected virtual void OnCheckStatusClicked()
-        {
-            this.TriggerCheckStatus();
-        }
-
         protected virtual void OnStartBattleClicked()
         {
+            if (this.hasActiveBattleSession)
+            {
+                this.TriggerResumeBattle();
+                return;
+            }
             this.TriggerStartBattle();
-        }
-
-        private void TriggerCheckStatus()
-        {
-            BattleScripts scripts = this.getBattleScripts();
-            if (!this.CanCheckBattleStatus(scripts)) return;
-            this.SetCheckStatusLoading(true);
-            scripts.RunBattleStatus(this.OnBattleStatusSucceeded, this.OnBattleStatusFailed);
-        }
-
-        private void TriggerGetAllCardDefinitionsOnFirstStatus()
-        {
-            if (this.battleStatusFirstCallDone) return;
-            this.battleStatusFirstCallDone = true;
-            this.GetAllCardDefinitions();
-        }
-
-        private bool CanCheckBattleStatus(BattleScripts scripts)
-        {
-            if (scripts != null) return true;
-            this.SetCheckStatusButtonText("No Script");
-            return false;
-        }
-
-        private void SetCheckStatusLoading(bool isLoading)
-        {
-            if (this.btnCheckStatus == null) return;
-            this.btnCheckStatus.SetEnabled(!isLoading);
-            this.btnCheckStatus.text = isLoading ? "Checking..." : "Check Status";
-        }
-
-        private void SetCheckStatusButtonText(string text)
-        {
-            if (this.btnCheckStatus == null) return;
-            this.btnCheckStatus.text = text;
-        }
-
-        private void OnBattleStatusSucceeded(string response)
-        {
-            this.SetCheckStatusLoading(false);
-            this.SetCheckStatusButtonText("Status OK");
-            this.TriggerGetAllCardDefinitionsOnFirstStatus();
-            this.ApplyBattleStatusResponse(response);
-        }
-
-        private void OnBattleStatusFailed(string error)
-        {
-            this.SetCheckStatusLoading(false);
-            this.SetCheckStatusButtonText("Status Failed");
-            Debug.LogWarning("GameBattleActionsUI: Battle status failed: " + error);
         }
 
         private void TriggerEndBattle()
@@ -158,7 +124,7 @@ namespace SG03.UI
         {
             if (this.btnEndBattle == null) return;
             this.btnEndBattle.SetEnabled(!isLoading);
-            this.btnEndBattle.text = isLoading ? "Ending..." : "End Battle";
+            this.btnEndBattle.text = isLoading ? "Ending..." : "End Game";
         }
 
         private void SetEndBattleButtonText(string text)
@@ -194,6 +160,19 @@ namespace SG03.UI
             string requestBody = this.BuildBattleStartRequestBody(enemyCodeName, presetInstanceId);
             this.SetStartBattleLoading(true);
             scripts.RunBattleStart(requestBody, this.OnBattleStartSucceeded, this.OnBattleStartFailed);
+        }
+
+        private void TriggerResumeBattle()
+        {
+            BattleScripts scripts = this.getBattleScripts();
+            if (scripts == null)
+            {
+                this.SetStartBattleButtonText("No Script");
+                return;
+            }
+
+            this.SetResumeBattleLoading(true);
+            scripts.RunBattleStatus(this.OnResumeBattleSucceeded, this.OnResumeBattleFailed);
         }
 
         private bool CanStartBattle(BattleScripts scripts)
@@ -242,6 +221,13 @@ namespace SG03.UI
             this.btnStartBattle.text = isLoading ? "Starting..." : "Start Battle";
         }
 
+        private void SetResumeBattleLoading(bool isLoading)
+        {
+            if (this.btnStartBattle == null) return;
+            this.btnStartBattle.SetEnabled(!isLoading);
+            this.btnStartBattle.text = isLoading ? "Resuming..." : ResumeButtonText;
+        }
+
         private void SetStartBattleButtonText(string text)
         {
             if (this.btnStartBattle == null) return;
@@ -250,15 +236,32 @@ namespace SG03.UI
 
         private void ResetStartBattleButtonText()
         {
-            this.SetStartBattleButtonText("Start Battle");
+            this.SetStartBattleButtonText(this.hasActiveBattleSession ? ResumeButtonText : NewGameButtonText);
+        }
+
+        private void OnResumeBattleSucceeded(string response)
+        {
+            this.SetResumeBattleLoading(false);
+            this.GetAllCardDefinitions();
+            this.ApplyBattleStatusResponse(response);
+            this.OnBattleStartedOrResumed?.Invoke();
+        }
+
+        private void OnResumeBattleFailed(string error)
+        {
+            this.SetResumeBattleLoading(false);
+            Debug.LogWarning("GameBattleActionsUI: Resume battle failed: " + error);
         }
 
         private void OnBattleStartSucceeded(string response)
         {
+            this.hasActiveBattleSession = true;
             this.SetStartBattleLoading(false);
             this.SetStartBattleButtonText("Battle Started");
             this.GetAllCardDefinitions();
             this.ApplyBattleStatusResponse(response);
+            this.OnBattleStarted?.Invoke();
+            this.OnBattleStartedOrResumed?.Invoke();
         }
 
         private void OnBattleStartFailed(string error)

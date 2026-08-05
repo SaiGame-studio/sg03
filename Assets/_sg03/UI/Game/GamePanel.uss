@@ -44,8 +44,97 @@
 
 .game-top-menu__tabs {
     flex-direction: row;
-    flex: 1;
     align-items: center;
+}
+
+.game-bottom-menu__desk-info {
+    flex: 1;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+}
+
+.game-bottom-menu__desk-info .game-top-menu__tabs {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.game-bottom-menu__desk-info .game-top-menu__card-count {
+    flex: 0 0 auto;
+    margin-right: 8px;
+}
+
+#PlayerNavigation {
+    flex-direction: row;
+    align-items: center;
+    margin-left: auto;
+}
+
+.soul-energy {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 16px;
+    padding: 0;
+    border-width: 0;
+    background-color: transparent;
+}
+
+.soul-energy__icon {
+    color: rgb(210, 190, 255);
+    font-size: 9px;
+    margin-right: 4px;
+    transition-duration: 0.12s;
+}
+
+.soul-energy__value {
+    color: rgb(214, 207, 240);
+    font-size: 10px;
+    transition-duration: 0.12s;
+}
+
+.soul-energy:hover {
+    background-color: transparent;
+}
+
+.soul-energy:hover .soul-energy__icon,
+.soul-energy:hover .soul-energy__value {
+    color: rgb(255, 220, 128);
+}
+
+.soul-energy-popup {
+    position: absolute;
+    width: 164px;
+    padding: 9px 10px;
+    background-color: rgb(23, 19, 42);
+    border-width: 1px;
+    border-radius: 6px;
+    border-color: rgba(132, 94, 255, 0.7);
+}
+
+.soul-energy-popup__title {
+    color: rgb(222, 212, 255);
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.soul-energy-popup__row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 2px;
+}
+
+.soul-energy-popup__label {
+    color: rgb(164, 155, 196);
+    font-size: 11px;
+}
+
+.soul-energy-popup__value {
+    color: rgb(235, 229, 255);
+    font-size: 11px;
+    -unity-font-style: bold;
+    margin-left: 14px;
 }
 
 .game-tab {
@@ -170,6 +259,24 @@
     padding: 0 12px;
 }
 
+.game-bottom-menu #BtnStartBattle {
+    flex: 0 0 132px;
+    width: 132px;
+    min-width: 132px;
+    max-width: 132px;
+    margin: 0 8px;
+    padding: 10px 8px;
+}
+
+.game-bottom-menu #BtnEndBattle {
+    flex: 0 0 132px;
+    width: 132px;
+    min-width: 132px;
+    max-width: 132px;
+    margin: 0 8px;
+    padding: 10px 8px;
+}
+
 .game-bottom-btn {
     flex: 1;
     margin: 0 6px;
@@ -244,9 +351,10 @@
 
 /* Enemy input and Start Battle button placed inside TopMenu — compact size */
 .game-top-menu .game-bottom-input {
-    flex: 0 0 auto;
-    min-width: 150px;
-    max-width: 260px;
+    flex: 0 0 210px;
+    width: 210px;
+    min-width: 210px;
+    max-width: 210px;
     font-size: 11px;
     margin: 0 4px;
 }
@@ -254,6 +362,35 @@
 .game-top-menu .game-bottom-input .unity-text-input {
     padding: 2px 6px;
     color: rgb(180, 0, 0);
+}
+
+/* Enemy selector: match the dark, blue-accented controls in the top menu. */
+.game-top-menu .game-bottom-input .unity-base-popup-field__input,
+.game-top-menu .game-bottom-input .unity-popup-field__input {
+    min-height: 28px;
+    padding: 2px 8px;
+    border-width: 1px;
+    border-radius: 8px;
+    border-color: rgba(80, 100, 160, 0.45);
+    background-color: rgba(38, 46, 68, 0.86);
+    color: rgb(220, 228, 255);
+}
+
+.game-top-menu .game-bottom-input .unity-base-popup-field__input:hover,
+.game-top-menu .game-bottom-input .unity-popup-field__input:hover {
+    border-color: rgba(100, 140, 255, 0.9);
+    background-color: rgba(58, 68, 96, 0.92);
+}
+
+.game-top-menu .game-bottom-input .unity-base-popup-field__text,
+.game-top-menu .game-bottom-input .unity-popup-field__text {
+    color: rgb(220, 228, 255);
+    -unity-font-style: bold;
+}
+
+.game-top-menu .game-bottom-input .unity-base-popup-field__arrow,
+.game-top-menu .game-bottom-input .unity-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(150, 180, 255);
 }
 
 .game-top-menu .game-bottom-btn--primary {

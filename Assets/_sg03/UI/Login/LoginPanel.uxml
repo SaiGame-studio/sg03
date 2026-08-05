@@ -31,10 +31,31 @@
 
             <!-- Password -->
             <ui:Label text="Password" class="field-label" />
-            <ui:TextField name="PasswordField"
-                          placeholder-text="Enter password"
-                          password="true"
-                          class="input-field" />
+            <ui:VisualElement class="password-row">
+                <ui:TextField name="PasswordField"
+                              placeholder-text="Enter password"
+                              password="true"
+                              class="input-field password-row__field" />
+                <ui:Button name="PasswordVisibilityButton"
+                           text="👁"
+                           tooltip="Show password"
+                           class="password-visibility-button" />
+            </ui:VisualElement>
+
+            <!-- Registration-only password confirmation -->
+            <ui:VisualElement name="ConfirmPasswordContainer">
+                <ui:Label text="Confirm Password" class="field-label" />
+                <ui:VisualElement class="password-row">
+                    <ui:TextField name="ConfirmPasswordField"
+                                  placeholder-text="Re-enter password"
+                                  password="true"
+                                  class="input-field password-row__field" />
+                    <ui:Button name="ConfirmPasswordVisibilityButton"
+                               text="👁"
+                               tooltip="Show password"
+                               class="password-visibility-button" />
+                </ui:VisualElement>
+            </ui:VisualElement>
 
             <!-- Divider -->
             <ui:VisualElement class="divider" />

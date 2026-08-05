@@ -9,6 +9,8 @@ namespace SG03.UI
     // Drawer shown by InventoryContentUI for inventory items in the gacha_pack category.
     public class GachaPackDetailUI
     {
+        private const string SoulGeneratorItemCode = "soul_generaror";
+
         private readonly VisualElement panel;
         private readonly VisualElement content;
         private readonly DropdownField packDropdown;
@@ -126,6 +128,7 @@ namespace SG03.UI
 
             int selectedIndex = this.packDropdown?.index ?? 0;
             selectedIndex = Mathf.Clamp(selectedIndex, 0, this.packIds.Count - 1);
+            bool hadSoulGenerator = this.HasSoulGenerator(SaiServer.Instance?.ItemGenerator?.CurrentGenerators?.generators);
 
             this.openPackButton?.SetEnabled(false);
             if (this.openStatus != null) this.openStatus.text = "Opening pack…";
@@ -136,9 +139,24 @@ namespace SG03.UI
                 {
                     int rewardCount = response?.items_granted?.Length ?? 0;
                     if (this.openStatus != null) this.openStatus.text = $"Opened! Received {rewardCount} item(s).";
+                    if (!hadSoulGenerator)
+                        SaiServer.Instance?.ItemGenerator?.GetGenerators();
                     this.OnPackOpened?.Invoke();
                 },
                 onError: this.ShowOpenError);
+        }
+
+        private bool HasSoulGenerator(GeneratorData[] generators)
+        {
+            if (generators == null) return false;
+
+            foreach (GeneratorData generator in generators)
+            {
+                if (string.Equals(generator?.definition?.item_code, SoulGeneratorItemCode, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
         }
 
         private void ShowOpenError(string error)

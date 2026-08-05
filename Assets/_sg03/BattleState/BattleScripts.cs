@@ -18,6 +18,7 @@ namespace SG03
         [SerializeField] private string scriptNameBattleStart        = "battle_start";
         [SerializeField] private string scriptNameBattleEnd          = "battle_end";
         [SerializeField] private string scriptNameBattleStatus       = "battle_status";
+        [SerializeField] private string scriptNameBattleSessionExists = "battle_session_exists";
         [SerializeField] private string scriptNameInitCards          = "init_cards";
         [SerializeField] private string scriptNameGetCardDefinitions = "get_card_definitions";
         [SerializeField] private string scriptNameCardDeploy         = "card_deploy";
@@ -70,6 +71,17 @@ namespace SG03
             if (this.IsBattleScriptMissing(nameof(this.RunBattleStatus))) return;
             this.LogPayload("RunBattleStatus", "#FFD700", null);
             this.RunWithLock(this.scriptNameBattleStatus, null, onSuccess, onError);
+        }
+
+        public void RunBattleSessionExists(Action<string> onSuccess, Action<string> onError)
+        {
+            if (this.IsBattleScriptMissing(nameof(this.RunBattleSessionExists)))
+            {
+                onError?.Invoke("Battle script service is unavailable.");
+                return;
+            }
+            this.LogPayload("RunBattleSessionExists", "#88DDFF", null);
+            this.RunWithLock(this.scriptNameBattleSessionExists, null, onSuccess, onError);
         }
 
         public void RunInitCards(Action<string> onSuccess, Action<string> onError)
@@ -136,7 +148,7 @@ namespace SG03
             this.isRunning = true;
             string payloadPart = string.IsNullOrEmpty(requestBody) ? string.Empty : "\n" + requestBody;
             Debug.Log($"[BattleScripts] RunScript: <color=#FFFF00>{scriptName}</color>{payloadPart}");
-            this.battleScript.RunScript(scriptName, requestBody, this.ReleaseLockThenSuccess(scriptName, onSuccess), this.ReleaseLockThenError(scriptName));
+            this.battleScript.RunScript(scriptName, requestBody, this.ReleaseLockThenSuccess(scriptName, onSuccess), this.ReleaseLockThenError(scriptName, onError));
         }
 
         private Action<string> ReleaseLockThenSuccess(string scriptName, Action<string> onSuccess)
@@ -163,12 +175,13 @@ namespace SG03
             Debug.Log($"[BattleScripts] <color=#FFFF00>{scriptName}</color> [{timestamp}] response too large ({result.Length} chars) \u2192 saved to:\n{path}", this.gameObject);
         }
 
-        private Action<string> ReleaseLockThenError(string scriptName)
+        private Action<string> ReleaseLockThenError(string scriptName, Action<string> onError)
         {
             return error =>
             {
                 this.isRunning = false;
                 Debug.LogWarning($"[BattleScripts] '{scriptName}' error: {error}", this.gameObject);
+                onError?.Invoke(error);
             };
         }
 
