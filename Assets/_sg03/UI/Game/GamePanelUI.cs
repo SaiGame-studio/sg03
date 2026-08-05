@@ -17,6 +17,7 @@ namespace SG03.UI
         [SerializeField] private ItemPreset itemPreset;
         [SerializeField] private BattleScripts battleScripts;
         [SerializeField] private BattleStateCtrl battleStateCtrl;
+        [SerializeField] private CurrencyWallet currencyWallet;
         [SerializeField] private UIDocument uiDocument;
 
         [Header("Scene Navigation")]
@@ -36,11 +37,13 @@ namespace SG03.UI
         private GameDeskTabsUI deskTabsUI;
         private GameBattleStatusUI battleStatusUI;
         private GameBattleActionsUI battleActionsUI;
+        private SoulEnergyUI soulEnergyUI;
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
             this.LoadSaiServer();
+            this.LoadCurrencyWallet();
             this.LoadItemPreset();
             this.LoadBattleScript();
             this.LoadBattleStateCtrl();
@@ -69,6 +72,14 @@ namespace SG03.UI
             if (this.itemPreset == null) this.itemPreset = this.saiServer.GetComponentInChildren<ItemPreset>(true);
             if (this.itemPreset == null) return;
             Debug.LogWarning(this.transform.name + ": LoadItemPreset", this.gameObject);
+        }
+
+        private void LoadCurrencyWallet()
+        {
+            if (this.currencyWallet != null) return;
+            this.currencyWallet = this.GetComponent<CurrencyWallet>();
+            if (this.currencyWallet == null)
+                this.currencyWallet = this.gameObject.AddComponent<CurrencyWallet>();
         }
 
         private void LoadBattleScript()
@@ -146,6 +157,7 @@ namespace SG03.UI
             base.Start();
             this.EnsureServiceReferences();
             this.InitializeStandalonePanel();
+            this.currencyWallet?.Refresh();
         }
 
         private void EnsureServiceReferences()
@@ -211,6 +223,7 @@ namespace SG03.UI
             this.BindDeskTabs(panelRoot);
             this.BindBattleStatus(panelRoot);
             this.BindBattleActions(panelRoot);
+            this.BindSoulEnergy(panelRoot);
             this.WirePresetEventsToBattleActions();
             this.SubscribeToAuthEvents();
             this.SubscribeToBattleStateEvents();
@@ -262,6 +275,13 @@ namespace SG03.UI
             this.battleActionsUI.OnBattleStartedOrResumed += this.HideBattleSetupControls;
         }
 
+        private void BindSoulEnergy(VisualElement panelRoot)
+        {
+            this.soulEnergyUI?.Dispose();
+            this.soulEnergyUI = new SoulEnergyUI(this, panelRoot, this.currencyWallet, panelRoot.Q("PlayerNavigation"));
+            this.soulEnergyUI.Initialize();
+        }
+
         private void WirePresetEventsToBattleActions()
         {
             if (this.deskTabsUI == null) return;
@@ -307,6 +327,8 @@ namespace SG03.UI
         private void OnLoginSuccess(LoginResponse response)
         {
             this.RefreshPlayerName();
+            this.soulEnergyUI?.Load();
+            this.currencyWallet?.Refresh();
             this.RefreshBattleSessionAvailability();
         }
 
@@ -407,6 +429,7 @@ namespace SG03.UI
         {
             this.battleStatusUI?.Dispose();
             this.deskTabsUI?.Dispose();
+            this.soulEnergyUI?.Dispose();
             this.UnsubscribeFromAuthEvents();
             this.UnsubscribeFromBattleStateEvents();
         }
