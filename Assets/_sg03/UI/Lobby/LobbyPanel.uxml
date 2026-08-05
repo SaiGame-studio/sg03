@@ -17,6 +17,18 @@
                 <ui:VisualElement name="TopMenuTabs" class="lobby-top-menu__tabs">
                     <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab lobby-tab--active" />
                     <ui:Button name="ShopTab"    text="Shop"    class="lobby-tab" />
+                    <ui:VisualElement name="GreaterVesselCurrency" class="top-currency top-currency--first" tooltip="Greater Vessel">
+                        <ui:Label text="✦" class="top-currency__icon top-currency__icon--greater" />
+                        <ui:Label name="GreaterVesselValue" text="0" class="top-currency__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="CommonVesselCurrency" class="top-currency" tooltip="Common Vessel">
+                        <ui:Label text="✦" class="top-currency__icon top-currency__icon--common" />
+                        <ui:Label name="CommonVesselValue" text="0" class="top-currency__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="LesserVesselCurrency" class="top-currency" tooltip="Lesser Vessel">
+                        <ui:Label text="✦" class="top-currency__icon top-currency__icon--lesser" />
+                        <ui:Label name="LesserVesselValue" text="0" class="top-currency__value" />
+                    </ui:VisualElement>
                     <ui:Button name="SoulEnergy" class="soul-energy" tooltip="Soul Collector">
                         <ui:Label text="✦" tooltip="Soul Energy" class="soul-energy__icon" />
                         <ui:Label name="SoulEnergyValue" text="0 / 0" class="soul-energy__value" />
@@ -69,6 +81,9 @@
                 <ui:Label name="SoulEnergyFullLabel" text="Full in" class="soul-energy-popup__label" />
                 <ui:Label name="SoulEnergyFullValue" text="—" class="soul-energy-popup__value" />
             </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="TopCurrencyPopup" class="top-currency-popup" style="display: none;">
+            <ui:Label name="TopCurrencyPopupLabel" class="top-currency-popup__label" />
         </ui:VisualElement>
 
     </ui:VisualElement>

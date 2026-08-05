@@ -10,9 +10,6 @@ namespace SG03.UI
     // Access all SaiServer services via the Server property.
     public class LobbyPanelUI : SaiBehaviour
     {
-        private const string SoulGeneratorItemCode = "soul_generaror";
-        private const string SoulItemCode = "soul";
-
         public string PanelId => "Lobby";
 
         [Header("Panel")]
@@ -195,21 +192,7 @@ namespace SG03.UI
         private SaiAuth subscribedAuth;
         private SaiAuth logoutAuth;
 
-        // Soul Energy indicator (shown only when the player owns soul_generaror).
-        private VisualElement soulEnergy;
-        private Label soulEnergyValue;
-        private VisualElement soulEnergyPopup;
-        private VisualElement soulEnergyClaimRow;
-        private Label soulEnergyClaimValue;
-        private VisualElement soulEnergyNextClaimRow;
-        private Label soulEnergyNextClaimValue;
-        private Label soulEnergyFullLabel;
-        private Label soulEnergyFullValue;
-        private IVisualElementScheduledItem soulEnergyPopupRefreshSchedule;
-        private ItemGenerator subscribedItemGenerator;
-        private CurrencyWallet subscribedCurrencyWallet;
-        private Coroutine soulAutoClaimCoroutine;
-        private bool isSoulClaimInProgress;
+        private SoulEnergyUI soulEnergyUI;
 
         // Lobby background elements toggled during immersive mode
         private VisualElement lobbyRoot;
@@ -298,19 +281,9 @@ namespace SG03.UI
             this.btnConfirmQuit?.RegisterCallback<ClickEvent>(_ => this.QuitGame());
             this.RefreshPlayerName();
 
-            this.soulEnergy = root.Q("SoulEnergy");
-            this.soulEnergyValue = root.Q<Label>("SoulEnergyValue");
-            this.soulEnergyPopup = root.Q("SoulEnergyPopup");
-            this.soulEnergyClaimRow = root.Q("SoulEnergyClaimRow");
-            this.soulEnergyClaimValue = root.Q<Label>("SoulEnergyClaimValue");
-            this.soulEnergyNextClaimRow = root.Q("SoulEnergyNextClaimRow");
-            this.soulEnergyNextClaimValue = root.Q<Label>("SoulEnergyNextClaimValue");
-            this.soulEnergyFullLabel = root.Q<Label>("SoulEnergyFullLabel");
-            this.soulEnergyFullValue = root.Q<Label>("SoulEnergyFullValue");
-            this.soulEnergy?.RegisterCallback<PointerEnterEvent>(_ => this.ShowSoulEnergyPopup());
-            this.soulEnergy?.RegisterCallback<PointerLeaveEvent>(_ => this.HideSoulEnergyPopup());
-            this.SubscribeSoulEnergyData();
-            this.LoadSoulEnergy();
+            this.soulEnergyUI?.Dispose();
+            this.soulEnergyUI = new SoulEnergyUI(this, root, this.currencyWallet);
+            this.soulEnergyUI.Initialize();
 
             // Subscribe so name updates if lobby is loaded before login completes
             SaiAuth auth = this.GetSaiAuth();
@@ -333,7 +306,7 @@ namespace SG03.UI
         private void OnLoginSuccess(LoginResponse response)
         {
             this.SetPlayerName(response?.user);
-            this.LoadSoulEnergy();
+            this.soulEnergyUI?.Load();
             this.currencyWallet?.Refresh();
         }
 
@@ -359,249 +332,6 @@ namespace SG03.UI
             this.playerNameLabel.text = string.IsNullOrEmpty(name) ? "👤 Guest" : $"👤 {name}";
         }
 
-        private void SubscribeSoulEnergyData()
-        {
-            SaiServer activeServer = SaiServer.Instance;
-            ItemGenerator itemGenerator = activeServer?.ItemGenerator;
-
-            if (itemGenerator != null)
-            {
-                itemGenerator.OnGetGeneratorsSuccess += this.OnSoulEnergyGeneratorsUpdated;
-                this.subscribedItemGenerator = itemGenerator;
-            }
-
-            if (this.currencyWallet != null)
-            {
-                this.currencyWallet.OnBalancesUpdated += this.OnSoulEnergyCurrenciesUpdated;
-                this.subscribedCurrencyWallet = this.currencyWallet;
-            }
-        }
-
-        /// <summary>
-        /// Loads generator data used by the Soul Energy badge. Currency comes only
-        /// from CurrencyWallet's independent cache.
-        /// </summary>
-        private void LoadSoulEnergy()
-        {
-            this.RefreshSoulEnergy();
-
-            SaiServer activeServer = SaiServer.Instance;
-            if (activeServer == null || !activeServer.IsAuthenticated) return;
-
-            activeServer.ItemGenerator?.GetGenerators();
-            this.RestartSoulAutoClaimTimer();
-        }
-
-        private void OnSoulEnergyGeneratorsUpdated(GeneratorsResponse _)
-        {
-            this.RefreshSoulEnergy();
-            this.RestartSoulAutoClaimTimer();
-        }
-
-        private void OnSoulEnergyCurrenciesUpdated()
-        {
-            this.RefreshSoulEnergy();
-            this.RestartSoulAutoClaimTimer();
-        }
-
-        private void RefreshSoulEnergy()
-        {
-            if (this.soulEnergy == null) return;
-
-            GeneratorData[] generators = SaiServer.Instance?.ItemGenerator?.CurrentGenerators?.generators;
-            GeneratorData soulGenerator = this.FindSoulGenerator(generators);
-
-            int current = this.currencyWallet?.GetBalanceByItemCode(SoulItemCode) ?? 0;
-            int collectCap = this.GetSoulCollectCap(soulGenerator);
-            this.soulEnergyValue.text = $"{current} / {collectCap}";
-            this.soulEnergy.style.display = DisplayStyle.Flex;
-        }
-
-        private void ShowSoulEnergyPopup()
-        {
-            this.RefreshSoulEnergyPopup();
-            if (this.soulEnergyPopupRefreshSchedule == null)
-                this.soulEnergyPopupRefreshSchedule = this.soulEnergyPopup.schedule.Execute(this.RefreshSoulEnergyPopup).Every(1000);
-            else
-                this.soulEnergyPopupRefreshSchedule.Resume();
-        }
-
-        private void RefreshSoulEnergyPopup()
-        {
-            ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
-            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators);
-            if (this.soulEnergyPopup == null || soulGenerator == null) return;
-
-            GeneratorExpectedOutput expectedSoul = this.GetSoulExpectedOutput(itemGenerator, soulGenerator);
-            this.soulEnergyClaimValue.text = FormatExpectedSoulAmount(expectedSoul);
-            int currentSoul = this.currencyWallet?.GetBalanceByItemCode(SoulItemCode) ?? 0;
-            int collectCap = this.GetSoulCollectCap(soulGenerator);
-            bool isFull = SoulEnergyUtility.IsFull(currentSoul, collectCap);
-            bool hasClaimableSoul = soulGenerator.GetCurrentPendingUnits() > 0;
-            this.soulEnergyClaimRow.style.display = !isFull && hasClaimableSoul ? DisplayStyle.Flex : DisplayStyle.None;
-            this.soulEnergyNextClaimRow.style.display = !isFull && !hasClaimableSoul ? DisplayStyle.Flex : DisplayStyle.None;
-            if (!hasClaimableSoul && this.soulEnergyNextClaimValue != null)
-                this.soulEnergyNextClaimValue.text = FormatCountdown(soulGenerator.GetDynamicNextTickSeconds());
-            this.soulEnergyFullLabel.text = isFull ? "Already full" : "Full in";
-            this.soulEnergyFullValue.text = isFull
-                ? string.Empty
-                : itemGenerator.GetGeneratorTimeUntilFull(soulGenerator.inventory_item_id);
-            this.PositionSoulEnergyPopup();
-            this.soulEnergyPopup.style.display = DisplayStyle.Flex;
-        }
-
-        private void PositionSoulEnergyPopup()
-        {
-            if (this.soulEnergyPopup == null || this.soulEnergy == null || this.lobbyRoot == null) return;
-
-            Rect soulBounds = this.soulEnergy.worldBound;
-            Rect rootBounds = this.lobbyRoot.worldBound;
-            this.soulEnergyPopup.style.left = soulBounds.xMax - rootBounds.xMin - 164f;
-            this.soulEnergyPopup.style.top = soulBounds.yMax - rootBounds.yMin + 6f;
-        }
-
-        private void HideSoulEnergyPopup()
-        {
-            if (this.soulEnergyPopup != null)
-                this.soulEnergyPopup.style.display = DisplayStyle.None;
-            this.soulEnergyPopupRefreshSchedule?.Pause();
-        }
-
-        private void ClaimSoul()
-        {
-            if (this.isSoulClaimInProgress) return;
-
-            ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
-            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators);
-            if (itemGenerator == null || soulGenerator == null || soulGenerator.GetCurrentPendingUnits() <= 0) return;
-
-            this.isSoulClaimInProgress = true;
-            this.soulEnergy?.SetEnabled(false);
-            itemGenerator.CollectGenerator(
-                soulGenerator.inventory_item_id,
-                onSuccess: _ =>
-                {
-                    this.isSoulClaimInProgress = false;
-                    this.soulEnergy?.SetEnabled(true);
-                    this.currencyWallet?.Refresh();
-                    this.LoadSoulEnergy();
-                },
-                onError: _ =>
-                {
-                    this.isSoulClaimInProgress = false;
-                    this.soulEnergy?.SetEnabled(true);
-                    this.RestartSoulAutoClaimTimer();
-                });
-        }
-
-        /// <summary>
-        /// Schedules a collect just after the next generator tick. The dynamic tick
-        /// countdown is derived from ItemGenerator's production interval.
-        /// </summary>
-        private void RestartSoulAutoClaimTimer()
-        {
-            this.StopSoulAutoClaimTimer();
-            if (this.isSoulClaimInProgress) return;
-
-            ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
-            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators);
-            if (soulGenerator == null || this.IsSoulStorageFull(soulGenerator)) return;
-
-            int secondsUntilClaim = soulGenerator.GetCurrentPendingUnits() > 0
-                ? 2
-                : soulGenerator.GetDynamicNextTickSeconds() + 2;
-            this.soulAutoClaimCoroutine = this.StartCoroutine(this.AutoClaimSoulAfterDelay(secondsUntilClaim));
-        }
-
-        private System.Collections.IEnumerator AutoClaimSoulAfterDelay(int secondsUntilClaim)
-        {
-            yield return new WaitForSecondsRealtime(Mathf.Max(0, secondsUntilClaim));
-            this.soulAutoClaimCoroutine = null;
-
-            ItemGenerator itemGenerator = SaiServer.Instance?.ItemGenerator;
-            GeneratorData soulGenerator = this.FindSoulGenerator(itemGenerator?.CurrentGenerators?.generators);
-            if (soulGenerator == null || this.IsSoulStorageFull(soulGenerator)) yield break;
-
-            if (soulGenerator.GetCurrentPendingUnits() > 0)
-                this.ClaimSoul();
-            else
-                this.RestartSoulAutoClaimTimer();
-        }
-
-        private bool IsSoulStorageFull(GeneratorData soulGenerator)
-        {
-            int currentSoul = this.currencyWallet?.GetBalanceByItemCode(SoulItemCode) ?? 0;
-            return SoulEnergyUtility.IsFull(currentSoul, this.GetSoulCollectCap(soulGenerator));
-        }
-
-        private void StopSoulAutoClaimTimer()
-        {
-            if (this.soulAutoClaimCoroutine == null) return;
-            this.StopCoroutine(this.soulAutoClaimCoroutine);
-            this.soulAutoClaimCoroutine = null;
-        }
-
-        private GeneratorData FindSoulGenerator(GeneratorData[] generators)
-        {
-            if (generators == null) return null;
-
-            foreach (GeneratorData generator in generators)
-            {
-                if (generator == null) continue;
-                if (string.Equals(generator.definition?.item_code, SoulGeneratorItemCode, System.StringComparison.OrdinalIgnoreCase))
-                    return generator;
-            }
-
-            return null;
-        }
-
-        private int GetSoulCollectCap(GeneratorData generator)
-        {
-            if (generator == null) return 0;
-            string soulDefinitionId = this.currencyWallet?.GetDefinitionIdByItemCode(SoulItemCode);
-
-            foreach (GeneratorOutputPool output in generator.output_pool ?? System.Array.Empty<GeneratorOutputPool>())
-            {
-                if (output == null) continue;
-                if (string.IsNullOrEmpty(soulDefinitionId) || output.item_definition_id == soulDefinitionId)
-                    return output.collect_cap;
-            }
-
-            return 0;
-        }
-
-        private GeneratorExpectedOutput GetSoulExpectedOutput(
-            ItemGenerator itemGenerator,
-            GeneratorData generator)
-        {
-            if (itemGenerator == null || generator == null) return null;
-
-            string soulDefinitionId = this.currencyWallet?.GetDefinitionIdByItemCode(SoulItemCode);
-
-            foreach (GeneratorExpectedOutput output in itemGenerator.GetGeneratorExpectedOutput(generator.inventory_item_id) ?? System.Array.Empty<GeneratorExpectedOutput>())
-            {
-                if (string.IsNullOrEmpty(soulDefinitionId) || output.item_definition_id == soulDefinitionId)
-                    return output;
-            }
-
-            return null;
-        }
-
-        private static string FormatExpectedSoulAmount(GeneratorExpectedOutput expectedSoul)
-        {
-            if (expectedSoul == null) return "0";
-            return expectedSoul.expected_min == expectedSoul.expected_max
-                ? expectedSoul.expected_min.ToString()
-                : $"{expectedSoul.expected_min}–{expectedSoul.expected_max}";
-        }
-
-        private static string FormatCountdown(int seconds)
-        {
-            System.TimeSpan time = System.TimeSpan.FromSeconds(Mathf.Max(0, seconds));
-            return time.TotalHours >= 1
-                ? $"{(int)time.TotalHours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"
-                : $"{time.Minutes:D2}:{time.Seconds:D2}";
-        }
 
         private void OnLogoutClicked()
         {
@@ -797,32 +527,17 @@ namespace SG03.UI
 
         protected virtual void OnDestroy()
         {
-            this.StopSoulAutoClaimTimer();
+            this.soulEnergyUI?.Dispose();
+            this.soulEnergyUI = null;
             this.DisposeShopPanel();
             this.UnsubscribeFromLoginSuccess();
             this.UnsubscribeFromLogout();
-            this.UnsubscribeFromSoulEnergyData();
         }
 
         private void DisposeShopPanel()
         {
             this.shopPanel?.Dispose();
             this.shopPanel = null;
-        }
-
-        private void UnsubscribeFromSoulEnergyData()
-        {
-            if (this.subscribedItemGenerator != null)
-            {
-                this.subscribedItemGenerator.OnGetGeneratorsSuccess -= this.OnSoulEnergyGeneratorsUpdated;
-                this.subscribedItemGenerator = null;
-            }
-
-            if (this.subscribedCurrencyWallet != null)
-            {
-                this.subscribedCurrencyWallet.OnBalancesUpdated -= this.OnSoulEnergyCurrenciesUpdated;
-                this.subscribedCurrencyWallet = null;
-            }
         }
 
         private void UnsubscribeFromLoginSuccess()
@@ -856,18 +571,4 @@ namespace SG03.UI
         }
     }
 
-    /// <summary>
-    /// Shared capacity rules for Soul Energy displays and interactions.
-    /// </summary>
-    public static class SoulEnergyUtility
-    {
-        /// <summary>
-        /// Returns true when the current Soul quantity has reached its collect cap.
-        /// A cap of zero means unlimited, so it can never be full.
-        /// </summary>
-        public static bool IsFull(int currentCount, int collectCap)
-        {
-            return collectCap > 0 && currentCount >= collectCap;
-        }
-    }
 }
