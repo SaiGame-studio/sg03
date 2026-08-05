@@ -9,3 +9,41 @@
 #RegisterFields {
     display: none;
 }
+
+#ConfirmPasswordContainer {
+    display: none;
+}
+
+.password-row {
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+}
+
+.password-row__field {
+    flex-grow: 1;
+}
+
+.password-row__field .unity-text-input,
+.password-row__field .unity-base-text-field__input {
+    padding-right: 46px;
+}
+
+.password-visibility-button {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    translate: 0 -50%;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border-radius: 8px;
+    border-width: 0;
+    background-color: transparent;
+    color: rgb(180, 200, 255);
+    font-size: 13px;
+}
+
+.password-visibility-button:hover {
+    background-color: rgba(60, 80, 140, 0.65);
+}
