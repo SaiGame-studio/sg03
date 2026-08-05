@@ -157,9 +157,21 @@ open_drop_packs = function(session_id, state)
     local pack_ids = enemy.metadata and enemy.metadata.drop_pack_ids
     if pack_ids == nil or #pack_ids == 0 then return {}, nil end
 
-    local drops, err = game.open_entity_drop_packs(session_id, enemy.id, pack_ids)
-    if err ~= nil then return nil, err end
-    return drops or {}, nil
+    local drops = {}
+    for _, pack_id in ipairs(pack_ids) do
+        local result, err = game.open_reward_gacha_pack(
+            pack_id,
+            "battle-entity-drop:" .. session_id .. ":" .. pack_id
+        )
+        if err ~= nil then return nil, err end
+
+        drops[#drops + 1] = {
+            pack_id = pack_id,
+            success = true,
+            items = result.items or {},
+        }
+    end
+    return drops, nil
 end
 
 open_win_game_pack = function(session_id)

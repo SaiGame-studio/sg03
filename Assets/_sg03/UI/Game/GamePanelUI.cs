@@ -272,7 +272,13 @@ namespace SG03.UI
                 this.GetCurrentBattleScripts,
                 this.GetCurrentBattleStateCtrl);
             this.battleActionsUI.Bind(panelRoot);
+            this.battleActionsUI.OnBattleStarted += this.RefreshCurrencyWallet;
             this.battleActionsUI.OnBattleStartedOrResumed += this.HideBattleSetupControls;
+        }
+
+        private void RefreshCurrencyWallet()
+        {
+            this.currencyWallet?.Refresh();
         }
 
         private void BindSoulEnergy(VisualElement panelRoot)

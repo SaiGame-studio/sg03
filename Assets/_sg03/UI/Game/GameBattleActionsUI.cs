@@ -14,7 +14,7 @@ namespace SG03.UI
     {
         private const string BattleModeNormal = "normal";
         private const string DefaultEnemyCodeName = "goblin_shaman";
-        private const string NewGameButtonText = "New Game";
+        private const string NewGameButtonText = "Start with 5 soul";
         private const string ResumeButtonText = "Resume";
 
         private readonly Func<BattleScripts> getBattleScripts;
@@ -29,6 +29,7 @@ namespace SG03.UI
         private bool hasActiveBattleSession;
 
         public event Action OnBattleStartedOrResumed;
+        public event Action OnBattleStarted;
 
         public GameBattleActionsUI(
             Func<BattleScripts> getBattleScripts,
@@ -259,6 +260,7 @@ namespace SG03.UI
             this.SetStartBattleButtonText("Battle Started");
             this.GetAllCardDefinitions();
             this.ApplyBattleStatusResponse(response);
+            this.OnBattleStarted?.Invoke();
             this.OnBattleStartedOrResumed?.Invoke();
         }
 

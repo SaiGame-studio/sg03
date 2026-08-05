@@ -34,7 +34,7 @@
 
             <ui:VisualElement name="BottomMenu" class="game-bottom-menu">
                 <ui:Label name="AlphaLabel" text="Alpha" class="game-top-menu__title" />
-                <ui:Button name="BtnStartBattle" text="New Game" class="game-bottom-btn game-bottom-btn--primary" />
+                <ui:Button name="BtnStartBattle" text="Start with 5 soul" class="game-bottom-btn game-bottom-btn--primary" />
                 <ui:Button name="BtnEndBattle" text="End Game" class="game-bottom-btn game-bottom-btn--danger" style="display: none;" />
                 <ui:VisualElement name="BattleDeskInfo" class="game-bottom-menu__desk-info">
                     <ui:VisualElement name="DeskTabs" class="game-top-menu__tabs">
