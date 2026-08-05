@@ -13,7 +13,7 @@
             <ui:VisualElement name="TopMenu" class="game-top-menu">
                 <ui:Label name="BattleTitle" text="Omega" class="game-top-menu__title" />
                 <ui:DropdownField name="EnemyCodeNameInput" label="Enemy" choices="goblin_shaman" value="goblin_shaman" class="game-bottom-input" />
-                <ui:Button name="BtnStartBattle" text="Start Battle" class="game-bottom-btn game-bottom-btn--primary" />
+                <ui:Button name="BtnStartBattle" text="New Game" class="game-bottom-btn game-bottom-btn--primary" />
                 <ui:VisualElement name="DeskTabs" class="game-top-menu__tabs">
                 </ui:VisualElement>
                 <ui:Label name="PlayerNameLabel" text="Guest" class="game-top-menu__player-name" />

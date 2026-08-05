@@ -14,6 +14,8 @@ namespace SG03.UI
     {
         private const string BattleModeNormal = "normal";
         private const string DefaultEnemyCodeName = "goblin_shaman";
+        private const string NewGameButtonText = "New Game";
+        private const string ResumeButtonText = "Resume";
 
         private readonly Func<BattleScripts> getBattleScripts;
         private readonly Func<BattleStateCtrl> getBattleStateCtrl;
@@ -27,6 +29,7 @@ namespace SG03.UI
         private DropdownField enemyCodeNameInput;
 
         private bool battleStatusFirstCallDone;
+        private bool hasActiveBattleSession;
 
         public GameBattleActionsUI(
             Func<BattleScripts> getBattleScripts,
@@ -74,6 +77,21 @@ namespace SG03.UI
             this.selectedPreset = preset;
         }
 
+        public void SetBattleSessionAvailabilityLoading()
+        {
+            if (this.btnStartBattle == null) return;
+            this.btnStartBattle.SetEnabled(false);
+            this.btnStartBattle.text = "Checking...";
+        }
+
+        public void SetBattleSessionAvailability(bool hasActiveBattleSession)
+        {
+            this.hasActiveBattleSession = hasActiveBattleSession;
+            if (this.btnStartBattle == null) return;
+            this.btnStartBattle.SetEnabled(true);
+            this.btnStartBattle.text = this.hasActiveBattleSession ? ResumeButtonText : NewGameButtonText;
+        }
+
 
 
         protected virtual void OnEndBattleClicked()
@@ -88,6 +106,11 @@ namespace SG03.UI
 
         protected virtual void OnStartBattleClicked()
         {
+            if (this.hasActiveBattleSession)
+            {
+                this.TriggerResumeBattle();
+                return;
+            }
             this.TriggerStartBattle();
         }
 
@@ -198,6 +221,19 @@ namespace SG03.UI
             scripts.RunBattleStart(requestBody, this.OnBattleStartSucceeded, this.OnBattleStartFailed);
         }
 
+        private void TriggerResumeBattle()
+        {
+            BattleScripts scripts = this.getBattleScripts();
+            if (scripts == null)
+            {
+                this.SetStartBattleButtonText("No Script");
+                return;
+            }
+
+            this.SetResumeBattleLoading(true);
+            scripts.RunBattleStatus(this.OnResumeBattleSucceeded, this.OnResumeBattleFailed);
+        }
+
         private bool CanStartBattle(BattleScripts scripts)
         {
             if (this.selectedPreset == null)
@@ -244,6 +280,13 @@ namespace SG03.UI
             this.btnStartBattle.text = isLoading ? "Starting..." : "Start Battle";
         }
 
+        private void SetResumeBattleLoading(bool isLoading)
+        {
+            if (this.btnStartBattle == null) return;
+            this.btnStartBattle.SetEnabled(!isLoading);
+            this.btnStartBattle.text = isLoading ? "Resuming..." : ResumeButtonText;
+        }
+
         private void SetStartBattleButtonText(string text)
         {
             if (this.btnStartBattle == null) return;
@@ -252,11 +295,25 @@ namespace SG03.UI
 
         private void ResetStartBattleButtonText()
         {
-            this.SetStartBattleButtonText("Start Battle");
+            this.SetStartBattleButtonText(this.hasActiveBattleSession ? ResumeButtonText : NewGameButtonText);
+        }
+
+        private void OnResumeBattleSucceeded(string response)
+        {
+            this.SetResumeBattleLoading(false);
+            this.GetAllCardDefinitions();
+            this.ApplyBattleStatusResponse(response);
+        }
+
+        private void OnResumeBattleFailed(string error)
+        {
+            this.SetResumeBattleLoading(false);
+            Debug.LogWarning("GameBattleActionsUI: Resume battle failed: " + error);
         }
 
         private void OnBattleStartSucceeded(string response)
         {
+            this.hasActiveBattleSession = true;
             this.SetStartBattleLoading(false);
             this.SetStartBattleButtonText("Battle Started");
             this.GetAllCardDefinitions();

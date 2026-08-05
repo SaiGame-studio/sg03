@@ -212,6 +212,7 @@ namespace SG03.UI
             this.SubscribeToAuthEvents();
             this.SubscribeToBattleStateEvents();
             this.deskTabsUI?.LoadPresets();
+            this.RefreshBattleSessionAvailability();
         }
 
         private void BindPlayerName(VisualElement panelRoot)
@@ -301,6 +302,49 @@ namespace SG03.UI
         {
             this.RefreshPlayerName();
             this.deskTabsUI?.LoadPresets();
+            this.RefreshBattleSessionAvailability();
+        }
+
+        private void RefreshBattleSessionAvailability()
+        {
+            if (this.battleActionsUI == null) return;
+
+            BattleScripts scripts = this.GetCurrentBattleScripts();
+            if (scripts == null)
+            {
+                this.battleActionsUI.SetBattleSessionAvailability(false);
+                return;
+            }
+
+            this.battleActionsUI.SetBattleSessionAvailabilityLoading();
+            scripts.RunBattleSessionExists(this.OnBattleSessionExistsSucceeded, this.OnBattleSessionExistsFailed);
+        }
+
+        private void OnBattleSessionExistsSucceeded(string response)
+        {
+            BattleSessionExistsScriptResponse scriptResponse = JsonUtility.FromJson<BattleSessionExistsScriptResponse>(response);
+            BattleSessionExistsOutput output = scriptResponse?.output;
+            if (output == null)
+            {
+                Debug.LogWarning("[GamePanelUI] Could not parse battle_session_exists response.");
+                this.battleActionsUI?.SetBattleSessionAvailability(false);
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(output.error))
+            {
+                Debug.LogWarning("[GamePanelUI] battle_session_exists error: " + output.error);
+                this.battleActionsUI?.SetBattleSessionAvailability(false);
+                return;
+            }
+
+            this.battleActionsUI?.SetBattleSessionAvailability(output.exists);
+        }
+
+        private void OnBattleSessionExistsFailed(string error)
+        {
+            Debug.LogWarning("[GamePanelUI] battle_session_exists failed: " + error);
+            this.battleActionsUI?.SetBattleSessionAvailability(false);
         }
 
         private void RefreshPlayerName()
