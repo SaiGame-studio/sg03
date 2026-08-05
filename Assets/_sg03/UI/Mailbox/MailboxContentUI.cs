@@ -17,10 +17,12 @@ namespace SG03.UI
         private readonly Button claimAllBtn;
         private readonly Button deleteAllClaimedBtn;
         private readonly MailboxList list;
+        private readonly Action refreshCurrency;
         private bool isBulkActionRunning;
 
-        public MailboxContentUI(VisualElement root)
+        public MailboxContentUI(VisualElement root, Action refreshCurrency = null)
         {
+            this.refreshCurrency = refreshCurrency;
             this.mailList     = root.Q<ScrollView>("MailList");
             this.emptyState   = root.Q("EmptyState");
             this.loadingState = root.Q("LoadingState");
@@ -42,6 +44,7 @@ namespace SG03.UI
 
             this.ShowLoading();
             this.DoRefresh();
+            this.refreshCurrency?.Invoke();
         }
 
         private void DoRefresh()
@@ -60,6 +63,7 @@ namespace SG03.UI
                 onSuccess: _ =>
                 {
                     this.isBulkActionRunning = false;
+                    this.refreshCurrency?.Invoke();
                     this.DoRefresh();
                 },
                 onError: error =>
@@ -208,7 +212,11 @@ namespace SG03.UI
                     claimBtn.SetEnabled(false);
                     this.list.ClaimMessage(
                         msgId,
-                        onSuccess: _ => this.list.Refresh(),
+                        onSuccess: _ =>
+                        {
+                            this.refreshCurrency?.Invoke();
+                            this.list.Refresh();
+                        },
                         onError: err =>
                         {
                             claimBtn.SetEnabled(true);
