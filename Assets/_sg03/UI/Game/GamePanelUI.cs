@@ -23,7 +23,10 @@ namespace SG03.UI
         [SerializeField] private string lobbySceneName = "1-lobby";
 
         private Button btnBackToLobby;
+        private Button btnEndBattle;
+        private Button btnStartBattle;
         private Label playerNameLabel;
+        private VisualElement battleDeskInfo;
         private VisualElement gameRoot;
         private VisualElement gameViewport;
         private VisualElement root;
@@ -211,7 +214,6 @@ namespace SG03.UI
             this.WirePresetEventsToBattleActions();
             this.SubscribeToAuthEvents();
             this.SubscribeToBattleStateEvents();
-            this.deskTabsUI?.LoadPresets();
             this.RefreshBattleSessionAvailability();
         }
 
@@ -238,6 +240,7 @@ namespace SG03.UI
 
         private void BindDeskTabs(VisualElement panelRoot)
         {
+            this.battleDeskInfo = panelRoot.Q("BattleDeskInfo");
             this.deskTabsUI = new GameDeskTabsUI(this.GetCurrentItemPreset);
             this.deskTabsUI.Bind(panelRoot);
         }
@@ -250,10 +253,13 @@ namespace SG03.UI
 
         private void BindBattleActions(VisualElement panelRoot)
         {
+            this.btnStartBattle = panelRoot.Q<Button>("BtnStartBattle");
+            this.btnEndBattle = panelRoot.Q<Button>("BtnEndBattle");
             this.battleActionsUI = new GameBattleActionsUI(
                 this.GetCurrentBattleScripts,
                 this.GetCurrentBattleStateCtrl);
             this.battleActionsUI.Bind(panelRoot);
+            this.battleActionsUI.OnBattleStartedOrResumed += this.HideBattleSetupControls;
         }
 
         private void WirePresetEventsToBattleActions()
@@ -301,7 +307,6 @@ namespace SG03.UI
         private void OnLoginSuccess(LoginResponse response)
         {
             this.RefreshPlayerName();
-            this.deskTabsUI?.LoadPresets();
             this.RefreshBattleSessionAvailability();
         }
 
@@ -312,7 +317,7 @@ namespace SG03.UI
             BattleScripts scripts = this.GetCurrentBattleScripts();
             if (scripts == null)
             {
-                this.battleActionsUI.SetBattleSessionAvailability(false);
+                this.ShowNewGameSetup();
                 return;
             }
 
@@ -327,24 +332,59 @@ namespace SG03.UI
             if (output == null)
             {
                 Debug.LogWarning("[GamePanelUI] Could not parse battle_session_exists response.");
-                this.battleActionsUI?.SetBattleSessionAvailability(false);
+                this.ShowNewGameSetup();
                 return;
             }
 
             if (!string.IsNullOrWhiteSpace(output.error))
             {
                 Debug.LogWarning("[GamePanelUI] battle_session_exists error: " + output.error);
-                this.battleActionsUI?.SetBattleSessionAvailability(false);
+                this.ShowNewGameSetup();
                 return;
             }
 
-            this.battleActionsUI?.SetBattleSessionAvailability(output.exists);
+            if (output.exists)
+            {
+                this.ShowResumeControl();
+                this.battleActionsUI?.SetBattleSessionAvailability(true);
+                return;
+            }
+
+            this.ShowNewGameSetup();
         }
 
         private void OnBattleSessionExistsFailed(string error)
         {
             Debug.LogWarning("[GamePanelUI] battle_session_exists failed: " + error);
+            this.ShowNewGameSetup();
+        }
+
+        private void ShowNewGameSetup()
+        {
+            this.ShowBattleSetupControls();
             this.battleActionsUI?.SetBattleSessionAvailability(false);
+            this.deskTabsUI?.LoadPresets();
+        }
+
+        private void ShowBattleSetupControls()
+        {
+            if (this.battleDeskInfo != null) this.battleDeskInfo.style.display = DisplayStyle.Flex;
+            if (this.btnStartBattle != null) this.btnStartBattle.style.display = DisplayStyle.Flex;
+            if (this.btnEndBattle != null) this.btnEndBattle.style.display = DisplayStyle.None;
+        }
+
+        private void ShowResumeControl()
+        {
+            if (this.battleDeskInfo != null) this.battleDeskInfo.style.display = DisplayStyle.None;
+            if (this.btnStartBattle != null) this.btnStartBattle.style.display = DisplayStyle.Flex;
+            if (this.btnEndBattle != null) this.btnEndBattle.style.display = DisplayStyle.None;
+        }
+
+        private void HideBattleSetupControls()
+        {
+            if (this.battleDeskInfo != null) this.battleDeskInfo.style.display = DisplayStyle.None;
+            if (this.btnStartBattle != null) this.btnStartBattle.style.display = DisplayStyle.None;
+            if (this.btnEndBattle != null) this.btnEndBattle.style.display = DisplayStyle.Flex;
         }
 
         private void RefreshPlayerName()

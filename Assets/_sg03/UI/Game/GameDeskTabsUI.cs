@@ -52,12 +52,20 @@ namespace SG03.UI
             if (this.deskTabs == null) return;
             this.ClearDeskTabs();
             if (presets == null) return;
+            PresetData firstPreset = null;
+            Button firstButton = null;
             for (int i = 0; i < presets.Length; i++)
             {
                 PresetData preset = presets[i];
                 if (preset == null) continue;
-                this.AddDeskTab(preset, i);
+                Button button = this.AddDeskTab(preset, i);
+                if (firstPreset != null) continue;
+                firstPreset = preset;
+                firstButton = button;
             }
+
+            if (firstPreset != null && firstButton != null)
+                this.OnPresetDeskTabClicked(firstPreset, firstButton);
         }
 
         private void ClearDeskTabs()
@@ -67,7 +75,7 @@ namespace SG03.UI
             this.deskButtons.Clear();
         }
 
-        private void AddDeskTab(PresetData preset, int index)
+        private Button AddDeskTab(PresetData preset, int index)
         {
             Button btn = new Button();
             btn.name = $"preset-desk-tab-{index + 1}";
@@ -77,6 +85,7 @@ namespace SG03.UI
             btn.RegisterCallback<ClickEvent>(_ => this.OnPresetDeskTabClicked(captured, btn));
             this.deskButtons.Add(btn);
             this.deskTabs.Add(btn);
+            return btn;
         }
 
         private string GetPresetDisplayName(PresetData preset, int index)
