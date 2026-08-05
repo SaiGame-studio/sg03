@@ -522,7 +522,7 @@ namespace SG03.UI
             content.style.alignSelf  = Align.Stretch;
             this.contentArea.Add(content);
 
-            new MailboxContentUI(content);
+            new MailboxContentUI(content, () => this.currencyWallet?.Refresh());
         }
 
         protected virtual void OnDestroy()
