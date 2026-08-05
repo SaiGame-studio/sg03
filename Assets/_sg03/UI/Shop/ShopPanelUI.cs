@@ -180,7 +180,7 @@ namespace SG03.UI
             details.Add(meta);
             card.Add(details);
 
-            Button buyButton = new Button { text = $"Buy · {item.price} {this.GetCurrencyName(item)}" };
+            Button buyButton = new Button { text = $"Buy with {item.price} {this.GetCurrencyName(item)}" };
             buyButton.AddToClassList("shop-item-card__buy");
             bool canPurchase = !string.IsNullOrWhiteSpace(item.id)
                 && (item.purchase_limit <= 0 || item.purchased_count < item.purchase_limit);
