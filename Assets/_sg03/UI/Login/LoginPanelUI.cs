@@ -7,6 +7,21 @@ namespace SG03.UI
 {
     public class LoginPanelUI : SaiBehaviour
     {
+        [System.Serializable]
+        private class GameInfoResponse
+        {
+            public string name;
+            public string game_name;
+            public GameInfoData game;
+            public GameInfoData data;
+        }
+
+        [System.Serializable]
+        private class GameInfoData
+        {
+            public string name;
+        }
+
         public string PanelId => "Login";
 
         [Header("Panel")]
@@ -30,6 +45,7 @@ namespace SG03.UI
         private Button confirmPasswordVisibilityButton;
         private Label feedbackLabel;
         private Label titleLabel;
+        private Label gameNameLabel;
         private VisualElement registerFields;
         private VisualElement confirmPasswordContainer;
         private VisualElement root;
@@ -72,6 +88,7 @@ namespace SG03.UI
             base.Start();
             this.InitializeStandalonePanel();
             this.LoadCredentialsFromAuthIfEnabled();
+            this.LoadGameName();
         }
 
         private void InitializeStandalonePanel()
@@ -106,6 +123,7 @@ namespace SG03.UI
             this.passwordVisibilityButton = root.Q<Button>("PasswordVisibilityButton");
             this.confirmPasswordVisibilityButton = root.Q<Button>("ConfirmPasswordVisibilityButton");
             this.titleLabel = root.Q<Label>("TitleLabel");
+            this.gameNameLabel = root.Q<Label>("GameNameLabel");
             this.registerFields = root.Q<VisualElement>("RegisterFields");
             this.confirmPasswordContainer = root.Q<VisualElement>("ConfirmPasswordContainer");
 
@@ -123,6 +141,34 @@ namespace SG03.UI
 
             this.RefreshAuthMode();
             this.SubscribeToAuthEvents();
+        }
+
+        private void LoadGameName()
+        {
+            SaiServer server = SaiServer.Instance;
+            if (server == null || string.IsNullOrWhiteSpace(server.GameId)) return;
+
+            string endpoint = $"/api/v1/public/games/{server.GameId}/info";
+            server.StartCoroutine(server.GetRequest(
+                endpoint,
+                response =>
+                {
+                    try
+                    {
+                        GameInfoResponse gameInfo = JsonUtility.FromJson<GameInfoResponse>(response);
+                        string gameName = gameInfo?.game_name
+                            ?? gameInfo?.game?.name
+                            ?? gameInfo?.data?.name
+                            ?? gameInfo?.name;
+                        if (this.gameNameLabel != null && !string.IsNullOrWhiteSpace(gameName))
+                            this.gameNameLabel.text = gameName;
+                    }
+                    catch (System.Exception exception)
+                    {
+                        Debug.LogWarning($"Unable to read game info: {exception.Message}", this.gameObject);
+                    }
+                },
+                error => Debug.LogWarning($"Unable to load game info: {error}", this.gameObject)));
         }
 
         public void LoadCredentialsFromAuth()

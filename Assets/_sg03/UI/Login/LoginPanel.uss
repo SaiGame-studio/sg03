@@ -6,6 +6,14 @@
     width: 380px;
 }
 
+.game-name {
+    margin-top: -10px;
+    margin-bottom: 16px;
+    color: rgb(180, 200, 255);
+    font-size: 15px;
+    -unity-text-align: middle-center;
+}
+
 #RegisterFields {
     display: none;
 }

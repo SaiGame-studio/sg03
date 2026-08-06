@@ -14,6 +14,7 @@
 
             <!-- Title -->
             <ui:Label name="TitleLabel" text="Login" class="panel-title" />
+            <ui:Label name="GameNameLabel" text="game-name" class="game-name" />
 
             <!-- Registration-only fields -->
             <ui:VisualElement name="RegisterFields">
