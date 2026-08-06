@@ -503,13 +503,13 @@ namespace SG03.UI
         private void UpdateStarCount()
         {
             if (this.starCountLabel == null) return;
-            this.starCountLabel.text = $"\u2605 {this.starredSlots.Count} / {MaxStarredSlots}";
+            this.starCountLabel.text = $"Stars {this.starredSlots.Count} / {MaxStarredSlots}";
         }
 
         private void UpdateVoidCount()
         {
             if (this.voidCountLabel == null) return;
-            this.voidCountLabel.text = $"\uD83C\uDF00 {this.voidedSlots.Count} / {MaxVoidedSlots}";
+            this.voidCountLabel.text = $"Void {this.voidedSlots.Count} / {MaxVoidedSlots}";
         }
 
         private void ShowCardViewer(InventoryItemData item, string itemId)

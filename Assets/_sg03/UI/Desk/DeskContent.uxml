@@ -47,8 +47,8 @@
                 <ui:VisualElement class="desk-detail-left">
                     <ui:VisualElement class="desk-detail-section-header">
                         <ui:Label text="Slots" class="desk-detail-section-title" />
+                        <ui:Label name="VoidCountLabel" text="Void 0 / 7" class="desk-detail-void-count" />
                         <ui:Label name="StarCountLabel" text="Stars 0 / 3" class="desk-detail-star-count" />
-                        <ui:Label name="VoidCountLabel" text="&#x1F300; 0 / 7" class="desk-detail-void-count" />
                         <ui:Label name="SlotCountLabel" text="" class="desk-detail-slot-count" />
                     </ui:VisualElement>
                     <ui:ScrollView name="SlotGrid" class="desk-slot-grid" />
