@@ -18,23 +18,23 @@
                     <ui:Button name="QuestTab"   text="Quest"   class="lobby-tab lobby-tab--active" />
                     <ui:Button name="ShopTab"    text="Shop"    class="lobby-tab" />
                     <ui:VisualElement name="GreaterVesselCurrency" class="top-currency top-currency--first" tooltip="Greater Vessel">
-                        <ui:Label text="✦" class="top-currency__icon top-currency__icon--greater" />
+                        <ui:VisualElement class="top-currency__icon top-currency__icon--greater" />
                         <ui:Label name="GreaterVesselValue" text="0" class="top-currency__value" />
                     </ui:VisualElement>
                     <ui:VisualElement name="CommonVesselCurrency" class="top-currency" tooltip="Common Vessel">
-                        <ui:Label text="✦" class="top-currency__icon top-currency__icon--common" />
+                        <ui:VisualElement class="top-currency__icon top-currency__icon--common" />
                         <ui:Label name="CommonVesselValue" text="0" class="top-currency__value" />
                     </ui:VisualElement>
                     <ui:VisualElement name="LesserVesselCurrency" class="top-currency" tooltip="Lesser Vessel">
-                        <ui:Label text="✦" class="top-currency__icon top-currency__icon--lesser" />
+                        <ui:VisualElement class="top-currency__icon top-currency__icon--lesser" />
                         <ui:Label name="LesserVesselValue" text="0" class="top-currency__value" />
                     </ui:VisualElement>
                     <ui:Button name="SoulEnergy" class="soul-energy" tooltip="Soul Collector">
-                        <ui:Label text="✦" tooltip="Soul Energy" class="soul-energy__icon" />
+                        <ui:VisualElement tooltip="Soul Energy" class="soul-energy__icon" />
                         <ui:Label name="SoulEnergyValue" text="0 / 0" class="soul-energy__value" />
                     </ui:Button>
                 </ui:VisualElement>
-                <ui:Label name="PlayerNameLabel" text="👤 Guest" class="lobby-top-menu__player-name" />
+                <ui:Label name="PlayerNameLabel" text="Guest" class="lobby-top-menu__player-name" />
                 <ui:Button name="BtnLogout" text="←" tooltip="Log out" class="lobby-top-menu__logout" />
                 <ui:Button name="BtnQuitGame" tooltip="Power off" class="lobby-top-menu__quit">
                     <ui:VisualElement class="power-off-icon">
@@ -48,10 +48,10 @@
 
             <!-- Bottom navigation bar -->
             <ui:VisualElement name="BottomMenu" class="lobby-bottom-menu">
-                <ui:Button name="BtnDesk"      text="🃏 Desk"      class="lobby-bottom-btn" />
-                <ui:Button name="BtnInventory" text="🎒 Inventory" class="lobby-bottom-btn" />
-                <ui:Button name="BtnMailbox"   text="📬 Mailbox"   class="lobby-bottom-btn" />
-                <ui:Button name="BtnPlay"      text="▶  Play"      class="lobby-bottom-btn lobby-bottom-btn--primary" />
+                <ui:Button name="BtnDesk"      text="Desk"      class="lobby-bottom-btn" />
+                <ui:Button name="BtnInventory" text="Inventory" class="lobby-bottom-btn" />
+                <ui:Button name="BtnMailbox"   text="Mailbox"   class="lobby-bottom-btn" />
+                <ui:Button name="BtnPlay"      text="Play"      class="lobby-bottom-btn lobby-bottom-btn--primary" />
             </ui:VisualElement>
 
             <ui:VisualElement name="QuitConfirmOverlay" class="quit-confirm-overlay" style="display: none;">

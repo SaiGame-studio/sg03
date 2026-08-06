@@ -218,7 +218,7 @@ namespace SG03.UI
             row.name = $"DeskRow_{desk.id}";
             row.AddToClassList("desk-row");
 
-            Label icon = new Label("🃏");
+            Label icon = new Label("D");
             icon.name = $"DeskRowIcon_{desk.id}";
             icon.AddToClassList("desk-row__icon");
             row.Add(icon);

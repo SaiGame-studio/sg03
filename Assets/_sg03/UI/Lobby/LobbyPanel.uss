@@ -108,25 +108,31 @@
 }
 
 .top-currency__icon {
-    width: 15px;
+    width: 12px;
+    height: 12px;
     margin-right: 4px;
-    font-size: 13px;
-    -unity-text-align: middle-center;
+    border-width: 1px;
+    border-radius: 6px;
 }
 
 .top-currency__icon--lesser {
     color: rgb(125, 180, 255);
-    font-size: 11px;
+    border-color: rgb(125, 180, 255);
+    background-color: rgb(125, 180, 255);
 }
 
 .top-currency__icon--common {
     color: rgb(190, 135, 255);
-    font-size: 13px;
+    border-radius: 2px;
+    border-color: rgb(190, 135, 255);
+    background-color: rgb(190, 135, 255);
 }
 
 .top-currency__icon--greater {
     color: rgb(230, 185, 90);
-    font-size: 15px;
+    border-width: 3px;
+    border-color: rgb(230, 185, 90);
+    background-color: transparent;
 }
 
 .top-currency__value {
@@ -151,9 +157,14 @@
 }
 
 .soul-energy__icon {
+    width: 11px;
+    height: 11px;
     color: rgb(210, 190, 255);
-    font-size: 9px;
     margin-right: 4px;
+    border-width: 2px;
+    border-radius: 6px;
+    border-color: rgb(210, 190, 255);
+    background-color: transparent;
     transition-duration: 0.12s;
 }
 
@@ -170,6 +181,10 @@
 .soul-energy:hover .soul-energy__icon,
 .soul-energy:hover .soul-energy__value {
     color: rgb(255, 220, 128);
+}
+
+.soul-energy:hover .soul-energy__icon {
+    border-color: rgb(255, 220, 128);
 }
 
 .soul-energy-popup {

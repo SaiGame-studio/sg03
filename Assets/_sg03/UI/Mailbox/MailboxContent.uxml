@@ -11,7 +11,7 @@
 
         <!-- Header bar -->
         <ui:VisualElement class="mb-header">
-            <ui:Label text="📬 Mailbox" class="mb-header__title" />
+            <ui:Label text="Mailbox" class="mb-header__title" />
             <ui:Button name="ClaimAllBtn" text="Claim All" class="mb-header__action-btn mb-header__claim-all-btn" />
             <ui:Button name="DeleteAllClaimedBtn" text="Delete All Claimed" class="mb-header__action-btn mb-header__delete-all-claimed-btn" />
             <ui:Button name="RefreshBtn" text="↻" tooltip="Refresh" class="mb-header__refresh-btn" />
@@ -25,7 +25,7 @@
 
         <!-- Empty state (no messages) -->
         <ui:VisualElement name="EmptyState" class="mb-state">
-            <ui:Label text="📭" class="mb-state__icon" />
+            <ui:Label text="M" class="mb-state__icon" />
             <ui:Label text="No messages" class="mb-state__label" />
         </ui:VisualElement>
 

@@ -11,7 +11,7 @@
         <ui:VisualElement name="ListPanel" class="desk-panel">
 
             <ui:VisualElement class="desk-header">
-                <ui:Label text="🃏 My Desks" class="desk-header__title" />
+                <ui:Label text="My Desks" class="desk-header__title" />
                 <ui:Button name="NewDeskBtn" text="+ New Desk" class="desk-header__new-btn" />
                 <ui:Button name="RefreshBtn" text="&#x21BB;" tooltip="Refresh" class="desk-header__refresh-btn" />
             </ui:VisualElement>
@@ -28,7 +28,7 @@
             </ui:VisualElement>
 
             <ui:VisualElement name="EmptyState" class="desk-state">
-                <ui:Label text="🃏" class="desk-state__icon" />
+                <ui:Label text="D" class="desk-state__icon" />
             </ui:VisualElement>
 
             <ui:ScrollView name="DeskList" class="desk-list" />
@@ -47,7 +47,7 @@
                 <ui:VisualElement class="desk-detail-left">
                     <ui:VisualElement class="desk-detail-section-header">
                         <ui:Label text="Slots" class="desk-detail-section-title" />
-                        <ui:Label name="StarCountLabel" text="★ 0 / 3" class="desk-detail-star-count" />
+                        <ui:Label name="StarCountLabel" text="Stars 0 / 3" class="desk-detail-star-count" />
                         <ui:Label name="VoidCountLabel" text="&#x1F300; 0 / 7" class="desk-detail-void-count" />
                         <ui:Label name="SlotCountLabel" text="" class="desk-detail-slot-count" />
                     </ui:VisualElement>
@@ -67,20 +67,20 @@
         </ui:VisualElement>
 
         <ui:VisualElement name="DimLayer" class="desk-dim-layer desk-dim-layer--hidden">
-            <ui:Button name="DimCloseBtn" text="✕" class="desk-dim-close-btn" />
+            <ui:Button name="DimCloseBtn" text="X" class="desk-dim-close-btn" />
         </ui:VisualElement>
 
         <ui:VisualElement name="CardViewerOverlay" class="desk-card-viewer desk-card-viewer--hidden">
             <ui:VisualElement name="CardViewerBackdrop" class="desk-card-viewer__backdrop" />
             <ui:VisualElement class="desk-card-viewer__stage">
                 <ui:VisualElement class="desk-card-viewer__card">
-                    <ui:Label name="CardViewerIcon" text="🃏" class="desk-card-viewer__card-icon" />
+                    <ui:Label name="CardViewerIcon" text="C" class="desk-card-viewer__card-icon" />
                     <ui:Label name="CardViewerName" text="" class="desk-card-viewer__card-name" />
                     <ui:Label name="CardViewerRarity" text="" class="desk-card-viewer__card-rarity" />
                     <ui:Label name="CardViewerCategory" text="" class="desk-card-viewer__card-category" />
                     <ui:Label name="CardViewerQty" text="" class="desk-card-viewer__card-qty" />
                 </ui:VisualElement>
-                <ui:Button name="CardViewerCloseBtn" text="✕  Close" class="desk-card-viewer__close-btn" />
+                <ui:Button name="CardViewerCloseBtn" text="Close" class="desk-card-viewer__close-btn" />
             </ui:VisualElement>
         </ui:VisualElement>
 

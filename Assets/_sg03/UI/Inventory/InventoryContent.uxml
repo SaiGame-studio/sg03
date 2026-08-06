@@ -11,7 +11,7 @@
 
         <!-- Header bar -->
         <ui:VisualElement class="inv-header">
-            <ui:Label text="🎒 Inventory" class="inv-header__title" />
+            <ui:Label text="Inventory" class="inv-header__title" />
             <ui:Button name="RefreshBtn" text="↻" tooltip="Refresh" class="inv-header__refresh-btn" />
         </ui:VisualElement>
 
@@ -26,7 +26,7 @@
 
         <!-- Empty state (no items) -->
         <ui:VisualElement name="EmptyState" class="inv-state">
-            <ui:Label text="📦" class="inv-state__icon" />
+            <ui:Label text="I" class="inv-state__icon" />
             <ui:Label text="No items found" class="inv-state__label" />
         </ui:VisualElement>
 

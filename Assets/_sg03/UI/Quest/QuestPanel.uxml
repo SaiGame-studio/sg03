@@ -14,7 +14,7 @@
 
             <!-- Section header -->
             <ui:VisualElement class="quest-sidebar__header">
-                <ui:Label text="⚔" class="quest-sidebar__header-icon" />
+                <ui:Label text="Q" class="quest-sidebar__header-icon" />
                 <ui:Label text="Quest" class="quest-sidebar__header-label" />
             </ui:VisualElement>
 
@@ -22,11 +22,11 @@
 
             <!-- Nav items -->
             <ui:Button name="MainQuestNavBtn" class="quest-nav-btn quest-nav-btn--active">
-                <ui:Label text="🗺" class="quest-nav-btn__icon" />
+                <ui:Label text="M" class="quest-nav-btn__icon" />
                 <ui:Label text="Main Quest" class="quest-nav-btn__label" />
             </ui:Button>
             <ui:Button name="DailyQuestNavBtn" class="quest-nav-btn">
-                <ui:Label text="📅" class="quest-nav-btn__icon" />
+                <ui:Label text="D" class="quest-nav-btn__icon" />
                 <ui:Label text="Daily Quest" class="quest-nav-btn__label" />
             </ui:Button>
 

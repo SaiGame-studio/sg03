@@ -224,7 +224,7 @@ namespace SG03.UI
 
                 Button voidBtn = new Button();
                 voidBtn.name = $"SlotVoidBtn_{slotIndex}";
-                voidBtn.text = "\uD83C\uDF00"; // Vortex symbol 🌀
+                voidBtn.text = "V";
                 voidBtn.AddToClassList("desk-slot__void-btn");
                 if (isVoided)
                     voidBtn.AddToClassList("desk-slot__void-btn--active");
@@ -272,7 +272,7 @@ namespace SG03.UI
             actions.AddToClassList("desk-slot__actions");
 
             Button viewBtn = new Button();
-            viewBtn.text = "👁";
+            viewBtn.text = "View";
             viewBtn.AddToClassList("desk-slot__btn");
             viewBtn.AddToClassList("desk-slot__btn--view");
             InventoryItemData capturedItem = foundItem;
@@ -285,7 +285,7 @@ namespace SG03.UI
             actions.Add(viewBtn);
 
             Button removeBtn = new Button();
-            removeBtn.text = "✕";
+            removeBtn.text = "X";
             removeBtn.AddToClassList("desk-slot__btn");
             removeBtn.AddToClassList("desk-slot__btn--remove");
             PresetData capturedDesk = desk;
@@ -659,7 +659,7 @@ namespace SG03.UI
                 return;
             }
 
-            Label ghost = new Label("🃏");
+            Label ghost = new Label("C");
             ghost.AddToClassList("desk-fly-ghost");
             ghost.pickingMode = PickingMode.Ignore;
             this.flyLayer.Add(ghost);

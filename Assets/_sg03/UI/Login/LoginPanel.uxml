@@ -38,7 +38,7 @@
                               password="true"
                               class="input-field password-row__field" />
                 <ui:Button name="PasswordVisibilityButton"
-                           text="👁"
+                           text="o"
                            tooltip="Show password"
                            class="password-visibility-button" />
             </ui:VisualElement>
@@ -52,7 +52,7 @@
                                   password="true"
                                   class="input-field password-row__field" />
                     <ui:Button name="ConfirmPasswordVisibilityButton"
-                               text="👁"
+                               text="o"
                                tooltip="Show password"
                                class="password-visibility-button" />
                 </ui:VisualElement>

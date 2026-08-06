@@ -15,7 +15,7 @@
                 <ui:DropdownField name="EnemyCodeNameInput" label="Enemy" choices="goblin_shaman" value="goblin_shaman" class="game-bottom-input" />
                 <ui:VisualElement name="PlayerNavigation">
                     <ui:Button name="SoulEnergy" class="soul-energy" tooltip="Soul Collector">
-                        <ui:Label text="✦" tooltip="Soul Energy" class="soul-energy__icon" />
+                        <ui:VisualElement tooltip="Soul Energy" class="soul-energy__icon" />
                         <ui:Label name="SoulEnergyValue" text="0 / 0" class="soul-energy__value" />
                     </ui:Button>
                     <ui:Label name="PlayerNameLabel" text="Guest" class="game-top-menu__player-name" />

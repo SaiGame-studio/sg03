@@ -229,7 +229,7 @@ namespace SG03.UI
             }
             else if (isClaimed)
             {
-                Label badge = new Label("✓ Claimed");
+                Label badge = new Label("Claimed");
                 badge.AddToClassList("mb-status-badge");
                 badge.AddToClassList("mb-status-badge--claimed");
                 right.Add(badge);
@@ -240,7 +240,7 @@ namespace SG03.UI
             {
                 string deleteMsgId = msg.id;
                 Button deleteBtn = new Button();
-                deleteBtn.text = "🗑";
+                deleteBtn.text = "X";
                 deleteBtn.AddToClassList("mb-delete-btn");
                 deleteBtn.clicked += () =>
                 {
@@ -290,7 +290,7 @@ namespace SG03.UI
             if (!string.IsNullOrEmpty(rarity))
                 chip.AddToClassList($"mb-attachment-chip--{rarity.ToLower()}");
 
-            Label nameLabel = new Label($"🎁 {displayName} x{att.quantity}");
+            Label nameLabel = new Label($"{displayName} x{att.quantity}");
             nameLabel.AddToClassList("mb-attachment-chip__name");
             chip.Add(nameLabel);
 
