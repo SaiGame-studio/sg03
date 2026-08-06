@@ -206,7 +206,7 @@ namespace SG03.UI
 
                 Button starBtn = new Button();
                 starBtn.name = $"SlotStarBtn_{slotIndex}";
-                starBtn.text = "\u2605";
+                starBtn.text = "S";
                 starBtn.AddToClassList("desk-slot__star-btn");
                 if (isStarred)
                     starBtn.AddToClassList("desk-slot__star-btn--active");
@@ -471,7 +471,7 @@ namespace SG03.UI
             VisualElement actions = new VisualElement();
             actions.AddToClassList("desk-card__actions");
 
-            Button viewBtn = new Button { text = "\U0001F441" };
+            Button viewBtn = new Button { text = "View" };
             viewBtn.AddToClassList("desk-card__action-btn");
             viewBtn.AddToClassList("desk-card__view-btn");
             InventoryItemData capturedItem = item;

@@ -77,7 +77,7 @@ namespace SG03.UI
             VisualElement row = new VisualElement();
             row.AddToClassList("desk-picker-item");
 
-            Label icon = new Label("\U0001F0CF");
+            Label icon = new Label("C");
             icon.AddToClassList("desk-picker-item__icon");
             row.Add(icon);
 
