@@ -258,7 +258,9 @@ charge_start_battle_fee = function()
     if soul_def == nil then return "soul item definition not found" end
 
     local deduct_err = game.deduct_item(soul_def.id, START_BATTLE_SOUL_COST)
-    if deduct_err ~= nil then return deduct_err end
+    if deduct_err ~= nil then
+        return "not enough soul to start battle (requires " .. START_BATTLE_SOUL_COST .. ")"
+    end
 
     return nil
 end

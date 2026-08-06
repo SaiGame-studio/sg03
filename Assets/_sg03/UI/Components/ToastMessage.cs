@@ -7,6 +7,7 @@ namespace SG03.UI.Components
     public static class ToastMessage
     {
         private const string ToastName = "SG03ToastMessage";
+        private const string CloseButtonName = "SG03ToastCloseButton";
         private const int ErrorDurationMilliseconds = 6000;
 
         private class ToastState
@@ -35,6 +36,8 @@ namespace SG03.UI.Components
                 toast.style.position = Position.Absolute;
                 toast.style.left = 24;
                 toast.style.bottom = 24;
+                toast.style.minWidth = 320;
+                toast.style.minHeight = 64;
                 toast.style.maxWidth = 420;
                 toast.style.paddingLeft = 14;
                 toast.style.paddingRight = 14;
@@ -48,6 +51,38 @@ namespace SG03.UI.Components
                 root.Add(toast);
             }
 
+            Button closeButton = toast.Q<Button>(CloseButtonName);
+            if (closeButton == null)
+            {
+                closeButton = new Button { name = CloseButtonName, text = "×" };
+                closeButton.style.position = Position.Absolute;
+                closeButton.style.right = 8;
+                closeButton.style.top = 7;
+                closeButton.style.width = 20;
+                closeButton.style.height = 20;
+                closeButton.style.minWidth = 0;
+                closeButton.style.minHeight = 0;
+                closeButton.style.paddingLeft = 0;
+                closeButton.style.paddingRight = 0;
+                closeButton.style.paddingTop = 0;
+                closeButton.style.paddingBottom = 0;
+                closeButton.style.marginLeft = 0;
+                closeButton.style.marginRight = 0;
+                closeButton.style.marginTop = 0;
+                closeButton.style.marginBottom = 0;
+                closeButton.style.backgroundColor = Color.clear;
+                closeButton.style.borderLeftWidth = 0;
+                closeButton.style.borderRightWidth = 0;
+                closeButton.style.borderTopWidth = 0;
+                closeButton.style.borderBottomWidth = 0;
+                closeButton.style.color = new Color(1f, 0.78f, 0.78f);
+                closeButton.style.fontSize = 20;
+                closeButton.style.unityFontStyleAndWeight = FontStyle.Bold;
+                closeButton.style.unityTextAlign = TextAnchor.MiddleCenter;
+                closeButton.clicked += () => toast.style.display = DisplayStyle.None;
+                toast.Add(closeButton);
+            }
+
             toast.RemoveFromClassList("toast-message--error");
             if (!string.IsNullOrWhiteSpace(styleClass)) toast.AddToClassList(styleClass);
             bool isError = styleClass == "toast-message--error";
@@ -56,6 +91,7 @@ namespace SG03.UI.Components
             toast.style.borderTopColor = isError ? new Color(0.9f, 0.41f, 0.44f) : new Color(0.45f, 0.6f, 0.9f);
             toast.style.borderRightColor = toast.style.borderBottomColor = toast.style.borderLeftColor = toast.style.borderTopColor;
             toast.text = message;
+            toast.style.paddingRight = 42;
             toast.style.display = DisplayStyle.Flex;
 
             ToastState state = toast.userData as ToastState ?? new ToastState();

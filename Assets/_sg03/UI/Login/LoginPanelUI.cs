@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using SaiGame.Services;
+using SG03.UI.Components;
 
 namespace SG03.UI
 {
@@ -347,7 +348,21 @@ namespace SG03.UI
 
         private void HandleLoginFailure(string error)
         {
-            this.ShowFeedback(error, isError: true);
+            this.HideFeedback();
+            ToastMessage.ShowError(this.FormatLoginError(error), this.loginButton);
+        }
+
+        private string FormatLoginError(string error)
+        {
+            if (string.IsNullOrWhiteSpace(error)) return "Unable to log in. Please try again.";
+
+            string normalizedError = error.ToLowerInvariant();
+            if (normalizedError.Contains("invalid credential")
+                || normalizedError.Contains("unauthorized")
+                || normalizedError.Contains("401"))
+                return "Invalid username or password.";
+
+            return "Unable to log in. Please try again.";
         }
 
         private void ShowFeedback(string message, bool isError)
