@@ -237,12 +237,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.QuestHistory
   claimsLimit: 50
-  claimsOffset: 0
+  claimsProgressId: 
+  claimsAfter: 
   currentClaimsResponse:
     claims: []
     limit: 0
-    offset: 0
-    total: 0
+    has_more: 0
+    next_after: 
   currentQuestStatusResponse:
     progress:
       id: 
@@ -739,12 +740,16 @@ MonoBehaviour:
   leaderboard: {fileID: 1993458322055049526}
   battleSessions: {fileID: 8438002230962336466}
   battleScript: {fileID: 5292617345916487666}
-  serverEndpoint: 0
-  domainOption: 0
-  port: 82
-  useHttps: 0
-  gameId: 
+  serverEndpoint: 1
+  domainOption: 1
+  port: 443
+  useHttps: 1
+  gameId: 019f49a1-350b-72c4-ac8f-8fe4f7d1418e
   requestTimeout: 30
+  serverTime: 
+  serverTimestamp: 0
+  serverTimezone: 
+  serverTimeError: 
   showButtonsLog: 1
   showCallbackLog: 1
   showDebugLog: 1
@@ -775,7 +780,7 @@ MonoBehaviour:
     is_verified: 0
     created_at: 0
   loginTime: 0
-  autoLogin: 1
+  autoLogin: 0
   autoRefreshToken: 1
   refreshBeforeExpire: 2
   username: 
