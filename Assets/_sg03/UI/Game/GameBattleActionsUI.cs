@@ -3,6 +3,7 @@ using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using SG03.UI.Components;
 
 namespace SG03.UI
 {
@@ -255,8 +256,17 @@ namespace SG03.UI
 
         private void OnBattleStartSucceeded(string response)
         {
-            this.hasActiveBattleSession = true;
             this.SetStartBattleLoading(false);
+
+            if (TryGetScriptError(response, out string error))
+            {
+                this.hasActiveBattleSession = false;
+                this.ResetStartBattleButtonText();
+                ToastMessage.ShowError(error, this.btnStartBattle);
+                return;
+            }
+
+            this.hasActiveBattleSession = true;
             this.SetStartBattleButtonText("Battle Started");
             this.GetAllCardDefinitions();
             this.ApplyBattleStatusResponse(response);
@@ -269,6 +279,16 @@ namespace SG03.UI
             this.SetStartBattleLoading(false);
             this.SetStartBattleButtonText("Battle Failed");
             Debug.LogWarning("GameBattleActionsUI: Battle start failed: " + error);
+        }
+
+        private static bool TryGetScriptError(string response, out string error)
+        {
+            error = null;
+            if (string.IsNullOrWhiteSpace(response)) return false;
+
+            BattleStatusScriptResponse scriptResponse = JsonUtility.FromJson<BattleStatusScriptResponse>(response);
+            error = scriptResponse?.output?.error;
+            return !string.IsNullOrWhiteSpace(error);
         }
 
         private void ApplyBattleStatusResponse(string response)

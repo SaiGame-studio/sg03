@@ -18,6 +18,8 @@ namespace SG03.UI
         [SerializeField] private CurrencyBalance[] balances = Array.Empty<CurrencyBalance>();
         [SerializeField] private bool isLoaded;
         [SerializeField] private string lastError;
+        private bool isActive = true;
+        private int refreshVersion;
 
         public event Action OnBalancesUpdated;
         public bool IsLoaded => this.isLoaded;
@@ -25,9 +27,27 @@ namespace SG03.UI
 
         public void Refresh()
         {
+            if (!this.isActive) return;
+
             SaiServer server = SaiServer.Instance;
             if (server == null || !server.IsAuthenticated) return;
-            this.StartCoroutine(this.LoadCurrenciesCoroutine(server));
+
+            this.StopAllCoroutines();
+            int version = ++this.refreshVersion;
+            this.StartCoroutine(this.LoadCurrenciesCoroutine(server, version));
+        }
+
+        public void Deactivate()
+        {
+            if (!this.isActive) return;
+
+            this.isActive = false;
+            ++this.refreshVersion;
+            this.StopAllCoroutines();
+            this.balances = Array.Empty<CurrencyBalance>();
+            this.isLoaded = false;
+            this.lastError = string.Empty;
+            this.OnBalancesUpdated?.Invoke();
         }
 
         public bool CanAfford(string currencyItemDefinitionId, int amount)
@@ -67,8 +87,10 @@ namespace SG03.UI
             return null;
         }
 
-        private IEnumerator LoadCurrenciesCoroutine(SaiServer server)
+        private IEnumerator LoadCurrenciesCoroutine(SaiServer server, int version)
         {
+            if (!this || !this.isActive || version != this.refreshVersion) yield break;
+
             this.isLoaded = false;
             this.lastError = string.Empty;
             Dictionary<string, CurrencyBalance> collected = new Dictionary<string, CurrencyBalance>();
@@ -83,6 +105,8 @@ namespace SG03.UI
                     endpoint,
                     response =>
                     {
+                        if (!this || !this.isActive || version != this.refreshVersion) return;
+
                         string sanitized = InventoryJsonHelper.StringifyObjectFields(response);
                         InventoryResponse page = JsonUtility.FromJson<InventoryResponse>(sanitized);
                         InventoryItemData[] items = page?.items ?? Array.Empty<InventoryItemData>();
@@ -112,17 +136,27 @@ namespace SG03.UI
                     },
                     error =>
                     {
+                        if (!this || !this.isActive || version != this.refreshVersion) return;
+
                         this.lastError = error;
                         total = 0;
                         completed = true;
                     });
 
                 if (!completed || offset >= total || offset == 0) break;
+                if (!this || !this.isActive || version != this.refreshVersion) yield break;
             }
+
+            if (!this || !this.isActive || version != this.refreshVersion) yield break;
 
             this.balances = new List<CurrencyBalance>(collected.Values).ToArray();
             this.isLoaded = string.IsNullOrEmpty(this.lastError);
             this.OnBalancesUpdated?.Invoke();
+        }
+
+        private void OnDestroy()
+        {
+            ++this.refreshVersion;
         }
     }
 
