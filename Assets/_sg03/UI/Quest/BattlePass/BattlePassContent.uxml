@@ -5,11 +5,16 @@
          editor-extension-mode="False">
     <ui:VisualElement name="BattlePassRoot" class="battle-pass-root">
         <ui:VisualElement class="battle-pass-header">
-            <ui:VisualElement class="battle-pass-header__copy">
-                <ui:Label text="BATTLE PASS" class="battle-pass-header__title" />
-                <ui:Label text="Select a battle pass to view its quest chains." class="battle-pass-header__subtitle" />
+            <ui:Label text="Battle Pass" class="battle-pass-header__title" />
+            <ui:VisualElement name="BattlePassServerTimeLabel" class="battle-pass-header__server-time" />
+        </ui:VisualElement>
+        <ui:VisualElement class="battle-pass-toolbar">
+            <ui:VisualElement name="BattlePassSessionSchedule" class="battle-pass-session-schedule">
+                <ui:Label name="BattlePassScheduleType" class="battle-pass-session-schedule__item" />
+                <ui:Label name="BattlePassScheduleCycle" class="battle-pass-session-schedule__item" />
+                <ui:Label name="BattlePassScheduleState" class="battle-pass-session-schedule__item" />
             </ui:VisualElement>
-            <ui:DropdownField name="BattlePassDropdown" class="battle-pass-dropdown" />
+            <ui:DropdownField name="BattlePassDropdown" class="battle-pass-dropdown dq-pool-dropdown dq-pool-dropdown--right" />
             <ui:Button name="BattlePassRefreshButton" text="R" tooltip="Refresh" class="main-quest-refresh-button" />
         </ui:VisualElement>
         <ui:VisualElement name="BattlePassGraphHost" class="battle-pass-graph-host" />

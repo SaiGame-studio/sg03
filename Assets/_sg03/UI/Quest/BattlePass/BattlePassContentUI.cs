@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
+using SG03.UI.Components;
 
 namespace SG03.UI
 {
@@ -17,6 +19,11 @@ namespace SG03.UI
         private const float CanvasPadding = 48f;
 
         private readonly DropdownField battlePassDropdown;
+        private readonly VisualElement sessionSchedule;
+        private readonly Label scheduleType;
+        private readonly Label scheduleCycle;
+        private readonly Label scheduleState;
+        private readonly ServerTimeLabelComponent serverTime;
         private readonly Label state;
         private readonly QuestFlowGraph graph;
         private readonly BattlePass battlePass;
@@ -33,6 +40,12 @@ namespace SG03.UI
         public BattlePassContentUI(VisualElement root)
         {
             this.battlePassDropdown = root.Q<DropdownField>("BattlePassDropdown");
+            this.sessionSchedule = root.Q<VisualElement>("BattlePassSessionSchedule");
+            this.scheduleType = root.Q<Label>("BattlePassScheduleType");
+            this.scheduleCycle = root.Q<Label>("BattlePassScheduleCycle");
+            this.scheduleState = root.Q<Label>("BattlePassScheduleState");
+            VisualElement serverTimeLabel = root.Q<VisualElement>("BattlePassServerTimeLabel");
+            if (serverTimeLabel != null) this.serverTime = new ServerTimeLabelComponent(serverTimeLabel);
             this.state = root.Q<Label>("BattlePassState");
             this.graph = new QuestFlowGraph(root.Q<VisualElement>("BattlePassGraphHost"));
             this.battlePass = SaiServer.Instance?.BattlePass;
@@ -50,6 +63,7 @@ namespace SG03.UI
 
         public void Dispose()
         {
+            this.serverTime?.Dispose();
             this.requestVersion++;
             this.detailRequestVersion++;
             this.graph.NodeClicked -= this.questDetailPanel.Show;
@@ -115,7 +129,9 @@ namespace SG03.UI
             }
 
             this.battlePassDropdown?.SetValueWithoutNotify(labels[0]);
-            this.LoadBattlePassChains(this.battlePassesByLabel[labels[0]]);
+            BattlePassData selectedBattlePass = this.battlePassesByLabel[labels[0]];
+            this.RenderSessionSchedule(selectedBattlePass);
+            this.LoadBattlePassChains(selectedBattlePass);
         }
 
         private string CreateBattlePassLabel(BattlePassData battlePassData, int index)
@@ -132,7 +148,34 @@ namespace SG03.UI
         private void HandleBattlePassSelectionChanged(ChangeEvent<string> evt)
         {
             if (this.battlePassesByLabel.TryGetValue(evt.newValue, out BattlePassData battlePassData))
+            {
+                this.RenderSessionSchedule(battlePassData);
                 this.LoadBattlePassChains(battlePassData);
+            }
+        }
+
+        private void RenderSessionSchedule(BattlePassData battlePassData)
+        {
+            BattlePassSessionData session = battlePassData?.type_config?.session;
+            if (this.sessionSchedule == null) return;
+            this.sessionSchedule.style.display = session == null ? DisplayStyle.None : DisplayStyle.Flex;
+            if (session == null) return;
+            this.scheduleType.text = $"Schedule: {(session.repeatable ? "Recurring" : "Fixed window")}";
+            string cycleStart = !string.IsNullOrEmpty(session.cycle_start_at) ? session.cycle_start_at : session.session_start_at;
+            this.scheduleCycle.text = session.repeatable
+                ? $"Cycle: {cycleStart} · every {session.repeat_every_months} month(s)"
+                : $"Window: {session.session_start_at} — {session.session_end_at}";
+            this.scheduleState.text = $"Session: {this.GetSessionState(session)}";
+        }
+
+        private string GetSessionState(BattlePassSessionData session)
+        {
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            if (DateTimeOffset.TryParse(session.session_start_at ?? session.cycle_start_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset start) && now < start)
+                return "upcoming";
+            if (!session.repeatable && DateTimeOffset.TryParse(session.session_end_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset end) && now > end)
+                return "ended";
+            return "active";
         }
 
         private void LoadBattlePassChains(BattlePassData battlePassData)
