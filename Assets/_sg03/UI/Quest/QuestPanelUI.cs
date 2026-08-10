@@ -12,21 +12,25 @@ namespace SG03.UI
     {
         private readonly Button dailyNavBtn;
         private readonly Button mainNavBtn;
+        private readonly Button battlePassNavBtn;
         private readonly VisualElement contentArea;
 
         private readonly VisualTreeAsset dailyQuestAsset;
         private readonly VisualTreeAsset mainQuestAsset;
+        private readonly VisualTreeAsset battlePassAsset;
         private readonly VisualTreeAsset thisWeekAsset;
         private readonly VisualTreeAsset thisMonthAsset;
         private readonly VisualTreeAsset next7DaysAsset;
         private readonly VisualTreeAsset next30DaysAsset;
         private DailyQuestContentUI dailyQuestContent;
         private MainQuestContentUI mainQuestContent;
+        private BattlePassContentUI battlePassContent;
 
         public QuestPanelUI(
             VisualElement panelRoot,
             VisualTreeAsset dailyAsset,
             VisualTreeAsset mainAsset,
+            VisualTreeAsset battlePassAsset,
             VisualTreeAsset thisWeekAsset,
             VisualTreeAsset thisMonthAsset,
             VisualTreeAsset next7DaysAsset,
@@ -34,6 +38,7 @@ namespace SG03.UI
         {
             this.dailyQuestAsset = dailyAsset;
             this.mainQuestAsset  = mainAsset;
+            this.battlePassAsset = battlePassAsset;
             this.thisWeekAsset = thisWeekAsset;
             this.thisMonthAsset = thisMonthAsset;
             this.next7DaysAsset = next7DaysAsset;
@@ -41,10 +46,12 @@ namespace SG03.UI
 
             this.dailyNavBtn = panelRoot.Q<Button>("DailyQuestNavBtn");
             this.mainNavBtn  = panelRoot.Q<Button>("MainQuestNavBtn");
+            this.battlePassNavBtn = panelRoot.Q<Button>("BattlePassNavBtn");
             this.contentArea = panelRoot.Q("QuestContentArea");
 
             this.dailyNavBtn?.RegisterCallback<ClickEvent>(_ => this.ShowQuest(QuestType.Daily));
             this.mainNavBtn?.RegisterCallback<ClickEvent>(_ => this.ShowQuest(QuestType.Main));
+            this.battlePassNavBtn?.RegisterCallback<ClickEvent>(_ => this.ShowQuest(QuestType.BattlePass));
         }
 
         // Load and display the content for the requested quest type.
@@ -53,11 +60,14 @@ namespace SG03.UI
             // Update sidebar active state
             this.dailyNavBtn?.RemoveFromClassList("quest-nav-btn--active");
             this.mainNavBtn?.RemoveFromClassList("quest-nav-btn--active");
+            this.battlePassNavBtn?.RemoveFromClassList("quest-nav-btn--active");
 
             if (type == QuestType.Daily)
                 this.dailyNavBtn?.AddToClassList("quest-nav-btn--active");
-            else
+            else if (type == QuestType.Main)
                 this.mainNavBtn?.AddToClassList("quest-nav-btn--active");
+            else
+                this.battlePassNavBtn?.AddToClassList("quest-nav-btn--active");
 
             // Swap content
             if (this.contentArea == null) return;
@@ -65,7 +75,9 @@ namespace SG03.UI
 
             VisualTreeAsset asset = type == QuestType.Daily
                 ? this.dailyQuestAsset
-                : this.mainQuestAsset;
+                : type == QuestType.Main
+                    ? this.mainQuestAsset
+                    : this.battlePassAsset;
 
             if (asset == null) return;
 
@@ -79,6 +91,8 @@ namespace SG03.UI
             this.dailyQuestContent = null;
             this.mainQuestContent?.Dispose();
             this.mainQuestContent = null;
+            this.battlePassContent?.Dispose();
+            this.battlePassContent = null;
             if (type == QuestType.Daily)
                 this.dailyQuestContent = new DailyQuestContentUI(
                     content,
@@ -86,8 +100,10 @@ namespace SG03.UI
                     this.thisMonthAsset,
                     this.next7DaysAsset,
                     this.next30DaysAsset);
-            else
+            else if (type == QuestType.Main)
                 this.mainQuestContent = new MainQuestContentUI(content);
+            else
+                this.battlePassContent = new BattlePassContentUI(content);
         }
 
         public bool CloseQuestDetailOnEscape()

@@ -29,6 +29,10 @@
                 <ui:Label text="D" class="quest-nav-btn__icon" />
                 <ui:Label text="Daily Quest" class="quest-nav-btn__label" />
             </ui:Button>
+            <ui:Button name="BattlePassNavBtn" class="quest-nav-btn">
+                <ui:Label text="B" class="quest-nav-btn__icon" />
+                <ui:Label text="Battle Pass" class="quest-nav-btn__label" />
+            </ui:Button>
 
         </ui:VisualElement>
 

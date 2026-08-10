@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+    <ui:VisualElement name="BattlePassRoot" class="battle-pass-root">
+        <ui:VisualElement class="battle-pass-header">
+            <ui:VisualElement class="battle-pass-header__copy">
+                <ui:Label text="BATTLE PASS" class="battle-pass-header__title" />
+                <ui:Label text="Select a battle pass to view its quest chains." class="battle-pass-header__subtitle" />
+            </ui:VisualElement>
+            <ui:DropdownField name="BattlePassDropdown" class="battle-pass-dropdown" />
+            <ui:Button name="BattlePassRefreshButton" text="R" tooltip="Refresh" class="main-quest-refresh-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="BattlePassGraphHost" class="battle-pass-graph-host" />
+        <ui:Label name="BattlePassState" class="battle-pass-state" />
+    </ui:VisualElement>
+</ui:UXML>

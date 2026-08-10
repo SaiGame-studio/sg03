@@ -1398,6 +1398,7 @@ MonoBehaviour:
   questPanelAsset: {fileID: 9197481963319205126, guid: 003455c36b27e684a9832fe9f7f26a32, type: 3}
   dailyQuestContentAsset: {fileID: 9197481963319205126, guid: 7d1d9c63c33078e4eab9684cc0ad09ef, type: 3}
   mainQuestContentAsset: {fileID: 9197481963319205126, guid: 920d223dc2287d142b7286b6918e6e68, type: 3}
+  battlePassContentAsset: {fileID: 9197481963319205126, guid: b71af7f3498f4205a2fe729e264a9db7, type: 3}
   thisWeekContentAsset: {fileID: 9197481963319205126, guid: 21aa0000000000000000000000000001, type: 3}
   thisMonthContentAsset: {fileID: 9197481963319205126, guid: 21aa0000000000000000000000000002, type: 3}
   next7DaysContentAsset: {fileID: 9197481963319205126, guid: 21aa0000000000000000000000000003, type: 3}

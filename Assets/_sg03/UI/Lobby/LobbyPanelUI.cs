@@ -24,6 +24,7 @@ namespace SG03.UI
         [SerializeField] private VisualTreeAsset questPanelAsset;
         [SerializeField] private VisualTreeAsset dailyQuestContentAsset;
         [SerializeField] private VisualTreeAsset mainQuestContentAsset;
+        [SerializeField] private VisualTreeAsset battlePassContentAsset;
         [SerializeField] private VisualTreeAsset thisWeekContentAsset;
         [SerializeField] private VisualTreeAsset thisMonthContentAsset;
         [SerializeField] private VisualTreeAsset next7DaysContentAsset;
@@ -61,6 +62,7 @@ namespace SG03.UI
             this.LoadShopPanelAsset();
             this.LoadDailyQuestContentAsset();
             this.LoadMainQuestContentAsset();
+            this.LoadBattlePassContentAsset();
             this.LoadDailyQuestTabContentAssets();
             this.LoadMailboxContentAsset();
             this.LoadInventoryContentAsset();
@@ -138,6 +140,16 @@ namespace SG03.UI
             this.mainQuestContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Quest/MainQuest/MainQuestContent.uxml");
             Debug.LogWarning(this.transform.name + ": LoadMainQuestContentAsset", this.gameObject);
+#endif
+        }
+
+        private void LoadBattlePassContentAsset()
+        {
+            if (this.battlePassContentAsset != null) return;
+#if UNITY_EDITOR
+            this.battlePassContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/_sg03/UI/Quest/BattlePass/BattlePassContent.uxml");
+            Debug.LogWarning(this.transform.name + ": LoadBattlePassContentAsset", this.gameObject);
 #endif
         }
 
@@ -463,6 +475,7 @@ namespace SG03.UI
                 panelRoot,
                 this.dailyQuestContentAsset,
                 this.mainQuestContentAsset,
+                this.battlePassContentAsset,
                 this.thisWeekContentAsset,
                 this.thisMonthContentAsset,
                 this.next7DaysContentAsset,
