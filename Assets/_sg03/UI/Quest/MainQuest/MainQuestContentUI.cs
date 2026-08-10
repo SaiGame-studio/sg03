@@ -10,6 +10,7 @@ namespace SG03.UI
     /// <summary>Renders the active quest-chain tree with progression flowing from left to right.</summary>
     public class MainQuestContentUI : IDisposable
     {
+        private const string MainQuestChainKey = "main_quest";
         private const float CardWidth = 220f;
         private const float CardHeight = 92f;
         private const float ColumnGap = 120f;
@@ -19,6 +20,7 @@ namespace SG03.UI
         private readonly Label chainName;
         private readonly Label state;
         private readonly QuestFlowGraph graph;
+        private readonly QuestDetailPanelUI questDetailPanel;
         private readonly ChainQuest chainQuest;
         private readonly VisualElement detailPanel;
         private readonly VisualElement detailContent;
@@ -48,12 +50,11 @@ namespace SG03.UI
             this.detailExpiredMessage = root.Q<Label>("MainQuestDetailExpiredMessage");
             this.detailClaimedMessage = root.Q<Label>("MainQuestDetailClaimedMessage");
             this.detailUnavailableMessage = root.Q<Label>("MainQuestDetailUnavailableMessage");
-            root.Q<Button>("MainQuestRefreshButton")?.RegisterCallback<ClickEvent>(_ => this.LoadTree());
-            root.Q<Button>("CloseMainQuestDetailButton")?.RegisterCallback<ClickEvent>(_ => this.HideQuestDetail());
-            this.detailStartButton?.RegisterCallback<ClickEvent>(_ => this.StartSelectedQuest());
-            this.detailCheckButton?.RegisterCallback<ClickEvent>(_ => this.CheckSelectedQuest());
-            this.detailClaimButton?.RegisterCallback<ClickEvent>(_ => this.ClaimSelectedQuest());
-            this.graph.NodeClicked += this.ShowQuestDetail;
+            Button refreshButton = root.Q<Button>("MainQuestRefreshButton");
+            new RefreshButtonComponent(refreshButton, null);
+            refreshButton?.RegisterCallback<ClickEvent>(_ => this.LoadTree());
+            this.questDetailPanel = new QuestDetailPanelUI(root, this.LoadTree);
+            this.graph.NodeClicked += this.questDetailPanel.Show;
             this.chainQuest = SaiServer.Instance?.ChainQuest;
             this.LoadTree();
         }
@@ -61,7 +62,7 @@ namespace SG03.UI
         public void Dispose()
         {
             this.detailRequestVersion++;
-            this.graph.NodeClicked -= this.ShowQuestDetail;
+            this.graph.NodeClicked -= this.questDetailPanel.Show;
             if (!this.waitingForLogin || SaiServer.Instance?.SaiAuth == null) return;
             SaiServer.Instance.SaiAuth.OnLoginSuccess -= this.HandleLoginSuccess;
             this.waitingForLogin = false;
@@ -69,9 +70,7 @@ namespace SG03.UI
 
         public bool CloseQuestDetailOnEscape()
         {
-            if (this.detailPanel == null || !this.detailPanel.ClassListContains("main-quest-detail-panel--open")) return false;
-            this.HideQuestDetail();
-            return true;
+            return this.questDetailPanel.CloseOnEscape();
         }
 
         private void LoadTree()
@@ -103,7 +102,7 @@ namespace SG03.UI
                 onSuccess: _ =>
                 {
                     ChainQuestData loadedChain = this.GetActiveChain();
-                    if (loadedChain == null) this.ShowState("No active quest chain is available.");
+                    if (loadedChain == null) this.ShowState($"Quest chain '{MainQuestChainKey}' is not available.");
                     else this.LoadTree(loadedChain);
                 },
                 onError: error => this.ShowState($"Could not load quest chains: {error}"));
@@ -131,8 +130,8 @@ namespace SG03.UI
 
         private ChainQuestData GetActiveChain()
         {
-            ChainQuestData[] chains = this.chainQuest.GetActiveChains();
-            return chains != null && chains.Length > 0 ? chains[0] : null;
+            ChainQuestData mainQuestChain = this.chainQuest.GetChainByKey(MainQuestChainKey);
+            return mainQuestChain != null && mainQuestChain.is_active ? mainQuestChain : null;
         }
 
         private void LoadTree(ChainQuestData chain)
@@ -153,57 +152,14 @@ namespace SG03.UI
             if (!string.IsNullOrEmpty(response.chain_name)) this.chainName.text = response.chain_name;
             this.state.style.display = DisplayStyle.None;
 
-            List<LayoutNode> roots = new List<LayoutNode>();
-            foreach (QuestTreeNode node in response.nodes)
-                if (node != null) roots.Add(this.CreateLayoutNode(node, 0));
-
-            int nextLeafRow = 0;
-            foreach (LayoutNode root in roots)
-                this.AssignRows(root, ref nextLeafRow);
-
             List<QuestFlowNode> nodes = new List<QuestFlowNode>();
             List<QuestFlowEdge> edges = new List<QuestFlowEdge>();
-            foreach (LayoutNode root in roots) this.AppendGraphData(root, nodes, edges);
+            QuestChainFlowRenderer.Append(
+                response.nodes, nodes, edges, new Vector2(CanvasPadding, CanvasPadding),
+                CardWidth, CardHeight, ColumnGap, RowGap);
             if (this.graph.UpdateNodeStatuses(nodes)) return;
             this.graph.SetGraph(nodes, edges, fitView: !this.graph.HasNodes);
         }
-
-        private LayoutNode CreateLayoutNode(QuestTreeNode node, int depth)
-        {
-            LayoutNode layoutNode = new LayoutNode { node = node, depth = depth };
-            if (node.children != null)
-                foreach (QuestTreeNode child in node.children)
-                    if (child != null) layoutNode.children.Add(this.CreateLayoutNode(child, depth + 1));
-            return layoutNode;
-        }
-
-        private void AssignRows(LayoutNode node, ref int nextLeafRow)
-        {
-            if (node.children.Count == 0) { node.row = nextLeafRow++; return; }
-            foreach (LayoutNode child in node.children) this.AssignRows(child, ref nextLeafRow);
-            node.row = (node.children[0].row + node.children[node.children.Count - 1].row) / 2f;
-        }
-
-        private void AppendGraphData(LayoutNode layoutNode, List<QuestFlowNode> nodes, List<QuestFlowEdge> edges)
-        {
-            nodes.Add(new QuestFlowNode
-            {
-                id = layoutNode.node.quest_id,
-                title = layoutNode.node.quest_name,
-                status = layoutNode.node.status,
-                position = new Vector2(this.GetX(layoutNode), this.GetY(layoutNode)),
-                width = CardWidth,
-                height = CardHeight
-            });
-            foreach (LayoutNode child in layoutNode.children)
-            {
-                edges.Add(new QuestFlowEdge { sourceId = layoutNode.node.quest_id, targetId = child.node.quest_id });
-                this.AppendGraphData(child, nodes, edges);
-            }
-        }
-
-        private float GetX(LayoutNode node) => CanvasPadding + node.depth * (CardWidth + ColumnGap);
-        private float GetY(LayoutNode node) => CanvasPadding + node.row * RowGap;
 
         private void ShowState(string message, bool clearGraph = true)
         {
@@ -473,12 +429,5 @@ namespace SG03.UI
             this.detailPanel.AddToClassList("main-quest-detail-panel--hidden");
         }
 
-        private class LayoutNode
-        {
-            public QuestTreeNode node;
-            public int depth;
-            public float row;
-            public readonly List<LayoutNode> children = new List<LayoutNode>();
-        }
     }
 }
