@@ -506,6 +506,8 @@
     color: rgb(220, 235, 255);
     background-color: rgba(50, 65, 105, 0.9);
 }
+.refresh-button-component__icon { position: absolute; left: 2px; top: 2px; width: 25px; height: 25px; -unity-background-scale-mode: scale-to-fit; }
+
 
 .dq-pool-dropdown {
     min-width: 180px;

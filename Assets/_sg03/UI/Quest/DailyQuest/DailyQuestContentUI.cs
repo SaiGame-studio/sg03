@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine.UIElements;
+using UnityEngine;
 using SaiGame.Services;
 using SG03.Quest;
 using SG03.UI.Components;
@@ -41,6 +42,7 @@ namespace SG03.UI
         private readonly VisualTreeAsset thisMonthAsset;
         private readonly VisualTreeAsset next7DaysAsset;
         private readonly VisualTreeAsset next30DaysAsset;
+        private readonly Sprite refreshIcon;
         private QuestList[] lists;
         private readonly List<QuestList> poolLists = new List<QuestList>();
         private readonly HashSet<QuestList> subscribedLists = new HashSet<QuestList>();
@@ -72,20 +74,23 @@ namespace SG03.UI
             VisualTreeAsset thisWeekAsset,
             VisualTreeAsset thisMonthAsset,
             VisualTreeAsset next7DaysAsset,
-            VisualTreeAsset next30DaysAsset)
+            VisualTreeAsset next30DaysAsset,
+            Sprite refreshIcon)
         {
             this.tabContent = root.Q("DailyQuestTabContent");
             this.thisWeekAsset = thisWeekAsset;
             this.thisMonthAsset = thisMonthAsset;
             this.next7DaysAsset = next7DaysAsset;
             this.next30DaysAsset = next30DaysAsset;
+            this.refreshIcon = refreshIcon;
             this.thisWeekTab    = root.Q<Button>("ThisWeekTab");
             this.next7DaysTab   = root.Q<Button>("Next7DaysTab");
             this.next30DaysTab  = root.Q<Button>("Next30DaysTab");
             this.thisMonthTab   = root.Q<Button>("ThisMonthTab");
             this.poolDropdown   = root.Q<DropdownField>("PoolDropdown");
             this.assignAheadButton = root.Q<Button>("AssignAheadButton");
-            this.refreshButton  = root.Q<Button>("RefreshButton");
+            this.refreshButton = new RefreshButtonComponent(
+                root.Q<VisualElement>("DailyQuestToolbar"), "RefreshButton", this.RefreshSelectedPool, this.refreshIcon).Button;
             this.commonQuestDetailPanel = new QuestDetailPanelUI(root, this.RefreshSelectedPoolData);
             this.questDetailPanel = root.Q("QuestDetailPanel");
             this.questDetailContent = root.Q("QuestDetailContent");

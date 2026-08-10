@@ -29,6 +29,7 @@ namespace SG03.UI
         [SerializeField] private VisualTreeAsset thisMonthContentAsset;
         [SerializeField] private VisualTreeAsset next7DaysContentAsset;
         [SerializeField] private VisualTreeAsset next30DaysContentAsset;
+        [SerializeField] private Sprite refreshIcon;
 
         [Header("Shop Panel Assets")]
         [SerializeField] private VisualTreeAsset shopPanelAsset;
@@ -63,6 +64,7 @@ namespace SG03.UI
             this.LoadDailyQuestContentAsset();
             this.LoadMainQuestContentAsset();
             this.LoadBattlePassContentAsset();
+            this.LoadRefreshIcon();
             this.LoadDailyQuestTabContentAssets();
             this.LoadMailboxContentAsset();
             this.LoadInventoryContentAsset();
@@ -150,6 +152,16 @@ namespace SG03.UI
             this.battlePassContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Quest/BattlePass/BattlePassContent.uxml");
             Debug.LogWarning(this.transform.name + ": LoadBattlePassContentAsset", this.gameObject);
+#endif
+        }
+
+        private void LoadRefreshIcon()
+        {
+            if (this.refreshIcon != null) return;
+#if UNITY_EDITOR
+            this.refreshIcon = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/_sg03/UI/Images/refresh-512.png");
+            Debug.LogWarning(this.transform.name + ": LoadRefreshIcon", this.gameObject);
 #endif
         }
 
@@ -479,7 +491,8 @@ namespace SG03.UI
                 this.thisWeekContentAsset,
                 this.thisMonthContentAsset,
                 this.next7DaysContentAsset,
-                this.next30DaysContentAsset);
+                this.next30DaysContentAsset,
+                this.refreshIcon);
 
             this.questPanel.ShowQuest(type);
         }

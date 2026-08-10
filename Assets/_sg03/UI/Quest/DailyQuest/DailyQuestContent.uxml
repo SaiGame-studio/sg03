@@ -12,14 +12,13 @@
             <ui:VisualElement name="ServerTimeLabel" class="dq-header__server-time" />
         </ui:VisualElement>
 
-        <ui:VisualElement class="dq-range-tabs">
+        <ui:VisualElement name="DailyQuestToolbar" class="dq-range-tabs">
             <ui:Button name="ThisWeekTab" text="This Week" class="dq-range-tab" />
             <ui:Button name="ThisMonthTab" text="This Month" class="dq-range-tab" />
             <ui:Button name="Next7DaysTab" text="Next 7 Days" class="dq-range-tab dq-range-tab--active" />
             <ui:Button name="Next30DaysTab" text="Next 30 Days" class="dq-range-tab" />
             <ui:Button name="AssignAheadButton" text="Assign Ahead" tooltip="Assign quests for the selected range" class="dq-assign-ahead-button" />
             <ui:DropdownField name="PoolDropdown" class="dq-pool-dropdown" />
-            <ui:Button name="RefreshButton" text="↻" tooltip="Refresh" class="dq-refresh-button" />
         </ui:VisualElement>
 
         <ui:VisualElement name="DailyQuestTabContent" class="dq-tab-content" />
