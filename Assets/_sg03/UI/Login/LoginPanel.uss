@@ -50,8 +50,38 @@
     background-color: transparent;
     color: rgb(180, 200, 255);
     font-size: 13px;
+    align-items: center;
+    justify-content: center;
 }
 
 .password-visibility-button:hover {
     background-color: rgba(60, 80, 140, 0.65);
+}
+
+/* CSS-only icon: safe in WebGL because it does not rely on a font glyph. */
+.password-eye-icon {
+    position: relative;
+    width: 15px;
+    height: 9px;
+    border-width: 2px;
+    border-radius: 50%;
+    border-color: rgb(180, 200, 255);
+}
+
+.password-eye-icon__pupil {
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background-color: rgb(180, 200, 255);
+}
+
+.password-visibility-button:hover .password-eye-icon {
+    border-color: rgb(230, 238, 255);
+}
+
+.password-visibility-button:hover .password-eye-icon__pupil {
+    background-color: rgb(230, 238, 255);
 }

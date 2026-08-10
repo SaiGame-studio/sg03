@@ -75,7 +75,7 @@ namespace SG03.UI
 
             Button indicator = new Button { name = "SoulEnergy", tooltip = "Soul Collector" };
             indicator.AddToClassList("soul-energy");
-            Label icon = new Label("✦") { tooltip = "Soul Energy" };
+            VisualElement icon = new VisualElement { tooltip = "Soul Energy" };
             icon.AddToClassList("soul-energy__icon");
             Label value = new Label("0 / 0") { name = "SoulEnergyValue" };
             value.AddToClassList("soul-energy__value");

@@ -329,7 +329,7 @@ namespace SG03.UI
             if (this.playerNameLabel == null) return;
             string name = user?.display_name;
             if (string.IsNullOrEmpty(name)) name = user?.username;
-            this.playerNameLabel.text = string.IsNullOrEmpty(name) ? "👤 Guest" : $"👤 {name}";
+            this.playerNameLabel.text = string.IsNullOrEmpty(name) ? "Guest" : name;
         }
 
 

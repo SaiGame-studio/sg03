@@ -189,7 +189,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.UI.LoginPanelUI
   panelAsset: {fileID: 9197481963319205126, guid: b3c4d5e6f7890123b3c4d5e6f7890123, type: 3}
   saiAuth: {fileID: 1776946250}
-  uiDocument: {fileID: 0}
+  uiDocument: {fileID: 251390376}
   nextScenes: 1-lobby
   autoLoadCredentials: 1
 --- !u!1 &330585543

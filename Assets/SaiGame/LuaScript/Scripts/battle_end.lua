@@ -159,11 +159,19 @@ open_drop_packs = function(session_id, state)
 
     local drops = {}
     for _, pack_id in ipairs(pack_ids) do
+        local pack, pack_err = game.get_gacha_pack_by_id(pack_id)
+        if pack_err ~= nil then
+            return nil, "gacha pack not found (id: " .. tostring(pack_id) .. "): " .. tostring(pack_err)
+        end
+
+        local pack_code = pack.code_name or "unknown"
         local result, err = game.open_reward_gacha_pack(
             pack_id,
             "battle-entity-drop:" .. session_id .. ":" .. pack_id
         )
-        if err ~= nil then return nil, err end
+        if err ~= nil then
+            return nil, "failed to open gacha pack '" .. tostring(pack.name or pack_code) .. "' (code: " .. tostring(pack_code) .. ", id: " .. tostring(pack_id) .. "): " .. tostring(err)
+        end
 
         drops[#drops + 1] = {
             pack_id = pack_id,
@@ -179,7 +187,9 @@ open_win_game_pack = function(session_id)
         "win_game_pack",
         "battle-win-game-pack:" .. session_id
     )
-    if err ~= nil then return nil, err end
+    if err ~= nil then
+        return nil, "failed to open gacha pack 'win_game_pack': " .. tostring(err)
+    end
     return result, nil
 end
 

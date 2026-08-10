@@ -206,7 +206,7 @@ namespace SG03.UI
 
                 Button starBtn = new Button();
                 starBtn.name = $"SlotStarBtn_{slotIndex}";
-                starBtn.text = "\u2605";
+                starBtn.text = "S";
                 starBtn.AddToClassList("desk-slot__star-btn");
                 if (isStarred)
                     starBtn.AddToClassList("desk-slot__star-btn--active");
@@ -224,7 +224,7 @@ namespace SG03.UI
 
                 Button voidBtn = new Button();
                 voidBtn.name = $"SlotVoidBtn_{slotIndex}";
-                voidBtn.text = "\uD83C\uDF00"; // Vortex symbol 🌀
+                voidBtn.text = "V";
                 voidBtn.AddToClassList("desk-slot__void-btn");
                 if (isVoided)
                     voidBtn.AddToClassList("desk-slot__void-btn--active");
@@ -272,7 +272,7 @@ namespace SG03.UI
             actions.AddToClassList("desk-slot__actions");
 
             Button viewBtn = new Button();
-            viewBtn.text = "👁";
+            viewBtn.text = "View";
             viewBtn.AddToClassList("desk-slot__btn");
             viewBtn.AddToClassList("desk-slot__btn--view");
             InventoryItemData capturedItem = foundItem;
@@ -285,7 +285,7 @@ namespace SG03.UI
             actions.Add(viewBtn);
 
             Button removeBtn = new Button();
-            removeBtn.text = "✕";
+            removeBtn.text = "X";
             removeBtn.AddToClassList("desk-slot__btn");
             removeBtn.AddToClassList("desk-slot__btn--remove");
             PresetData capturedDesk = desk;
@@ -471,7 +471,7 @@ namespace SG03.UI
             VisualElement actions = new VisualElement();
             actions.AddToClassList("desk-card__actions");
 
-            Button viewBtn = new Button { text = "\U0001F441" };
+            Button viewBtn = new Button { text = "View" };
             viewBtn.AddToClassList("desk-card__action-btn");
             viewBtn.AddToClassList("desk-card__view-btn");
             InventoryItemData capturedItem = item;
@@ -503,13 +503,13 @@ namespace SG03.UI
         private void UpdateStarCount()
         {
             if (this.starCountLabel == null) return;
-            this.starCountLabel.text = $"\u2605 {this.starredSlots.Count} / {MaxStarredSlots}";
+            this.starCountLabel.text = $"Stars {this.starredSlots.Count} / {MaxStarredSlots}";
         }
 
         private void UpdateVoidCount()
         {
             if (this.voidCountLabel == null) return;
-            this.voidCountLabel.text = $"\uD83C\uDF00 {this.voidedSlots.Count} / {MaxVoidedSlots}";
+            this.voidCountLabel.text = $"Void {this.voidedSlots.Count} / {MaxVoidedSlots}";
         }
 
         private void ShowCardViewer(InventoryItemData item, string itemId)
@@ -659,7 +659,7 @@ namespace SG03.UI
                 return;
             }
 
-            Label ghost = new Label("🃏");
+            Label ghost = new Label("C");
             ghost.AddToClassList("desk-fly-ghost");
             ghost.pickingMode = PickingMode.Ignore;
             this.flyLayer.Add(ghost);

@@ -1422,9 +1422,9 @@ namespace SG03.UI
         {
             switch (status)
             {
-                case "in_progress": return "▶ In Progress";
-                case "completed":   return "✓ Completed";
-                case "claimed":     return "★ Claimed";
+                case "in_progress": return "In Progress";
+                case "completed":   return "Completed";
+                case "claimed":     return "Claimed";
                 default:            return string.Empty;
             }
         }

@@ -38,9 +38,12 @@
                               password="true"
                               class="input-field password-row__field" />
                 <ui:Button name="PasswordVisibilityButton"
-                           text="👁"
                            tooltip="Show password"
-                           class="password-visibility-button" />
+                           class="password-visibility-button">
+                    <ui:VisualElement class="password-eye-icon">
+                        <ui:VisualElement class="password-eye-icon__pupil" />
+                    </ui:VisualElement>
+                </ui:Button>
             </ui:VisualElement>
 
             <!-- Registration-only password confirmation -->
@@ -52,9 +55,12 @@
                                   password="true"
                                   class="input-field password-row__field" />
                     <ui:Button name="ConfirmPasswordVisibilityButton"
-                               text="👁"
                                tooltip="Show password"
-                               class="password-visibility-button" />
+                               class="password-visibility-button">
+                        <ui:VisualElement class="password-eye-icon">
+                            <ui:VisualElement class="password-eye-icon__pupil" />
+                        </ui:VisualElement>
+                    </ui:Button>
                 </ui:VisualElement>
             </ui:VisualElement>
 

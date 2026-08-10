@@ -11,8 +11,8 @@
 
         <!-- Header bar -->
         <ui:VisualElement class="inv-header">
-            <ui:Label text="🎒 Inventory" class="inv-header__title" />
-            <ui:Button name="RefreshBtn" text="↻" tooltip="Refresh" class="inv-header__refresh-btn" />
+            <ui:Label text="Inventory" class="inv-header__title" />
+            <ui:Button name="RefreshBtn" text="R" tooltip="Refresh" class="inv-header__refresh-btn" />
         </ui:VisualElement>
 
         <!-- Category filter tabs (populated at runtime) -->
@@ -20,13 +20,13 @@
 
         <!-- Loading state -->
         <ui:VisualElement name="LoadingState" class="inv-state">
-            <ui:Label text="⏳" class="inv-state__icon" />
+            <ui:Label text="..." class="inv-state__icon" />
             <ui:Label text="Loading inventory…" class="inv-state__label" />
         </ui:VisualElement>
 
         <!-- Empty state (no items) -->
         <ui:VisualElement name="EmptyState" class="inv-state">
-            <ui:Label text="📦" class="inv-state__icon" />
+            <ui:Label text="I" class="inv-state__icon" />
             <ui:Label text="No items found" class="inv-state__label" />
         </ui:VisualElement>
 
