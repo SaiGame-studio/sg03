@@ -163,8 +163,8 @@ namespace SG03.UI
             this.scheduleType.text = $"Schedule: {(session.repeatable ? "Recurring" : "Fixed window")}";
             string cycleStart = !string.IsNullOrEmpty(session.cycle_start_at) ? session.cycle_start_at : session.session_start_at;
             this.scheduleCycle.text = session.repeatable
-                ? $"Cycle: {cycleStart} · every {session.repeat_every_months} month(s)"
-                : $"Window: {session.session_start_at} — {session.session_end_at}";
+                ? $"Cycle: {this.FormatUtc(cycleStart)} · every {session.repeat_every_months} month(s)"
+                : $"Window: {this.FormatUtc(session.session_start_at)} — {this.FormatUtc(session.session_end_at)}";
             this.scheduleState.text = $"Session: {this.GetSessionState(session)}";
         }
 
@@ -176,6 +176,13 @@ namespace SG03.UI
             if (!session.repeatable && DateTimeOffset.TryParse(session.session_end_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset end) && now > end)
                 return "ended";
             return "active";
+        }
+
+        private string FormatUtc(string value)
+        {
+            if (!DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset dateTime))
+                return string.IsNullOrEmpty(value) ? "Not set" : value;
+            return dateTime.ToUniversalTime().ToString("dd MMM yyyy, HH:mm 'UTC'", CultureInfo.InvariantCulture);
         }
 
         private void LoadBattlePassChains(BattlePassData battlePassData)
