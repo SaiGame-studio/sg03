@@ -247,6 +247,7 @@
 .battle-pass-session-schedule__item { color: rgb(155, 180, 230); font-size: 10px; margin-right: 14px; }
 .battle-pass-graph-host { flex: 1; min-height: 0; position: relative; border-radius: 8px; overflow: hidden; }
 .battle-pass-state { position: absolute; top: 108px; right: 0; color: rgb(185, 200, 240); background-color: rgba(24, 32, 54, 0.94); border-width: 1px; border-color: rgba(90, 130, 220, 0.42); border-radius: 6px; padding: 6px 10px; font-size: 13px; }
+.refresh-button-component__icon { position: absolute; left: 2px; top: 2px; width: 25px; height: 25px; -unity-background-scale-mode: scale-to-fit; }
 
 /* Main Quest detail drawer, matching the Daily Quest detail-panel interaction. */
 .main-quest-detail-panel { position: absolute; top: 0; right: 0; width: 380px; height: 100%; flex-direction: column; padding: 20px; background-color: rgb(18, 24, 40); border-left-width: 1px; border-color: rgba(80, 120, 210, 0.6); transition-property: right; transition-duration: 0.2s; transition-timing-function: ease-out; }

@@ -1403,7 +1403,6 @@ MonoBehaviour:
   thisMonthContentAsset: {fileID: 9197481963319205126, guid: 21aa0000000000000000000000000002, type: 3}
   next7DaysContentAsset: {fileID: 9197481963319205126, guid: 21aa0000000000000000000000000003, type: 3}
   next30DaysContentAsset: {fileID: 9197481963319205126, guid: 21aa0000000000000000000000000004, type: 3}
-  refreshIcon: {fileID: 21300000, guid: d710975eaa392974896b761197a32bd0, type: 3}
   shopPanelAsset: {fileID: 9197481963319205126, guid: 94e9ce9c0b9d4c42aa01c81c8a11c970, type: 3}
   mailboxContentAsset: {fileID: 9197481963319205126, guid: 098cd705774df9f4e8dda846272c26a5, type: 3}
   inventoryContentAsset: {fileID: 9197481963319205126, guid: 41a5b96e1281c9447a2f11773bf2e69a, type: 3}

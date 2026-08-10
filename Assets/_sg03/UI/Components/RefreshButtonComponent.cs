@@ -9,19 +9,36 @@ namespace SG03.UI.Components
     {
         public Button Button { get; }
 
-        public RefreshButtonComponent(VisualElement host, string name, Action onClick, Sprite icon)
+        public RefreshButtonComponent(Button button, Sprite icon)
         {
-            this.Button = new Button(onClick) { name = name, text = "R", tooltip = "Refresh" };
+            this.Button = button;
+            if (this.Button == null) return;
             this.Button.AddToClassList("dq-refresh-button");
+            // The UXML owns the icon at runtime.  Do not rewrite the button's
+            // content here, otherwise UI Toolkit removes that visual element.
             if (icon != null)
             {
                 this.Button.text = string.Empty;
-                VisualElement iconElement = new VisualElement();
-                iconElement.AddToClassList("refresh-button-component__icon");
-                iconElement.style.backgroundImage = new StyleBackground(icon);
-                this.Button.Add(iconElement);
+                this.Button.Clear();
+                this.AddIcon(icon);
             }
+        }
+
+        public RefreshButtonComponent(VisualElement host, string name, Action onClick, Sprite icon)
+        {
+            this.Button = new Button(onClick) { name = name, text = "", tooltip = "Refresh" };
+            this.Button.AddToClassList("dq-refresh-button");
+            this.AddIcon(icon);
             host?.Add(this.Button);
+        }
+
+        private void AddIcon(Sprite icon)
+        {
+            if (icon == null) { this.Button.text = "R"; return; }
+            VisualElement iconElement = new VisualElement();
+            iconElement.AddToClassList("refresh-button-component__icon");
+            iconElement.style.backgroundImage = new StyleBackground(icon);
+            this.Button.Add(iconElement);
         }
     }
 }

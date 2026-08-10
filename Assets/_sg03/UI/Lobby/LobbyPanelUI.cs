@@ -29,7 +29,6 @@ namespace SG03.UI
         [SerializeField] private VisualTreeAsset thisMonthContentAsset;
         [SerializeField] private VisualTreeAsset next7DaysContentAsset;
         [SerializeField] private VisualTreeAsset next30DaysContentAsset;
-        [SerializeField] private Sprite refreshIcon;
 
         [Header("Shop Panel Assets")]
         [SerializeField] private VisualTreeAsset shopPanelAsset;
@@ -64,7 +63,6 @@ namespace SG03.UI
             this.LoadDailyQuestContentAsset();
             this.LoadMainQuestContentAsset();
             this.LoadBattlePassContentAsset();
-            this.LoadRefreshIcon();
             this.LoadDailyQuestTabContentAssets();
             this.LoadMailboxContentAsset();
             this.LoadInventoryContentAsset();
@@ -93,8 +91,8 @@ namespace SG03.UI
             PanelSettings ps = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>(
                 "Assets/_sg03/UI/LobbyPanelSettings.asset");
             if (ps != null) this.uiDocument.panelSettings = ps;
-            Debug.LogWarning(this.transform.name + ": LoadPanelSettings", this.gameObject);
 #endif
+            Debug.LogWarning(this.transform.name + ": LoadPanelSettings", this.gameObject);
         }
 
         private void LoadPanelAsset()
@@ -121,8 +119,8 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.questPanelAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Quest/QuestPanel.uxml");
-            Debug.LogWarning(this.transform.name + ": LoadQuestPanelAsset", this.gameObject);
 #endif
+            Debug.LogWarning(this.transform.name + ": LoadQuestPanelAsset", this.gameObject);
         }
 
         private void LoadDailyQuestContentAsset()
@@ -131,8 +129,8 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.dailyQuestContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Quest/DailyQuest/DailyQuestContent.uxml");
-            Debug.LogWarning(this.transform.name + ": LoadDailyQuestContentAsset", this.gameObject);
 #endif
+            Debug.LogWarning(this.transform.name + ": LoadDailyQuestContentAsset", this.gameObject);
         }
 
         private void LoadMainQuestContentAsset()
@@ -141,8 +139,8 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.mainQuestContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Quest/MainQuest/MainQuestContent.uxml");
-            Debug.LogWarning(this.transform.name + ": LoadMainQuestContentAsset", this.gameObject);
 #endif
+            Debug.LogWarning(this.transform.name + ": LoadMainQuestContentAsset", this.gameObject);
         }
 
         private void LoadBattlePassContentAsset()
@@ -151,18 +149,8 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.battlePassContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Quest/BattlePass/BattlePassContent.uxml");
+#endif
             Debug.LogWarning(this.transform.name + ": LoadBattlePassContentAsset", this.gameObject);
-#endif
-        }
-
-        private void LoadRefreshIcon()
-        {
-            if (this.refreshIcon != null) return;
-#if UNITY_EDITOR
-            this.refreshIcon = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
-                "Assets/_sg03/UI/Images/refresh-512.png");
-            Debug.LogWarning(this.transform.name + ": LoadRefreshIcon", this.gameObject);
-#endif
         }
 
         private void LoadMailboxContentAsset()
@@ -171,8 +159,8 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.mailboxContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Mailbox/MailboxContent.uxml");
-            Debug.LogWarning(this.transform.name + ": LoadMailboxContentAsset", this.gameObject);
 #endif
+            Debug.LogWarning(this.transform.name + ": LoadMailboxContentAsset", this.gameObject);
         }
 
         private void LoadInventoryContentAsset()
@@ -181,8 +169,8 @@ namespace SG03.UI
 #if UNITY_EDITOR
             this.inventoryContentAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
                 "Assets/_sg03/UI/Inventory/InventoryContent.uxml");
-            Debug.LogWarning(this.transform.name + ": LoadInventoryContentAsset", this.gameObject);
 #endif
+            Debug.LogWarning(this.transform.name + ": LoadInventoryContentAsset", this.gameObject);
         }
 
         private void LoadDeskContentBehaviour()
@@ -491,8 +479,7 @@ namespace SG03.UI
                 this.thisWeekContentAsset,
                 this.thisMonthContentAsset,
                 this.next7DaysContentAsset,
-                this.next30DaysContentAsset,
-                this.refreshIcon);
+                this.next30DaysContentAsset);
 
             this.questPanel.ShowQuest(type);
         }

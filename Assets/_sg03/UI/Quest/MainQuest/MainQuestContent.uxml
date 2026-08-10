@@ -10,7 +10,9 @@
                 <ui:Label text="MAIN QUEST" class="main-quest-header__title" />
                 <ui:Label name="MainQuestChainName" text="Loading quest chain..." class="main-quest-header__subtitle" />
             </ui:VisualElement>
-            <ui:Button name="MainQuestRefreshButton" text="R" tooltip="Refresh" class="main-quest-refresh-button" />
+            <ui:Button name="MainQuestRefreshButton" tooltip="Refresh" class="main-quest-refresh-button dq-refresh-button">
+                <ui:VisualElement class="refresh-button-component__icon" style="background-image: url(../../Images/refresh-128.png);" />
+            </ui:Button>
         </ui:VisualElement>
         <ui:VisualElement name="MainQuestGraphHost" class="main-quest-graph-host" />
         <ui:Label name="MainQuestState" class="main-quest-state" />

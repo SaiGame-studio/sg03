@@ -5,6 +5,7 @@ using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
 using SG03.UI.Components;
+using SG03.UI.Components;
 
 namespace SG03.UI
 {
@@ -54,7 +55,9 @@ namespace SG03.UI
             this.detailContent = root.Q<VisualElement>("MainQuestDetailContent");
 
             this.battlePassDropdown?.RegisterValueChangedCallback(this.HandleBattlePassSelectionChanged);
-            root.Q<Button>("BattlePassRefreshButton")?.RegisterCallback<ClickEvent>(_ => this.LoadBattlePasses());
+            Button refreshButton = root.Q<Button>("BattlePassRefreshButton");
+            new RefreshButtonComponent(refreshButton, null);
+            refreshButton?.RegisterCallback<ClickEvent>(_ => this.LoadBattlePasses());
             this.questDetailPanel = new QuestDetailPanelUI(root, this.LoadBattlePasses,
                 node => node != null && this.questIdsByGraphNodeId.TryGetValue(node.id, out string questId) ? questId : null);
             this.graph.NodeClicked += this.questDetailPanel.Show;

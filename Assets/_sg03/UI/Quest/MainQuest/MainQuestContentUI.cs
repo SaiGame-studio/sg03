@@ -50,7 +50,9 @@ namespace SG03.UI
             this.detailExpiredMessage = root.Q<Label>("MainQuestDetailExpiredMessage");
             this.detailClaimedMessage = root.Q<Label>("MainQuestDetailClaimedMessage");
             this.detailUnavailableMessage = root.Q<Label>("MainQuestDetailUnavailableMessage");
-            root.Q<Button>("MainQuestRefreshButton")?.RegisterCallback<ClickEvent>(_ => this.LoadTree());
+            Button refreshButton = root.Q<Button>("MainQuestRefreshButton");
+            new RefreshButtonComponent(refreshButton, null);
+            refreshButton?.RegisterCallback<ClickEvent>(_ => this.LoadTree());
             this.questDetailPanel = new QuestDetailPanelUI(root, this.LoadTree);
             this.graph.NodeClicked += this.questDetailPanel.Show;
             this.chainQuest = SaiServer.Instance?.ChainQuest;

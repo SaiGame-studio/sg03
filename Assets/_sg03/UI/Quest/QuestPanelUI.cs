@@ -22,7 +22,6 @@ namespace SG03.UI
         private readonly VisualTreeAsset thisMonthAsset;
         private readonly VisualTreeAsset next7DaysAsset;
         private readonly VisualTreeAsset next30DaysAsset;
-        private readonly Sprite refreshIcon;
         private DailyQuestContentUI dailyQuestContent;
         private MainQuestContentUI mainQuestContent;
         private BattlePassContentUI battlePassContent;
@@ -35,8 +34,7 @@ namespace SG03.UI
             VisualTreeAsset thisWeekAsset,
             VisualTreeAsset thisMonthAsset,
             VisualTreeAsset next7DaysAsset,
-            VisualTreeAsset next30DaysAsset,
-            Sprite refreshIcon)
+            VisualTreeAsset next30DaysAsset)
         {
             this.dailyQuestAsset = dailyAsset;
             this.mainQuestAsset  = mainAsset;
@@ -45,7 +43,6 @@ namespace SG03.UI
             this.thisMonthAsset = thisMonthAsset;
             this.next7DaysAsset = next7DaysAsset;
             this.next30DaysAsset = next30DaysAsset;
-            this.refreshIcon = refreshIcon;
 
             this.dailyNavBtn = panelRoot.Q<Button>("DailyQuestNavBtn");
             this.mainNavBtn  = panelRoot.Q<Button>("MainQuestNavBtn");
@@ -102,8 +99,7 @@ namespace SG03.UI
                     this.thisWeekAsset,
                     this.thisMonthAsset,
                     this.next7DaysAsset,
-                    this.next30DaysAsset,
-                    this.refreshIcon);
+                    this.next30DaysAsset);
             else if (type == QuestType.Main)
                 this.mainQuestContent = new MainQuestContentUI(content);
             else
