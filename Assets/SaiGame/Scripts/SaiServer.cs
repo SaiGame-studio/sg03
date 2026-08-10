@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Globalization;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
@@ -11,7 +10,7 @@ namespace SaiGame.Services
     [DefaultExecutionOrder(-100)]
     public class SaiServer : SaiSingleton<SaiServer>
     {
-        public const string PACKAGE_VERSION = "0.2.45";
+        public const string PACKAGE_VERSION = "0.2.47";
         public const string PACKAGE_NAME = "Sai Server";
 
         [SerializeField] protected SaiAuth saiAuth;
@@ -28,6 +27,7 @@ namespace SaiGame.Services
         [SerializeField] protected EquipmentSlot equipmentSlotManager;
         [SerializeField] protected Shop shop;
         [SerializeField] protected ChainQuest chainQuest;
+        [SerializeField] protected BattlePass battlePass;
         [SerializeField] protected QuestProgressor questProgressor;
         [SerializeField] protected QuestHistory questHistory;
         [SerializeField] protected DailyQuest dailyQuest;
@@ -128,6 +128,8 @@ namespace SaiGame.Services
         public EquipmentSlot EquipmentSlotManager => this.equipmentSlotManager;
 
         public ChainQuest ChainQuest => this.chainQuest;
+
+        public BattlePass BattlePass => this.battlePass;
 
         public QuestProgressor QuestProgressor => this.questProgressor;
 
@@ -413,6 +415,7 @@ namespace SaiGame.Services
             this.LoadEquipmentSlotManager();
             this.LoadShop();
             this.LoadChainQuest();
+            this.LoadBattlePass();
             this.LoadQuestProgressor();
             this.LoadQuestHistory();
             this.LoadDailyQuest();
@@ -487,8 +490,8 @@ namespace SaiGame.Services
 
         private DateTime ParseServerTime(string value, long timestamp)
         {
-            if (DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out DateTimeOffset parsed))
-                return parsed.DateTime;
+            if (DateTimeOffset.TryParse(value, out DateTimeOffset parsedServerTime))
+                return parsedServerTime.UtcDateTime;
 
             return DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime;
         }
@@ -612,6 +615,14 @@ namespace SaiGame.Services
             this.chainQuest = GetComponentInChildren<ChainQuest>();
             if (this.showDebugLog)
                 Debug.Log(transform.name + ": LoadChainQuest", gameObject);
+        }
+
+        protected virtual void LoadBattlePass()
+        {
+            if (this.battlePass != null) return;
+            this.battlePass = GetComponentInChildren<BattlePass>();
+            if (this.showDebugLog)
+                Debug.Log(transform.name + ": LoadBattlePass", gameObject);
         }
 
         protected virtual void LoadQuestProgressor()
