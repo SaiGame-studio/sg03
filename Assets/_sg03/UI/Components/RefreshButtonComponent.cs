@@ -13,7 +13,7 @@ namespace SG03.UI.Components
         {
             this.Button = button;
             if (this.Button == null) return;
-            this.Button.AddToClassList("dq-refresh-button");
+            this.Button.AddToClassList("refresh-button");
             // The UXML owns the icon at runtime.  Do not rewrite the button's
             // content here, otherwise UI Toolkit removes that visual element.
             if (icon != null)
@@ -27,7 +27,7 @@ namespace SG03.UI.Components
         public RefreshButtonComponent(VisualElement host, string name, Action onClick, Sprite icon)
         {
             this.Button = new Button(onClick) { name = name, text = "", tooltip = "Refresh" };
-            this.Button.AddToClassList("dq-refresh-button");
+            this.Button.AddToClassList("refresh-button");
             this.AddIcon(icon);
             host?.Add(this.Button);
         }

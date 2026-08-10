@@ -15,7 +15,7 @@
                 <ui:Label name="BattlePassScheduleState" class="battle-pass-session-schedule__item" />
             </ui:VisualElement>
             <ui:DropdownField name="BattlePassDropdown" class="battle-pass-dropdown dq-pool-dropdown dq-pool-dropdown--right" />
-            <ui:Button name="BattlePassRefreshButton" tooltip="Refresh" class="main-quest-refresh-button dq-refresh-button">
+            <ui:Button name="BattlePassRefreshButton" tooltip="Refresh" class="main-quest-refresh-button refresh-button">
                 <ui:VisualElement class="refresh-button-component__icon" style="background-image: url(../../Images/refresh-128.png);" />
             </ui:Button>
         </ui:VisualElement>
