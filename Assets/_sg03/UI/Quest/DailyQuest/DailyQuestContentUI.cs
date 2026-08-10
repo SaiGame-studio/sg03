@@ -25,6 +25,7 @@ namespace SG03.UI
         private readonly DropdownField poolDropdown;
         private readonly Button assignAheadButton;
         private readonly Button refreshButton;
+        private readonly QuestDetailPanelUI commonQuestDetailPanel;
         private readonly VisualElement questDetailPanel;
         private readonly VisualElement questDetailContent;
         private readonly Button closeQuestDetailButton;
@@ -85,6 +86,7 @@ namespace SG03.UI
             this.poolDropdown   = root.Q<DropdownField>("PoolDropdown");
             this.assignAheadButton = root.Q<Button>("AssignAheadButton");
             this.refreshButton  = root.Q<Button>("RefreshButton");
+            this.commonQuestDetailPanel = new QuestDetailPanelUI(root, this.RefreshSelectedPoolData);
             this.questDetailPanel = root.Q("QuestDetailPanel");
             this.questDetailContent = root.Q("QuestDetailContent");
             this.closeQuestDetailButton = root.Q<Button>("CloseQuestDetailButton");
@@ -822,6 +824,12 @@ namespace SG03.UI
 
         private void ShowQuestDetail(DailyQuestEntryData entry, VisualElement questItem)
         {
+            if (entry?.quest != null)
+            {
+                this.SetSelectedQuestItem(questItem);
+                this.commonQuestDetailPanel.Show(new QuestFlowNode { id = entry.quest.id ?? entry.assignment?.quest_definition_id, title = entry.quest.name, status = entry.status });
+                return;
+            }
             if (entry == null || this.questDetailPanel == null || this.questDetailContent == null) return;
 
             int requestVersion = ++this.questDetailRequestVersion;
@@ -1094,6 +1102,7 @@ namespace SG03.UI
 
         public bool CloseQuestDetailOnEscape()
         {
+            if (this.commonQuestDetailPanel.CloseOnEscape()) { this.SetSelectedQuestItem(null); return true; }
             if (this.questDetailPanel == null
                 || !this.questDetailPanel.ClassListContains("dq-quest-detail-panel--open")) return false;
 

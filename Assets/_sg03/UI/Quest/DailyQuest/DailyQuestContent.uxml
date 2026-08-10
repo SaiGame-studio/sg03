@@ -24,21 +24,21 @@
 
         <ui:VisualElement name="DailyQuestTabContent" class="dq-tab-content" />
 
-        <ui:VisualElement name="QuestDetailPanel" class="dq-quest-detail-panel dq-quest-detail-panel--hidden">
+        <ui:VisualElement name="MainQuestDetailPanel" class="main-quest-detail-panel main-quest-detail-panel--hidden">
             <ui:VisualElement class="dq-quest-detail-panel__header">
                 <ui:Label text="Quest Details" class="dq-quest-detail-panel__title" />
                 <ui:Button name="CloseQuestDetailButton" text="×" tooltip="Close" class="dq-quest-detail-panel__close" />
             </ui:VisualElement>
             <ui:ScrollView class="dq-quest-detail-panel__scroll">
-                <ui:VisualElement name="QuestDetailContent" class="dq-quest-detail-panel__content" />
+                <ui:VisualElement name="MainQuestDetailContent" class="main-quest-detail-panel__content" />
             </ui:ScrollView>
             <ui:VisualElement name="QuestDetailActions" class="dq-quest-detail-panel__actions">
-                <ui:Button name="QuestDetailStartButton" text="Start" class="dq-quest-detail-panel__action" />
-                <ui:Button name="QuestDetailCheckButton" text="Check" class="dq-quest-detail-panel__action" />
-                <ui:Button name="QuestDetailClaimButton" text="Claim" class="dq-quest-detail-panel__action dq-quest-detail-panel__action--claim dq-quest-detail-panel__action--last" />
-                <ui:Label name="QuestDetailExpiredMessage" text="This quest has expired." class="dq-quest-detail-panel__expired-message" />
-                <ui:Label name="QuestDetailClaimedMessage" text="Quest claimed successfully." class="dq-quest-detail-panel__claimed-message" />
-                <ui:Label name="QuestDetailUnavailableMessage" text="This quest is not available yet." class="dq-quest-detail-panel__unavailable-message" />
+                <ui:Button name="MainQuestDetailStartButton" text="Start" class="main-quest-detail-panel__action" />
+                <ui:Button name="MainQuestDetailCheckButton" text="Check" class="main-quest-detail-panel__action" />
+                <ui:Button name="MainQuestDetailClaimButton" text="Claim" class="main-quest-detail-panel__action main-quest-detail-panel__action--claim main-quest-detail-panel__action--last" />
+                <ui:Label name="MainQuestDetailExpiredMessage" text="This quest has expired." class="main-quest-detail-panel__expired-message" />
+                <ui:Label name="MainQuestDetailClaimedMessage" text="Quest claimed successfully." class="main-quest-detail-panel__claimed-message" />
+                <ui:Label name="MainQuestDetailUnavailableMessage" text="This quest is not available yet." class="main-quest-detail-panel__unavailable-message" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
