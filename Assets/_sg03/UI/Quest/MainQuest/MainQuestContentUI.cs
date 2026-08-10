@@ -10,6 +10,7 @@ namespace SG03.UI
     /// <summary>Renders the active quest-chain tree with progression flowing from left to right.</summary>
     public class MainQuestContentUI : IDisposable
     {
+        private const string MainQuestChainKey = "main_quest";
         private const float CardWidth = 220f;
         private const float CardHeight = 92f;
         private const float ColumnGap = 120f;
@@ -103,7 +104,7 @@ namespace SG03.UI
                 onSuccess: _ =>
                 {
                     ChainQuestData loadedChain = this.GetActiveChain();
-                    if (loadedChain == null) this.ShowState("No active quest chain is available.");
+                    if (loadedChain == null) this.ShowState($"Quest chain '{MainQuestChainKey}' is not available.");
                     else this.LoadTree(loadedChain);
                 },
                 onError: error => this.ShowState($"Could not load quest chains: {error}"));
@@ -131,8 +132,8 @@ namespace SG03.UI
 
         private ChainQuestData GetActiveChain()
         {
-            ChainQuestData[] chains = this.chainQuest.GetActiveChains();
-            return chains != null && chains.Length > 0 ? chains[0] : null;
+            ChainQuestData mainQuestChain = this.chainQuest.GetChainByKey(MainQuestChainKey);
+            return mainQuestChain != null && mainQuestChain.is_active ? mainQuestChain : null;
         }
 
         private void LoadTree(ChainQuestData chain)
