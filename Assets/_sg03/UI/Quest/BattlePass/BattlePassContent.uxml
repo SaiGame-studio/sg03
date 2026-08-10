@@ -14,5 +14,22 @@
         </ui:VisualElement>
         <ui:VisualElement name="BattlePassGraphHost" class="battle-pass-graph-host" />
         <ui:Label name="BattlePassState" class="battle-pass-state" />
+        <ui:VisualElement name="MainQuestDetailPanel" class="main-quest-detail-panel main-quest-detail-panel--hidden">
+            <ui:VisualElement class="main-quest-detail-panel__header">
+                <ui:Label text="Quest Details" class="main-quest-detail-panel__title" />
+                <ui:Button name="CloseMainQuestDetailButton" text="X" tooltip="Close" class="main-quest-detail-panel__close" />
+            </ui:VisualElement>
+            <ui:ScrollView class="main-quest-detail-panel__scroll">
+                <ui:VisualElement name="MainQuestDetailContent" class="main-quest-detail-panel__content" />
+            </ui:ScrollView>
+            <ui:VisualElement class="main-quest-detail-panel__actions">
+                <ui:Button name="MainQuestDetailStartButton" text="Start" class="main-quest-detail-panel__action" />
+                <ui:Button name="MainQuestDetailCheckButton" text="Check" class="main-quest-detail-panel__action" />
+                <ui:Button name="MainQuestDetailClaimButton" text="Claim" class="main-quest-detail-panel__action main-quest-detail-panel__action--claim main-quest-detail-panel__action--last" />
+                <ui:Label name="MainQuestDetailExpiredMessage" text="This quest has expired." class="main-quest-detail-panel__expired-message" />
+                <ui:Label name="MainQuestDetailClaimedMessage" text="Quest claimed successfully." class="main-quest-detail-panel__claimed-message" />
+                <ui:Label name="MainQuestDetailUnavailableMessage" text="This quest is not available yet." class="main-quest-detail-panel__unavailable-message" />
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

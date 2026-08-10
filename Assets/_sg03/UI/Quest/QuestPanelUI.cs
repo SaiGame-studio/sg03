@@ -109,6 +109,7 @@ namespace SG03.UI
         public bool CloseQuestDetailOnEscape()
             => this.dailyQuestContent?.CloseQuestDetailOnEscape()
                ?? this.mainQuestContent?.CloseQuestDetailOnEscape()
+               ?? this.battlePassContent?.CloseQuestDetailOnEscape()
                ?? false;
     }
 
