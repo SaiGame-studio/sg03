@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using SaiGame.Services;
 using UnityEngine.UIElements;
 using SG03.UI.Components;
@@ -18,6 +19,7 @@ namespace SG03.UI
         private readonly Label claimedMessage;
         private readonly Label unavailableMessage;
         private readonly Func<QuestFlowNode, string> questIdResolver;
+        private readonly Func<BattlePassSessionData> sessionResolver;
         private readonly Action refresh;
         private QuestFlowNode selectedNode;
         private string selectedQuestId;
@@ -27,7 +29,7 @@ namespace SG03.UI
         private readonly Dictionary<string, ItemDefinitionData> itemDefinitions = new Dictionary<string, ItemDefinitionData>();
         private readonly HashSet<string> loadingItemDefinitions = new HashSet<string>();
 
-        public QuestDetailPanelUI(VisualElement root, Action refresh, Func<QuestFlowNode, string> questIdResolver = null)
+        public QuestDetailPanelUI(VisualElement root, Action refresh, Func<QuestFlowNode, string> questIdResolver = null, Func<BattlePassSessionData> sessionResolver = null)
         {
             this.panel = root.Q<VisualElement>("MainQuestDetailPanel");
             this.content = root.Q<VisualElement>("MainQuestDetailContent");
@@ -39,6 +41,7 @@ namespace SG03.UI
             this.unavailableMessage = root.Q<Label>("MainQuestDetailUnavailableMessage");
             this.refresh = refresh;
             this.questIdResolver = questIdResolver ?? (node => node?.id);
+            this.sessionResolver = sessionResolver;
             (root.Q<Button>("CloseMainQuestDetailButton") ?? root.Q<Button>("CloseQuestDetailButton"))?.RegisterCallback<ClickEvent>(_ => this.Hide());
             this.startButton?.RegisterCallback<ClickEvent>(_ => this.RunAction("start"));
             this.checkButton?.RegisterCallback<ClickEvent>(_ => this.RunAction("check"));
@@ -101,7 +104,7 @@ namespace SG03.UI
                 this.AddLabel("Received rewards", "main-quest-detail__section");
                 this.AddReceivedRewardDetails(this.selectedClaim.rewards_granted);
             }
-            this.ConfigureActions(status);
+            this.ConfigureActions(status, definition);
             this.panel.RemoveFromClassList("main-quest-detail-panel--hidden");
             this.panel.AddToClassList("main-quest-detail-panel--open");
         }
@@ -114,16 +117,35 @@ namespace SG03.UI
             this.panel.AddToClassList("main-quest-detail-panel--open");
         }
 
-        private void ConfigureActions(string status)
+        private void ConfigureActions(string status, QuestDefinitionData definition)
         {
             string value = (status ?? string.Empty).ToLowerInvariant();
+            if (this.IsSessionUpcoming(definition, out DateTimeOffset startAt))
+            {
+                SetDisplay(this.startButton, false); SetDisplay(this.checkButton, false); SetDisplay(this.claimButton, false);
+                SetDisplay(this.expiredMessage, false); SetDisplay(this.claimedMessage, false); SetDisplay(this.unavailableMessage, true);
+                if (this.unavailableMessage != null)
+                    this.unavailableMessage.text = $"This quest starts at {startAt.ToUniversalTime():dd MMM yyyy, HH:mm 'UTC'}.";
+                return;
+            }
+
             bool hide = value == "claimed" || value == "expired" || value == "locked";
             SetDisplay(this.startButton, !hide); SetDisplay(this.checkButton, !hide); SetDisplay(this.claimButton, !hide);
             SetDisplay(this.expiredMessage, value == "expired"); SetDisplay(this.claimedMessage, value == "claimed"); SetDisplay(this.unavailableMessage, value == "locked");
+            if (this.unavailableMessage != null) this.unavailableMessage.text = "This quest is not available yet.";
             if (hide) return;
             SetAction(this.startButton, "Start", value == "not_started");
             SetAction(this.checkButton, "Check", value == "in_progress");
             SetAction(this.claimButton, "Claim", value == "completed");
+        }
+
+        private bool IsSessionUpcoming(QuestDefinitionData definition, out DateTimeOffset startAt)
+        {
+            startAt = default;
+            if (!string.Equals(definition?.quest_type, "session", StringComparison.OrdinalIgnoreCase)) return false;
+            string cycleStart = this.sessionResolver?.Invoke()?.cycle_start_at;
+            return DateTimeOffset.TryParse(cycleStart, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out startAt)
+                && DateTimeOffset.UtcNow < startAt;
         }
 
         private void RunAction(string action)

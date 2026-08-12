@@ -135,7 +135,9 @@ namespace SG03.UI
             controls.AddToClassList("quest-flow-controls");
             controls.Add(this.CreateControl("+", () => this.SetZoom(this.zoom * 1.2f)));
             controls.Add(this.CreateControl("−", () => this.SetZoom(this.zoom / 1.2f)));
-            controls.Add(this.CreateControl("Fit", this.FitView));
+            Button fitViewButton = this.CreateControl("Fit", this.FitView);
+            fitViewButton.AddToClassList("quest-flow-controls__button--last");
+            controls.Add(fitViewButton);
             host.Add(controls);
         }
 

@@ -234,7 +234,7 @@
 .quest-flow-node--locked .quest-flow-node__status { color: rgb(150, 155, 170); background-color: rgba(85, 90, 105, 0.35); }
 .quest-flow-controls { position: absolute; right: 14px; bottom: 14px; flex-direction: row; background-color: rgb(20, 26, 43); border-width: 1px; border-color: rgba(112, 151, 225, 0.5); border-radius: 6px; overflow: hidden; }
 .quest-flow-controls__button { min-width: 32px; height: 30px; padding: 2px 8px; color: rgb(190, 210, 255); background-color: transparent; border-width: 0; border-right-width: 1px; border-color: rgba(112, 151, 225, 0.35); border-radius: 0; font-size: 12px; }
-.quest-flow-controls__button:last-child { border-right-width: 0; }
+.quest-flow-controls__button--last { border-right-width: 0; }
 
 /* Battle Pass chain graph. */
 .battle-pass-root { position: relative; flex: 1; flex-direction: column; min-height: 0; overflow: hidden; }
@@ -282,7 +282,7 @@
 .main-quest-detail-panel__expired-message, .main-quest-detail-panel__claimed-message, .main-quest-detail-panel__unavailable-message { display: none; flex-grow: 1; padding: 8px 10px; border-width: 1px; border-radius: 6px; -unity-text-align: middle-center; -unity-font-style: bold; }
 .main-quest-detail-panel__expired-message { color: rgb(255, 185, 185); background-color: rgba(150, 50, 50, 0.25); border-color: rgba(255, 120, 120, 0.5); }
 .main-quest-detail-panel__claimed-message { color: rgb(175, 255, 195); background-color: rgba(50, 150, 80, 0.25); border-color: rgba(110, 230, 140, 0.5); }
-.main-quest-detail-panel__unavailable-message { color: rgb(190, 215, 255); background-color: rgba(50, 90, 150, 0.25); border-color: rgba(110, 165, 255, 0.5); }
+.main-quest-detail-panel__unavailable-message { color: rgb(190, 215, 255); background-color: transparent; border-width: 0; }
 .main-quest-detail__name { color: rgb(225, 235, 255); font-size: 18px; -unity-font-style: bold; white-space: normal; margin-bottom: 10px; }
 .main-quest-detail__description { color: rgb(170, 185, 220); font-size: 12px; white-space: normal; margin-bottom: 14px; }
 .main-quest-detail__section { color: rgb(130, 180, 255); font-size: 12px; -unity-font-style: bold; margin-top: 10px; margin-bottom: 5px; }
