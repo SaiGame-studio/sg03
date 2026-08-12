@@ -36,6 +36,7 @@ namespace SG03.UI
         private bool waitingForLogin;
         private int requestVersion;
         private int detailRequestVersion;
+        private BattlePassData selectedBattlePass;
 
         public BattlePassContentUI(VisualElement root)
         {
@@ -58,7 +59,8 @@ namespace SG03.UI
             new RefreshButtonComponent(refreshButton, null);
             refreshButton?.RegisterCallback<ClickEvent>(_ => this.LoadBattlePasses());
             this.questDetailPanel = new QuestDetailPanelUI(root, this.LoadBattlePasses,
-                node => node != null && this.questIdsByGraphNodeId.TryGetValue(node.id, out string questId) ? questId : null);
+                node => node != null && this.questIdsByGraphNodeId.TryGetValue(node.id, out string questId) ? questId : null,
+                () => this.selectedBattlePass?.type_config?.session);
             this.graph.NodeClicked += this.questDetailPanel.Show;
             this.LoadBattlePasses();
         }
@@ -132,6 +134,7 @@ namespace SG03.UI
 
             this.battlePassDropdown?.SetValueWithoutNotify(labels[0]);
             BattlePassData selectedBattlePass = this.battlePassesByLabel[labels[0]];
+            this.selectedBattlePass = selectedBattlePass;
             this.RenderSessionSchedule(selectedBattlePass);
             this.LoadBattlePassChains(selectedBattlePass);
         }
@@ -151,6 +154,7 @@ namespace SG03.UI
         {
             if (this.battlePassesByLabel.TryGetValue(evt.newValue, out BattlePassData battlePassData))
             {
+                this.selectedBattlePass = battlePassData;
                 this.RenderSessionSchedule(battlePassData);
                 this.LoadBattlePassChains(battlePassData);
             }
@@ -162,22 +166,19 @@ namespace SG03.UI
             if (this.sessionSchedule == null) return;
             this.sessionSchedule.style.display = session == null ? DisplayStyle.None : DisplayStyle.Flex;
             if (session == null) return;
-            bool isRecurring = string.Equals(session.schedule_mode, "interval", StringComparison.OrdinalIgnoreCase);
-            this.scheduleType.text = $"Schedule: {(isRecurring ? "Recurring" : "Fixed window")}";
-            string cycleStart = !string.IsNullOrEmpty(session.cycle_start_at) ? session.cycle_start_at : session.session_start_at;
+            bool isRecurring = session.repeatable;
+            this.scheduleType.text = $"Schedule: {(isRecurring ? "Recurring" : "One-time")}";
             this.scheduleCycle.text = isRecurring
-                ? $"Cycle: {this.FormatUtc(cycleStart)} · every {session.repeat_amount} {session.repeat_type}"
-                : $"Window: {this.FormatUtc(session.session_start_at)} — {this.FormatUtc(session.session_end_at)}";
+                ? $"Cycle: {this.FormatUtc(session.cycle_start_at)} - every {session.repeat_every_months} months"
+                : $"Starts: {this.FormatUtc(session.cycle_start_at)}";
             this.scheduleState.text = $"Session: {this.GetSessionState(session)}";
         }
 
         private string GetSessionState(BattlePassSessionData session)
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            if (DateTimeOffset.TryParse(session.session_start_at ?? session.cycle_start_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset start) && now < start)
+            if (DateTimeOffset.TryParse(session.cycle_start_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset start) && now < start)
                 return "upcoming";
-            if (!string.Equals(session.schedule_mode, "interval", StringComparison.OrdinalIgnoreCase) && DateTimeOffset.TryParse(session.session_end_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset end) && now > end)
-                return "ended";
             return "active";
         }
 
