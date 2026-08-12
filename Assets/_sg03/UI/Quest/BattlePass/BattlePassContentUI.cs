@@ -5,7 +5,6 @@ using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
 using SG03.UI.Components;
-using SG03.UI.Components;
 
 namespace SG03.UI
 {
@@ -163,10 +162,11 @@ namespace SG03.UI
             if (this.sessionSchedule == null) return;
             this.sessionSchedule.style.display = session == null ? DisplayStyle.None : DisplayStyle.Flex;
             if (session == null) return;
-            this.scheduleType.text = $"Schedule: {(session.repeatable ? "Recurring" : "Fixed window")}";
+            bool isRecurring = string.Equals(session.schedule_mode, "interval", StringComparison.OrdinalIgnoreCase);
+            this.scheduleType.text = $"Schedule: {(isRecurring ? "Recurring" : "Fixed window")}";
             string cycleStart = !string.IsNullOrEmpty(session.cycle_start_at) ? session.cycle_start_at : session.session_start_at;
-            this.scheduleCycle.text = session.repeatable
-                ? $"Cycle: {this.FormatUtc(cycleStart)} · every {session.repeat_every_months} month(s)"
+            this.scheduleCycle.text = isRecurring
+                ? $"Cycle: {this.FormatUtc(cycleStart)} · every {session.repeat_amount} {session.repeat_type}"
                 : $"Window: {this.FormatUtc(session.session_start_at)} — {this.FormatUtc(session.session_end_at)}";
             this.scheduleState.text = $"Session: {this.GetSessionState(session)}";
         }
@@ -176,7 +176,7 @@ namespace SG03.UI
             DateTimeOffset now = DateTimeOffset.UtcNow;
             if (DateTimeOffset.TryParse(session.session_start_at ?? session.cycle_start_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset start) && now < start)
                 return "upcoming";
-            if (!session.repeatable && DateTimeOffset.TryParse(session.session_end_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset end) && now > end)
+            if (!string.Equals(session.schedule_mode, "interval", StringComparison.OrdinalIgnoreCase) && DateTimeOffset.TryParse(session.session_end_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset end) && now > end)
                 return "ended";
             return "active";
         }

@@ -234,7 +234,7 @@
 .quest-flow-node--locked .quest-flow-node__status { color: rgb(150, 155, 170); background-color: rgba(85, 90, 105, 0.35); }
 .quest-flow-controls { position: absolute; right: 14px; bottom: 14px; flex-direction: row; background-color: rgb(20, 26, 43); border-width: 1px; border-color: rgba(112, 151, 225, 0.5); border-radius: 6px; overflow: hidden; }
 .quest-flow-controls__button { min-width: 32px; height: 30px; padding: 2px 8px; color: rgb(190, 210, 255); background-color: transparent; border-width: 0; border-right-width: 1px; border-color: rgba(112, 151, 225, 0.35); border-radius: 0; font-size: 12px; }
-.quest-flow-controls__button:last-child { border-right-width: 0; }
+.quest-flow-controls__button--last { border-right-width: 0; }
 
 /* Battle Pass chain graph. */
 .battle-pass-root { position: relative; flex: 1; flex-direction: column; min-height: 0; overflow: hidden; }
