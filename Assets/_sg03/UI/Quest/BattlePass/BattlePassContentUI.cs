@@ -166,11 +166,11 @@ namespace SG03.UI
             if (this.sessionSchedule == null) return;
             this.sessionSchedule.style.display = session == null ? DisplayStyle.None : DisplayStyle.Flex;
             if (session == null) return;
-            bool isRecurring = session.repeatable;
+            bool isRecurring = string.Equals(session.schedule_mode, "interval", StringComparison.OrdinalIgnoreCase);
             this.scheduleType.text = $"Schedule: {(isRecurring ? "Recurring" : "One-time")}";
             this.scheduleCycle.text = isRecurring
-                ? $"Cycle: {this.FormatUtc(session.cycle_start_at)} - every {session.repeat_every_months} months"
-                : $"Starts: {this.FormatUtc(session.cycle_start_at)}";
+                ? $"Cycle: {this.FormatUtc(session.cycle_start_at)} - every {session.repeat_amount} {session.repeat_type}"
+                : $"Starts: {this.FormatUtc(session.session_start_at)}";
             this.scheduleState.text = $"Session: {this.GetSessionState(session)}";
         }
 
