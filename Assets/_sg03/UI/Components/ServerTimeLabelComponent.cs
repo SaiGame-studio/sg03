@@ -7,7 +7,7 @@ namespace SG03.UI.Components
 {
     public sealed class ServerTimeLabelComponent : IDisposable
     {
-        public const float DefaultWidth = 150f;
+        public const float DefaultWidth = 160f;
 
         private readonly VisualElement root;
         private readonly Label dateLabel;
@@ -38,6 +38,7 @@ namespace SG03.UI.Components
             this.root.Add(this.CreateLabel("MinuteSecondSeparator", 5f, ":"));
             this.root.Add(this.timeDigitLabels[4]);
             this.root.Add(this.timeDigitLabels[5]);
+            this.root.Add(this.CreateUtcBadge());
             this.root.RegisterCallback<AttachToPanelEvent>(this.OnAttachToPanel);
             this.root.RegisterCallback<DetachFromPanelEvent>(this.OnDetachFromPanel);
             this.UpdateText();
@@ -100,6 +101,17 @@ namespace SG03.UI.Components
             label.style.paddingBottom = 0;
             label.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter;
             return label;
+        }
+
+        private Label CreateUtcBadge()
+        {
+            Label badge = this.CreateLabel("Utc", 24f, "UTC");
+            badge.style.marginLeft = 3f;
+            badge.style.color = new UnityEngine.Color(1f, 0.87f, 0.47f);
+            badge.style.backgroundColor = new UnityEngine.Color(0.75f, 0.5f, 0.08f, 0.35f);
+            badge.style.unityFontStyleAndWeight = UnityEngine.FontStyle.Bold;
+            badge.style.fontSize = 9f;
+            return badge;
         }
 
         private void UpdateText()

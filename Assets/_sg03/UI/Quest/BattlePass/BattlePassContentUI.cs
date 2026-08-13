@@ -21,7 +21,7 @@ namespace SG03.UI
         private readonly DropdownField battlePassDropdown;
         private readonly VisualElement sessionSchedule;
         private readonly Label scheduleType;
-        private readonly Label scheduleCycle;
+        private readonly Label scheduleDetails;
         private readonly Label scheduleState;
         private readonly ServerTimeLabelComponent serverTime;
         private readonly Label state;
@@ -43,7 +43,7 @@ namespace SG03.UI
             this.battlePassDropdown = root.Q<DropdownField>("BattlePassDropdown");
             this.sessionSchedule = root.Q<VisualElement>("BattlePassSessionSchedule");
             this.scheduleType = root.Q<Label>("BattlePassScheduleType");
-            this.scheduleCycle = root.Q<Label>("BattlePassScheduleCycle");
+            this.scheduleDetails = root.Q<Label>("BattlePassScheduleDetails");
             this.scheduleState = root.Q<Label>("BattlePassScheduleState");
             VisualElement serverTimeLabel = root.Q<VisualElement>("BattlePassServerTimeLabel");
             if (serverTimeLabel != null) this.serverTime = new ServerTimeLabelComponent(serverTimeLabel);
@@ -166,27 +166,46 @@ namespace SG03.UI
             if (this.sessionSchedule == null) return;
             this.sessionSchedule.style.display = session == null ? DisplayStyle.None : DisplayStyle.Flex;
             if (session == null) return;
-            bool isRecurring = string.Equals(session.schedule_mode, "interval", StringComparison.OrdinalIgnoreCase);
-            this.scheduleType.text = $"Schedule: {(isRecurring ? "Recurring" : "One-time")}";
-            this.scheduleCycle.text = isRecurring
-                ? $"Cycle: {this.FormatUtc(session.cycle_start_at)} - every {session.repeat_amount} {session.repeat_type}"
-                : $"Starts: {this.FormatUtc(session.session_start_at)}";
-            this.scheduleState.text = $"Session: {this.GetSessionState(session)}";
+            string scheduleMode = session.schedule_mode?.ToLowerInvariant();
+            bool isInterval = scheduleMode == "interval";
+            bool isAnnual = scheduleMode == "annual";
+            this.scheduleType.text = isInterval ? "INTERVAL" : isAnnual ? "ANNUAL" : "FIXED";
+            this.scheduleDetails.text = isInterval
+                ? $"From {this.FormatUtcTime(session.cycle_start_at)} | Every {session.repeat_amount} {this.FormatRepeatType(session.repeat_type)}"
+                : $"{this.FormatUtcTime(session.session_start_at)} - {this.FormatUtcTime(session.session_end_at)}";
+            string sessionState = this.GetSessionState(session);
+            this.scheduleState.text = sessionState;
+            this.sessionSchedule.EnableInClassList("battle-pass-session-schedule--upcoming", sessionState == "Upcoming");
+            this.sessionSchedule.EnableInClassList("battle-pass-session-schedule--active", sessionState == "Active");
+            this.sessionSchedule.EnableInClassList("battle-pass-session-schedule--expired", sessionState == "Expired");
         }
 
         private string GetSessionState(BattlePassSessionData session)
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            if (DateTimeOffset.TryParse(session.cycle_start_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset start) && now < start)
-                return "upcoming";
-            return "active";
+            string startValue = string.Equals(session.schedule_mode, "interval", StringComparison.OrdinalIgnoreCase)
+                ? session.cycle_start_at
+                : session.session_start_at;
+            if (DateTimeOffset.TryParse(startValue, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset start) && now < start)
+                return "Upcoming";
+            if (!string.Equals(session.schedule_mode, "interval", StringComparison.OrdinalIgnoreCase)
+                && DateTimeOffset.TryParse(session.session_end_at, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset end)
+                && now > end)
+                return "Expired";
+            return "Active";
         }
 
-        private string FormatUtc(string value)
+        private string FormatRepeatType(string repeatType)
+        {
+            if (string.IsNullOrEmpty(repeatType)) return "periods";
+            return repeatType.EndsWith("s", StringComparison.OrdinalIgnoreCase) ? repeatType : $"{repeatType}s";
+        }
+
+        private string FormatUtcTime(string value)
         {
             if (!DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset dateTime))
                 return string.IsNullOrEmpty(value) ? "Not set" : value;
-            return dateTime.ToUniversalTime().ToString("dd MMM yyyy, HH:mm 'UTC'", CultureInfo.InvariantCulture);
+            return dateTime.ToUniversalTime().ToString("dd MMM yyyy, HH:mm", CultureInfo.InvariantCulture);
         }
 
         private void LoadBattlePassChains(BattlePassData battlePassData)
