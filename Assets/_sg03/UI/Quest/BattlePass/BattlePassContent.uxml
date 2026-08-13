@@ -10,9 +10,10 @@
         </ui:VisualElement>
         <ui:VisualElement class="battle-pass-toolbar">
             <ui:VisualElement name="BattlePassSessionSchedule" class="battle-pass-session-schedule">
-                <ui:Label name="BattlePassScheduleType" class="battle-pass-session-schedule__item" />
-                <ui:Label name="BattlePassScheduleCycle" class="battle-pass-session-schedule__item" />
-                <ui:Label name="BattlePassScheduleState" class="battle-pass-session-schedule__item" />
+                <ui:Label name="BattlePassScheduleType" class="battle-pass-session-schedule__type" />
+                <ui:Label name="BattlePassScheduleDetails" class="battle-pass-session-schedule__details" />
+                <ui:Label text="UTC" class="battle-pass-session-schedule__timezone" />
+                <ui:Label name="BattlePassScheduleState" class="battle-pass-session-schedule__state" />
             </ui:VisualElement>
             <ui:DropdownField name="BattlePassDropdown" class="battle-pass-dropdown dq-pool-dropdown dq-pool-dropdown--right" />
             <ui:Button name="BattlePassRefreshButton" tooltip="Refresh" class="main-quest-refresh-button refresh-button">
