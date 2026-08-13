@@ -33,10 +33,14 @@ namespace SG03.UI
         private readonly VisualElement detailContent;
         private readonly Dictionary<string, BattlePassData> battlePassesByLabel = new Dictionary<string, BattlePassData>();
         private readonly Dictionary<string, string> questIdsByGraphNodeId = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> chainIdsByGraphNodeId = new Dictionary<string, string>();
+        private readonly List<ChainQuestData> loadedChains = new List<ChainQuestData>();
+        private readonly Dictionary<string, ChainQuestTreeResponse> loadedTreesByChainId = new Dictionary<string, ChainQuestTreeResponse>();
         private bool waitingForLogin;
         private int requestVersion;
         private int detailRequestVersion;
         private BattlePassData selectedBattlePass;
+        private string selectedChainId;
 
         public BattlePassContentUI(VisualElement root)
         {
@@ -58,10 +62,10 @@ namespace SG03.UI
             Button refreshButton = root.Q<Button>("BattlePassRefreshButton");
             new RefreshButtonComponent(refreshButton, null);
             refreshButton?.RegisterCallback<ClickEvent>(_ => this.LoadBattlePasses());
-            this.questDetailPanel = new QuestDetailPanelUI(root, this.LoadBattlePasses,
+            this.questDetailPanel = new QuestDetailPanelUI(root, this.RefreshSelectedChain,
                 node => node != null && this.questIdsByGraphNodeId.TryGetValue(node.id, out string questId) ? questId : null,
                 () => this.selectedBattlePass?.type_config?.session);
-            this.graph.NodeClicked += this.questDetailPanel.Show;
+            this.graph.NodeClicked += this.HandleQuestNodeClicked;
             this.LoadBattlePasses();
         }
 
@@ -70,7 +74,7 @@ namespace SG03.UI
             this.serverTime?.Dispose();
             this.requestVersion++;
             this.detailRequestVersion++;
-            this.graph.NodeClicked -= this.questDetailPanel.Show;
+            this.graph.NodeClicked -= this.HandleQuestNodeClicked;
             if (!this.waitingForLogin || SaiServer.Instance?.SaiAuth == null) return;
             SaiServer.Instance.SaiAuth.OnLoginSuccess -= this.HandleLoginSuccess;
             this.waitingForLogin = false;
@@ -279,7 +283,12 @@ namespace SG03.UI
         {
             completed++;
             if (completed != chains.Count || version != this.requestVersion) return;
-            this.RenderChainFlows(chains, treesByChainId);
+            this.loadedChains.Clear();
+            this.loadedChains.AddRange(chains);
+            this.loadedTreesByChainId.Clear();
+            foreach (KeyValuePair<string, ChainQuestTreeResponse> pair in treesByChainId)
+                this.loadedTreesByChainId[pair.Key] = pair.Value;
+            this.RenderChainFlows(this.loadedChains, this.loadedTreesByChainId);
         }
 
         private void RenderChainFlows(
@@ -289,6 +298,7 @@ namespace SG03.UI
             List<QuestFlowNode> nodes = new List<QuestFlowNode>();
             List<QuestFlowEdge> edges = new List<QuestFlowEdge>();
             this.questIdsByGraphNodeId.Clear();
+            this.chainIdsByGraphNodeId.Clear();
             float nextChainY = CanvasPadding;
 
             // Preserve the ordering supplied by BattlePass while rendering each chain's own tree.
@@ -322,8 +332,39 @@ namespace SG03.UI
             {
                 if (node == null || string.IsNullOrEmpty(node.quest_id)) continue;
                 this.questIdsByGraphNodeId[$"{chainId}:{node.quest_id}"] = node.quest_id;
+                this.chainIdsByGraphNodeId[$"{chainId}:{node.quest_id}"] = chainId;
                 this.RegisterQuestNodeIds(chainId, node.children);
             }
+        }
+
+        private void HandleQuestNodeClicked(QuestFlowNode node)
+        {
+            this.selectedChainId = node != null && this.chainIdsByGraphNodeId.TryGetValue(node.id, out string chainId)
+                ? chainId
+                : null;
+            this.questDetailPanel.Show(node);
+        }
+
+        private void RefreshSelectedChain()
+        {
+            if (this.chainQuest == null || string.IsNullOrEmpty(this.selectedChainId)) return;
+
+            int version = ++this.requestVersion;
+            this.ShowState("Updating quest chain...", clearGraph: false);
+            string chainId = this.selectedChainId;
+            this.chainQuest.GetChainTree(
+                chainId,
+                response =>
+                {
+                    if (version != this.requestVersion) return;
+                    this.loadedTreesByChainId[chainId] = response;
+                    this.RenderChainFlows(this.loadedChains, this.loadedTreesByChainId);
+                },
+                error =>
+                {
+                    if (version != this.requestVersion) return;
+                    this.ShowState($"Could not update quest chain: {error}", clearGraph: false);
+                });
         }
 
         public bool CloseQuestDetailOnEscape()
