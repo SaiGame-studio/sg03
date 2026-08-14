@@ -324,10 +324,11 @@ namespace SG03.UI
         private void LoadItemDefinition(string itemDefinitionId)
         {
             if (this.loadingRewardDefinitions.Contains(itemDefinitionId)) return;
-            PlayerItem playerItem = SaiServer.Instance?.PlayerItem;
-            if (playerItem == null) return;
+            SaiServer server = SaiServer.Instance;
+            ItemDefinitions definitions = server?.ItemDefinitions ?? server?.GetComponentInChildren<ItemDefinitions>(true);
+            if (definitions == null) return;
             this.loadingRewardDefinitions.Add(itemDefinitionId);
-            playerItem.GetItemDefinition(itemDefinitionId,
+            definitions.FetchById(itemDefinitionId,
                 definition =>
                 {
                     this.loadingRewardDefinitions.Remove(itemDefinitionId);
