@@ -27,9 +27,6 @@ namespace SG03.UI
         private QuestDefinitionStatusResponse selectedResponse;
         private QuestClaimRecord selectedClaim;
         private int requestVersion;
-        // All instances share this cache. A quest detail drawer can therefore be reused
-        // from any screen without requiring its host to provide item definitions.
-        private static readonly Dictionary<string, ItemDefinitionData> itemDefinitions = new Dictionary<string, ItemDefinitionData>();
         private readonly HashSet<string> loadingItemDefinitions = new HashSet<string>();
 
         public QuestDetailPanelUI(VisualElement root, Action refresh, Func<QuestFlowNode, string> questIdResolver = null, Func<BattlePassSessionData> sessionResolver = null)
@@ -72,8 +69,12 @@ namespace SG03.UI
                 {
                     if (version != this.requestVersion) return;
                     this.selectedClaim = null;
-                    this.Render(node, questId, response);
-                    this.LoadReceivedRewards(questId, version);
+                    this.FetchQuestItemDefinitions(response?.quest_definition, () =>
+                    {
+                        if (version != this.requestVersion) return;
+                        this.Render(node, questId, response);
+                        this.LoadReceivedRewards(questId, version);
+                    });
                 },
                 error => { if (version == this.requestVersion) this.RenderError(error); });
         }
@@ -179,7 +180,7 @@ namespace SG03.UI
                 if (clause.items != null) foreach (QuestClauseItem item in clause.items)
                 {
                     if (item == null) continue;
-                    itemDefinitions.TryGetValue(item.item_definition_id ?? string.Empty, out ItemDefinitionData definition);
+                    ItemDefinitionData definition = this.GetCachedItemDefinition(item.item_definition_id);
                     AddTo(card, $"Item: {definition?.name ?? definition?.item_code ?? "Item"} × {item.quantity}", "main-quest-detail__condition-rule");
                     if (!string.IsNullOrEmpty(definition?.rarity)) AddTo(card, $"Rarity: {definition.rarity}", "main-quest-detail__condition-rule");
                     if (definition == null && !string.IsNullOrEmpty(item.item_definition_id)) this.LoadItemDefinition(item.item_definition_id);
@@ -198,7 +199,7 @@ namespace SG03.UI
                 if (reward == null) continue;
                 int min = reward.quantity_min > 0 ? reward.quantity_min : reward.amount;
                 int max = reward.quantity_max > 0 ? reward.quantity_max : min;
-                itemDefinitions.TryGetValue(reward.item_definition_id ?? string.Empty, out ItemDefinitionData definition);
+                ItemDefinitionData definition = this.GetCachedItemDefinition(reward.item_definition_id);
                 VisualElement card = new VisualElement(); card.AddToClassList("main-quest-detail__reward");
                 AddTo(card, $"{definition?.name ?? definition?.item_code ?? reward.reward_type ?? "Reward"} × {(min == max ? min.ToString() : $"{min}–{max}")}", "main-quest-detail__reward-name");
                 if (!string.IsNullOrEmpty(definition?.item_code)) AddTo(card, $"Code: {definition.item_code}", "main-quest-detail__reward-info");
@@ -226,7 +227,6 @@ namespace SG03.UI
                 {
                     this.loadingItemDefinitions.Remove(itemDefinitionId);
                     if (definition == null) return;
-                    CacheItemDefinition(itemDefinitionId, definition);
                     if (this.selectedNode != null && this.selectedResponse != null)
                         this.Render(this.selectedNode, this.selectedQuestId, this.selectedResponse);
                 },
@@ -243,11 +243,56 @@ namespace SG03.UI
             return server?.ItemDefinitions ?? server?.GetComponentInChildren<ItemDefinitions>(true);
         }
 
-        private static void CacheItemDefinition(string requestedItemDefinitionId, ItemDefinitionData definition)
+        private ItemDefinitionData GetCachedItemDefinition(string itemDefinitionId)
         {
-            if (definition == null) return;
-            itemDefinitions[requestedItemDefinitionId] = definition;
-            if (!string.IsNullOrEmpty(definition.id)) itemDefinitions[definition.id] = definition;
+            return string.IsNullOrEmpty(itemDefinitionId)
+                ? null
+                : this.GetItemDefinitions()?.GetItemById(itemDefinitionId);
+        }
+
+        /// <summary>
+        /// Always resolve quest item IDs through ItemDefinitions when the panel opens.
+        /// ItemDefinitions itself owns the runtime cache, so reopening the panel produces
+        /// its FetchById cache-hit path instead of bypassing the service with UI state.
+        /// </summary>
+        private void FetchQuestItemDefinitions(QuestDefinitionData questDefinition, Action onComplete)
+        {
+            HashSet<string> itemDefinitionIds = new HashSet<string>();
+            if (questDefinition?.conditions?.clauses != null)
+            {
+                foreach (QuestClause clause in questDefinition.conditions.clauses)
+                {
+                    if (clause?.items == null) continue;
+                    foreach (QuestClauseItem item in clause.items)
+                        if (!string.IsNullOrEmpty(item?.item_definition_id)) itemDefinitionIds.Add(item.item_definition_id);
+                }
+            }
+
+            if (questDefinition?.rewards != null)
+                foreach (QuestReward reward in questDefinition.rewards)
+                    if (!string.IsNullOrEmpty(reward?.item_definition_id)) itemDefinitionIds.Add(reward.item_definition_id);
+
+            ItemDefinitions definitions = this.GetItemDefinitions();
+            if (definitions == null || itemDefinitionIds.Count == 0)
+            {
+                onComplete?.Invoke();
+                return;
+            }
+
+            int pending = itemDefinitionIds.Count;
+            foreach (string itemDefinitionId in itemDefinitionIds)
+            {
+                definitions.FetchById(itemDefinitionId,
+                    definition =>
+                    {
+                        if (--pending == 0) onComplete?.Invoke();
+                    },
+                    error =>
+                    {
+                        Debug.LogWarning($"[QuestDetail] Could not load item definition for {itemDefinitionId}: {error}");
+                        if (--pending == 0) onComplete?.Invoke();
+                    });
+            }
         }
 
         private void LoadReceivedRewards(string questId, int version)
@@ -271,7 +316,7 @@ namespace SG03.UI
             {
                 if (reward == null) continue;
                 int quantity = reward.quantity > 0 ? reward.quantity : reward.amount;
-                itemDefinitions.TryGetValue(reward.item_definition_id ?? string.Empty, out ItemDefinitionData definition);
+                ItemDefinitionData definition = this.GetCachedItemDefinition(reward.item_definition_id);
                 VisualElement card = new VisualElement(); card.AddToClassList("main-quest-detail__reward");
                 AddTo(card, $"{definition?.name ?? definition?.item_code ?? reward.reward_type ?? "Reward"} × {quantity}", "main-quest-detail__reward-name");
                 if (!string.IsNullOrEmpty(reward.reward_type)) AddTo(card, reward.reward_type, "main-quest-detail__reward-info");
