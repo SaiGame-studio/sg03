@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using SaiGame.Services;
@@ -12,14 +11,6 @@ namespace SG03.UI
     /// <summary>Shared quest-definition drawer used by every quest flow.</summary>
     public class QuestDetailPanelUI
     {
-        [Serializable]
-        private class ItemNameResponse
-        {
-            public string id;
-            public string name;
-            public string item_code;
-        }
-
         private readonly VisualElement panel;
         private readonly VisualElement content;
         private readonly Button startButton;
@@ -223,67 +214,33 @@ namespace SG03.UI
         private void LoadItemDefinition(string itemDefinitionId)
         {
             if (this.loadingItemDefinitions.Contains(itemDefinitionId)) return;
-            PlayerItem playerItem = SaiServer.Instance?.PlayerItem;
-            if (playerItem == null) return;
-
-            if (TryGetInventoryDefinition(playerItem, itemDefinitionId, out ItemDefinitionData cachedDefinition))
+            ItemDefinitions definitions = this.GetItemDefinitions();
+            if (definitions == null)
             {
-                CacheItemDefinition(itemDefinitionId, cachedDefinition);
-                if (this.selectedNode != null && this.selectedResponse != null)
-                    this.Render(this.selectedNode, this.selectedQuestId, this.selectedResponse);
+                Debug.LogWarning("[QuestDetail] ItemDefinitions service is not available.");
                 return;
             }
-
             this.loadingItemDefinitions.Add(itemDefinitionId);
-            SaiServer.Instance.StartCoroutine(this.LoadItemDefinitionCoroutine(itemDefinitionId));
-        }
-
-        private IEnumerator LoadItemDefinitionCoroutine(string itemDefinitionId)
-        {
-            string endpoint = $"/api/v1/games/{SaiServer.Instance.GameId}/items/{itemDefinitionId}";
-            yield return SaiServer.Instance.GetRequest(endpoint, response =>
-            {
-                try
+            definitions.FetchById(itemDefinitionId,
+                definition =>
                 {
-                    ItemDefinitionData definition = ParseItemName(response);
-
-                    if (definition == null || string.IsNullOrEmpty(definition.name))
-                    {
-                        Debug.LogWarning($"[QuestDetail] Item detail did not contain a name for {itemDefinitionId}.");
-                        return;
-                    }
-
+                    this.loadingItemDefinitions.Remove(itemDefinitionId);
+                    if (definition == null) return;
                     CacheItemDefinition(itemDefinitionId, definition);
                     if (this.selectedNode != null && this.selectedResponse != null)
                         this.Render(this.selectedNode, this.selectedQuestId, this.selectedResponse);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogWarning($"[QuestDetail] Could not parse item detail for {itemDefinitionId}: {exception.Message}");
-                }
-                finally
+                },
+                error =>
                 {
                     this.loadingItemDefinitions.Remove(itemDefinitionId);
-                }
-            }, error =>
-            {
-                this.loadingItemDefinitions.Remove(itemDefinitionId);
-                Debug.LogWarning($"[QuestDetail] Could not load item detail for {itemDefinitionId}: {error}");
-            });
+                    Debug.LogWarning($"[QuestDetail] Could not load item definition for {itemDefinitionId}: {error}");
+                });
         }
 
-        private static bool TryGetInventoryDefinition(PlayerItem playerItem, string itemDefinitionId, out ItemDefinitionData definition)
+        private ItemDefinitions GetItemDefinitions()
         {
-            definition = null;
-            InventoryItemData[] items = playerItem.CurrentInventory?.items;
-            if (items == null) return false;
-            foreach (InventoryItemData item in items)
-            {
-                if (item?.item_definition_id != itemDefinitionId || item.definition == null) continue;
-                definition = item.definition;
-                return true;
-            }
-            return false;
+            SaiServer server = SaiServer.Instance;
+            return server?.ItemDefinitions ?? server?.GetComponentInChildren<ItemDefinitions>(true);
         }
 
         private static void CacheItemDefinition(string requestedItemDefinitionId, ItemDefinitionData definition)
@@ -291,47 +248,6 @@ namespace SG03.UI
             if (definition == null) return;
             itemDefinitions[requestedItemDefinitionId] = definition;
             if (!string.IsNullOrEmpty(definition.id)) itemDefinitions[definition.id] = definition;
-        }
-
-        private static ItemDefinitionData ParseItemName(string response)
-        {
-            string itemJson = ExtractObject(response, "item")
-                ?? ExtractObject(response, "item_definition")
-                ?? ExtractObject(response, "data");
-            if (string.IsNullOrEmpty(itemJson)) return null;
-
-            // Deliberately deserialize only display fields. Item detail responses contain
-            // nested base_stats and metadata objects, which JsonUtility cannot map into
-            // ItemDefinitionData's string fields reliably.
-            ItemNameResponse item = JsonUtility.FromJson<ItemNameResponse>(itemJson);
-            if (item == null) return null;
-            return new ItemDefinitionData { id = item.id, name = item.name, item_code = item.item_code };
-        }
-
-        private static string ExtractObject(string json, string propertyName)
-        {
-            if (string.IsNullOrEmpty(json)) return null;
-            int property = json.IndexOf($"\"{propertyName}\"", StringComparison.Ordinal);
-            if (property < 0) return null;
-            int start = json.IndexOf('{', property);
-            if (start < 0) return null;
-
-            int depth = 0;
-            bool inString = false;
-            for (int i = start; i < json.Length; i++)
-            {
-                char character = json[i];
-                if (inString)
-                {
-                    if (character == '\\') { i++; continue; }
-                    if (character == '"') inString = false;
-                    continue;
-                }
-                if (character == '"') { inString = true; continue; }
-                if (character == '{') { depth++; continue; }
-                if (character == '}' && --depth == 0) return json.Substring(start, i - start + 1);
-            }
-            return null;
         }
 
         private void LoadReceivedRewards(string questId, int version)
