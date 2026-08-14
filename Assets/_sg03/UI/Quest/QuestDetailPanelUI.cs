@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using SaiGame.Services;
+using UnityEngine;
 using UnityEngine.UIElements;
 using SG03.UI.Components;
 
@@ -10,6 +12,14 @@ namespace SG03.UI
     /// <summary>Shared quest-definition drawer used by every quest flow.</summary>
     public class QuestDetailPanelUI
     {
+        [Serializable]
+        private class ItemNameResponse
+        {
+            public string id;
+            public string name;
+            public string item_code;
+        }
+
         private readonly VisualElement panel;
         private readonly VisualElement content;
         private readonly Button startButton;
@@ -26,7 +36,9 @@ namespace SG03.UI
         private QuestDefinitionStatusResponse selectedResponse;
         private QuestClaimRecord selectedClaim;
         private int requestVersion;
-        private readonly Dictionary<string, ItemDefinitionData> itemDefinitions = new Dictionary<string, ItemDefinitionData>();
+        // All instances share this cache. A quest detail drawer can therefore be reused
+        // from any screen without requiring its host to provide item definitions.
+        private static readonly Dictionary<string, ItemDefinitionData> itemDefinitions = new Dictionary<string, ItemDefinitionData>();
         private readonly HashSet<string> loadingItemDefinitions = new HashSet<string>();
 
         public QuestDetailPanelUI(VisualElement root, Action refresh, Func<QuestFlowNode, string> questIdResolver = null, Func<BattlePassSessionData> sessionResolver = null)
@@ -176,7 +188,7 @@ namespace SG03.UI
                 if (clause.items != null) foreach (QuestClauseItem item in clause.items)
                 {
                     if (item == null) continue;
-                    this.itemDefinitions.TryGetValue(item.item_definition_id ?? string.Empty, out ItemDefinitionData definition);
+                    itemDefinitions.TryGetValue(item.item_definition_id ?? string.Empty, out ItemDefinitionData definition);
                     AddTo(card, $"Item: {definition?.name ?? definition?.item_code ?? "Item"} × {item.quantity}", "main-quest-detail__condition-rule");
                     if (!string.IsNullOrEmpty(definition?.rarity)) AddTo(card, $"Rarity: {definition.rarity}", "main-quest-detail__condition-rule");
                     if (definition == null && !string.IsNullOrEmpty(item.item_definition_id)) this.LoadItemDefinition(item.item_definition_id);
@@ -195,7 +207,7 @@ namespace SG03.UI
                 if (reward == null) continue;
                 int min = reward.quantity_min > 0 ? reward.quantity_min : reward.amount;
                 int max = reward.quantity_max > 0 ? reward.quantity_max : min;
-                this.itemDefinitions.TryGetValue(reward.item_definition_id ?? string.Empty, out ItemDefinitionData definition);
+                itemDefinitions.TryGetValue(reward.item_definition_id ?? string.Empty, out ItemDefinitionData definition);
                 VisualElement card = new VisualElement(); card.AddToClassList("main-quest-detail__reward");
                 AddTo(card, $"{definition?.name ?? definition?.item_code ?? reward.reward_type ?? "Reward"} × {(min == max ? min.ToString() : $"{min}–{max}")}", "main-quest-detail__reward-name");
                 if (!string.IsNullOrEmpty(definition?.item_code)) AddTo(card, $"Code: {definition.item_code}", "main-quest-detail__reward-info");
@@ -213,13 +225,113 @@ namespace SG03.UI
             if (this.loadingItemDefinitions.Contains(itemDefinitionId)) return;
             PlayerItem playerItem = SaiServer.Instance?.PlayerItem;
             if (playerItem == null) return;
+
+            if (TryGetInventoryDefinition(playerItem, itemDefinitionId, out ItemDefinitionData cachedDefinition))
+            {
+                CacheItemDefinition(itemDefinitionId, cachedDefinition);
+                if (this.selectedNode != null && this.selectedResponse != null)
+                    this.Render(this.selectedNode, this.selectedQuestId, this.selectedResponse);
+                return;
+            }
+
             this.loadingItemDefinitions.Add(itemDefinitionId);
-            playerItem.GetItemDefinition(itemDefinitionId, definition =>
+            SaiServer.Instance.StartCoroutine(this.LoadItemDefinitionCoroutine(itemDefinitionId));
+        }
+
+        private IEnumerator LoadItemDefinitionCoroutine(string itemDefinitionId)
+        {
+            string endpoint = $"/api/v1/games/{SaiServer.Instance.GameId}/items/{itemDefinitionId}";
+            yield return SaiServer.Instance.GetRequest(endpoint, response =>
+            {
+                try
+                {
+                    ItemDefinitionData definition = ParseItemName(response);
+
+                    if (definition == null || string.IsNullOrEmpty(definition.name))
+                    {
+                        Debug.LogWarning($"[QuestDetail] Item detail did not contain a name for {itemDefinitionId}.");
+                        return;
+                    }
+
+                    CacheItemDefinition(itemDefinitionId, definition);
+                    if (this.selectedNode != null && this.selectedResponse != null)
+                        this.Render(this.selectedNode, this.selectedQuestId, this.selectedResponse);
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogWarning($"[QuestDetail] Could not parse item detail for {itemDefinitionId}: {exception.Message}");
+                }
+                finally
+                {
+                    this.loadingItemDefinitions.Remove(itemDefinitionId);
+                }
+            }, error =>
             {
                 this.loadingItemDefinitions.Remove(itemDefinitionId);
-                if (definition != null) this.itemDefinitions[itemDefinitionId] = definition;
-                if (this.selectedNode != null && this.selectedResponse != null) this.Render(this.selectedNode, this.selectedQuestId, this.selectedResponse);
-            }, _ => this.loadingItemDefinitions.Remove(itemDefinitionId));
+                Debug.LogWarning($"[QuestDetail] Could not load item detail for {itemDefinitionId}: {error}");
+            });
+        }
+
+        private static bool TryGetInventoryDefinition(PlayerItem playerItem, string itemDefinitionId, out ItemDefinitionData definition)
+        {
+            definition = null;
+            InventoryItemData[] items = playerItem.CurrentInventory?.items;
+            if (items == null) return false;
+            foreach (InventoryItemData item in items)
+            {
+                if (item?.item_definition_id != itemDefinitionId || item.definition == null) continue;
+                definition = item.definition;
+                return true;
+            }
+            return false;
+        }
+
+        private static void CacheItemDefinition(string requestedItemDefinitionId, ItemDefinitionData definition)
+        {
+            if (definition == null) return;
+            itemDefinitions[requestedItemDefinitionId] = definition;
+            if (!string.IsNullOrEmpty(definition.id)) itemDefinitions[definition.id] = definition;
+        }
+
+        private static ItemDefinitionData ParseItemName(string response)
+        {
+            string itemJson = ExtractObject(response, "item")
+                ?? ExtractObject(response, "item_definition")
+                ?? ExtractObject(response, "data");
+            if (string.IsNullOrEmpty(itemJson)) return null;
+
+            // Deliberately deserialize only display fields. Item detail responses contain
+            // nested base_stats and metadata objects, which JsonUtility cannot map into
+            // ItemDefinitionData's string fields reliably.
+            ItemNameResponse item = JsonUtility.FromJson<ItemNameResponse>(itemJson);
+            if (item == null) return null;
+            return new ItemDefinitionData { id = item.id, name = item.name, item_code = item.item_code };
+        }
+
+        private static string ExtractObject(string json, string propertyName)
+        {
+            if (string.IsNullOrEmpty(json)) return null;
+            int property = json.IndexOf($"\"{propertyName}\"", StringComparison.Ordinal);
+            if (property < 0) return null;
+            int start = json.IndexOf('{', property);
+            if (start < 0) return null;
+
+            int depth = 0;
+            bool inString = false;
+            for (int i = start; i < json.Length; i++)
+            {
+                char character = json[i];
+                if (inString)
+                {
+                    if (character == '\\') { i++; continue; }
+                    if (character == '"') inString = false;
+                    continue;
+                }
+                if (character == '"') { inString = true; continue; }
+                if (character == '{') { depth++; continue; }
+                if (character == '}' && --depth == 0) return json.Substring(start, i - start + 1);
+            }
+            return null;
         }
 
         private void LoadReceivedRewards(string questId, int version)
@@ -243,7 +355,7 @@ namespace SG03.UI
             {
                 if (reward == null) continue;
                 int quantity = reward.quantity > 0 ? reward.quantity : reward.amount;
-                this.itemDefinitions.TryGetValue(reward.item_definition_id ?? string.Empty, out ItemDefinitionData definition);
+                itemDefinitions.TryGetValue(reward.item_definition_id ?? string.Empty, out ItemDefinitionData definition);
                 VisualElement card = new VisualElement(); card.AddToClassList("main-quest-detail__reward");
                 AddTo(card, $"{definition?.name ?? definition?.item_code ?? reward.reward_type ?? "Reward"} × {quantity}", "main-quest-detail__reward-name");
                 if (!string.IsNullOrEmpty(reward.reward_type)) AddTo(card, reward.reward_type, "main-quest-detail__reward-info");
