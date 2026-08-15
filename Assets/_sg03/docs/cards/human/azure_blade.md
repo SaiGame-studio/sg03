@@ -1,12 +1,19 @@
-# Azure Blade (Kiếm Sĩ Tiền Tuyến)
+# Ren
 
+- **Tên**: Ren
+- **Số sao**: 3
+- **Tấn Công (ATK)**: 300
+- **Phòng Thủ (DEF)**: 420
 - **Mã Thẻ Bài**: `azure_blade`
 - **Loại Thẻ**: `character`
 - **Chủng Tộc**: `human` (Nhân Loại)
 - **Vai Trò**: Striker / Defender Core
 
 ## Mô Tả
-Hiệp sĩ tiền tuyến tinh nhuệ thành thạo các kỹ năng kiếm thuật. Azure Blade là đơn vị nòng cốt bắt buộc phải có trên sới đấu để thi triển các chiêu thức của chủng tộc Human.
+Ren, mang title Azure Blade, là hiệp sĩ tiền tuyến tinh nhuệ thành thạo các kỹ năng kiếm thuật. Đây là đơn vị nòng cốt bắt buộc phải có trên sới đấu để thi triển các chiêu thức của chủng tộc Human.
+
+## Kỹ Năng Nội Tại
+- **Twin Reaper**: Có thể tấn công đồng thời 2 mục tiêu.
 
 ## Kỹ Năng Liên Kết
 - [Spinning Slash](spinning_slash.md) — Chiêu thức chém xoay gây sát thương tổng.

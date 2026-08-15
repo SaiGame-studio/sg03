@@ -8,11 +8,11 @@ Tài liệu này tổng hợp toàn bộ các thẻ bài Nhân vật và Thẻ K
 Nằm tại thư mục [`cards/human/`](cards/human/)
 
 ### Thẻ Nhân Vật (Character)
-- [Azure Blade](cards/human/azure_blade.md) — Kiếm Sĩ Tiền Tuyến (Striker / Defender Core)
+- [Ren](cards/human/azure_blade.md) (azure_blade) — Số sao: 3
 
 ### Thẻ Kỹ Năng (Ability)
-- [Spinning Slash](cards/human/spinning_slash.md) — Trảm Xoay (Chiêu thức chém xoay gây sát thương tổng)
-- [Cross Guard](cards/human/cross_guard.md) — Đỡ Kiếm Phản Vệ (Tăng +200 giáp cho mục tiêu phòng thủ)
+- [Spinning Slash](cards/human/spinning_slash.md) (spinning_slash) — Số sao: 0
+- [Cross Guard](cards/human/cross_guard.md) (cross_guard) — Số sao: 0
 
 ---
 
@@ -20,10 +20,10 @@ Nằm tại thư mục [`cards/human/`](cards/human/)
 Nằm tại thư mục [`cards/elf/`](cards/elf/)
 
 ### Thẻ Nhân Vật (Character)
-- [Light Elf](cards/elf/light_elf.md) — Tu Sĩ Ánh Sáng (Holy Healer / Support Caster)
+- [Light Elf](cards/elf/light_elf.md) (light_elf) — Số sao: 0
 
 ### Thẻ Kỹ Năng (Ability)
-- [Holy Glow](cards/elf/holy_glow.md) — Thánh Quang Hồi Năng (Phép thuật hồi HP cho Player)
+- [Holy Glow](cards/elf/holy_glow.md) (holy_glow) — Số sao: 0
 
 ---
 
@@ -31,11 +31,11 @@ Nằm tại thư mục [`cards/elf/`](cards/elf/)
 Nằm tại thư mục [`cards/goblin/`](cards/goblin/)
 
 ### Thẻ Nhân Vật (Character)
-- [Goblin Shaman](cards/goblin/goblin_shaman.md) — Pháp Sư Goblin (Caster / Totemic Support)
+- [Goblin Shaman](cards/goblin/goblin_shaman.md) (goblin_shaman) — Số sao: 0
 
 ### Thẻ Kỹ Năng (Ability)
-- [Totem Pulse](cards/goblin/totem_pulse.md) — Sóng Mạch Totem (Buff giáp cho toàn bộ sới tiền tuyến)
-- [Back Stab](cards/goblin/back_stab.md) — Đánh Lén Đao Độc (Đòn đao độc gây sát thương lớn)
+- [Totem Pulse](cards/goblin/totem_pulse.md) (totem_pulse) — Số sao: 0
+- [Back Stab](cards/goblin/back_stab.md) (back_stab) — Số sao: 0
 
 ---
 
@@ -43,10 +43,10 @@ Nằm tại thư mục [`cards/goblin/`](cards/goblin/)
 Nằm tại thư mục [`cards/dark_elf/`](cards/dark_elf/)
 
 ### Thẻ Nhân Vật (Character)
-- [Hellscythe](cards/dark_elf/hellscythe.md) — Tử Thần Chiêu Hồn (Necromancer Commander)
-- [Skeleton](cards/dark_elf/skeleton.md) — Lính Xương Trỗi Dậy (Minion / Meatshield thế thân)
+- [Hellscythe](cards/dark_elf/hellscythe.md) (hellscythe) — Số sao: 0
+- [Skeleton](cards/dark_elf/skeleton.md) (skeleton) — Số sao: 0
 
 ### Thẻ Kỹ Năng (Ability)
-- [Twin Reaper](cards/dark_elf/twin_reaper.md) — Song Tử Trảm (Đòn tấn công chém lan sang đơn vị kề cận)
-- [Skeleton Shield](cards/dark_elf/skeleton_shield.md) — Lá Chắn Xương (Tráo đổi lính xương gánh đòn thay)
-- [Animate Dead](cards/dark_elf/animate_dead.md) — Chiêu Hồn Binh Đoàn Xương (Hồi sinh lính xương từ mộ)
+- [Twin Reaper](cards/dark_elf/twin_reaper.md) (twin_reaper) — Số sao: 0
+- [Skeleton Shield](cards/dark_elf/skeleton_shield.md) (skeleton_shield) — Số sao: 0
+- [Animate Dead](cards/dark_elf/animate_dead.md) (animate_dead) — Số sao: 0
