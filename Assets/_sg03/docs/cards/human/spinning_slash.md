@@ -1,6 +1,7 @@
 # Spinning Slash (Trảm Xoay)
 
 - **Loại Thẻ**: `ability`
+- **Số sao**: 3
 - **Chủng Tộc**: `human` (Nhân Loại)
 - **Vị Trí Nhắm Mục Tiêu**: Hàng trước đối thủ
 - **Thẻ Nhân Vật Yêu Cầu**: [Ren](azure_blade.md)
@@ -12,4 +13,4 @@ Ren thực hiện một nhát chém xoay mạnh vào một thẻ nhân vật ở
 Ren phải đang ở hàng trước của phe bạn và chưa hành động trong lượt.
 
 ## Hiệu Quả
-Chọn một mục tiêu ở hàng trước đối thủ để gây sát thương. Sau khi sử dụng, Ren được tính là đã hành động trong lượt đó.
+Chọn một mục tiêu ở hàng trước đối thủ để gây sát thương. Đòn đánh nhận `atk_add` **+260**; với ATK cơ bản 300 của Ren, tổng sát thương là **560**, đủ tiêu diệt mọi thẻ Character 4-sao (DEF 460–560). Sau khi sử dụng, Ren được tính là đã hành động trong lượt đó.

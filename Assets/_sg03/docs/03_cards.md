@@ -8,11 +8,11 @@ Tài liệu này tổng hợp toàn bộ các thẻ bài Nhân vật và Thẻ K
 Nằm tại thư mục [`cards/human/`](cards/human/)
 
 ### Thẻ Nhân Vật (Character)
-- [Ren](cards/human/azure_blade.md) (azure_blade) — Số sao: 3
+- [Ren](cards/human/azure_blade.md) (azure_blade): 3 sao
 
 ### Thẻ Kỹ Năng (Ability)
-- [Spinning Slash](cards/human/spinning_slash.md) (spinning_slash) — Số sao: 0
-- [Cross Guard](cards/human/cross_guard.md) (cross_guard) — Số sao: 0
+- [Spinning Slash](cards/human/spinning_slash.md) (spinning_slash): 3 sao
+- [Cross Guard](cards/human/cross_guard.md) (cross_guard): 1 sao
 
 ---
 

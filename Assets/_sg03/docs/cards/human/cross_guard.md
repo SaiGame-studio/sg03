@@ -1,6 +1,7 @@
 # Cross Guard (Đỡ Kiếm Phản Vệ)
 
 - **Loại Thẻ**: `ability`
+- **Số sao**: 1
 - **Chủng Tộc**: `human` (Nhân Loại)
 - **Vị Trí Nhắm Mục Tiêu**: Hàng trước đồng minh
 - **Thẻ Nhân Vật Yêu Cầu**: [Ren](azure_blade.md)
@@ -12,4 +13,4 @@ Ren dựng thế phòng thủ bằng hai thanh kiếm, bảo vệ một thẻ nh
 Ren phải đang ở hàng trước của phe bạn và chưa hành động trong lượt.
 
 ## Hiệu Quả
-Chọn một thẻ nhân vật đồng minh ở hàng trước. Thẻ đó nhận thêm 200 điểm phòng thủ trong đợt giao chiến hiện tại. Sau khi sử dụng, Ren được tính là đã hành động trong lượt đó.
+Chọn một thẻ nhân vật đồng minh ở hàng trước. Thẻ đó nhận `def_add` **+100** trong đợt giao chiến hiện tại. Mức tăng này nâng ngưỡng phòng thủ thêm một bậc sao, nên một mục tiêu 3-sao thường cần một đòn công 5-sao để bị tiêu diệt. Sau khi sử dụng, Ren được tính là đã hành động trong lượt đó.
