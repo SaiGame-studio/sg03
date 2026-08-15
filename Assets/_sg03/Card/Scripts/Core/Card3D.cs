@@ -50,8 +50,8 @@ namespace SG03
         // Set externally via Card3DCtrl.SetFallbackStats() before ApplyTextures().
         private CardBaseStats fallbackStats;
 
-        // Shown in DescriptionText when CardData.Description is null or empty.
-        // Sourced from ItemDefinitionMetadata.description via Card3DCtrl.SetFallbackDescription().
+        // Shown in DescriptionText. Sourced from CardDefinitionMetadata.description
+        // via Card3DCtrl.SetFallbackDescription().
         private string fallbackDescription;
 
         [Header("Card Text")]
@@ -165,8 +165,8 @@ namespace SG03
         public void SetFallbackStats(CardBaseStats stats) => this.fallbackStats = stats;
 
         /// <summary>
-        /// Sets fallback description shown in DescriptionText when CardData.Description is empty.
-        /// Pass <c>ItemDefinitionMetadata.description</c> parsed from the server response.
+        /// Sets the description shown in DescriptionText. Pass
+        /// <c>CardDefinitionMetadata.description</c> parsed from the battle response.
         /// </summary>
         public void SetFallbackDescription(string description) => this.fallbackDescription = description;
 
@@ -250,9 +250,9 @@ namespace SG03
             int displayDef = this.cardData.Def != 0 ? this.cardData.Def : this.fallbackStats?.def ?? 0;
             int displayStars = this.cardData.Stars != 0 ? this.cardData.Stars : this.fallbackStats?.star ?? 0;
 
-            string displayDescription = string.IsNullOrEmpty(this.cardData.Description)
-                ? this.fallbackDescription
-                : this.cardData.Description;
+            // Card artwork is local CardData, but the description is game data and
+            // must come from the definition returned for the current battle.
+            string displayDescription = this.fallbackDescription;
 
             this.SetTMPText(this.cardNameText, displayName);
             this.SetTMPText(this.starsText, new string('*', displayStars));
