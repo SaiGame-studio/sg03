@@ -1,6 +1,5 @@
 # Goblin Shaman (Pháp Sư Goblin)
 
-- **Mã Thẻ Bài**: `goblin_shaman`
 - **Loại Thẻ**: [`character`](../../03_characters.md)
 - **Chủng Tộc**: `goblin` (Yêu Tinh)
 - **Vai Trò**: Caster / Totemic Support
