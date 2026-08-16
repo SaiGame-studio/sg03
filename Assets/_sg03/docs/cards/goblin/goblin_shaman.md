@@ -9,5 +9,5 @@
 Pháp sư bộ tộc sử dụng hắc tà thuật và cắm Totem bảo vệ. Đóng vai trò là Boss chính phía Omega trong PvE và đơn vị pháp sư trong PvP.
 
 ## Kỹ Năng Liên Kết
-- [Totem Pulse](abiliteis/totem_pulse.md) — Kích hoạt sóng Totem tăng giáp cho toàn bộ sới tiền tuyến.
-- [Back Stab](abiliteis/back_stab.md) — Chiêu thức đánh lén gây sát thương lớn.
+- [Totem Pulse](abilities/totem_pulse.md) — Kích hoạt sóng Totem tăng giáp cho toàn bộ sới tiền tuyến.
+- [Back Stab](abilities/back_stab.md) — Chiêu thức đánh lén gây sát thương lớn.

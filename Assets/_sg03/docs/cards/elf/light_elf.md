@@ -9,4 +9,4 @@
 Nữ tu tinh linh ánh sáng sử dụng thần thuật để hồi phục máu cho người chơi.
 
 ## Kỹ Năng Liên Kết
-- [Holy Glow](abiliteis/holy_glow.md) — Phép thuật hồi HP cho Player.
+- [Holy Glow](abilities/holy_glow.md) — Phép thuật hồi HP cho Player.
