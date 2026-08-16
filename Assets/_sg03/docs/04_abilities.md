@@ -31,17 +31,17 @@ Khi một kỹ năng được gọi, `can_ability_target_position` kiểm tra th
 Chi tiết luồng thực thi, các bước xử lý và hiệu ứng của từng kỹ năng được biên soạn cụ thể trong tệp tài liệu của từng Thẻ Kỹ Năng tương ứng bên dưới:
 
 ### 🛡️ Chủng Tộc Nhân Loại (Human)
-- [Spinning Slash (Trảm Xoay)](cards/human/spinning_slash.md) — Chiêu thức chém xoay gây sát thương tổng nhắm vào tiền tuyến đối thủ.
-- [Cross Guard (Đỡ Kiếm Phản Vệ)](cards/human/cross_guard.md) — Chiêu thức đỡ kiếm tăng +200 giáp cho đơn vị phòng thủ đồng minh.
+- [Spinning Slash](cards/human/spinning_slash.md): 3 sao — Chiêu thức chém xoay gây sát thương tổng nhắm vào tiền tuyến đối thủ.
+- [Cross Guard](cards/human/cross_guard.md): 1 sao — Chiêu thức đỡ kiếm tăng +200 giáp cho đơn vị phòng thủ đồng minh.
 
 ### 🌿 Chủng Tộc Tinh Linh (Elf / Light Elf)
-- [Holy Glow (Thánh Quang Hồi Năng)](cards/elf/holy_glow.md) — Phép thuật hồi phục HP cho Player và tiêu thụ lá bài vào mộ.
+- [Holy Glow](cards/elf/holy_glow.md) — Số sao: 0 — Phép thuật hồi phục HP cho Player và tiêu thụ lá bài vào mộ.
 
 ### 👺 Chủng Tộc Yêu Tinh (Goblin)
-- [Totem Pulse (Sóng Mạch Totem)](cards/goblin/totem_pulse.md) — Sóng Totem tăng giáp phòng thủ cho toàn bộ sới tiền tuyến đồng minh.
-- [Back Stab (Đánh Lén Đao Độc)](cards/goblin/back_stab.md) — Chiêu thức đao độc đánh lén gây sát thương lớn lên mục tiêu đối thủ.
+- [Totem Pulse](cards/goblin/totem_pulse.md) — Số sao: 0 — Sóng Totem tăng giáp phòng thủ cho toàn bộ sới tiền tuyến đồng minh.
+- [Back Stab](cards/goblin/back_stab.md) — Số sao: 0 — Chiêu thức đao độc đánh lén gây sát thương lớn lên mục tiêu đối thủ.
 
 ### 💀 Chủng Tộc Bóng Tối (Dark Elf / Undead)
-- [Twin Reaper (Song Tử Trảm)](cards/dark_elf/twin_reaper.md) — Trảm song đao gây sát thương chém lan sang đơn vị kề cận.
-- [Skeleton Shield (Lá Chắn Xương)](cards/dark_elf/skeleton_shield.md) — Tráo đổi lính xương gánh đòn tấn công thay cho mục tiêu đồng minh.
-- [Animate Dead (Chiêu Hồn Binh Đoàn Xương)](cards/dark_elf/animate_dead.md) — Hồi sinh tối đa 3 lính xương từ mộ `the_void` lên tiền tuyến.
+- [Twin Reaper](cards/dark_elf/twin_reaper.md) — Số sao: 0 — Trảm song đao gây sát thương chém lan sang đơn vị kề cận.
+- [Skeleton Shield](cards/dark_elf/skeleton_shield.md) — Số sao: 0 — Tráo đổi lính xương gánh đòn tấn công thay cho mục tiêu đồng minh.
+- [Animate Dead](cards/dark_elf/animate_dead.md) — Số sao: 0 — Hồi sinh tối đa 3 lính xương từ mộ `the_void` lên tiền tuyến.

@@ -1,6 +1,6 @@
 # Cross Guard (Đỡ Kiếm Phản Vệ)
 
-- **Loại Thẻ**: `ability`
+- **Loại Thẻ**: [`ability`](../../04_abilities.md)
 - **Số sao**: 1
 - **Chủng Tộc**: `human` (Nhân Loại)
 - **Vị Trí Nhắm Mục Tiêu**: Hàng trước đồng minh

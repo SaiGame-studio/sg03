@@ -1,7 +1,7 @@
 # Back Stab (Đánh Lén Đao Độc)
 
 - **Mã Thẻ Bài**: `back_stab`
-- **Loại Thẻ**: `ability`
+- **Loại Thẻ**: [`ability`](../../04_abilities.md)
 - **Chủng Tộc**: `goblin` (Yêu Tinh)
 - **Vị Trí Nhắm Mục Tiêu**: `enemy_frontline`
 - **Thẻ Nhân Vật Yêu Cầu**: Thẻ nhân vật thuộc tộc `goblin` (ví dụ [Goblin Shaman](goblin_shaman.md))

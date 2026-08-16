@@ -1,7 +1,7 @@
 # Animate Dead (Chiêu Hồn Binh Đoàn Xương)
 
 - **Mã Thẻ Bài**: `animate_dead`
-- **Loại Thẻ**: `ability`
+- **Loại Thẻ**: [`ability`](../../04_abilities.md)
 - **Chủng Tộc**: `dark_elf` / `undead` (Bóng Tối / Tử Thần)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline` / `own_hand`
 - **Thẻ Nhân Vật Yêu Cầu**: [Hellscythe](hellscythe.md)

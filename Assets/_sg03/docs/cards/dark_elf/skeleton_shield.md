@@ -1,7 +1,7 @@
 # Skeleton Shield (Lá Chắn Xương)
 
 - **Mã Thẻ Bài**: `skeleton_shield`
-- **Loại Thẻ**: `ability`
+- **Loại Thẻ**: [`ability`](../../04_abilities.md)
 - **Chủng Tộc**: `dark_elf` / `undead` (Bóng Tối / Tử Thần)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline`
 - **Thẻ Nhân Vật Yêu Cầu**: [Hellscythe](hellscythe.md) & [Skeleton](skeleton.md)

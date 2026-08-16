@@ -1,6 +1,6 @@
 # Spinning Slash (Trảm Xoay)
 
-- **Loại Thẻ**: `ability`
+- **Loại Thẻ**: [`ability`](../../04_abilities.md)
 - **Số sao**: 3
 - **Chủng Tộc**: `human` (Nhân Loại)
 - **Vị Trí Nhắm Mục Tiêu**: Hàng trước đối thủ
