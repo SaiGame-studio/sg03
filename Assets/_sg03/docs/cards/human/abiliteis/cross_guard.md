@@ -1,10 +1,10 @@
 # Cross Guard (Đỡ Kiếm Phản Vệ)
 
-- **Loại Thẻ**: [`ability`](../../04_abilities.md)
+- **Loại Thẻ**: [`ability`](../../../04_abilities.md)
 - **Số sao**: 1
 - **Chủng Tộc**: `human` (Nhân Loại)
 - **Vị Trí Nhắm Mục Tiêu**: Hàng trước đồng minh
-- **Thẻ Nhân Vật Yêu Cầu**: [Ren](azure_blade.md)
+- **Thẻ Nhân Vật Yêu Cầu**: [Ren](../azure_blade.md)
 
 ## Mô Tả Kỹ Năng
 Ren dựng thế phòng thủ bằng hai thanh kiếm, bảo vệ một thẻ nhân vật đồng minh ở hàng trước.

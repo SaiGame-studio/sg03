@@ -16,5 +16,5 @@ Ren, mang title Azure Blade, là hiệp sĩ tiền tuyến tinh nhuệ thành th
 - **Twin Reaper**: Có thể tấn công đồng thời 2 mục tiêu.
 
 ## Kỹ Năng Liên Kết
-- [Spinning Slash](spinning_slash.md) — Chiêu thức chém xoay gây sát thương tổng.
-- [Cross Guard](cross_guard.md) — Chiêu thức đỡ kiếm tăng +200 giáp phòng thủ.
+- [Spinning Slash](abiliteis/spinning_slash.md) — Chiêu thức chém xoay gây sát thương tổng.
+- [Cross Guard](abiliteis/cross_guard.md) — Chiêu thức đỡ kiếm tăng +200 giáp phòng thủ.

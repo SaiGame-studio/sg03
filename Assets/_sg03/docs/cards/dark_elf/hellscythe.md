@@ -9,6 +9,6 @@
 Tử thần đáng sợ điều khiển binh đoàn xương và thao túng vị trí trên bàn đấu.
 
 ## Kỹ Năng Liên Kết
-- [Twin Reaper](twin_reaper.md) — Trảm song đao gây sát thương chém lan.
-- [Skeleton Shield](skeleton_shield.md) — Tráo đổi lính xương gánh đòn thay.
-- [Animate Dead](animate_dead.md) — Hồi sinh quân đoàn xương từ mộ.
+- [Twin Reaper](abiliteis/twin_reaper.md) — Trảm song đao gây sát thương chém lan.
+- [Skeleton Shield](abiliteis/skeleton_shield.md) — Tráo đổi lính xương gánh đòn thay.
+- [Animate Dead](abiliteis/animate_dead.md) — Hồi sinh quân đoàn xương từ mộ.

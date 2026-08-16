@@ -6,4 +6,4 @@
 - **Vai Trò**: Minion / Meatshield thế thân
 
 ## Mô Tả
-Binh sĩ xương được chiêu hồn. Dùng làm thế thân đỡ đòn qua [Skeleton Shield](skeleton_shield.md) hoặc hồi sinh từ mộ qua [Animate Dead](animate_dead.md).
+Binh sĩ xương được chiêu hồn. Dùng làm thế thân đỡ đòn qua [Skeleton Shield](abiliteis/skeleton_shield.md) hoặc hồi sinh từ mộ qua [Animate Dead](abiliteis/animate_dead.md).

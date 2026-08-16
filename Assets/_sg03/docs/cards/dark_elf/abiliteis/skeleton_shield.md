@@ -1,17 +1,17 @@
 # Skeleton Shield (Lá Chắn Xương)
 
 - **Mã Thẻ Bài**: `skeleton_shield`
-- **Loại Thẻ**: [`ability`](../../04_abilities.md)
+- **Loại Thẻ**: [`ability`](../../../04_abilities.md)
 - **Chủng Tộc**: `dark_elf` / `undead` (Bóng Tối / Tử Thần)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline`
-- **Thẻ Nhân Vật Yêu Cầu**: [Hellscythe](hellscythe.md) & [Skeleton](skeleton.md)
+- **Thẻ Nhân Vật Yêu Cầu**: [Hellscythe](../hellscythe.md) & [Skeleton](../skeleton.md)
 
 ---
 
 ## ☠️ Cơ Chế & Luồng Thực Thi Kỹ Năng
 
 - **Cấu Hình**: `target_positions = { "own_frontline" }`, `requires_target_card = true`
-- **Điều Kiện**: Yêu cầu 1 thẻ [Hellscythe](hellscythe.md) chưa kích hoạt trên `own_frontline` VÀ 1 thẻ [Skeleton](skeleton.md) khác trên `own_frontline`. Thẻ mục tiêu phải đang bị đối phương chọn làm mục tiêu tấn công.
+- **Điều Kiện**: Yêu cầu 1 thẻ [Hellscythe](../hellscythe.md) chưa kích hoạt trên `own_frontline` VÀ 1 thẻ [Skeleton](../skeleton.md) khác trên `own_frontline`. Thẻ mục tiêu phải đang bị đối phương chọn làm mục tiêu tấn công.
 
 ### Các Bước Thực Thi
 1. Tìm `hellscythe` chưa kích hoạt và 1 `skeleton` chưa kích hoạt (khác mục tiêu).

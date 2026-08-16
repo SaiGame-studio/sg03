@@ -1,10 +1,10 @@
 # Spinning Slash (Trảm Xoay)
 
-- **Loại Thẻ**: [`ability`](../../04_abilities.md)
+- **Loại Thẻ**: [`ability`](../../../04_abilities.md)
 - **Số sao**: 3
 - **Chủng Tộc**: `human` (Nhân Loại)
 - **Vị Trí Nhắm Mục Tiêu**: Hàng trước đối thủ
-- **Thẻ Nhân Vật Yêu Cầu**: [Ren](azure_blade.md)
+- **Thẻ Nhân Vật Yêu Cầu**: [Ren](../azure_blade.md)
 
 ## Mô Tả Kỹ Năng
 Ren thực hiện một nhát chém xoay mạnh vào một thẻ nhân vật ở hàng trước của đối thủ. Sát thương của đòn đánh dựa trên sức tấn công của Ren và sức mạnh của kỹ năng.
