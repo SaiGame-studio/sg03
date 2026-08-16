@@ -26,22 +26,23 @@ Khi một kỹ năng được gọi, `can_ability_target_position` kiểm tra th
 
 ---
 
-## 2. Danh Mục & Liên Kết Chi Tiết Kỹ Năng Theo Chủng Tộc
+## 2. Danh Mục Kỹ Năng Theo Chủng Tộc
 
-Chi tiết luồng thực thi, các bước xử lý và hiệu ứng của từng kỹ năng được biên soạn cụ thể trong tệp tài liệu của từng Thẻ Kỹ Năng tương ứng bên dưới:
+Danh mục bên dưới chỉ liệt kê tên và số sao của từng thẻ kỹ năng.
 
 ### 🛡️ Chủng Tộc Nhân Loại (Human)
-- [Spinning Slash](cards/human/abilities/spinning_slash.md): 3 sao — Chiêu thức chém xoay gây sát thương tổng nhắm vào tiền tuyến đối thủ.
-- [Cross Guard](cards/human/abilities/cross_guard.md): 1 sao — Chiêu thức đỡ kiếm tăng +200 giáp cho đơn vị phòng thủ đồng minh.
+- [Spinning Slash](cards/human/abilities/spinning_slash.md): 3 sao
+- [Cross Guard](cards/human/abilities/cross_guard.md): 1 sao
+- [Titan Fall](cards/human/abilities/titan_fall.md): 5 sao
 
 ### 🌿 Chủng Tộc Tinh Linh (Elf / Light Elf)
-- [Holy Glow](cards/elf/abilities/holy_glow.md) — Số sao: 0 — Phép thuật hồi phục HP cho Player và tiêu thụ lá bài vào mộ.
+- [Holy Glow](cards/elf/abilities/holy_glow.md): 0 sao
 
 ### 👺 Chủng Tộc Yêu Tinh (Goblin)
-- [Totem Pulse](cards/goblin/abilities/totem_pulse.md) — Số sao: 0 — Sóng Totem tăng giáp phòng thủ cho toàn bộ sới tiền tuyến đồng minh.
-- [Back Stab](cards/goblin/abilities/back_stab.md) — Số sao: 0 — Chiêu thức đao độc đánh lén gây sát thương lớn lên mục tiêu đối thủ.
+- [Totem Pulse](cards/goblin/abilities/totem_pulse.md): 0 sao
+- [Back Stab](cards/goblin/abilities/back_stab.md): 0 sao
 
 ### 💀 Chủng Tộc Bóng Tối (Dark Elf / Undead)
-- [Twin Reaper](cards/dark_elf/abilities/twin_reaper.md) — Số sao: 0 — Trảm song đao gây sát thương chém lan sang đơn vị kề cận.
-- [Skeleton Shield](cards/dark_elf/abilities/skeleton_shield.md) — Số sao: 0 — Tráo đổi lính xương gánh đòn tấn công thay cho mục tiêu đồng minh.
-- [Animate Dead](cards/dark_elf/abilities/animate_dead.md) — Số sao: 0 — Hồi sinh tối đa 3 lính xương từ mộ `the_void` lên tiền tuyến.
+- [Twin Reaper](cards/dark_elf/abilities/twin_reaper.md): 0 sao
+- [Skeleton Shield](cards/dark_elf/abilities/skeleton_shield.md): 0 sao
+- [Animate Dead](cards/dark_elf/abilities/animate_dead.md): 0 sao

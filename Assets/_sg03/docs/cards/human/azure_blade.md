@@ -17,3 +17,4 @@ Ren, mang title Azure Blade, là hiệp sĩ tiền tuyến tinh nhuệ thành th
 ## Kỹ Năng Liên Kết
 - [Spinning Slash](abilities/spinning_slash.md) — Chiêu thức chém xoay gây sát thương tổng.
 - [Cross Guard](abilities/cross_guard.md) — Chiêu thức đỡ kiếm tăng +200 giáp phòng thủ.
+- [Titan Fall](abilities/titan_fall.md) — Triệu gọi Titan từ `the_void` khi điều kiện được đáp ứng.
