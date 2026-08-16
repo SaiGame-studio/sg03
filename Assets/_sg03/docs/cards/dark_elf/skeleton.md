@@ -1,7 +1,7 @@
 # Skeleton (Lính Xương Trỗi Dậy)
 
 - **Mã Thẻ Bài**: `skeleton`
-- **Loại Thẻ**: `character`
+- **Loại Thẻ**: [`character`](../../03_characters.md)
 - **Chủng Tộc**: `dark_elf` / `undead` (Bóng Tối / Lính Xương)
 - **Vai Trò**: Minion / Meatshield thế thân
 

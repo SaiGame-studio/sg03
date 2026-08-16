@@ -1,7 +1,7 @@
 # Light Elf (Tu Sĩ Ánh Sáng)
 
 - **Mã Thẻ Bài**: `light_elf`
-- **Loại Thẻ**: `character`
+- **Loại Thẻ**: [`character`](../../03_characters.md)
 - **Chủng Tộc**: `elf` / `light_elf` (Tinh Linh)
 - **Vai Trò**: Holy Healer / Support Caster
 
