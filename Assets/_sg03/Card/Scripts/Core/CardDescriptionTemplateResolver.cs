@@ -6,7 +6,8 @@ using System.Text.RegularExpressions;
 namespace SG03
 {
     /// <summary>
-    /// Expands card-description tokens in the form <c>[group:key]</c>.
+    /// Expands card-description tokens in the form <c>[group:key]</c> or
+    /// <c>[group.key]</c>.
     ///
     /// Current groups are <c>stats</c> (CardDefinitionData.base_stats),
     /// <c>metadata</c> (CardDefinitionData.metadata), <c>card</c>
@@ -18,7 +19,7 @@ namespace SG03
     public static class CardDescriptionTemplateResolver
     {
         private static readonly Regex TokenPattern = new Regex(
-            @"\[(?<group>[a-zA-Z_][a-zA-Z0-9_]*):(?<key>[a-zA-Z_][a-zA-Z0-9_]*)\]",
+            @"\[(?<group>[a-zA-Z_][a-zA-Z0-9_]*)(?:\:|\.)(?<key>[a-zA-Z_][a-zA-Z0-9_]*)\]",
             RegexOptions.Compiled);
 
         public static string Resolve(string template, CardDefinitionData definition)

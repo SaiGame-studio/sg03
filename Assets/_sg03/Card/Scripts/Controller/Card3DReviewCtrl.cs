@@ -41,9 +41,9 @@ namespace SG03
 
         /// <summary>
         /// Shows the card with the given <paramref name="codeName"/>.
-        /// <paramref name="displayName"/> is the fallback card name when CardData.CardName is empty.
-        /// <paramref name="stats"/> provides fallback ATK / DEF / Stars when CardData has zeros.
-        /// <paramref name="description"/> is the fallback description from ItemDefinitionMetadata.
+        /// <paramref name="displayName"/> is the card name shown on the preview.
+        /// <paramref name="stats"/> provides the ATK / DEF / Stars shown on the preview.
+        /// <paramref name="description"/> is the description shown on the preview.
         /// </summary>
         public void RequestShow(string codeName, string displayName = null, CardBaseStats stats = null, string description = null)
         {

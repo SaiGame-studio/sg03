@@ -42,12 +42,10 @@ namespace SG03
         [Tooltip("Duration of the flip animation in seconds.")]
         [SerializeField] private float flipDuration = 0.4f;
 
-        // Shown in CardNameText when CardData.CardName is null or empty.
-        // Set externally via Card3DCtrl.SetFallbackName() before ApplyTextures().
+        // Sourced from the card definition via Card3DCtrl.SetFallbackName().
         private string fallbackName;
 
-        // Used for ATK / DEF / Stars when CardData has zeros (e.g. unfilled test cards).
-        // Set externally via Card3DCtrl.SetFallbackStats() before ApplyTextures().
+        // Sourced from the card definition via Card3DCtrl.SetFallbackStats().
         private CardBaseStats fallbackStats;
 
         // Shown in DescriptionText. Sourced from CardDefinitionMetadata.description
@@ -152,9 +150,7 @@ namespace SG03
         }
 
         /// <summary>
-        /// Sets a display name to show in <see cref="cardNameText"/> when
-        /// <see cref="CardData.CardName"/> is null or empty (e.g. test cards
-        /// whose CardData asset has not been filled in yet).
+        /// Sets the display name sourced from the card definition.
         /// </summary>
         public void SetFallbackName(string name) => this.fallbackName = name;
 
@@ -235,20 +231,17 @@ namespace SG03
         }
 
         /// <summary>
-        /// Pushes card name, stars, ATK, DEF, and description from <see cref="cardData"/>
-        /// to the matching <see cref="TextMeshPro"/> components.
+        /// Pushes card name, stars, ATK, DEF, and description from the card-definition
+        /// fallback data to the matching <see cref="TextMeshPro"/> components.
         /// </summary>
         public void ApplyCardText()
         {
             if (this.cardData == null) return;
 
-            string displayName = string.IsNullOrEmpty(this.cardData.CardName)
-                ? this.fallbackName
-                : this.cardData.CardName;
-
-            int displayAtk = this.cardData.Atk != 0 ? this.cardData.Atk : this.fallbackStats?.atk ?? 0;
-            int displayDef = this.cardData.Def != 0 ? this.cardData.Def : this.fallbackStats?.def ?? 0;
-            int displayStars = this.cardData.Stars != 0 ? this.cardData.Stars : this.fallbackStats?.star ?? 0;
+            string displayName = this.fallbackName;
+            int displayAtk = this.fallbackStats?.atk ?? 0;
+            int displayDef = this.fallbackStats?.def ?? 0;
+            int displayStars = this.fallbackStats?.star ?? 0;
 
             // Card artwork is local CardData, but the description is game data and
             // must come from the definition returned for the current battle.
