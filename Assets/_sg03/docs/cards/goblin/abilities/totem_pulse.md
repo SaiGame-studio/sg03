@@ -1,17 +1,17 @@
 # Totem Pulse (Sóng Mạch Totem)
 
 - **Mã Thẻ Bài**: `totem_pulse`
-- **Loại Thẻ**: `ability`
+- **Loại Thẻ**: [`ability`](../../../04_abilities.md)
 - **Chủng Tộc**: `goblin` (Yêu Tinh)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline`
-- **Thẻ Nhân Vật Yêu Cầu**: [Goblin Shaman](goblin_shaman.md)
+- **Thẻ Nhân Vật Yêu Cầu**: [Goblin Shaman](../goblin_shaman.md)
 
 ---
 
 ## 🗿 Cơ Chế & Luồng Thực Thi Kỹ Năng
 
 - **Cấu Hình**: `target_positions = { "own_frontline" }`
-- **Điều Kiện**: Yêu cầu 1 thẻ nhân vật [Goblin Shaman](goblin_shaman.md) chưa kích hoạt trên `own_frontline`.
+- **Điều Kiện**: Yêu cầu 1 thẻ nhân vật [Goblin Shaman](../goblin_shaman.md) chưa kích hoạt trên `own_frontline`.
 
 ### Các Bước Thực Thi
 1. Tìm `goblin_shaman` chưa kích hoạt trên `own_frontline`.

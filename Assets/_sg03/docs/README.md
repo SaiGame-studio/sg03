@@ -12,7 +12,7 @@ Assets/_sg03/docs/
 │
 ├── 01_game_rules.md              # Luật chơi, Các khu vực bài & Công thức tính toán
 ├── 02_architecture.md            # Kiến trúc mã nguồn Client & Server
-├── 03_cards.md                   # Danh mục Thẻ bài (Nhân vật & Kỹ năng)
+├── 03_characters.md              # Danh mục Thẻ nhân vật
 ├── 04_abilities.md               # Engine Kỹ năng & Cơ chế của cả 8 Ability
 ├── 05_card_star_scaling.md       # Phân cấp sức mạnh Thẻ bài theo Cấp độ Sao (1-9 Sao)
 │
@@ -35,7 +35,7 @@ Assets/_sg03/docs/
 
 1. **[Luật Chơi & Cơ Chế Trận Đấu](01_game_rules.md)** — *Bắt đầu từ đây!* Khái niệm tổng quan, điều kiện Thắng/Thua, các khu vực bài, phase machine, công thức phòng thủ/máu, giới hạn thả nhân vật và tương tác Đèn Linh Hồn.
 2. **[Kiến Trúc Mã Nguồn & Hệ Thống](02_architecture.md)** — Kiến trúc C# Unity client (`BattleState`, `BattleScripts`, `CardSelection`, `ClientActions`, `CardSpawning`, `DeskPositionCtrl`, `LampOfSoulCtrl`), Lua 5.1 SS-GO server runtime, đồng bộ trạng thái và pipeline xử lý sự kiện.
-3. **[Danh Mục Thẻ Bài & Thông Số](03_cards.md)** — Danh mục đầy đủ các thẻ nhân vật (`azure_blade`, `goblin_shaman`, `light_elf`, `hellscythe`, `skeleton`) và thẻ kỹ năng phân theo chủng tộc.
+3. **[Danh Mục Thẻ Nhân Vật & Thông Số](03_characters.md)** — Danh mục đầy đủ các thẻ nhân vật (`azure_blade`, `goblin_shaman`, `light_elf`, `hellscythe`, `skeleton`) phân theo chủng tộc.
 4. **[Hệ Thống Kỹ Năng & Hướng Dẫn Thực Thi](04_abilities.md)** — Chi tiết luồng thực thi, quy tắc kiểm tra vị trí nhắm mục tiêu và logic script của toàn bộ 8 kỹ năng (`twin_reaper`, `spinning_slash`, `cross_guard`, `totem_pulse`, `back_stab`, `holy_glow`, `skeleton_shield`, `animate_dead`).
 5. **[Phân Cấp Sức Mạnh Thẻ Bài Theo Cấp Độ Sao](05_card_star_scaling.md)** — Mô tả sức mạnh và thang tăng trưởng chỉ số/hiệu ứng của thẻ bài theo cấp độ sao (1 đến 9 sao) chia làm 3 nhóm Early game, Mid game và Late game.
 

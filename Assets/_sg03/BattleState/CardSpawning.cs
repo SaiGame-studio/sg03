@@ -642,7 +642,7 @@ namespace SG03
             string resolvedName = string.IsNullOrEmpty(fallbackName) ? def?.name : fallbackName;
             card.SetFallbackName(resolvedName);
             card.SetFallbackStats(this.ToCardBaseStats(def?.base_stats));
-            card.SetFallbackDescription(def?.metadata?.description);
+            card.SetFallbackDescription(CardDescriptionTemplateResolver.Resolve(def?.metadata?.description, def));
         }
 
         private CardBaseStats ToCardBaseStats(CardDefinitionBaseStats src)

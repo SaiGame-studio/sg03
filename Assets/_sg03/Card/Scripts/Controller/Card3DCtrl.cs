@@ -133,8 +133,8 @@ namespace SG03
         public void SetFallbackStats(CardBaseStats stats) => this.card.SetFallbackStats(stats);
 
         /// <summary>
-        /// Sets fallback description shown in DescriptionText when CardData.Description is empty.
-        /// Pass <c>ItemDefinitionMetadata.description</c>.
+        /// Sets the description shown in DescriptionText. Pass
+        /// <c>CardDefinitionMetadata.description</c>.
         /// </summary>
         public void SetFallbackDescription(string description) => this.card.SetFallbackDescription(description);
 

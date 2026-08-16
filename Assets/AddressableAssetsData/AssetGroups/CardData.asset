@@ -35,6 +35,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a9831f85b45d80499267dfd572386d2
+    m_Address: Assets/_sg03/Card/Data/Ability/Human/AzureBlade/titan_fall.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 282a862c3062e2f4bb6094fe43bb2f47
     m_Address: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
     m_ReadOnly: 0
@@ -67,6 +72,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 55a3dfc83811bee45b54ee5ccb994fe9
     m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/skeleton_shield.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5935a7a6e483213489ea007b04a787d8
+    m_Address: Assets/_sg03/Card/Data/Character/Human/titan.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -1837,8 +1837,16 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 813458455079530658, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: password
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 813458455079530658, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: username
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 813458455079530658, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: autoLogin
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: customScriptName
@@ -1894,7 +1902,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: gameId
-      value: 
+      value: 019f49a1-350b-72c4-ac8f-8fe4f7d1418e
       objectReference: {fileID: 0}
     - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: showDebugLog
@@ -1908,6 +1916,10 @@ PrefabInstance:
       propertyPath: showUrlRequest
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: itemDefinitions
+      value: 
+      objectReference: {fileID: 1147895072}
     - target: {fileID: 8686393883881292769, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: showCallbackLog
       value: 1
@@ -4169,6 +4181,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7de018e797516c74c91f20dc9ccd0047, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.ItemPreset
+--- !u!114 &1147895072 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7353435024058604980, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+  m_PrefabInstance: {fileID: 706587908}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1c1c04777c34a9c8b310a20e44fc6ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.ItemDefinitions
 --- !u!65 &1160697365 stripped
 BoxCollider:
   m_CorrespondingSourceObject: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
@@ -6985,6 +7008,7 @@ MonoBehaviour:
   scriptNameBattleStart: battle_start
   scriptNameBattleEnd: battle_end
   scriptNameBattleStatus: battle_status
+  scriptNameBattleSessionExists: battle_session_exists
   scriptNameInitCards: init_cards
   scriptNameGetCardDefinitions: get_card_definitions
   scriptNameCardDeploy: card_deploy
@@ -7143,6 +7167,7 @@ MonoBehaviour:
   itemPreset: {fileID: 1147895069}
   battleScripts: {fileID: 2015755445}
   battleStateCtrl: {fileID: 2015755444}
+  currencyWallet: {fileID: 0}
   uiDocument: {fileID: 2030001003}
   lobbySceneName: 1-lobby
 --- !u!114 &2034349439 stripped
@@ -8134,9 +8159,49 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 763287715}
+    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.14117648
+      objectReference: {fileID: 0}
+    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.24705884
+      objectReference: {fileID: 0}
+    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.3803922
+      objectReference: {fileID: 0}
+    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4280565601
+      objectReference: {fileID: 0}
     - target: {fileID: 8660204716586372184, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_Name
       value: Card3D
+      objectReference: {fileID: 0}
+    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.14117648
+      objectReference: {fileID: 0}
+    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.24705884
+      objectReference: {fileID: 0}
+    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.37254903
+      objectReference: {fileID: 0}
+    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4280565599
       objectReference: {fileID: 0}
     - target: {fileID: 9221625749736723552, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'

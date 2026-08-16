@@ -15,8 +15,3 @@ MonoBehaviour:
   frameTexture: {fileID: 0}
   characterTexture: {fileID: 2800000, guid: 83a6a2a2cbe0d474e8126ab538f18fff, type: 3}
   backTexture: {fileID: 0}
-  cardName: 
-  atk: 0
-  def: 0
-  stars: 0
-  description: 
