@@ -729,7 +729,8 @@ namespace SG03.UI
         {
             for (int index = 0; index < cards.Count; index++)
             {
-                if (cards[index].OriginalSlot != index) return false;
+                DeskCardSortEntry cardInSlot = cards.Find(card => card.OriginalSlot == index);
+                if (cardInSlot == null || !HasSameSortKey(cardInSlot, cards[index])) return false;
             }
             return true;
         }
@@ -742,8 +743,16 @@ namespace SG03.UI
                 return;
             }
 
-            while (index < cards.Count && GetItemIdInSlot(this.currentDesk, index) == cards[index].ItemId)
+            while (index < cards.Count)
+            {
+                string itemIdInTargetSlot = GetItemIdInSlot(this.currentDesk, index);
+                DeskCardSortEntry cardInTargetSlot = cards.Find(card => card.ItemId == itemIdInTargetSlot);
+                if (cardInTargetSlot == null || !HasSameSortKey(cardInTargetSlot, cards[index])) break;
+
+                // Cards with the same sort key are interchangeable, so swapping
+                // their item instances would only result in unnecessary API calls.
                 index++;
+            }
 
             if (index >= cards.Count)
             {
@@ -844,6 +853,12 @@ namespace SG03.UI
                 if (slot.inventory_item_id == itemId) return slot.slot_index;
             }
             return -1;
+        }
+
+        private static bool HasSameSortKey(DeskCardSortEntry left, DeskCardSortEntry right)
+        {
+            return left.Stars == right.Stars
+                && string.Equals(left.CardType, right.CardType, StringComparison.Ordinal);
         }
 
         private void FinishSoftCardSort(PresetData desk, HashSet<string> starredItemIds, HashSet<string> voidedItemIds)
