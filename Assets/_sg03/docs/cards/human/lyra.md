@@ -16,8 +16,8 @@ Thiên về hỗ trợ trinh sát, Lyra có bộ chỉ số ưu tiên khả năn
 
 ## Kỹ Năng Nội Tại
 
-- **Scout Strike**: Khi Lyra tấn công một mục tiêu, đại bàng của cô kích hoạt hiệu ứng Eagle Eye lên 1 lá bài đang úp nằm liền kề mục tiêu đó (bên trái hoặc bên phải, cùng hàng). Lá bài được chọn bị **Expose**. Nếu không có lá bài đang úp liền kề, hiệu ứng này không xảy ra.
+- **Scout Strike**: Khi Lyra tấn công một mục tiêu, đại bàng của cô kích hoạt hiệu ứng Eagle Eye lên 1 thẻ Character đang úp nằm liền kề mục tiêu đó (bên trái hoặc bên phải, cùng hàng). Thẻ được chọn bị **Expose**. Nếu không có thẻ Character đang úp liền kề, hiệu ứng này không xảy ra.
 
 ## Kỹ Năng Liên Kết
 
-- [Eagle Eye](abilities/eagle_eye.md): Đại bàng của Lyra trinh sát từ trên không, cho phép nhìn thấy 1 lá bài đang úp, bao gồm cả thẻ Character và Ability. Lá bài được chọn sẽ bị **Expose**, để lộ thông tin của nó cho người chơi.
+- [Eagle Eye](abilities/eagle_eye.md): Đại bàng của Lyra trinh sát từ trên không, cho phép nhìn thấy 1 thẻ Character đang úp. Thẻ được chọn sẽ bị **Expose**, để lộ thông tin của nó cho người chơi.
