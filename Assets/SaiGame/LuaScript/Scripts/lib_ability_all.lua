@@ -1,30 +1,69 @@
--- Valid target_positions:
---   own_frontline
---   own_backline
---   own_hand
---   own_void
---   own_source
---   enemy_frontline
---   enemy_backline
---   enemy_hand
---   enemy_void
---   enemy_source
-function get_ability_config(ability_key)
-    local configs = {
-        twin_reaper = { event = "on_attack", target_positions = { "enemy_frontline" } },
-        scout_strike = {
-            event = "on_attack",
-            target_positions = { "enemy_frontline"}
-        },
-        spinning_slash = { target_positions = { "enemy_frontline" }, is_character_ability = true, requires_target_card = true },
-        cross_guard = { target_positions = { "own_frontline" }, requires_target_card = true },
-        totem_pulse = { target_positions = { "own_frontline" } },
-        back_stab = { target_positions = { "enemy_frontline" }, requires_target_card = true },
-        holy_glow = { target_positions = { "own_frontline", "own_backline", "own_source", "own_void" } },
-        skeleton_shield = { target_positions = { "own_frontline" }, requires_target_card = true },
-        animate_dead = { target_positions = { "own_frontline", "own_backline", "own_source", "own_void" } },
+-- ability: eagle_eye
+-- Expose one face-down enemy Character while Lyra is on the caster's front line.
+-- Lyra is only a requirement and is intentionally not triggered by this ability.
+function eagle_eye_execute(state, source_card, event_data, helpers)
+    local battle = helpers.lib_battle_common
+    battle.dlog("== [ability] eagle_eye ====================")
+
+    local target_card = (event_data or {}).defender_card
+    if target_card == nil then
+        return {}, "eagle_eye requires a target card"
+    end
+
+    local source_side = helpers.find_card_side(state, source_card)
+    if source_side == nil or source_side == "unknown" then
+        return {}, "eagle_eye source card is not on a battle line"
+    end
+
+    local target_def = helpers.find_item_def(state.item_defs, target_card.item_definition_code_name)
+    local target_type = target_def ~= nil and target_def.metadata ~= nil and target_def.metadata.type or nil
+    if target_type ~= "character" then
+        return {}, "eagle_eye can target only a character card"
+    end
+    if target_card.face_up == true or target_card.expose == true then
+        return {}, "eagle_eye requires a face-down character target"
+    end
+
+    local lyra_card = nil
+    local front_line = state[source_side .. "_front_line"] or {}
+    for _, line_card in ipairs(front_line) do
+        local has_id = line_card.inventory_item_id ~= nil and line_card.inventory_item_id ~= ""
+        if has_id then
+            local line_def = helpers.find_item_def(state.item_defs, line_card.item_definition_code_name)
+            local line_type = line_def ~= nil and line_def.metadata ~= nil and line_def.metadata.type or nil
+            local char_code = line_def ~= nil and line_def.metadata ~= nil and line_def.metadata.char_code or nil
+            if line_type == "character" and (line_card.item_definition_code_name == "lyra" or char_code == "lyra") then
+                lyra_card = line_card
+                break
+            end
+        end
+    end
+    if lyra_card == nil then
+        return {}, "eagle_eye requires Lyra on the caster's front_line"
+    end
+
+    target_card.face_up = true
+    target_card.expose = true
+    local target_side = helpers.find_card_side(state, target_card)
+    local ability_actions = {
+        target_side .. "_card_expose:" .. target_card.inventory_item_id,
+        source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=eagle_eye,target=" .. target_card.inventory_item_id .. ",required=" .. lyra_card.inventory_item_id
     }
-    return configs[ability_key]
+
+    -- Ability cards are consumed after resolving an ability-only action.
+    for _, line_key in ipairs({ source_side .. "_front_line", source_side .. "_back_line", source_side .. "_hand" }) do
+        local line = state[line_key]
+        if line ~= nil then
+            battle.remove_card_from_line(line, source_card.inventory_item_id)
+        end
+    end
+    local void_key = source_side .. "_the_void"
+    if state[void_key] == nil then state[void_key] = {} end
+    table.insert(state[void_key], source_card)
+    table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+
+    battle.dlog("[ability] eagle_eye: Lyra=" .. lyra_card.inventory_item_id .. " exposed target=" .. target_card.inventory_item_id)
+    return ability_actions, nil
 end
 
 

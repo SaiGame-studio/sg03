@@ -1,4 +1,5 @@
 require "lib_battle_common"
+require "lib_ability_config"
 require "lib_ability_core"
 require "lib_battle_entity_ai"
 require "enemy_ai_goblin_shaman"
@@ -388,7 +389,7 @@ local function main()
 
         if is_spell_ability then
             local ability_key = attacker_card.item_definition_code_name
-            local ability_def = lib_ability_all.get_ability_config(ability_key)
+            local ability_def = lib_ability_config.get_ability_config(ability_key)
             if ability_def ~= nil and ability_def.requires_target_card then
                 output.error = ability_key .. " requires a specific card target"
                 return
@@ -458,7 +459,16 @@ local function main()
         defender_line_key == "omega_front_line" or
         defender_line_key == "omega_back_line"
 
-    if not target_is_on_battle_line then
+    -- Một số Ability chỉ resolve hiệu ứng trên battle line, không tấn công.
+    -- Điều này giúp Eagle Eye kiểm tra đúng mục tiêu đang úp trước khi luồng
+    -- tấn công thông thường có thể tự expose mục tiêu.
+    local resolves_without_attack = false
+    if attacker_def.metadata ~= nil and attacker_def.metadata.type == "ability" then
+        local ability_def = lib_ability_config.get_ability_config(attacker_card.item_definition_code_name)
+        resolves_without_attack = ability_def ~= nil and ability_def.resolves_without_attack == true
+    end
+
+    if not target_is_on_battle_line or resolves_without_attack then
         local ability_err = activate_attack_ability(
             state,
             attacker_card, attacker_line_key, attacker_def,

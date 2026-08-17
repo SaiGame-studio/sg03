@@ -1,4 +1,5 @@
 require "lib_battle_common"
+require "lib_ability_config"
 require "lib_ability_core"
 require "lib_ability_all"
 require "lib_ability_advanced"

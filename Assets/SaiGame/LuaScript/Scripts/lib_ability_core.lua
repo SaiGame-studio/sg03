@@ -9,7 +9,7 @@
 --
 -- To add a new ability:
 --   1. Create/edit its source under `LuaScript/AbilitySources`.
---   2. Add its config to `get_ability_config`.
+--   2. Add its config to `lib_ability_config.get_ability_config`.
 --   3. Add a branch in `_get_ability_handler` so the dispatcher can call `lib_ability_all.<ability>_execute(...)`.
 --   4. Regenerate `Scripts/lib_ability_all.lua` from the sources.
 
@@ -139,7 +139,7 @@ function get_target_position_key(state, source_card, zone_key)
 end
 
 function can_ability_target_position(state, source_card, ability_key, zone_key)
-    local ability_def = lib_ability_all.get_ability_config(ability_key)
+    local ability_def = lib_ability_config.get_ability_config(ability_key)
     if ability_def == nil then
         return false, "unknown ability key: " .. tostring(ability_key)
     end
@@ -239,6 +239,8 @@ local function _get_ability_handler(ability_key)
         return lib_ability_character_passives.twin_reaper_execute
     elseif ability_key == "scout_strike" then
         return lib_ability_character_passives.scout_strike_execute
+    elseif ability_key == "eagle_eye" then
+        return lib_ability_all.eagle_eye_execute
     elseif ability_key == "spinning_slash" then
         return lib_ability_all.spinning_slash_execute
     elseif ability_key == "cross_guard" then
@@ -344,9 +346,9 @@ end
 -- Returns: extra_client_actions (table), err (string or nil)
 local function _dispatch_one_ability(state, source_card, key, trigger_event, event_data)
     lib_battle_common.dlog("-- [ability] _dispatch_one_ability ----------------------")
-    local ability_def = lib_ability_all.get_ability_config(key)
+    local ability_def = lib_ability_config.get_ability_config(key)
     if ability_def == nil then
-        lib_battle_common.dlog("[ability] dispatch: key=" .. tostring(key) .. " UNKNOWN - not registered in get_ability_config")
+        lib_battle_common.dlog("[ability] dispatch: key=" .. tostring(key) .. " UNKNOWN - not registered in lib_ability_config")
         return {}, "unknown ability key: " .. tostring(key)
     end
     if ability_def.event ~= nil and ability_def.event ~= trigger_event then
