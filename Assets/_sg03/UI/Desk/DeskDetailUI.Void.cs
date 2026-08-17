@@ -59,6 +59,8 @@ namespace SG03.UI
 
         private void OnToggleStarSlot(int slotIndex)
         {
+            if (this.isSoftCardSortInProgress) return;
+
             if (this.starredSlots.Contains(slotIndex))
                 this.starredSlots.Remove(slotIndex);
             else if (this.starredSlots.Count < MaxStarredSlots && !this.voidedSlots.Contains(slotIndex))
@@ -72,6 +74,8 @@ namespace SG03.UI
 
         private void OnToggleVoidSlot(int slotIndex)
         {
+            if (this.isSoftCardSortInProgress) return;
+
             if (this.voidedSlots.Contains(slotIndex))
             {
                 this.voidedSlots.Remove(slotIndex);

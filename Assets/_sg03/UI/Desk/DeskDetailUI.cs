@@ -19,6 +19,8 @@ namespace SG03.UI
         private readonly Label starCountLabel;
         private readonly Label voidCountLabel;
         private readonly Button backBtn;
+        private readonly Button softCardBtn;
+        private readonly Label softCardStatusLabel;
         private readonly ScrollView slotGrid;
         private readonly TextField inventorySearch;
         private readonly ScrollView inventoryList;
@@ -34,6 +36,8 @@ namespace SG03.UI
         private InventoryItemData[] allInventoryItems = Array.Empty<InventoryItemData>();
         private string searchText = string.Empty;
         private int pendingApiRequests = 0;
+        private bool isSoftCardSortInProgress;
+        private bool isSoftCardSortStopRequested;
         private readonly Dictionary<string, Texture2D> cardArtCache = new();
         private readonly Dictionary<string, List<Image>> pendingCardArtImages = new();
         private readonly Dictionary<string, AsyncOperationHandle<CardData>> cardArtHandles = new();
@@ -53,6 +57,8 @@ namespace SG03.UI
             this.voidCountLabel  = deskRoot.Q<Label>("VoidCountLabel");
             this.slotGrid        = deskRoot.Q<ScrollView>("SlotGrid");
             this.backBtn         = deskRoot.Q<Button>("BackBtn");
+            this.softCardBtn     = deskRoot.Q<Button>("SoftCardBtn");
+            this.softCardStatusLabel = deskRoot.Q<Label>("SoftCardStatusLabel");
             this.inventorySearch = deskRoot.Q<TextField>("InventorySearch");
             this.inventoryList   = deskRoot.Q<ScrollView>("InventoryList");
             this.flyLayer        = deskRoot.Q("FlyLayer");
@@ -67,6 +73,9 @@ namespace SG03.UI
 
             if (this.backBtn != null)
                 this.backBtn.RegisterCallback<ClickEvent>(_ => this.OnBackRequested?.Invoke());
+
+            if (this.softCardBtn != null)
+                this.softCardBtn.RegisterCallback<ClickEvent>(_ => this.OnSoftCardClicked());
 
             Button closeBtn = deskRoot.Q<Button>("CardViewerCloseBtn");
             if (closeBtn != null)
@@ -526,6 +535,8 @@ namespace SG03.UI
 
         private void OnRemoveFromDesk(PresetData desk, int slotIndex)
         {
+            if (this.isSoftCardSortInProgress) return;
+
             if (this.currentDesk.slots != null)
             {
                 var list = new List<PresetSlotData>(this.currentDesk.slots);
@@ -569,7 +580,7 @@ namespace SG03.UI
 
         private void OnInventoryItemClicked(CardStack stack, VisualElement sourceElement)
         {
-            if (this.currentDesk == null) return;
+            if (this.currentDesk == null || this.isSoftCardSortInProgress) return;
             if (stack.ItemIds.Count == 0) return;
 
             int emptySlot = this.FindFirstEmptySlot();
@@ -650,6 +661,331 @@ namespace SG03.UI
         }
 
         // ── Fly animation ─────────────────────────────────────────────────────
+
+        private void OnSoftCardClicked()
+        {
+            if (this.isSoftCardSortInProgress)
+            {
+                this.isSoftCardSortStopRequested = true;
+                this.softCardBtn?.SetEnabled(false);
+                this.SetSoftCardStatus("Stopping after the current swap...");
+                return;
+            }
+
+            if (this.currentDesk == null || this.pendingApiRequests > 0) return;
+
+            List<DeskCardSortEntry> cards = this.BuildSortedDeckCards();
+            if (cards.Count < 2 || this.IsAlreadySorted(cards))
+            {
+                this.SetSoftCardStatus("Cards are already sorted");
+                return;
+            }
+
+            HashSet<string> starredItemIds = this.GetItemIdsInSlots(this.starredSlots);
+            HashSet<string> voidedItemIds = this.GetItemIdsInSlots(this.voidedSlots);
+            this.isSoftCardSortInProgress = true;
+            this.isSoftCardSortStopRequested = false;
+            if (this.softCardBtn != null) this.softCardBtn.text = "Stop";
+            this.SetSoftCardStatus($"Sorting: 0/{cards.Count} swaps");
+            this.SortNextCard(cards, 0, starredItemIds, voidedItemIds);
+        }
+
+        private List<DeskCardSortEntry> BuildSortedDeckCards()
+        {
+            Dictionary<string, InventoryItemData> itemsById = new Dictionary<string, InventoryItemData>();
+            foreach (InventoryItemData item in this.allInventoryItems)
+            {
+                if (!string.IsNullOrEmpty(item?.id)) itemsById[item.id] = item;
+            }
+
+            List<DeskCardSortEntry> cards = new List<DeskCardSortEntry>();
+            if (this.currentDesk?.slots == null) return cards;
+
+            foreach (PresetSlotData slot in this.currentDesk.slots)
+            {
+                if (string.IsNullOrEmpty(slot.inventory_item_id)) continue;
+                itemsById.TryGetValue(slot.inventory_item_id, out InventoryItemData item);
+                cards.Add(new DeskCardSortEntry(
+                    slot.inventory_item_id,
+                    slot.slot_index,
+                    this.GetCardStarCount(item),
+                    item?.item_definition_id ?? item?.definition?.id ?? string.Empty));
+            }
+
+            cards.Sort((left, right) =>
+            {
+                int starComparison = right.Stars.CompareTo(left.Stars);
+                if (starComparison != 0) return starComparison;
+
+                int typeComparison = string.Compare(left.CardType, right.CardType, StringComparison.Ordinal);
+                if (typeComparison != 0) return typeComparison;
+
+                return left.OriginalSlot.CompareTo(right.OriginalSlot);
+            });
+            return cards;
+        }
+
+        private bool IsAlreadySorted(List<DeskCardSortEntry> cards)
+        {
+            for (int index = 0; index < cards.Count; index++)
+            {
+                if (cards[index].OriginalSlot != index) return false;
+            }
+            return true;
+        }
+
+        private void SortNextCard(List<DeskCardSortEntry> cards, int index, HashSet<string> starredItemIds, HashSet<string> voidedItemIds)
+        {
+            if (this.isSoftCardSortStopRequested)
+            {
+                this.ReloadDeskAfterSortStop();
+                return;
+            }
+
+            while (index < cards.Count && GetItemIdInSlot(this.currentDesk, index) == cards[index].ItemId)
+                index++;
+
+            if (index >= cards.Count)
+            {
+                this.deskList.GetDesk(
+                    this.currentDesk.id,
+                    desk => this.FinishSoftCardSort(desk, starredItemIds, voidedItemIds),
+                    _ => this.ReloadDeskAfterSortFailure());
+                return;
+            }
+
+            int sourceSlot = this.FindSlotForItem(cards[index].ItemId);
+            if (sourceSlot < 0)
+            {
+                this.ReloadDeskAfterSortFailure();
+                return;
+            }
+
+            string displacedItemId = GetItemIdInSlot(this.currentDesk, index);
+            if (string.IsNullOrEmpty(displacedItemId))
+            {
+                this.MoveCardForSort(cards, index, sourceSlot, starredItemIds, voidedItemIds);
+                return;
+            }
+
+            this.SwapCardsForSort(cards, index, sourceSlot, displacedItemId, starredItemIds, voidedItemIds);
+        }
+
+        private void MoveCardForSort(List<DeskCardSortEntry> cards, int index, int sourceSlot, HashSet<string> starredItemIds, HashSet<string> voidedItemIds)
+        {
+            string itemId = cards[index].ItemId;
+            this.deskList.RemoveItemFromDesk(
+                this.currentDesk.id,
+                sourceSlot,
+                _ =>
+                {
+                    this.RemoveSlotFromSortUi(sourceSlot);
+                    this.deskList.AddItemToDesk(
+                        this.currentDesk.id,
+                        index,
+                        itemId,
+                        _ =>
+                        {
+                            this.AddCardToSortUi(index, itemId);
+                            this.SetSoftCardStatus($"Sorting: {index + 1}/{cards.Count} swaps");
+                            this.SortNextCard(cards, index + 1, starredItemIds, voidedItemIds);
+                        },
+                        _ => this.ReloadDeskAfterSortFailure());
+                },
+                _ => this.ReloadDeskAfterSortFailure());
+        }
+
+        private void SwapCardsForSort(List<DeskCardSortEntry> cards, int index, int sourceSlot, string displacedItemId, HashSet<string> starredItemIds, HashSet<string> voidedItemIds)
+        {
+            string itemId = cards[index].ItemId;
+            this.deskList.RemoveItemFromDesk(
+                this.currentDesk.id,
+                index,
+                _ =>
+                {
+                    this.RemoveSlotFromSortUi(index);
+                    this.deskList.RemoveItemFromDesk(
+                        this.currentDesk.id,
+                        sourceSlot,
+                        _ =>
+                        {
+                            this.RemoveSlotFromSortUi(sourceSlot);
+                            this.deskList.AddItemToDesk(
+                                this.currentDesk.id,
+                                index,
+                                itemId,
+                                _ =>
+                                {
+                                    this.AddCardToSortUi(index, itemId);
+                                    this.deskList.AddItemToDesk(
+                                        this.currentDesk.id,
+                                        sourceSlot,
+                                        displacedItemId,
+                                        _ =>
+                                        {
+                                            this.AddCardToSortUi(sourceSlot, displacedItemId);
+                                            this.SetSoftCardStatus($"Sorting: {index + 1}/{cards.Count} swaps");
+                                            this.SortNextCard(cards, index + 1, starredItemIds, voidedItemIds);
+                                        },
+                                        _ => this.ReloadDeskAfterSortFailure());
+                                },
+                                _ => this.ReloadDeskAfterSortFailure());
+                        },
+                        _ => this.ReloadDeskAfterSortFailure());
+                },
+                _ => this.ReloadDeskAfterSortFailure());
+        }
+
+        private int FindSlotForItem(string itemId)
+        {
+            if (this.currentDesk?.slots == null) return -1;
+            foreach (PresetSlotData slot in this.currentDesk.slots)
+            {
+                if (slot.inventory_item_id == itemId) return slot.slot_index;
+            }
+            return -1;
+        }
+
+        private void FinishSoftCardSort(PresetData desk, HashSet<string> starredItemIds, HashSet<string> voidedItemIds)
+        {
+            desk.metadataJson = this.currentDesk.metadataJson;
+            this.currentDesk = desk;
+            this.SetSlotsForItemIds(this.starredSlots, starredItemIds);
+            this.SetSlotsForItemIds(this.voidedSlots, voidedItemIds);
+            this.RenderSlots(this.currentDesk);
+            this.RenderInventory();
+            this.SaveMetadata();
+            this.isSoftCardSortInProgress = false;
+            this.isSoftCardSortStopRequested = false;
+            this.SetSoftCardStatus("Cards sorted");
+            if (this.softCardBtn != null)
+            {
+                this.softCardBtn.text = "Soft Card";
+                this.softCardBtn.SetEnabled(true);
+            }
+        }
+
+        private void ReloadDeskAfterSortStop()
+        {
+            this.ReloadDeskAfterSort("Sorting stopped; deck reloaded");
+        }
+
+        private void ReloadDeskAfterSortFailure()
+        {
+            this.ReloadDeskAfterSort("Sort failed; deck reloaded");
+        }
+
+        private void ReloadDeskAfterSort(string statusMessage)
+        {
+            string metadataJson = this.currentDesk?.metadataJson;
+            this.deskList.GetDesk(
+                this.currentDesk.id,
+                desk =>
+                {
+                    desk.metadataJson = metadataJson;
+                    this.currentDesk = desk;
+                    this.starredSlots.Clear();
+                    this.voidedSlots.Clear();
+                    this.RestoreStarredSlotsFromMetadata(desk);
+                    this.RestoreVoidedSlotsFromMetadata(desk);
+                    this.RenderSlots(desk);
+                    this.RenderInventory();
+                    this.isSoftCardSortInProgress = false;
+                    this.isSoftCardSortStopRequested = false;
+                    this.SetSoftCardStatus(statusMessage);
+                    if (this.softCardBtn != null)
+                    {
+                        this.softCardBtn.text = "Soft Card";
+                        this.softCardBtn.SetEnabled(true);
+                    }
+                },
+                _ =>
+                {
+                    this.isSoftCardSortInProgress = false;
+                    this.isSoftCardSortStopRequested = false;
+                    this.SetSoftCardStatus("Sort failed; reload the deck");
+                    if (this.softCardBtn != null)
+                    {
+                        this.softCardBtn.text = "Soft Card";
+                        this.softCardBtn.SetEnabled(true);
+                    }
+                });
+        }
+
+        private void RemoveSlotFromSortUi(int slotIndex)
+        {
+            List<PresetSlotData> slots = new List<PresetSlotData>(this.currentDesk.slots);
+            slots.RemoveAll(slot => slot.slot_index == slotIndex);
+            this.currentDesk.slots = slots.ToArray();
+            this.RenderSlots(this.currentDesk);
+            this.RenderInventory();
+        }
+
+        private void AddCardToSortUi(int slotIndex, string itemId)
+        {
+            List<PresetSlotData> slots = new List<PresetSlotData>(this.currentDesk.slots)
+            {
+                new PresetSlotData { slot_index = slotIndex, inventory_item_id = itemId }
+            };
+            this.currentDesk.slots = slots.ToArray();
+            this.RenderSlots(this.currentDesk);
+            this.RenderInventory();
+        }
+
+        private void SetSoftCardStatus(string message)
+        {
+            if (this.softCardStatusLabel != null) this.softCardStatusLabel.text = message;
+        }
+
+        private HashSet<string> GetItemIdsInSlots(HashSet<int> slotIndices)
+        {
+            HashSet<string> itemIds = new HashSet<string>();
+            foreach (int slotIndex in slotIndices)
+            {
+                string itemId = GetItemIdInSlot(this.currentDesk, slotIndex);
+                if (!string.IsNullOrEmpty(itemId)) itemIds.Add(itemId);
+            }
+            return itemIds;
+        }
+
+        private void SetSlotsForItemIds(HashSet<int> slotIndices, HashSet<string> itemIds)
+        {
+            slotIndices.Clear();
+            if (this.currentDesk?.slots == null) return;
+            foreach (PresetSlotData slot in this.currentDesk.slots)
+            {
+                if (itemIds.Contains(slot.inventory_item_id)) slotIndices.Add(slot.slot_index);
+            }
+        }
+
+        private int GetCardStarCount(InventoryItemData item)
+        {
+            string baseStatsJson = item?.definition?.base_stats;
+            if (string.IsNullOrEmpty(baseStatsJson)) return 0;
+            return JsonUtility.FromJson<DeskCardBaseStats>(baseStatsJson)?.star ?? 0;
+        }
+
+        [Serializable]
+        private class DeskCardBaseStats
+        {
+            public int star;
+        }
+
+        private class DeskCardSortEntry
+        {
+            public readonly string ItemId;
+            public readonly int OriginalSlot;
+            public readonly int Stars;
+            public readonly string CardType;
+
+            public DeskCardSortEntry(string itemId, int originalSlot, int stars, string cardType)
+            {
+                this.ItemId = itemId;
+                this.OriginalSlot = originalSlot;
+                this.Stars = stars;
+                this.CardType = cardType;
+            }
+        }
 
         private void AnimateFly(VisualElement from, VisualElement to, Action onComplete)
         {
