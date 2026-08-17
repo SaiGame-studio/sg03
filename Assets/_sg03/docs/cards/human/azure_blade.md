@@ -2,8 +2,8 @@
 
 - **Tên**: Ren
 - **Số sao**: 3
-- **Tấn Công (ATK)**: 300
-- **Phòng Thủ (DEF)**: 420
+- **Tấn Công (ATK)**: 270
+- **Phòng Thủ (DEF)**: 400
 - **Loại Thẻ**: [`character`](../../03_characters.md)
 - **Chủng Tộc**: `human` (Nhân Loại)
 - **Vai Trò**: Striker / Defender Core
