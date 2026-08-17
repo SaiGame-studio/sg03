@@ -2,6 +2,8 @@ require "lib_battle_common"
 require "lib_ability_core"
 require "lib_battle_ai"
 require "lib_ability_all"
+require "lib_ability_advanced"
+require "lib_ability_character_passives"
 
 -- alpha_defending_end.lua
 -- Ends Alpha's defending phase by executing the queued Omega plan entries
