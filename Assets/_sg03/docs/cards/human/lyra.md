@@ -10,9 +10,9 @@
 
 ## Mô Tả
 
-Lyra là một nữ chiến binh kiên định, lớn lên bên những vách núi nơi đại bàng làm tổ. Cô dành nhiều năm huấn luyện đại bàng chiến để chúng có thể trinh sát, quấy rối tuyến sau và chỉ điểm mục tiêu cho đồng minh trên chiến trường. Dù không phải người mở giao tranh, Lyra giữ vững vị trí bằng chiếc khiên nhẹ và những mệnh lệnh chính xác từ trên không.
+Lyra là một nữ chiến binh kiên định, lớn lên bên những vách núi nơi đại bàng làm tổ. Cô dành nhiều năm huấn luyện đại bàng chiến để chúng có thể trinh sát, quấy rối tuyến sau và chỉ điểm mục tiêu cho đồng minh trên chiến trường.
 
-Với **ATK 170** và **DEF 240**, Lyra là nhân vật 2 sao thiên về hỗ trợ trinh sát. ATK thuộc khung scaling 2 sao (150–250); DEF được hạ dưới khung chuẩn 260–360 theo thiết kế nhân vật, đánh đổi độ bền để cô cần giữ vị trí an toàn khi duy trì sự hỗ trợ từ đại bàng cho đội hình.
+Thiên về hỗ trợ trinh sát, Lyra có bộ chỉ số ưu tiên khả năng cơ động và hỗ trợ đội hình hơn là đối đầu trực diện. Cô nên giữ vị trí an toàn để duy trì sự trinh sát từ đại bàng cho đồng minh.
 
 ## Kỹ Năng Nội Tại
 
