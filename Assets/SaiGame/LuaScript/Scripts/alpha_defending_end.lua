@@ -1,6 +1,8 @@
 require "lib_battle_common"
 require "lib_ability_core"
 require "lib_battle_ai"
+require "lib_battle_entity_ai"
+require "enemy_ai_goblin_shaman"
 require "lib_ability_all"
 require "lib_ability_advanced"
 require "lib_ability_character_passives"
@@ -140,7 +142,27 @@ local function execute_card_attack_plan(state, plan_entry)
             lib_battle_common.dlog("[alpha_defending_end] attacker no longer on field — alpha defending succeeded: " .. tostring(plan_entry.attacker_inv_id))
             return nil
         end
-        return resolve_err
+        if string.find(resolve_err, "defender card not found", 1, true) then
+            local has_alpha_front_character = false
+            for _, card in ipairs(state.alpha_front_line or {}) do
+                if lib_battle_common.check_card_type(state.item_defs, card, "character") then
+                    has_alpha_front_character = true
+                    break
+                end
+            end
+            if not has_alpha_front_character then return nil end
+            local new_defender = lib_battle_ai._pick_alpha_attack_target(state)
+            if new_defender == nil then return nil end
+            plan_entry.defender_inv_id = new_defender.inventory_item_id
+            resolved, resolve_err = resolve_attack_plan(state, plan_entry)
+            if resolve_err == nil then
+                -- The previous target was defeated; continue against a live one.
+            else
+                return resolve_err
+            end
+        else
+            return resolve_err
+        end
     end
 
     if resolved.attacker_card.trigger == true then
@@ -260,7 +282,7 @@ local function main()
     state.omega_planning  = {}
 
     -- ── Re-plan omega's next attack after executing this round's plan ─────
-    local next_plan_err = lib_battle_ai.omega_planning_to_attack(state)
+    local next_plan_err = lib_battle_entity_ai.run_plan_attack(state)
     if next_plan_err ~= nil then output.error = next_plan_err ; return end
 
     lib_battle_common.append_client_action(state, "alpha_take_lamp")

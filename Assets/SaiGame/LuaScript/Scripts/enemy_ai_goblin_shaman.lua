@@ -142,7 +142,8 @@ function defend(state)
     return nil
 end
 
--- Deploy strategy: one character (random face_up) to front, all totem_pulse cards (random face_up each) to back.
+-- Deploy strategy: deploy one character per turn. While Alpha still has a
+-- Character on its front line, keep Shaman's next character face-down once one is face-up.
 -- Resets newly deployed cards. Returns: front_line, back_line, hand, err.
 function deploy(state)
     lib_battle_common.dlog("[entity_ai] == goblin_shaman.deploy ==")
@@ -153,16 +154,34 @@ function deploy(state)
     local deployed_ids     = {}
     local front_deployed   = {}
     local back_deployed    = {}
+    local has_face_up_character = false
+    for _, front_card in ipairs(omega_front_line) do
+        if front_card.inventory_item_id ~= nil and front_card.inventory_item_id ~= ""
+            and front_card.face_up == true
+            and lib_battle_common.check_card_type(state.item_defs, front_card, "character") then
+            has_face_up_character = true
+            break
+        end
+    end
+
+    local alpha_front_line_character_count = 0
+    for _, front_card in ipairs(state.alpha_front_line or {}) do
+        if front_card.inventory_item_id ~= nil and front_card.inventory_item_id ~= ""
+            and lib_battle_common.check_card_type(state.item_defs, front_card, "character") then
+            alpha_front_line_character_count = alpha_front_line_character_count + 1
+        end
+    end
 
     local hand_cards                   = lib_battle_ai._collect_cards(state.omega_hand or {})
     local character_cards, other_cards = lib_battle_ai._split_cards_by_type(hand_cards, state.item_defs)
     local totem_pulse_cards            = goblin_shaman_filter_totem_pulse_cards(other_cards)
     lib_battle_common.dlog("[entity_ai] goblin_shaman.deploy: characters=" .. #character_cards .. " totem_pulse=" .. #totem_pulse_cards)
 
-    -- Deploy one character to front (random face_up).
+    -- Keep the one-character-per-turn rule. Retain hidden information while
+    -- Alpha still has a Character in its front line.
     if #character_cards >= 1 then
         local deploy_card = character_cards[1]
-        local face_up = math.random(0, 1) == 1
+        local face_up = not (has_face_up_character and alpha_front_line_character_count > 0)
         for slot_i = 1, slot_count do
             local existing = omega_front_line[slot_i]
             if existing == nil or existing.item_definition_code_name == nil or existing.item_definition_code_name == "" then
@@ -208,7 +227,17 @@ end
 -- Returns err or nil.
 function plan_attack(state)
     lib_battle_common.dlog("[entity_ai] == goblin_shaman.plan_attack ==")
-    local plan_err = lib_battle_ai.omega_planning_to_attack(state)
-    if plan_err ~= nil then return plan_err end
+    state.omega_planning = {}
+    local defender = lib_battle_ai._pick_alpha_attack_target(state)
+    if defender == nil then return lib_battle_ai.omega_planning_to_attack(state, true) end
+    for _, attacker in ipairs(state.omega_front_line or {}) do
+        if attacker.inventory_item_id ~= nil and attacker.inventory_item_id ~= ""
+            and attacker.trigger ~= true and attacker.face_up == true
+            and lib_battle_common.check_card_type(state.item_defs, attacker, "character") then
+            table.insert(state.omega_planning, { action = "card_attack_card", attacker_inv_id = attacker.inventory_item_id, defender_inv_id = defender.inventory_item_id })
+            lib_battle_common.append_client_action(state, "omega_planing_character_attack:" .. attacker.inventory_item_id .. "," .. defender.inventory_item_id)
+        end
+    end
+    if #state.omega_planning == 0 then lib_battle_ai.omega_end_turn(state) end
     return nil
 end

@@ -1080,6 +1080,7 @@ Transform:
   m_Children:
   - {fileID: 1313731243}
   - {fileID: 1875238348}
+  - {fileID: 1579515234}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &331941083
@@ -1096,7 +1097,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.ManagersCtrl
   profileManager: {fileID: 1313731244}
   cardDataManager: {fileID: 1875238347}
-  questDailyManager: {fileID: 0}
+  questDailyManager: {fileID: 1579515235}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -3445,7 +3446,7 @@ MonoBehaviour:
   battleStateCtrl: {fileID: 2015755444}
   mainCamera: {fileID: 330585545}
   battleScripts: {fileID: 2015755445}
-  lampOfSoulCtrl: {fileID: 0}
+  lampOfSoulCtrl: {fileID: 1773165130}
   cylinderRenderer: {fileID: 1043868439}
   outlineMaterial: {fileID: 2100000, guid: c8394e1b80c54625b81a70c8a61ed303, type: 2}
   outlineHoverMaterial: {fileID: 2100000, guid: d9494e1b80c54625b81a70c8a61ed304, type: 2}
@@ -4767,6 +4768,79 @@ Material:
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
+--- !u!1001 &1579515233
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 331941082}
+    m_Modifications:
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -17.40582
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 17.32225
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -36.68304
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7908861190732204320, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+      propertyPath: m_Name
+      value: QuestDailyManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+--- !u!4 &1579515234 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+  m_PrefabInstance: {fileID: 1579515233}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1579515235 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3982072084831160567, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
+  m_PrefabInstance: {fileID: 1579515233}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 555ac40ce1e53564f8046a39311cc70e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.Quest.QuestDailyManager
 --- !u!1001 &1585986555
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7089,6 +7163,7 @@ GameObject:
   - component: {fileID: 2030001002}
   - component: {fileID: 2030001004}
   - component: {fileID: 2030001003}
+  - component: {fileID: 2030001005}
   m_Layer: 0
   m_Name: GamePanelUI
   m_TagString: Untagged
@@ -7151,9 +7226,24 @@ MonoBehaviour:
   itemPreset: {fileID: 1147895069}
   battleScripts: {fileID: 2015755445}
   battleStateCtrl: {fileID: 2015755444}
-  currencyWallet: {fileID: 0}
+  currencyWallet: {fileID: 2030001005}
   uiDocument: {fileID: 2030001003}
   lobbySceneName: 1-lobby
+--- !u!114 &2030001005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2030001001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c72b197fdc24ca09ae016f26392c1a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.UI.CurrencyWallet
+  balances: []
+  isLoaded: 0
+  lastError: 
 --- !u!114 &2034349439 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6696618329774845696, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
