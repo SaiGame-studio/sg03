@@ -1078,7 +1078,7 @@ namespace SG03.UI
             if (!string.IsNullOrEmpty(classification))
                 card.Add(this.CreateDetailLabel(classification, "dq-quest-detail__reward-info"));
 
-            string description = definition.ParsedMetadata?.description;
+            string description = definition.description;
             if (string.IsNullOrEmpty(description)) description = definition.ParsedMetadata?.flavor_text;
             if (!string.IsNullOrEmpty(description))
                 card.Add(this.CreateDetailLabel(description, "dq-quest-detail__reward-info"));

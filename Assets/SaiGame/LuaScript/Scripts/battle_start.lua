@@ -18,6 +18,7 @@ require "lib_battle_common"
 -- Deck size limits — shared with player deck validation
 local DECK_CARD_MIN = 25
 local DECK_CARD_MAX = 52
+local DECK_CARD_COPY_MAX = 3
 local START_BATTLE_SOUL_COST = 5
 
 local function gen_id()
@@ -213,6 +214,23 @@ verify_player_preset = function(preset_instance_id)
     if total >= DECK_CARD_MAX then
         return nil, "player deck must have fewer than " .. DECK_CARD_MAX .. " cards (has " .. total .. ")"
     end
+
+    local card_counts = {}
+    for _, slot in ipairs(slots) do
+        local card_id = slot.item_definition_id
+        if card_id == nil or card_id == "" then
+            return nil, "player deck contains a card without an item definition"
+        end
+
+        local count = (card_counts[card_id] or 0) + 1
+        card_counts[card_id] = count
+        if count > DECK_CARD_COPY_MAX then
+            local card_name = slot.item_definition_code_name
+            if card_name == nil or card_name == "" then card_name = card_id end
+            return nil, "player deck cannot contain more than " .. DECK_CARD_COPY_MAX .. " copies of card " .. card_name
+        end
+    end
+
     return preset, nil
 end
 

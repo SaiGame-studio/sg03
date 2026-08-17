@@ -333,7 +333,8 @@ function _find_first_real_card_in_line(line)
 end
 
 -- Returns the first untriggered character card in omega_front_line, or nil.
-function _find_omega_attacker(state)
+-- When require_face_up is true, hidden Characters are not eligible to attack.
+function _find_omega_attacker(state, require_face_up)
     local omega_front_line = state.omega_front_line or {}
     for _, front_card in ipairs(omega_front_line) do
         local attacker_id = front_card.inventory_item_id or ""
@@ -341,6 +342,8 @@ function _find_omega_attacker(state)
             -- empty slot, skip
         elseif front_card.trigger == true then
             lib_battle_common.dlog("[lib_battle_ai] _find_omega_attacker: already triggered: " .. attacker_id)
+        elseif require_face_up and front_card.face_up ~= true then
+            lib_battle_common.dlog("[lib_battle_ai] _find_omega_attacker: face-down attacker skipped: " .. attacker_id)
         else
             local attacker_def = _find_item_def(state.item_defs, front_card.item_definition_code_name)
             local card_type    = attacker_def ~= nil and attacker_def.metadata ~= nil and attacker_def.metadata.type or
@@ -384,19 +387,12 @@ function _pick_alpha_attack_target(state)
     return back_card
 end
 
-function omega_planning_to_attack(state)
+function omega_planning_to_attack(state, hide_attackers_while_alpha_front)
     lib_battle_common.dlog("[lib_battle_ai] == omega_planning_to_attack ==")
     state.omega_planning = {}
 
-    local attacker_card = _find_omega_attacker(state)
-    if attacker_card == nil then
-        lib_battle_common.dlog(
-        "[lib_battle_ai] omega_planning_to_attack: no untriggered character attacker -> calling omega_end_turn")
-        omega_end_turn(state)
-        return nil
-    end
-
-    -- Check if we can attack alpha_hp directly (no character cards on alpha front line)
+    -- Hidden Shaman Characters may be preserved while Alpha still has a
+    -- front-line Character. Other callers retain the default behavior.
     local has_alpha_front_character = false
     for _, card in ipairs(state.alpha_front_line or {}) do
         if lib_battle_common.check_card_type(state.item_defs, card, "character") then
@@ -405,6 +401,18 @@ function omega_planning_to_attack(state)
         end
     end
 
+    local attacker_card = _find_omega_attacker(
+        state,
+        hide_attackers_while_alpha_front and has_alpha_front_character
+    )
+    if attacker_card == nil then
+        lib_battle_common.dlog(
+        "[lib_battle_ai] omega_planning_to_attack: no untriggered character attacker -> calling omega_end_turn")
+        omega_end_turn(state)
+        return nil
+    end
+
+    -- Check if we can attack alpha_hp directly (no character cards on alpha front line)
     if not has_alpha_front_character then
         local plan_entry           = {}
         plan_entry.action          = "omega_attack_alpha_hp"

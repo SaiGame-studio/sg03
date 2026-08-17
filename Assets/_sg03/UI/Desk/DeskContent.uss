@@ -313,6 +313,30 @@
     color: rgb(200, 215, 255);
 }
 
+.desk-header__soft-card-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(210, 165, 75, 0.6);
+    background-color: rgba(100, 68, 25, 0.65);
+    color: rgb(255, 220, 145);
+    font-size: 12px;
+    -unity-font-style: bold;
+    transition-duration: 0.1s;
+}
+
+.desk-header__soft-card-btn:hover {
+    background-color: rgba(135, 90, 30, 0.82);
+    color: rgb(255, 238, 190);
+}
+
+.desk-header__soft-card-status {
+    margin-right: 10px;
+    color: rgb(190, 205, 235);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
 /* ============================================================
    Slot grid
    ============================================================ */

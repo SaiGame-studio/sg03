@@ -48,6 +48,13 @@ local function find_and_remove_by_code(list, code)
     return nil
 end
 
+local function find_by_inventory_item_id(list, inventory_item_id)
+    for _, item in ipairs(list or {}) do
+        if item.inventory_item_id == inventory_item_id then return item end
+    end
+    return nil
+end
+
 local function alpha_draw_random(state, card_count, start_slot)
     lib_battle_common.dlog("[init_cards] == alpha_draw_random == card_count: " .. tostring(card_count))
     start_slot = start_slot or 0
@@ -135,11 +142,18 @@ local function alpha_choose_cards(state)
         if uid ~= nil and uid ~= "" then
             local card = find_and_remove(source, uid)
             if card == nil then
-                return nil, "preset card " .. slot_names[i] .. " (" .. uid .. ") not found in alpha_the_source"
+                -- Void takes precedence over a hand choice, including cards
+                -- automatically moved because they have at least four stars.
+                if find_by_inventory_item_id(state.alpha_the_void, uid) ~= nil then
+                    lib_battle_common.dlog("[init_cards] Skipped hand choice " .. slot_names[i] .. " (" .. uid .. ") because the card is in alpha_the_void")
+                else
+                    return nil, "preset card " .. slot_names[i] .. " (" .. uid .. ") not found in alpha_the_source"
+                end
+            else
+                card.slot_index  = #hand
+                card.trigger     = false
+                table.insert(hand, card)
             end
-            card.slot_index  = #hand
-            card.trigger     = false
-            table.insert(hand, card)
         end
     end
 
@@ -219,6 +233,77 @@ local function alpha_init_cards(state)
     return nil
 end
 
+-- Moves only character cards with at least four stars out of Alpha's source
+-- before any opening-hand selections or random draws occur.
+local function alpha_init_void(state)
+    lib_battle_common.dlog("[init_cards] == alpha_init_void ==")
+    local preset = state.alpha_preset_metadata
+    if preset == nil then
+        return "alpha_preset_metadata not found in session state"
+    end
+
+    local source = state.alpha_the_source
+    if source == nil then
+        return "alpha_the_source not found in session state"
+    end
+    if state.alpha_the_void == nil then
+        state.alpha_the_void = {}
+    end
+
+    local function move_to_void(card, reason)
+        table.insert(state.alpha_the_void, card)
+        lib_battle_common.append_client_action(state, "alpha_card_sent_to_void:" .. card.inventory_item_id)
+        lib_battle_common.dlog("[init_cards] Moved alpha card to void (" .. reason .. "): " .. card.inventory_item_id)
+    end
+
+    local defs_by_code = {}
+    for _, item_def in ipairs(state.item_defs or {}) do
+        if item_def.item_code ~= nil and item_def.item_code ~= "" then
+            defs_by_code[item_def.item_code] = item_def
+        end
+    end
+
+    local function is_void_eligible(card)
+        local item_def = defs_by_code[card.item_definition_code_name]
+        local card_type = item_def ~= nil and item_def.metadata ~= nil and item_def.metadata.type or nil
+        local stars = item_def ~= nil and item_def.base_stats ~= nil and item_def.base_stats.star or 0
+        return card_type == "character" and stars >= 4, stars
+    end
+
+    -- Explicit void choices keep their preset order, but only eligible
+    -- character cards can be moved during initialization.
+    local slot_names = { "void_card_1", "void_card_2", "void_card_3", "void_card_4", "void_card_5", "void_card_6", "void_card_7" }
+    for _, key in ipairs(slot_names) do
+        local uid = preset[key]
+        if uid ~= nil and uid ~= "" then
+            local card = find_by_inventory_item_id(source, uid)
+            if card ~= nil then
+                local eligible, stars = is_void_eligible(card)
+                if eligible then
+                    find_and_remove(source, uid)
+                    move_to_void(card, key)
+                else
+                    lib_battle_common.dlog("[init_cards] Skipped void card " .. key .. " (" .. uid .. "): only character cards with at least 4 stars are eligible")
+                end
+            else
+                lib_battle_common.dlog("[init_cards] Warning: void card " .. key .. " (" .. uid .. ") not found in alpha_the_source")
+            end
+        end
+    end
+
+    -- Iterate backwards while removing so every remaining source card is checked.
+    for i = #source, 1, -1 do
+        local card = source[i]
+        local eligible, stars = is_void_eligible(card)
+        if eligible then
+            table.remove(source, i)
+            move_to_void(card, tostring(stars) .. "-star character")
+        end
+    end
+
+    return nil
+end
+
 -- Draws omega's opening hand: 3 preset chosen cards + 2 random from omega_the_source.
 -- Returns err or nil.
 local function omega_init_cards(state)
@@ -251,6 +336,11 @@ local function main()
         output.error = load_err; return
     end
 
+    local void_err = alpha_init_void(state)
+    if void_err ~= nil then
+        output.error = void_err; return
+    end
+
     local alpha_err = alpha_init_cards(state)
     if alpha_err ~= nil then
         output.error = alpha_err; return
@@ -259,49 +349,6 @@ local function main()
     local omega_err = omega_init_cards(state)
     if omega_err ~= nil then
         output.error = omega_err; return
-    end
-
-    -- Draws Alpha's chosen void cards: exactly the preset cards from void_card_1..7
-    -- (from alpha_preset_metadata). Moves them from alpha_the_source to alpha_the_void.
-    -- Returns: err
-    local function alpha_init_void(state)
-        lib_battle_common.dlog("[init_cards] == alpha_init_void ==")
-        local preset = state.alpha_preset_metadata
-        if preset == nil then
-            lib_battle_common.dlog("[init_cards] alpha_preset_metadata not found in session state, skipping void initialization")
-            return nil
-        end
-
-        local source = state.alpha_the_source
-        if source == nil then
-            return "alpha_the_source not found in session state"
-        end
-
-        if state.alpha_the_void == nil then
-            state.alpha_the_void = {}
-        end
-
-        local slot_names = { "void_card_1", "void_card_2", "void_card_3", "void_card_4", "void_card_5", "void_card_6", "void_card_7" }
-        for _, key in ipairs(slot_names) do
-            local uid = preset[key]
-            if uid ~= nil and uid ~= "" then
-                local card = find_and_remove(source, uid)
-                if card ~= nil then
-                    table.insert(state.alpha_the_void, card)
-                    lib_battle_common.append_client_action(state, "alpha_card_sent_to_void:" .. card.inventory_item_id)
-                    lib_battle_common.dlog("[init_cards] Moved alpha card to void: " .. card.inventory_item_id)
-                else
-                    lib_battle_common.dlog("[init_cards] Warning: void card " .. key .. " (" .. uid .. ") not found in alpha_the_source")
-                end
-            end
-        end
-
-        return nil
-    end
-
-    local void_err = alpha_init_void(state)
-    if void_err ~= nil then
-        output.error = void_err; return
     end
 
     local deploy_err = run_omega_deploy(state)

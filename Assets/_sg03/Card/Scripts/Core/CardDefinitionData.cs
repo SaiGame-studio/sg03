@@ -13,6 +13,7 @@ namespace SG03
         public string id;
         public string item_code;
         public string name;
+        public string description;
         public string category;
         public string rarity;
         public int grid_width;

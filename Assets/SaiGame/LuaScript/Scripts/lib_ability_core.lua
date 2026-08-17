@@ -236,7 +236,9 @@ end
 
 local function _get_ability_handler(ability_key)
     if ability_key == "twin_reaper" then
-        return lib_ability_all.twin_reaper_execute
+        return lib_ability_character_passives.twin_reaper_execute
+    elseif ability_key == "scout_strike" then
+        return lib_ability_character_passives.scout_strike_execute
     elseif ability_key == "spinning_slash" then
         return lib_ability_all.spinning_slash_execute
     elseif ability_key == "cross_guard" then
@@ -250,7 +252,7 @@ local function _get_ability_handler(ability_key)
     elseif ability_key == "skeleton_shield" then
         return lib_ability_all.skeleton_shield_execute
     elseif ability_key == "animate_dead" then
-        return lib_ability_all.animate_dead_execute
+        return lib_ability_advanced.animate_dead_execute
     end
     return nil
 end

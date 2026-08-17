@@ -52,6 +52,9 @@ namespace SG03
         // via Card3DCtrl.SetFallbackDescription().
         private string fallbackDescription;
 
+        // Sourced from CardDefinitionMetadata.type via Card3DCtrl.SetDefinition().
+        private string cardType;
+
         [Header("Card Text")]
         [Tooltip("TextMeshPro showing the card name.")]
         [SerializeField] private TextMeshPro cardNameText;
@@ -89,6 +92,7 @@ namespace SG03
         {
             this.ApplyFrontFaceCulling();
             this.ApplySortingGroup();
+            this.ApplyStatsVisibility();
             // this.HideCharacterRenderer();
         }
 
@@ -165,6 +169,16 @@ namespace SG03
         /// <c>CardDefinitionMetadata.description</c> parsed from the battle response.
         /// </summary>
         public void SetFallbackDescription(string description) => this.fallbackDescription = description;
+
+        /// <summary>
+        /// Sets the card type from its definition. ATK and DEF are only shown for
+        /// character cards.
+        /// </summary>
+        public void SetCardType(string type)
+        {
+            this.cardType = type;
+            this.ApplyStatsVisibility();
+        }
 
         /// <summary>
         /// Assigns a new <see cref="CardData"/> and immediately applies its textures.
@@ -252,12 +266,20 @@ namespace SG03
             this.SetTMPText(this.atkText, $"{displayAtk}");
             this.SetTMPText(this.defText, $"{displayDef}");
             this.SetTMPText(this.descriptionText, displayDescription);
+            this.ApplyStatsVisibility();
         }
 
         private void SetTMPText(TextMeshPro tmp, string text)
         {
             if (tmp == null) return;
             tmp.text = text;
+        }
+
+        private void ApplyStatsVisibility()
+        {
+            bool showStats = string.Equals(this.cardType, "character", System.StringComparison.OrdinalIgnoreCase);
+            if (this.atkText != null) this.atkText.gameObject.SetActive(showStats);
+            if (this.defText != null) this.defText.gameObject.SetActive(showStats);
         }
 
         private void SetCharacterRendererVisible(bool visible)

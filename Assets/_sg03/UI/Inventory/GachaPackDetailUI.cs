@@ -49,7 +49,7 @@ namespace SG03.UI
                 this.AddLabel($"Rarity: {rarity}", "gacha-pack-detail__rarity");
 
             ItemDefinitionMetadata metadata = item.definition?.ParsedMetadata;
-            string description = metadata?.description;
+            string description = item.definition?.description;
             if (string.IsNullOrEmpty(description)) description = metadata?.flavor_text;
             if (!string.IsNullOrEmpty(description))
             {
