@@ -22,6 +22,7 @@ namespace SG03
 
         [Header("Void Stack")]
         [SerializeField] private float voidDropHeight = 5f;
+        [SerializeField, Range(0.1f, 1f)] private float sourceToVoidMoveDurationMultiplier = 0.4f;
 
         [Header("Line Transition")]
         [SerializeField] private float aboveLineHeight = 5f;
@@ -373,7 +374,10 @@ namespace SG03
             if (card == null) return null;
             this.handCardRegistry.Remove(inventoryItemId);
             this.RemoveFromSlotOccupancy(card);
-            card.SetMoveDuration(this.ActionMoveDuration);
+            float moveDuration = card.Location == Location.in_source
+                ? this.ActionMoveDuration * this.sourceToVoidMoveDurationMultiplier
+                : this.ActionMoveDuration;
+            card.SetMoveDuration(moveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
             Vector3 abovePos = voidPoint.position + Vector3.up * this.voidDropHeight;
             card.MoveAndRotate(abovePos, voidPoint.rotation, Location.in_void);
