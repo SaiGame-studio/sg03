@@ -629,6 +629,21 @@
     padding: 8px 10px 4px 0;
 }
 
+.desk-detail-duplicate-warning {
+    margin: 2px 12px 6px 12px;
+    padding: 5px 8px;
+    border-left-width: 3px;
+    border-color: rgb(255, 158, 60);
+    background-color: rgba(108, 53, 12, 0.65);
+    color: rgb(255, 202, 130);
+    font-size: 11px;
+    white-space: normal;
+}
+
+.desk-detail-duplicate-warning--hidden {
+    display: none;
+}
+
 /* Star badge — top-right corner of filled slot card */
 .desk-slot__star-btn {
     position: absolute;

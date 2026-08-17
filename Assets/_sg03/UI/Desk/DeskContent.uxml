@@ -53,6 +53,7 @@
                         <ui:Label name="StarCountLabel" text="Stars 0 / 3" class="desk-detail-star-count" />
                         <ui:Label name="SlotCountLabel" text="" class="desk-detail-slot-count" />
                     </ui:VisualElement>
+                    <ui:Label name="DuplicateCardWarning" text="" class="desk-detail-duplicate-warning desk-detail-duplicate-warning--hidden" />
                     <ui:ScrollView name="SlotGrid" class="desk-slot-grid" />
                 </ui:VisualElement>
 
