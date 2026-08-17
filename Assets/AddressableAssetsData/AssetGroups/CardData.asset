@@ -40,6 +40,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 232a7d6219a370541bb4d2c2b11f917b
+    m_Address: Assets/_sg03/Card/Data/Ability/Human/Lyra/eagle_eye.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 282a862c3062e2f4bb6094fe43bb2f47
     m_Address: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
     m_ReadOnly: 0

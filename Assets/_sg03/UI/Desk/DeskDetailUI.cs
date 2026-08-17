@@ -18,6 +18,7 @@ namespace SG03.UI
         private readonly Label slotCountLabel;
         private readonly Label starCountLabel;
         private readonly Label voidCountLabel;
+        private readonly Label duplicateCardWarning;
         private readonly Button backBtn;
         private readonly Button softCardBtn;
         private readonly Label softCardStatusLabel;
@@ -55,6 +56,7 @@ namespace SG03.UI
             this.slotCountLabel  = deskRoot.Q<Label>("SlotCountLabel");
             this.starCountLabel  = deskRoot.Q<Label>("StarCountLabel");
             this.voidCountLabel  = deskRoot.Q<Label>("VoidCountLabel");
+            this.duplicateCardWarning = deskRoot.Q<Label>("DuplicateCardWarning");
             this.slotGrid        = deskRoot.Q<ScrollView>("SlotGrid");
             this.backBtn         = deskRoot.Q<Button>("BackBtn");
             this.softCardBtn     = deskRoot.Q<Button>("SoftCardBtn");
@@ -186,9 +188,60 @@ namespace SG03.UI
 
             this.UpdateStarCount();
             this.UpdateVoidCount();
+            this.UpdateDuplicateCardWarning(desk);
 
             for (int i = 0; i < maxSlots; i++)
                 this.slotGrid.Add(this.BuildSlotTile(desk, i));
+        }
+
+        private void UpdateDuplicateCardWarning(PresetData desk)
+        {
+            if (this.duplicateCardWarning == null) return;
+
+            const int maxCopiesPerCard = 3;
+            Dictionary<string, int> copiesByDefinitionId = new Dictionary<string, int>();
+            Dictionary<string, string> namesByDefinitionId = new Dictionary<string, string>();
+            Dictionary<string, InventoryItemData> itemsById = new Dictionary<string, InventoryItemData>();
+
+            foreach (InventoryItemData item in this.allInventoryItems)
+            {
+                if (!string.IsNullOrEmpty(item?.id)) itemsById[item.id] = item;
+            }
+
+            if (desk?.slots != null)
+            {
+                foreach (PresetSlotData slot in desk.slots)
+                {
+                    if (string.IsNullOrEmpty(slot.inventory_item_id)
+                        || !itemsById.TryGetValue(slot.inventory_item_id, out InventoryItemData item))
+                        continue;
+
+                    string definitionId = item.item_definition_id ?? item.definition?.id;
+                    if (string.IsNullOrEmpty(definitionId)) continue;
+
+                    copiesByDefinitionId.TryGetValue(definitionId, out int copies);
+                    copiesByDefinitionId[definitionId] = copies + 1;
+                    namesByDefinitionId[definitionId] = item.definition?.name ?? definitionId;
+                }
+            }
+
+            List<string> violations = new List<string>();
+            foreach (KeyValuePair<string, int> entry in copiesByDefinitionId)
+            {
+                if (entry.Value > maxCopiesPerCard)
+                    violations.Add($"{namesByDefinitionId[entry.Key]} x{entry.Value}");
+            }
+
+            if (violations.Count == 0)
+            {
+                this.duplicateCardWarning.text = string.Empty;
+                this.duplicateCardWarning.AddToClassList("desk-header__duplicate-warning--hidden");
+                return;
+            }
+
+            this.duplicateCardWarning.text =
+                $"Warning: maximum {maxCopiesPerCard} copies per card. Over limit: {string.Join(", ", violations)}.";
+            this.duplicateCardWarning.RemoveFromClassList("desk-header__duplicate-warning--hidden");
         }
 
         private VisualElement BuildSlotTile(PresetData desk, int slotIndex)

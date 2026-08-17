@@ -40,6 +40,7 @@
             <ui:VisualElement class="desk-header">
                 <ui:Button name="BackBtn" text="&lt; Back" class="desk-header__back-btn" />
                 <ui:Label name="DetailTitle" text="Desk" class="desk-header__title" />
+                <ui:Label name="DuplicateCardWarning" text="" class="desk-header__duplicate-warning desk-header__duplicate-warning--hidden" />
                 <ui:Label name="SoftCardStatusLabel" text="" class="desk-header__soft-card-status" />
                 <ui:Button name="SoftCardBtn" text="Soft Card" tooltip="Sort cards by stars, then card type" class="desk-header__soft-card-btn" />
             </ui:VisualElement>
