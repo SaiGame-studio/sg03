@@ -1102,54 +1102,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 331941082}
     m_Modifications:
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: cardAddresses.Array.size
-      value: 27
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[16]'
-      value: Assets/_sg03/Card/Data/Character/Human/titan.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[17]'
-      value: Assets/_sg03/Card/Data/Character/LightElf/volt_heart.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[18]'
-      value: Assets/_sg03/Card/Data/Character/LightElf/zelene.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[19]'
-      value: Assets/_sg03/Card/Data/Character/Undead/skeleton.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[20]'
-      value: Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[21]'
-      value: Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[22]'
-      value: Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[23]'
-      value: Assets/_sg03/Card/Data/Env/abyssal_mist.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[24]'
-      value: Assets/_sg03/Card/Data/Env/graveyard.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[25]'
-      value: Assets/_sg03/Card/Data/Env/gright_forest.asset
-      objectReference: {fileID: 0}
-    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
-      propertyPath: 'cardAddresses.Array.data[26]'
-      value: Assets/_sg03/Card/Data/Env/iron_citadel.asset
-      objectReference: {fileID: 0}
     - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.612

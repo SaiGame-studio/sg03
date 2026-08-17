@@ -33,6 +33,7 @@ Danh mục bên dưới chỉ liệt kê tên và số sao của từng thẻ k�
 ### 🛡️ Chủng Tộc Nhân Loại (Human)
 - [Spinning Slash](cards/human/abilities/spinning_slash.md): 3 sao
 - [Cross Guard](cards/human/abilities/cross_guard.md): 1 sao
+- [Eagle Eye](cards/human/abilities/eagle_eye.md): 2 sao
 - [Titan Fall](cards/human/abilities/titan_fall.md): 5 sao
 
 ### 🌿 Chủng Tộc Tinh Linh (Elf / Light Elf)

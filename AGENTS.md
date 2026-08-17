@@ -6,6 +6,10 @@ Never create, modify, move, rename, or delete files under `Assets/SaiGame/`, exc
 
 Treat `Assets/SaiGame/` as a read-only dependency. Implement project-specific behavior only outside that directory, except for game-specific Lua scripts directly inside `Assets/SaiGame/LuaScript/Scripts/`, unless the user explicitly revokes this rule for a specific change.
 
+## Game Content Naming
+
+When creating or editing game content, use English for every official character and skill name. Vietnamese may be used only in descriptive text or explanatory notes, never as an official name, identifier, or card title.
+
 ## Runtime UI Assets
 
 For any UI Toolkit asset required at runtime (`VisualTreeAsset`, `StyleSheet`, `PanelSettings`, and related assets), assign a serialized reference in the owning scene or prefab. That reference must be present in source control so Unity includes the asset in every player build, including WebGL.

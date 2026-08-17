@@ -6836,6 +6836,7 @@ MonoBehaviour:
   spawnInterval: 0.05
   sourceStackOffsetY: 0.05
   voidDropHeight: 5
+  sourceToVoidMoveDurationMultiplier: 0.4
   aboveLineHeight: 5
   debugLog: 0
 --- !u!114 &2015755439

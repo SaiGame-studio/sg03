@@ -9,6 +9,7 @@ Nằm tại thư mục [`cards/human/`](cards/human/)
 
 ### Thẻ Nhân Vật (Character)
 - [Ren](cards/human/azure_blade.md): 3 sao
+- [Lyra](cards/human/lyra.md): 2 sao
 - [Titan](cards/human/titan.md): 5 sao
 
 ---

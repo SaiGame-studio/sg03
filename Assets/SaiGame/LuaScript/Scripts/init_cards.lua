@@ -233,8 +233,8 @@ local function alpha_init_cards(state)
     return nil
 end
 
--- Moves cards selected for void and every 4-star-or-higher card out of Alpha's
--- source before any opening-hand selections or random draws occur.
+-- Moves only character cards with at least four stars out of Alpha's source
+-- before any opening-hand selections or random draws occur.
 local function alpha_init_void(state)
     lib_battle_common.dlog("[init_cards] == alpha_init_void ==")
     local preset = state.alpha_preset_metadata
@@ -256,20 +256,6 @@ local function alpha_init_void(state)
         lib_battle_common.dlog("[init_cards] Moved alpha card to void (" .. reason .. "): " .. card.inventory_item_id)
     end
 
-    -- Explicit void choices keep their preset order.
-    local slot_names = { "void_card_1", "void_card_2", "void_card_3", "void_card_4", "void_card_5", "void_card_6", "void_card_7" }
-    for _, key in ipairs(slot_names) do
-        local uid = preset[key]
-        if uid ~= nil and uid ~= "" then
-            local card = find_and_remove(source, uid)
-            if card ~= nil then
-                move_to_void(card, key)
-            else
-                lib_battle_common.dlog("[init_cards] Warning: void card " .. key .. " (" .. uid .. ") not found in alpha_the_source")
-            end
-        end
-    end
-
     local defs_by_code = {}
     for _, item_def in ipairs(state.item_defs or {}) do
         if item_def.item_code ~= nil and item_def.item_code ~= "" then
@@ -277,14 +263,41 @@ local function alpha_init_void(state)
         end
     end
 
+    local function is_void_eligible(card)
+        local item_def = defs_by_code[card.item_definition_code_name]
+        local card_type = item_def ~= nil and item_def.metadata ~= nil and item_def.metadata.type or nil
+        local stars = item_def ~= nil and item_def.base_stats ~= nil and item_def.base_stats.star or 0
+        return card_type == "character" and stars >= 4, stars
+    end
+
+    -- Explicit void choices keep their preset order, but only eligible
+    -- character cards can be moved during initialization.
+    local slot_names = { "void_card_1", "void_card_2", "void_card_3", "void_card_4", "void_card_5", "void_card_6", "void_card_7" }
+    for _, key in ipairs(slot_names) do
+        local uid = preset[key]
+        if uid ~= nil and uid ~= "" then
+            local card = find_by_inventory_item_id(source, uid)
+            if card ~= nil then
+                local eligible, stars = is_void_eligible(card)
+                if eligible then
+                    find_and_remove(source, uid)
+                    move_to_void(card, key)
+                else
+                    lib_battle_common.dlog("[init_cards] Skipped void card " .. key .. " (" .. uid .. "): only character cards with at least 4 stars are eligible")
+                end
+            else
+                lib_battle_common.dlog("[init_cards] Warning: void card " .. key .. " (" .. uid .. ") not found in alpha_the_source")
+            end
+        end
+    end
+
     -- Iterate backwards while removing so every remaining source card is checked.
     for i = #source, 1, -1 do
         local card = source[i]
-        local item_def = defs_by_code[card.item_definition_code_name]
-        local stars = item_def ~= nil and item_def.base_stats ~= nil and item_def.base_stats.star or 0
-        if stars >= 4 then
+        local eligible, stars = is_void_eligible(card)
+        if eligible then
             table.remove(source, i)
-            move_to_void(card, tostring(stars) .. " stars")
+            move_to_void(card, tostring(stars) .. "-star character")
         end
     end
 
