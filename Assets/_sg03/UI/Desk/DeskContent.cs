@@ -98,7 +98,7 @@ namespace SG03.UI
             {
                 CardBaseStats stats       = ParseBaseStats(item?.definition?.base_stats);
                 string        rawMetadata = item?.definition?.metadata;
-                string        description = item?.definition?.ParsedMetadata?.description;
+                string        description = item?.definition?.description;
                 Debug.Log($"[DeskContent] base_stats={item?.definition?.base_stats} | metadata={rawMetadata} | description={description}");
                 cardReviewCtrl?.RequestShow(
                     item?.definition?.item_code,

@@ -311,7 +311,7 @@ namespace SG03.UI
                 card.Add(this.CreateDetailLabel($"Rarity: {definition.rarity}", "main-quest-detail__reward-info"));
             if (!string.IsNullOrEmpty(definition?.category))
                 card.Add(this.CreateDetailLabel($"Category: {definition.category}", "main-quest-detail__reward-info"));
-            if (!string.IsNullOrEmpty(definition?.ParsedMetadata?.description)) card.Add(this.CreateDetailLabel(definition.ParsedMetadata.description, "main-quest-detail__reward-info"));
+            if (!string.IsNullOrEmpty(definition?.description)) card.Add(this.CreateDetailLabel(definition.description, "main-quest-detail__reward-info"));
             if (!string.IsNullOrEmpty(reward.reward_type)) card.Add(this.CreateDetailLabel(reward.reward_type, "main-quest-detail__reward-info"));
             if (definition == null && !string.IsNullOrEmpty(reward.item_definition_id))
             {

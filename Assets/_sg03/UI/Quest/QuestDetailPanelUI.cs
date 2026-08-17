@@ -205,7 +205,7 @@ namespace SG03.UI
                 if (!string.IsNullOrEmpty(definition?.item_code)) AddTo(card, $"Code: {definition.item_code}", "main-quest-detail__reward-info");
                 if (!string.IsNullOrEmpty(definition?.rarity)) AddTo(card, $"Rarity: {definition.rarity}", "main-quest-detail__reward-info");
                 if (!string.IsNullOrEmpty(definition?.category)) AddTo(card, $"Category: {definition.category}", "main-quest-detail__reward-info");
-                if (!string.IsNullOrEmpty(definition?.ParsedMetadata?.description)) AddTo(card, definition.ParsedMetadata.description, "main-quest-detail__reward-info");
+                if (!string.IsNullOrEmpty(definition?.description)) AddTo(card, definition.description, "main-quest-detail__reward-info");
                 if (!string.IsNullOrEmpty(reward.reward_type)) AddTo(card, reward.reward_type, "main-quest-detail__reward-info");
                 if (definition == null && !string.IsNullOrEmpty(reward.item_definition_id)) this.LoadItemDefinition(reward.item_definition_id);
                 this.content.Add(card);
