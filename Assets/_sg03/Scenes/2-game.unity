@@ -1078,7 +1078,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 701451424}
   - {fileID: 1313731243}
   - {fileID: 1875238348}
   m_Father: {fileID: 0}
@@ -1097,7 +1096,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.ManagersCtrl
   profileManager: {fileID: 1313731244}
   cardDataManager: {fileID: 1875238347}
-  questDailyManager: {fileID: 701451425}
+  questDailyManager: {fileID: 0}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -1812,22 +1811,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.RotatingObject3D
   rotationAxis: {x: 0, y: 1, z: 0}
   rotationSpeed: 30
---- !u!4 &701451424 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-  m_PrefabInstance: {fileID: 5391014775227562843}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &701451425 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3982072084831160567, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-  m_PrefabInstance: {fileID: 5391014775227562843}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 555ac40ce1e53564f8046a39311cc70e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SG03.Quest.QuestDailyManager
 --- !u!1001 &706587908
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1846,7 +1829,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 813458455079530658, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: autoLogin
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: customScriptName
@@ -7905,63 +7888,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ed6667500e7b0f44494d1333cfe174c4, type: 3}
---- !u!1001 &5391014775227562843
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 331941082}
-    m_Modifications:
-    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6103479849273953211, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7908861190732204320, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
-      propertyPath: m_Name
-      value: QuestDailyManager
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 210b9960a0c0f894cb60585aee06829d, type: 3}
 --- !u!1001 &6418814622862749946
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8174,6 +8100,10 @@ PrefabInstance:
     - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontColor.r
       value: 0.3803922
+      objectReference: {fileID: 0}
+    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_overflowMode
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontColor32.rgba
