@@ -629,18 +629,19 @@
     padding: 8px 10px 4px 0;
 }
 
-.desk-detail-duplicate-warning {
-    margin: 2px 12px 6px 12px;
-    padding: 5px 8px;
-    border-left-width: 3px;
-    border-color: rgb(255, 158, 60);
-    background-color: rgba(108, 53, 12, 0.65);
+.desk-header__duplicate-warning {
+    position: absolute;
+    left: 50%;
+    width: 440px;
+    margin-left: -220px;
+    padding: 4px 8px;
     color: rgb(255, 202, 130);
     font-size: 11px;
+    -unity-text-align: middle-center;
     white-space: normal;
 }
 
-.desk-detail-duplicate-warning--hidden {
+.desk-header__duplicate-warning--hidden {
     display: none;
 }
 

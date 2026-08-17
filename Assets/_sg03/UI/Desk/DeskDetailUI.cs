@@ -235,13 +235,13 @@ namespace SG03.UI
             if (violations.Count == 0)
             {
                 this.duplicateCardWarning.text = string.Empty;
-                this.duplicateCardWarning.AddToClassList("desk-detail-duplicate-warning--hidden");
+                this.duplicateCardWarning.AddToClassList("desk-header__duplicate-warning--hidden");
                 return;
             }
 
             this.duplicateCardWarning.text =
                 $"Warning: maximum {maxCopiesPerCard} copies per card. Over limit: {string.Join(", ", violations)}.";
-            this.duplicateCardWarning.RemoveFromClassList("desk-detail-duplicate-warning--hidden");
+            this.duplicateCardWarning.RemoveFromClassList("desk-header__duplicate-warning--hidden");
         }
 
         private VisualElement BuildSlotTile(PresetData desk, int slotIndex)
