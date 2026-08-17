@@ -230,14 +230,20 @@ function plan_attack(state)
     state.omega_planning = {}
     local defender = lib_battle_ai._pick_alpha_attack_target(state)
     if defender == nil then return lib_battle_ai.omega_planning_to_attack(state, true) end
-    for _, attacker in ipairs(state.omega_front_line or {}) do
-        if attacker.inventory_item_id ~= nil and attacker.inventory_item_id ~= ""
-            and attacker.trigger ~= true and attacker.face_up == true
-            and lib_battle_common.check_card_type(state.item_defs, attacker, "character") then
-            table.insert(state.omega_planning, { action = "card_attack_card", attacker_inv_id = attacker.inventory_item_id, defender_inv_id = defender.inventory_item_id })
-            lib_battle_common.append_client_action(state, "omega_planing_character_attack:" .. attacker.inventory_item_id .. "," .. defender.inventory_item_id)
-        end
+    local attacker = lib_battle_ai._find_omega_attacker(state, true)
+    if attacker == nil then
+        lib_battle_ai.omega_end_turn(state)
+        return nil
     end
-    if #state.omega_planning == 0 then lib_battle_ai.omega_end_turn(state) end
+
+    table.insert(state.omega_planning, {
+        action = "card_attack_card",
+        attacker_inv_id = attacker.inventory_item_id,
+        defender_inv_id = defender.inventory_item_id
+    })
+    lib_battle_common.append_client_action(
+        state,
+        "omega_planing_character_attack:" .. attacker.inventory_item_id .. "," .. defender.inventory_item_id
+    )
     return nil
 end
