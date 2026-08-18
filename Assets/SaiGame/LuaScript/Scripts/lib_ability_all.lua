@@ -1,6 +1,6 @@
 -- ability: eagle_eye
 -- Expose one face-down enemy Character while Lyra is on the caster's front line.
--- Lyra is only a requirement and is intentionally not triggered by this ability.
+-- Eagle Eye reveals Lyra, but does not trigger her.
 function eagle_eye_execute(state, source_card, event_data, helpers)
     local battle = helpers.lib_battle_common
     battle.dlog("== [ability] eagle_eye ====================")
@@ -42,10 +42,13 @@ function eagle_eye_execute(state, source_card, event_data, helpers)
         return {}, "eagle_eye requires Lyra on the caster's front_line"
     end
 
+    lyra_card.face_up = true
+    lyra_card.expose = true
     target_card.face_up = true
     target_card.expose = true
     local target_side = helpers.find_card_side(state, target_card)
     local ability_actions = {
+        source_side .. "_card_expose:" .. lyra_card.inventory_item_id,
         target_side .. "_card_expose:" .. target_card.inventory_item_id,
         source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=eagle_eye,target=" .. target_card.inventory_item_id .. ",required=" .. lyra_card.inventory_item_id
     }
@@ -62,7 +65,7 @@ function eagle_eye_execute(state, source_card, event_data, helpers)
     table.insert(state[void_key], source_card)
     table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
 
-    battle.dlog("[ability] eagle_eye: Lyra=" .. lyra_card.inventory_item_id .. " exposed target=" .. target_card.inventory_item_id)
+    battle.dlog("[ability] eagle_eye: exposed Lyra=" .. lyra_card.inventory_item_id .. " and target=" .. target_card.inventory_item_id)
     return ability_actions, nil
 end
 
