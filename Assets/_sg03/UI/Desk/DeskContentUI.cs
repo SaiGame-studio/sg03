@@ -243,6 +243,30 @@ namespace SG03.UI
 
             PresetData captured = desk;
 
+            bool isDefault = this.list.IsDefaultDesk(desk);
+            if (isDefault)
+            {
+                Label defaultText = new Label("Default");
+                defaultText.name = $"DeskRowDefaultBtn_{desk.id}";
+                defaultText.AddToClassList("desk-row__default-text");
+                row.Add(defaultText);
+            }
+            else
+            {
+                Button defaultBtn = new Button();
+                defaultBtn.name = $"DeskRowDefaultBtn_{desk.id}";
+                defaultBtn.text = "Set Default";
+                defaultBtn.tooltip = "Set as the default desk";
+                defaultBtn.SetEnabled(!this.list.IsUpdatingDefaultDesk);
+                defaultBtn.AddToClassList("desk-row__default-btn");
+                defaultBtn.RegisterCallback<ClickEvent>(e =>
+                {
+                    e.StopPropagation();
+                    this.OnSetDefaultDesk(captured);
+                });
+                row.Add(defaultBtn);
+            }
+
             Button deleteBtn = new Button();
             deleteBtn.name = $"DeskRowDeleteBtn_{desk.id}";
             deleteBtn.text = "X";
@@ -266,6 +290,15 @@ namespace SG03.UI
                 onSuccess: () => this.DoRefresh(),
                 onError: _ => { }
             );
+        }
+
+        private void OnSetDefaultDesk(PresetData desk)
+        {
+            this.list.SetDefaultDesk(
+                desk,
+                onSuccess: this.DoRefresh,
+                onError: _ => this.DoRefresh());
+            this.Render();
         }
     }
 }

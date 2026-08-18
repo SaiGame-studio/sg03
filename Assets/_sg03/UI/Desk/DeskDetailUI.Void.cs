@@ -138,6 +138,10 @@ namespace SG03.UI
                 kvPairs.Add($"\"void_card_{i + 1}\":\"{EscapeJson(itemId)}\"");
             }
 
+            // Preserve the list-level default selection when saving desk card metadata.
+            if (this.deskList.IsDefaultDesk(this.currentDesk))
+                kvPairs.Add("\"is_default\":true");
+
             return "{" + string.Join(",", kvPairs) + "}";
         }
 
