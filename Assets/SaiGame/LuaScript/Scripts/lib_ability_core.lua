@@ -208,15 +208,24 @@ function deal_damage_to_character(state, attacker_card, target_card, damage, tar
         return {}, nil
     end
 
+    local target_side = void_key == "alpha_the_void" and "alpha" or "omega"
+    local damage_actions = {}
+
+    -- Ability damage bypasses card_attack_card, so it must reveal a hidden
+    -- target here. Put the client action before calculating/applying damage so
+    -- the visual order is: ability -> target expose -> damage -> void.
+    if target_card.face_up ~= true or target_card.expose ~= true then
+        target_card.face_up = true
+        target_card.expose  = true
+        table.insert(damage_actions, target_side .. "_card_expose:" .. target_card.inventory_item_id)
+    end
+
     local final_def = target_card.final_def or 0
     local prev_damage = target_card.total_damage_received or 0
     target_card.total_damage_received = prev_damage + damage
     local defeated = target_card.total_damage_received >= final_def
     lib_battle_common.dlog("[ability] deal_damage: final_def=" .. final_def .. " prev_damage=" .. prev_damage .. " new_total=" .. target_card.total_damage_received .. " defeated=" .. (defeated and "yes" or "no"))
 
-    local target_side = void_key == "alpha_the_void" and "alpha" or "omega"
-    local damage_actions = {}
-    
     if damage > 0 then
         table.insert(damage_actions, target_side .. "_card_take_damage:target=" .. target_card.inventory_item_id .. ",damage=" .. damage .. ",total_damage=" .. target_card.total_damage_received)
     end

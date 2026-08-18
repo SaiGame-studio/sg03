@@ -213,17 +213,19 @@ local function execute_omega_attack_alpha_hp_plan(state, plan_entry)
         return "attacker item def not found: " .. tostring(attacker_card.item_definition_code_name)
     end
 
+    attacker_card.trigger = true
+    attacker_card.face_up = true
+    attacker_card.expose  = true
+    -- Reveal before calculating or applying the direct attack, matching the
+    -- reveal-before-damage ordering used for card-vs-card combat.
+    lib_battle_common.append_client_action(state, "omega_card_expose:" .. attacker_card.inventory_item_id)
+
     local damage = compute_attack_damage(attacker_def)
     lib_battle_common.dlog("[alpha_defending_end] omega attacking alpha_hp directly: damage=" .. damage)
 
     state.alpha_hp = (state.alpha_hp or 0) - damage
     lib_battle_common.dlog("[alpha_defending_end] alpha_hp after attack=" .. state.alpha_hp)
 
-    attacker_card.trigger = true
-    attacker_card.face_up = true
-    attacker_card.expose  = true
-
-    lib_battle_common.append_client_action(state, "omega_card_expose:" .. attacker_card.inventory_item_id)
     lib_battle_common.append_client_action(state, "omega_attack_alpha_hp:attacker_card_id=" .. attacker_card.inventory_item_id .. ",damage=" .. damage .. ",alpha_hp=" .. state.alpha_hp)
 
     local alpha_defeated = state.alpha_hp <= 0

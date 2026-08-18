@@ -345,14 +345,18 @@ local function attack_omega_hp(session_id, state, attacker_card, attacker_def, i
             return "cannot attack omega while omega front line still has cards"
         end
     end
+    attacker_card.trigger  = true
+    attacker_card.face_up  = true
+    attacker_card.expose   = true
+    -- Reveal before calculating or applying the direct attack, matching the
+    -- reveal-before-damage ordering used for card-vs-card combat.
+    lib_battle_common.append_client_action(state, "alpha_card_expose:" .. attacker_card.inventory_item_id)
+
     local damage = compute_damage(attacker_def)
     lib_battle_common.dlog("[alpha_card_active] attacking omega_hp directly: damage=" .. damage)
     state.omega_hp = (state.omega_hp or 0) - damage
     lib_battle_common.dlog("[alpha_card_active] omega_hp after attack=" .. state.omega_hp)
-    attacker_card.trigger  = true
-    attacker_card.face_up  = true
-    attacker_card.expose   = true
-    lib_battle_common.append_client_action(state, "alpha_card_expose:" .. attacker_card.inventory_item_id)
+
     lib_battle_common.append_client_action(state, "alpha_attack_omega_hp:attacker_card_id=" .. attacker_card.inventory_item_id .. ",damage=" .. damage .. ",omega_hp=" .. state.omega_hp)
     local omega_defeated = state.omega_hp <= 0
     if omega_defeated then
