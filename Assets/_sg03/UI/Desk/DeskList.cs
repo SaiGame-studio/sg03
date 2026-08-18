@@ -159,6 +159,11 @@ namespace SG03.UI
 
         public bool IsDefaultDesk(PresetData desk)
         {
+            return HasDefaultDeskMetadata(desk);
+        }
+
+        public static bool HasDefaultDeskMetadata(PresetData desk)
+        {
             return desk != null && IsDefaultDeskMetadata(desk.metadataJson);
         }
 

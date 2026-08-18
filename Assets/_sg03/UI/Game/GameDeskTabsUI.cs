@@ -54,18 +54,30 @@ namespace SG03.UI
             if (presets == null) return;
             PresetData firstPreset = null;
             Button firstButton = null;
+            PresetData defaultPreset = null;
+            Button defaultButton = null;
             for (int i = 0; i < presets.Length; i++)
             {
                 PresetData preset = presets[i];
                 if (preset == null) continue;
                 Button button = this.AddDeskTab(preset, i);
-                if (firstPreset != null) continue;
-                firstPreset = preset;
-                firstButton = button;
+                if (firstPreset == null)
+                {
+                    firstPreset = preset;
+                    firstButton = button;
+                }
+
+                if (defaultPreset == null && DeskList.HasDefaultDeskMetadata(preset))
+                {
+                    defaultPreset = preset;
+                    defaultButton = button;
+                }
             }
 
-            if (firstPreset != null && firstButton != null)
-                this.OnPresetDeskTabClicked(firstPreset, firstButton);
+            PresetData presetToSelect = defaultPreset ?? firstPreset;
+            Button buttonToSelect = defaultButton ?? firstButton;
+            if (presetToSelect != null && buttonToSelect != null)
+                this.OnPresetDeskTabClicked(presetToSelect, buttonToSelect);
         }
 
         private void ClearDeskTabs()
