@@ -9,7 +9,7 @@
 --
 -- To add a new ability:
 --   1. Create/edit its source under `LuaScript/AbilitySources`.
---   2. Add its config to `get_ability_config`.
+--   2. Add its config to `lib_ability_config.get_ability_config`.
 --   3. Add a branch in `_get_ability_handler` so the dispatcher can call `lib_ability_all.<ability>_execute(...)`.
 --   4. Regenerate `Scripts/lib_ability_all.lua` from the sources.
 
@@ -139,7 +139,7 @@ function get_target_position_key(state, source_card, zone_key)
 end
 
 function can_ability_target_position(state, source_card, ability_key, zone_key)
-    local ability_def = lib_ability_all.get_ability_config(ability_key)
+    local ability_def = lib_ability_config.get_ability_config(ability_key)
     if ability_def == nil then
         return false, "unknown ability key: " .. tostring(ability_key)
     end
@@ -208,15 +208,24 @@ function deal_damage_to_character(state, attacker_card, target_card, damage, tar
         return {}, nil
     end
 
+    local target_side = void_key == "alpha_the_void" and "alpha" or "omega"
+    local damage_actions = {}
+
+    -- Ability damage bypasses card_attack_card, so it must reveal a hidden
+    -- target here. Put the client action before calculating/applying damage so
+    -- the visual order is: ability -> target expose -> damage -> void.
+    if target_card.face_up ~= true or target_card.expose ~= true then
+        target_card.face_up = true
+        target_card.expose  = true
+        table.insert(damage_actions, target_side .. "_card_expose:" .. target_card.inventory_item_id)
+    end
+
     local final_def = target_card.final_def or 0
     local prev_damage = target_card.total_damage_received or 0
     target_card.total_damage_received = prev_damage + damage
     local defeated = target_card.total_damage_received >= final_def
     lib_battle_common.dlog("[ability] deal_damage: final_def=" .. final_def .. " prev_damage=" .. prev_damage .. " new_total=" .. target_card.total_damage_received .. " defeated=" .. (defeated and "yes" or "no"))
 
-    local target_side = void_key == "alpha_the_void" and "alpha" or "omega"
-    local damage_actions = {}
-    
     if damage > 0 then
         table.insert(damage_actions, target_side .. "_card_take_damage:target=" .. target_card.inventory_item_id .. ",damage=" .. damage .. ",total_damage=" .. target_card.total_damage_received)
     end
@@ -239,6 +248,8 @@ local function _get_ability_handler(ability_key)
         return lib_ability_character_passives.twin_reaper_execute
     elseif ability_key == "scout_strike" then
         return lib_ability_character_passives.scout_strike_execute
+    elseif ability_key == "eagle_eye" then
+        return lib_ability_all.eagle_eye_execute
     elseif ability_key == "spinning_slash" then
         return lib_ability_all.spinning_slash_execute
     elseif ability_key == "cross_guard" then
@@ -344,9 +355,9 @@ end
 -- Returns: extra_client_actions (table), err (string or nil)
 local function _dispatch_one_ability(state, source_card, key, trigger_event, event_data)
     lib_battle_common.dlog("-- [ability] _dispatch_one_ability ----------------------")
-    local ability_def = lib_ability_all.get_ability_config(key)
+    local ability_def = lib_ability_config.get_ability_config(key)
     if ability_def == nil then
-        lib_battle_common.dlog("[ability] dispatch: key=" .. tostring(key) .. " UNKNOWN - not registered in get_ability_config")
+        lib_battle_common.dlog("[ability] dispatch: key=" .. tostring(key) .. " UNKNOWN - not registered in lib_ability_config")
         return {}, "unknown ability key: " .. tostring(key)
     end
     if ability_def.event ~= nil and ability_def.event ~= trigger_event then

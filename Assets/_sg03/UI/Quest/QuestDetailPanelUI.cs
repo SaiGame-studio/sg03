@@ -147,8 +147,11 @@ namespace SG03.UI
         {
             startAt = default;
             if (!string.Equals(definition?.quest_type, "session", StringComparison.OrdinalIgnoreCase)) return false;
-            string cycleStart = this.sessionResolver?.Invoke()?.cycle_start_at;
-            return DateTimeOffset.TryParse(cycleStart, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out startAt)
+            BattlePassSessionData session = this.sessionResolver?.Invoke();
+            string sessionStart = string.Equals(session?.schedule_mode, "interval", StringComparison.OrdinalIgnoreCase)
+                ? session.cycle_start_at
+                : session?.session_start_at;
+            return DateTimeOffset.TryParse(sessionStart, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out startAt)
                 && DateTimeOffset.UtcNow < startAt;
         }
 

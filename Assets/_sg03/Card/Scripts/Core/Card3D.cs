@@ -1,4 +1,5 @@
 using System.Collections;
+using SaiGame.Services;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -19,7 +20,7 @@ namespace SG03
     /// Flip mechanics rotate this root transform on the Y axis.
     /// </summary>
     [AddComponentMenu("SG03/Card/Card 3D")]
-    public class Card3D : MonoBehaviour
+    public class Card3D : SaiBehaviour
     {
         [Header("Face Renderers")]
         [Tooltip("Renderer for the transparent frame PNG overlaid on the front face.")]
@@ -88,12 +89,84 @@ namespace SG03
 
         // ─── Unity lifecycle ──────────────────────────────────────────────────────
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             this.ApplyFrontFaceCulling();
             this.ApplySortingGroup();
             this.ApplyStatsVisibility();
             // this.HideCharacterRenderer();
+        }
+
+        protected override void LoadComponents()
+        {
+            base.LoadComponents();
+            this.LoadFrontFrameRenderer();
+            this.LoadCharacterRenderer();
+            this.LoadBackRenderer();
+            this.LoadCardDefaults();
+            this.LoadCardNameText();
+            this.LoadStarsText();
+            this.LoadAtkText();
+            this.LoadDefText();
+            this.LoadDescriptionText();
+        }
+
+        protected override void ResetValue()
+        {
+            base.ResetValue();
+            this.ApplyDefaultFonts();
+            this.ApplyFrontFaceCulling();
+        }
+
+        private void LoadFrontFrameRenderer()
+        {
+            if (this.frontFrameRenderer != null) return;
+            this.frontFrameRenderer = this.FindChildComponent<Renderer>("FrontFace/Frame");
+        }
+
+        private void LoadCharacterRenderer()
+        {
+            if (this.characterRenderer != null) return;
+            this.characterRenderer = this.FindChildComponent<Renderer>("FrontFace/Character");
+        }
+
+        private void LoadBackRenderer()
+        {
+            if (this.backRenderer != null) return;
+            this.backRenderer = this.FindChildComponent<Renderer>("BackFace/Back");
+        }
+
+        private void LoadCardDefaults()
+        {
+            if (this.cardDefaults != null) return;
+            this.cardDefaults = Resources.Load<CardDefaults>("CardDefaults");
+        }
+
+        private void LoadCardNameText() => this.LoadText(ref this.cardNameText, "CardNameText");
+        private void LoadStarsText() => this.LoadText(ref this.starsText, "StarsText");
+        private void LoadAtkText() => this.LoadText(ref this.atkText, "AtkText");
+        private void LoadDefText() => this.LoadText(ref this.defText, "DefText");
+        private void LoadDescriptionText() => this.LoadText(ref this.descriptionText, "DescriptionText");
+
+        private T FindChildComponent<T>(string path) where T : Component
+        {
+            Transform child = this.transform.Find(path);
+            return child != null ? child.GetComponent<T>() : null;
+        }
+
+        private void LoadText(ref TextMeshPro field, string objectName)
+        {
+            if (field != null) return;
+
+            foreach (TextMeshPro text in this.GetComponentsInChildren<TextMeshPro>(true))
+            {
+                if (text.gameObject.name == objectName)
+                {
+                    field = text;
+                    return;
+                }
+            }
         }
 
         // Hides the character quad until a texture is loaded via ApplyTextures.
@@ -125,8 +198,9 @@ namespace SG03
         public void ApplyDefaults()
         {
             if (cardDefaults == null) return;
-            SetRendererTexture(frontFrameRenderer, cardDefaults.FrameTexture);
+            SetRendererTexture(frontFrameRenderer, cardDefaults.CardFrontChar1);
             SetRendererTexture(backRenderer, cardDefaults.BackTexture);
+            ApplyDefaultFonts();
         }
 
         /// <summary>
@@ -142,7 +216,7 @@ namespace SG03
                 return;
             }
 
-            Texture2D frame = this.cardData.FrameTexture != null ? this.cardData.FrameTexture : this.cardDefaults?.FrameTexture;
+            Texture2D frame = this.cardData.FrameTexture != null ? this.cardData.FrameTexture : this.GetDefaultFrontFrame();
             Texture2D back = this.cardData.BackTexture != null ? this.cardData.BackTexture : this.cardDefaults?.BackTexture;
 
             SetRendererTexture(this.frontFrameRenderer, frame);
@@ -178,6 +252,11 @@ namespace SG03
         {
             this.cardType = type;
             this.ApplyStatsVisibility();
+
+            // Card data can load before its definition. Re-apply the fallback front
+            // once the definition type becomes available.
+            if (this.cardData != null && this.cardData.FrameTexture == null)
+                this.ApplyTextures();
         }
 
         /// <summary>
@@ -219,6 +298,15 @@ namespace SG03
 
         // ─── Private helpers ──────────────────────────────────────────────────────
 
+        private Texture2D GetDefaultFrontFrame()
+        {
+            if (this.cardDefaults == null) return null;
+            if (this.cardType == CardType.ability.ToString())
+                return this.cardDefaults.CardFrontAbility1 ?? this.cardDefaults.CardFrontChar1;
+
+            return this.cardDefaults.CardFrontChar1;
+        }
+
         private void StopFlip()
         {
             if (flipCoroutine == null) return;
@@ -252,6 +340,8 @@ namespace SG03
         {
             if (this.cardData == null) return;
 
+            this.ApplyDefaultFonts();
+
             string displayName = this.fallbackName;
             int displayAtk = this.fallbackStats?.atk ?? 0;
             int displayDef = this.fallbackStats?.def ?? 0;
@@ -273,6 +363,22 @@ namespace SG03
         {
             if (tmp == null) return;
             tmp.text = text;
+        }
+
+        private void ApplyDefaultFonts()
+        {
+            if (this.cardDefaults == null) return;
+
+            this.SetTMPFont(this.cardNameText, this.cardDefaults.CardNameFont);
+            this.SetTMPFont(this.atkText, this.cardDefaults.AtkFont);
+            this.SetTMPFont(this.defText, this.cardDefaults.DefFont);
+            this.SetTMPFont(this.descriptionText, this.cardDefaults.DescriptionFont);
+        }
+
+        private void SetTMPFont(TextMeshPro tmp, TMP_FontAsset font)
+        {
+            if (tmp == null || font == null) return;
+            tmp.font = font;
         }
 
         private void ApplyStatsVisibility()

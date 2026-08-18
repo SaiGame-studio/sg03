@@ -223,21 +223,67 @@ function deploy(state)
     return omega_front_line, omega_back_line, new_hand, nil
 end
 
--- Attack planning: select targets on alpha's field for omega to attack next turn.
+-- Counts hidden Characters in omega_front_line and returns the first one that
+-- may attack. The returned card is intentionally face-down: attacking exposes it.
+function goblin_shaman_find_extra_face_down_attacker(state)
+    local face_down_count = 0
+    local first_face_down_attacker = nil
+    for _, front_card in ipairs(state.omega_front_line or {}) do
+        local card_id = front_card.inventory_item_id or ""
+        if card_id ~= ""
+            and front_card.trigger ~= true
+            and front_card.face_up ~= true
+            and lib_battle_common.check_card_type(state.item_defs, front_card, "character") then
+            face_down_count = face_down_count + 1
+            if first_face_down_attacker == nil then
+                first_face_down_attacker = front_card
+            end
+        end
+    end
+    return face_down_count, first_face_down_attacker
+end
+
+-- Attack planning: keep one hidden Character. When more than one hidden
+-- Character is on the front line, attack with a hidden one to reveal it.
 -- Returns err or nil.
 function plan_attack(state)
     lib_battle_common.dlog("[entity_ai] == goblin_shaman.plan_attack ==")
     state.omega_planning = {}
     local defender = lib_battle_ai._pick_alpha_attack_target(state)
-    if defender == nil then return lib_battle_ai.omega_planning_to_attack(state, true) end
-    for _, attacker in ipairs(state.omega_front_line or {}) do
-        if attacker.inventory_item_id ~= nil and attacker.inventory_item_id ~= ""
-            and attacker.trigger ~= true and attacker.face_up == true
-            and lib_battle_common.check_card_type(state.item_defs, attacker, "character") then
-            table.insert(state.omega_planning, { action = "card_attack_card", attacker_inv_id = attacker.inventory_item_id, defender_inv_id = defender.inventory_item_id })
-            lib_battle_common.append_client_action(state, "omega_planing_character_attack:" .. attacker.inventory_item_id .. "," .. defender.inventory_item_id)
-        end
+    local face_down_count, face_down_attacker = goblin_shaman_find_extra_face_down_attacker(state)
+    local attacker = nil
+    if face_down_count > 1 then
+        attacker = face_down_attacker
+        lib_battle_common.dlog("[entity_ai] goblin_shaman.plan_attack: face-down count=" .. face_down_count .. ", attacking with hidden card=" .. attacker.inventory_item_id)
+    else
+        attacker = lib_battle_ai._find_omega_attacker(state, true)
     end
-    if #state.omega_planning == 0 then lib_battle_ai.omega_end_turn(state) end
+    if attacker == nil then
+        lib_battle_ai.omega_end_turn(state)
+        return nil
+    end
+
+    if defender == nil then
+        table.insert(state.omega_planning, {
+            action = "omega_attack_alpha_hp",
+            attacker_inv_id = attacker.inventory_item_id,
+            defender_inv_id = "alpha_hp"
+        })
+        lib_battle_common.append_client_action(
+            state,
+            "omega_planing_character_attack:" .. attacker.inventory_item_id .. ",alpha_hp"
+        )
+        return nil
+    end
+
+    table.insert(state.omega_planning, {
+        action = "card_attack_card",
+        attacker_inv_id = attacker.inventory_item_id,
+        defender_inv_id = defender.inventory_item_id
+    })
+    lib_battle_common.append_client_action(
+        state,
+        "omega_planing_character_attack:" .. attacker.inventory_item_id .. "," .. defender.inventory_item_id
+    )
     return nil
 end

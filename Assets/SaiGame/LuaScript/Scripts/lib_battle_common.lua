@@ -242,11 +242,16 @@ local function side_from_line_key(line_key)
     return "omega"
 end
 
-local function expose_attack_pair(attacker_card, defender_card)
+-- Reveal both cards before combat resolution. The matching client actions are
+-- appended here (rather than after damage resolution) so the client animates
+-- the reveal before attack, damage, and any move to the void.
+local function expose_attack_pair(state, attacker_side, defender_side, attacker_card, defender_card)
     attacker_card.face_up = true
     attacker_card.expose  = true
     defender_card.face_up = true
     defender_card.expose  = true
+    append_client_action(state, attacker_side .. "_card_expose:" .. attacker_card.inventory_item_id)
+    append_client_action(state, defender_side .. "_card_expose:" .. defender_card.inventory_item_id)
 end
 
 local function fire_on_attack(state, attacker_card, attacker_def, defender_card, defender_def, defender_line_key, defender_side_void, damage_dealt)
@@ -275,8 +280,6 @@ local function fire_on_damaged(state, attacker_card, attacker_def, defender_card
 end
 
 local function append_attack_client_actions(state, attacker_side, defender_side, attacker_card, defender_card, dmg_actions, atk_actions, def_actions)
-    append_client_action(state, attacker_side .. "_card_expose:" .. attacker_card.inventory_item_id)
-    append_client_action(state, defender_side .. "_card_expose:" .. defender_card.inventory_item_id)
     append_client_action(state, attacker_side .. "_attack:" .. attacker_card.inventory_item_id .. "," .. defender_card.inventory_item_id)
     for _, action in ipairs(dmg_actions) do append_client_action(state, action) end
     for _, action in ipairs(atk_actions) do append_client_action(state, action) end
@@ -304,7 +307,7 @@ function card_attack_card(state, attacker_card, attacker_def, attacker_line_key,
     local attacker_side = side_from_line_key(attacker_line_key)
     local defender_side = (defender_side_void == "alpha_the_void") and "alpha" or "omega"
 
-    expose_attack_pair(attacker_card, defender_card)
+    expose_attack_pair(state, attacker_side, defender_side, attacker_card, defender_card)
 
     local dmg_actions, dmg_err = lib_ability_core.deal_damage_to_character(
         state, attacker_card, defender_card, damage_dealt, state[defender_line_key], defender_side_void

@@ -26,7 +26,6 @@ namespace SG03.UI
         private readonly DropdownField poolDropdown;
         private readonly Button assignAheadButton;
         private readonly Button refreshButton;
-        private readonly QuestDetailPanelUI commonQuestDetailPanel;
         private readonly VisualElement questDetailPanel;
         private readonly VisualElement questDetailContent;
         private readonly Button closeQuestDetailButton;
@@ -53,6 +52,9 @@ namespace SG03.UI
         private DailyTimeframeResponse thisWeekResponse;
         private DailyTimeframeResponse thisMonthResponse;
         private VisualElement selectedQuestItem;
+        private DailyQuestEntryData currentDetailEntry;
+        private QuestClaimRecord currentDetailClaim;
+        private readonly HashSet<string> loadingItemDefinitions = new HashSet<string>();
         private int questDetailRequestVersion;
         private bool hasCheckedOnOpen;
         private DateRange selectedRange = DateRange.Next7Days;
@@ -88,7 +90,6 @@ namespace SG03.UI
             this.assignAheadButton = root.Q<Button>("AssignAheadButton");
             this.refreshButton = root.Q<Button>("RefreshButton");
             new RefreshButtonComponent(this.refreshButton, null);
-            this.commonQuestDetailPanel = new QuestDetailPanelUI(root, this.RefreshSelectedPoolData);
             this.questDetailPanel = root.Q("QuestDetailPanel");
             this.questDetailContent = root.Q("QuestDetailContent");
             this.closeQuestDetailButton = root.Q<Button>("CloseQuestDetailButton");
@@ -826,12 +827,6 @@ namespace SG03.UI
 
         private void ShowQuestDetail(DailyQuestEntryData entry, VisualElement questItem)
         {
-            if (entry?.quest != null)
-            {
-                this.SetSelectedQuestItem(questItem);
-                this.commonQuestDetailPanel.Show(new QuestFlowNode { id = entry.quest.id ?? entry.assignment?.quest_definition_id, title = entry.quest.name, status = entry.status });
-                return;
-            }
             if (entry == null || this.questDetailPanel == null || this.questDetailContent == null) return;
 
             int requestVersion = ++this.questDetailRequestVersion;
@@ -870,6 +865,8 @@ namespace SG03.UI
         {
             if (entry == null || this.questDetailPanel == null || this.questDetailContent == null) return;
 
+            this.currentDetailEntry = entry;
+            this.currentDetailClaim = null;
             this.ConfigureQuestDetailActions(entry);
 
             this.questDetailContent.Clear();
@@ -883,7 +880,7 @@ namespace SG03.UI
             this.AddDetailRow("Quest type", entry.quest?.quest_type);
             this.AddDetailRow("Code", entry.quest?.code_name);
             this.AddDetailRow("Quest ID", entry.quest?.id ?? entry.assignment?.quest_definition_id);
-            this.AddConditionDetails(entry.quest?.conditions);
+            this.AddConditionDetails(entry, entry.quest?.conditions);
 
             this.AddDetailSection("Assignment");
             this.AddDetailRow("Assignment ID", entry.assignment?.id);
@@ -959,6 +956,8 @@ namespace SG03.UI
         {
             if (claim == null || this.questDetailContent == null) return;
 
+            this.currentDetailEntry = entry;
+            this.currentDetailClaim = claim;
             QuestDefinitionData quest = claim.quest_definition;
             this.questDetailContent.Clear();
             this.questDetailContent.Add(this.CreateDetailLabel(quest?.name ?? "Quest claim", "dq-quest-detail__name"));
@@ -976,7 +975,7 @@ namespace SG03.UI
             this.AddDetailRow("Quest type", quest?.quest_type);
             this.AddDetailRow("Code", quest?.code_name);
             this.AddDetailRow("Quest ID", claim.quest_definition_id);
-            this.AddConditionDetails(quest?.conditions);
+            this.AddConditionDetails(entry, quest?.conditions);
 
             this.AddDetailSection("Expected rewards");
             if (quest?.rewards == null || quest.rewards.Length == 0)
@@ -1025,6 +1024,9 @@ namespace SG03.UI
         {
             if (string.IsNullOrEmpty(itemDefinitionId)) return null;
 
+            ItemDefinitionData cachedDefinition = SaiServer.Instance?.ItemDefinitions?.GetItemById(itemDefinitionId);
+            if (cachedDefinition != null) return cachedDefinition;
+
             if (entry?.rewards != null)
             {
                 foreach (DailyRewardData reward in entry.rewards)
@@ -1044,6 +1046,40 @@ namespace SG03.UI
             }
 
             return null;
+        }
+
+        private void LoadItemDefinition(string itemDefinitionId)
+        {
+            if (string.IsNullOrEmpty(itemDefinitionId) || this.loadingItemDefinitions.Contains(itemDefinitionId)) return;
+
+            ItemDefinitions definitions = SaiServer.Instance?.ItemDefinitions
+                ?? SaiServer.Instance?.GetComponentInChildren<ItemDefinitions>(true);
+            if (definitions == null) return;
+
+            this.loadingItemDefinitions.Add(itemDefinitionId);
+            definitions.FetchById(itemDefinitionId,
+                _ =>
+                {
+                    this.loadingItemDefinitions.Remove(itemDefinitionId);
+                    this.RefreshOpenQuestDetail();
+                },
+                error =>
+                {
+                    this.loadingItemDefinitions.Remove(itemDefinitionId);
+                    Debug.LogWarning($"[DailyQuestContentUI] Could not load item definition for {itemDefinitionId}: {error}");
+                });
+        }
+
+        private void RefreshOpenQuestDetail()
+        {
+            if (this.currentDetailEntry == null
+                || this.questDetailPanel == null
+                || !this.questDetailPanel.ClassListContains("dq-quest-detail-panel--open")) return;
+
+            if (this.currentDetailClaim != null)
+                this.OpenQuestClaimDetail(this.currentDetailClaim, this.currentDetailEntry);
+            else
+                this.OpenQuestDetail(this.currentDetailEntry);
         }
 
         private void AddRewardDetail(
@@ -1104,7 +1140,6 @@ namespace SG03.UI
 
         public bool CloseQuestDetailOnEscape()
         {
-            if (this.commonQuestDetailPanel.CloseOnEscape()) { this.SetSelectedQuestItem(null); return true; }
             if (this.questDetailPanel == null
                 || !this.questDetailPanel.ClassListContains("dq-quest-detail-panel--open")) return false;
 
@@ -1117,7 +1152,7 @@ namespace SG03.UI
             this.questDetailContent.Add(this.CreateDetailLabel(text, "dq-quest-detail__section"));
         }
 
-        private void AddConditionDetails(QuestConditions conditions)
+        private void AddConditionDetails(DailyQuestEntryData entry, QuestConditions conditions)
         {
             if (conditions?.clauses == null || conditions.clauses.Length == 0) return;
 
@@ -1139,9 +1174,18 @@ namespace SG03.UI
                     foreach (QuestClauseItem item in clause.items)
                     {
                         if (item == null) continue;
+                        ItemDefinitionData definition = this.FindItemDefinition(entry, item.item_definition_id);
+                        string itemName = definition?.name ?? definition?.item_code ?? "Item";
                         card.Add(this.CreateDetailLabel(
-                            $"Item: {item.item_definition_id} × {item.quantity}",
+                            $"Item: {itemName} × {item.quantity}",
                             "dq-quest-detail__condition-rule"));
+                        if (!string.IsNullOrEmpty(definition?.rarity))
+                            card.Add(this.CreateDetailLabel($"Rarity: {definition.rarity}", "dq-quest-detail__condition-rule"));
+                        if (definition == null && !string.IsNullOrEmpty(item.item_definition_id))
+                        {
+                            card.Add(this.CreateDetailLabel("Loading item definition...", "dq-quest-detail__condition-rule"));
+                            this.LoadItemDefinition(item.item_definition_id);
+                        }
                     }
                 }
 
