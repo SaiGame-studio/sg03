@@ -30,7 +30,6 @@ namespace SG03
         private static readonly Dictionary<string, Func<CardDefinitionData, object>> Sources =
             new Dictionary<string, Func<CardDefinitionData, object>>(StringComparer.Ordinal)
             {
-                { "stats", definition => definition.base_stats },
                 { "metadata", definition => definition.metadata },
                 { "card", definition => definition }
             };
@@ -50,6 +49,8 @@ namespace SG03
 
         private static bool TryResolve(string group, string key, CardDefinitionData definition, out string value)
         {
+            if (group == "stats") return definition.TryGetBaseStat(key, out value);
+
             if (group == "char_code")
             {
                 // A character code is supplied by the template itself, e.g.
