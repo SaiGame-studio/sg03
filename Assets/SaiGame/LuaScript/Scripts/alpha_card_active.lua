@@ -4,6 +4,7 @@ require "lib_ability_core"
 require "lib_battle_entity_ai"
 require "enemy_ai_goblin_shaman"
 require "lib_ability_all"
+require "lib_ability_mid_game"
 require "lib_ability_advanced"
 require "lib_ability_character_passives"
 

@@ -52,6 +52,10 @@ function get_ability_config(ability_key)
         animate_dead = {
             target_positions = { "own_frontline", "own_backline", "own_source", "own_void" },
         },
+        titan_fall = {
+            target_positions = { "own_frontline" },
+            requires_target_card = true,
+        },
     }
     return configs[ability_key]
 end
