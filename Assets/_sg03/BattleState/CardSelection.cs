@@ -201,6 +201,11 @@ namespace SG03
             }
             if (this.fullDetail)
             {
+                if (Keyboard.current?.escapeKey.wasPressedThisFrame == true)
+                {
+                    this.ExitFullDetail();
+                    return;
+                }
                 this.HandleFullDetailClick();
                 return;
             }
