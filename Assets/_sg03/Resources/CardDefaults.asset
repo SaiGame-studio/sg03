@@ -20,3 +20,18 @@ MonoBehaviour:
   atkFont: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   defFont: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   descriptionFont: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  cardNameColor: {r: 0.3803922, g: 0.24705884, b: 0.14117648, a: 1}
+  starsColor: {r: 1, g: 1, b: 1, a: 1}
+  atkColor: {r: 1, g: 1, b: 1, a: 1}
+  defColor: {r: 1, g: 1, b: 1, a: 1}
+  descriptionColor: {r: 0.25490198, g: 0.16862746, b: 0.09803922, a: 1}
+  cardNameFontSize: 3
+  cardNameBold: 1
+  starsFontSize: 3
+  starsBold: 0
+  atkFontSize: 3
+  atkBold: 0
+  defFontSize: 3
+  defBold: 0
+  descriptionFontSize: 3
+  descriptionBold: 1

@@ -116,6 +116,7 @@ namespace SG03
         {
             base.ResetValue();
             this.ApplyDefaultFonts();
+            this.ApplyDefaultColors();
             this.ApplyFrontFaceCulling();
         }
 
@@ -201,6 +202,7 @@ namespace SG03
             SetRendererTexture(frontFrameRenderer, cardDefaults.CardFrontChar1);
             SetRendererTexture(backRenderer, cardDefaults.BackTexture);
             ApplyDefaultFonts();
+            ApplyDefaultColors();
         }
 
         /// <summary>
@@ -341,6 +343,7 @@ namespace SG03
             if (this.cardData == null) return;
 
             this.ApplyDefaultFonts();
+            this.ApplyDefaultColors();
 
             string displayName = this.fallbackName;
             int displayAtk = this.fallbackStats?.atk ?? 0;
@@ -373,12 +376,42 @@ namespace SG03
             this.SetTMPFont(this.atkText, this.cardDefaults.AtkFont);
             this.SetTMPFont(this.defText, this.cardDefaults.DefFont);
             this.SetTMPFont(this.descriptionText, this.cardDefaults.DescriptionFont);
+            SetTMPTypography(this.cardNameText, this.cardDefaults.CardNameFontSize, this.cardDefaults.CardNameBold);
+            SetTMPTypography(this.starsText, this.cardDefaults.StarsFontSize, this.cardDefaults.StarsBold);
+            SetTMPTypography(this.atkText, this.cardDefaults.AtkFontSize, this.cardDefaults.AtkBold);
+            SetTMPTypography(this.defText, this.cardDefaults.DefFontSize, this.cardDefaults.DefBold);
+            SetTMPTypography(this.descriptionText, this.cardDefaults.DescriptionFontSize, this.cardDefaults.DescriptionBold);
+        }
+
+        /// <summary>Applies the text colors configured in <see cref="CardDefaults"/>.</summary>
+        public void ApplyDefaultColors()
+        {
+            if (this.cardDefaults == null) return;
+
+            SetTMPColor(this.cardNameText, this.cardDefaults.CardNameColor);
+            SetTMPColor(this.starsText, this.cardDefaults.StarsColor);
+            SetTMPColor(this.atkText, this.cardDefaults.AtkColor);
+            SetTMPColor(this.defText, this.cardDefaults.DefColor);
+            SetTMPColor(this.descriptionText, this.cardDefaults.DescriptionColor);
         }
 
         private void SetTMPFont(TextMeshPro tmp, TMP_FontAsset font)
         {
             if (tmp == null || font == null) return;
             tmp.font = font;
+        }
+
+        private static void SetTMPColor(TextMeshPro tmp, Color color)
+        {
+            if (tmp == null) return;
+            tmp.color = color;
+        }
+
+        private static void SetTMPTypography(TextMeshPro tmp, float fontSize, bool bold)
+        {
+            if (tmp == null) return;
+            tmp.fontSize = fontSize;
+            tmp.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
         }
 
         private void ApplyStatsVisibility()
