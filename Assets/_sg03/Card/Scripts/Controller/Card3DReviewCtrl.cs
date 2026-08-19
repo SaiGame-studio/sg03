@@ -45,12 +45,18 @@ namespace SG03
         /// <paramref name="stats"/> provides the ATK / DEF / Stars shown on the preview.
         /// <paramref name="description"/> is the description shown on the preview.
         /// </summary>
-        public void RequestShow(string codeName, string displayName = null, CardBaseStats stats = null, string description = null)
+        public void RequestShow(
+            string codeName,
+            string displayName = null,
+            CardBaseStats stats = null,
+            string description = null,
+            string cardType = null)
         {
             if (this.reviewMovement == null) return;
             this.SetFallbackName(displayName ?? codeName);
             this.SetFallbackStats(stats);
             this.SetFallbackDescription(description);
+            this.SetCardType(cardType);
             // Apply fallbacks to the currently loaded card immediately.
             // LoadCardByCodeName is async — if the address lookup fails the card
             // data never updates, so fallback text would never render without this call.

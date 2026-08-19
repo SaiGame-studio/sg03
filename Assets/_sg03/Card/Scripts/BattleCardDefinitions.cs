@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using SaiGame.Services;
 using UnityEngine;
 
@@ -58,7 +59,7 @@ namespace SG03
 
         private void ParseResponse(string rawJson)
         {
-            CardDefinitionsResponse response = JsonUtility.FromJson<CardDefinitionsResponse>(rawJson);
+            CardDefinitionsResponse response = JsonConvert.DeserializeObject<CardDefinitionsResponse>(rawJson);
             if (response == null) return;
             if (response.output == null) return;
             this.ApplyCodes(response.output.codes);

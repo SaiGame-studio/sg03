@@ -52,6 +52,17 @@ function get_ability_config(ability_key)
         animate_dead = {
             target_positions = { "own_frontline", "own_backline", "own_source", "own_void" },
         },
+        titan_fall = {
+            target_positions = { "own_frontline" },
+            requires_target_card = true,
+        },
+        titan_spear_sweep = {
+            target_positions = {
+                "enemy_frontline",
+                "own_source", "enemy_source",
+            },
+            resolves_without_attack = true,
+        },
     }
     return configs[ability_key]
 end

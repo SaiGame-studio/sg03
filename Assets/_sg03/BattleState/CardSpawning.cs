@@ -645,14 +645,19 @@ namespace SG03
         {
             string resolvedName = string.IsNullOrEmpty(fallbackName) ? def?.name : fallbackName;
             card.SetFallbackName(resolvedName);
-            card.SetFallbackStats(this.ToCardBaseStats(def?.base_stats));
+            card.SetFallbackStats(this.ToCardBaseStats(def));
             card.SetFallbackDescription(CardDescriptionTemplateResolver.Resolve(def?.description, def));
         }
 
-        private CardBaseStats ToCardBaseStats(CardDefinitionBaseStats src)
+        private CardBaseStats ToCardBaseStats(CardDefinitionData definition)
         {
-            if (src == null) return null;
-            return new CardBaseStats { atk = src.atk, def = src.def, star = src.star };
+            if (definition == null) return null;
+            return new CardBaseStats
+            {
+                atk = definition.GetBaseStatInt("atk"),
+                def = definition.GetBaseStatInt("def"),
+                star = definition.GetBaseStatInt("star")
+            };
         }
 
     }

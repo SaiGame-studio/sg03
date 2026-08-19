@@ -48,6 +48,7 @@ function eagle_eye_execute(state, source_card, event_data, helpers)
     target_card.expose = true
     local target_side = helpers.find_card_side(state, target_card)
     local ability_actions = {
+        source_side .. "_attack:" .. lyra_card.inventory_item_id .. "," .. target_card.inventory_item_id,
         source_side .. "_card_expose:" .. lyra_card.inventory_item_id,
         target_side .. "_card_expose:" .. target_card.inventory_item_id,
         source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=eagle_eye,target=" .. target_card.inventory_item_id .. ",required=" .. lyra_card.inventory_item_id
@@ -145,11 +146,19 @@ function cross_guard_execute(state, source_card, event_data, helpers)
     end
     azure_blade_card.trigger = true
 
-    local guard_bonus = 200
+    local source_item_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
+    local guard_bonus = 0
+    if source_item_def ~= nil then
+        if source_item_def.metadata ~= nil and source_item_def.metadata.def_add ~= nil then
+            guard_bonus = source_item_def.metadata.def_add
+        elseif source_item_def.base_stats ~= nil and source_item_def.base_stats.def_add ~= nil then
+            guard_bonus = source_item_def.base_stats.def_add
+        end
+    end
     local prev_def = target_card.final_def or 0
     target_card.final_def = prev_def + guard_bonus
     local expose_action = helpers.expose_ability_selected_card(state, azure_blade_card)
-    battle.dlog("[ability] cross_guard: target=" .. target_card.inventory_item_id .. " final_def " .. prev_def .. " -> " .. target_card.final_def)
+    battle.dlog("[ability] cross_guard: target=" .. target_card.inventory_item_id .. " def_add=" .. guard_bonus .. " final_def " .. prev_def .. " -> " .. target_card.final_def)
     local guard_actions = {
         expose_action,
         source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=cross_guard,target=" .. target_card.inventory_item_id .. ",selected=" .. azure_blade_card.inventory_item_id,

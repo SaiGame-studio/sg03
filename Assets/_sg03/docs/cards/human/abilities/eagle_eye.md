@@ -16,4 +16,4 @@ Lyra phải đang có mặt trên sới đấu của phe bạn. Chọn 1 thẻ C
 
 ## Hiệu Quả
 
-Thẻ Character được chọn bị **Expose**: đặt `face_up = true` và `expose = true`, để toàn bộ thông tin của thẻ hiển thị cho người chơi. Lyra cũng bị **Expose** và ngửa lá (`face_up = true`), nhưng không được đặt vào trạng thái `trigger`. Eagle Eye không gây sát thương, không thay đổi chỉ số và không kích hoạt hiệu ứng của thẻ bị lộ.
+Thẻ Character được chọn bị **Expose**: đặt `face_up = true` và `expose = true`, để toàn bộ thông tin của thẻ hiển thị cho người chơi. Lyra cũng bị **Expose** và ngửa lá (`face_up = true`), nhưng không được đặt vào trạng thái `trigger`. Client nhận action tấn công từ Lyra đến thẻ được chọn để thể hiện rõ Lyra là người triển khai Eagle Eye. Eagle Eye không gây sát thương, không thay đổi chỉ số và không kích hoạt hiệu ứng của thẻ bị lộ.

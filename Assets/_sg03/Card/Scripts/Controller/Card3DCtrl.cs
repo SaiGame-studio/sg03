@@ -138,6 +138,9 @@ namespace SG03
         /// </summary>
         public void SetFallbackDescription(string description) => this.card.SetFallbackDescription(description);
 
+        /// <summary>Sets the card type used to select its frame and stat visibility.</summary>
+        public void SetCardType(string type) => this.card.SetCardType(type);
+
         /// <summary>Links a <see cref="CardHolderCtrl"/> to this card and moves the card to the holder's position.
         /// <paramref name="onReady"/> is invoked after RotateZ180 completes (new card) or immediately after move starts (existing holder).</summary>
         public void SetCardHolder(CardHolderCtrl holder, System.Action onReady = null)
@@ -314,7 +317,7 @@ namespace SG03
         public void SetDefinition(CardDefinitionData def)
         {
             this.definition = def;
-            this.card.SetCardType(def?.metadata?.type);
+            this.SetCardType(def?.metadata?.type);
         }
 
         /// <summary>The definition data currently assigned to this card.</summary>

@@ -39,6 +39,25 @@ namespace SG03
         [Tooltip("Default font asset for the card description.")]
         [SerializeField] private TMP_FontAsset descriptionFont;
 
+        [Header("Card Text Colors")]
+        [SerializeField] private Color cardNameColor = new Color(0.3803922f, 0.24705884f, 0.14117648f, 1f);
+        [SerializeField] private Color starsColor = Color.white;
+        [SerializeField] private Color atkColor = Color.white;
+        [SerializeField] private Color defColor = Color.white;
+        [SerializeField] private Color descriptionColor = new Color(0.25490198f, 0.16862746f, 0.09803922f, 1f);
+
+        [Header("Card Text Typography")]
+        [SerializeField] private float cardNameFontSize = 3f;
+        [SerializeField] private bool cardNameBold = true;
+        [SerializeField] private float starsFontSize = 3f;
+        [SerializeField] private bool starsBold;
+        [SerializeField] private float atkFontSize = 3f;
+        [SerializeField] private bool atkBold;
+        [SerializeField] private float defFontSize = 3f;
+        [SerializeField] private bool defBold;
+        [SerializeField] private float descriptionFontSize = 3f;
+        [SerializeField] private bool descriptionBold = true;
+
         // ─── Read-only accessors ──────────────────────────────────────────────────
 
         public Texture2D CardFrontChar1 => cardFrontChar1;
@@ -49,5 +68,20 @@ namespace SG03
         public TMP_FontAsset AtkFont       => atkFont;
         public TMP_FontAsset DefFont       => defFont;
         public TMP_FontAsset DescriptionFont => descriptionFont;
+        public Color CardNameColor          => cardNameColor;
+        public Color StarsColor             => starsColor;
+        public Color AtkColor               => atkColor;
+        public Color DefColor               => defColor;
+        public Color DescriptionColor       => descriptionColor;
+        public float CardNameFontSize        => cardNameFontSize;
+        public bool CardNameBold             => cardNameBold;
+        public float StarsFontSize           => starsFontSize;
+        public bool StarsBold                => starsBold;
+        public float AtkFontSize             => atkFontSize;
+        public bool AtkBold                  => atkBold;
+        public float DefFontSize             => defFontSize;
+        public bool DefBold                  => defBold;
+        public float DescriptionFontSize     => descriptionFontSize;
+        public bool DescriptionBold          => descriptionBold;
     }
 }

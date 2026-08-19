@@ -27,6 +27,8 @@
 .shop-item-card__name { color: rgb(225, 232, 255); font-size: 14px; -unity-font-style: bold; white-space: normal; }
 .shop-item-card__description { color: rgb(160, 175, 215); font-size: 12px; white-space: normal; margin-top: 4px; }
 .shop-item-card__meta { color: rgb(130, 150, 195); font-size: 11px; margin-top: 6px; }
+.shop-item-card__quantity-input { width: 54px; min-width: 54px; margin-left: 8px; }
+.shop-item-card__quantity-input .unity-base-field__input { min-width: 0; color: rgb(225, 232, 255); background-color: rgba(30, 40, 66, 0.95); border-width: 1px; border-color: rgba(105, 145, 220, 0.65); border-radius: 4px; }
 .shop-item-card__buy { min-width: 92px; margin-left: 16px; padding: 8px 12px; background-color: rgba(55, 110, 225, 0.9); border-width: 1px; border-color: rgba(105, 165, 255, 0.85); border-radius: 6px; color: rgb(240, 245, 255); font-size: 12px; -unity-font-style: bold; }
 .shop-item-card__buy:hover { background-color: rgb(70, 130, 250); }
 .shop-item-card__buy:disabled { color: rgb(125, 140, 175); background-color: rgba(50, 58, 80, 0.8); border-color: rgba(80, 100, 150, 0.3); }
