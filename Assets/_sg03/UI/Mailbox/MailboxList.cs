@@ -79,7 +79,52 @@ namespace SG03.UI
                 return;
             }
 
-            this.mailbox.ClaimAllMessages(onSuccess, onError);
+            var claimableMessages = new List<MailboxMessage>();
+            foreach (MailboxMessage message in this.Messages ?? Array.Empty<MailboxMessage>())
+            {
+                bool hasAttachments = message.attachments != null && message.attachments.Length > 0;
+                if (hasAttachments && string.IsNullOrEmpty(message.claimed_at) && !string.IsNullOrEmpty(message.id))
+                    claimableMessages.Add(message);
+            }
+
+            if (claimableMessages.Count == 0)
+            {
+                onError?.Invoke("No unclaimed messages found.");
+                return;
+            }
+
+            this.ClaimMessages(claimableMessages, 0, new List<MailboxMessage>(), null, onSuccess, onError);
+        }
+
+        // Claim one message at a time. A failure is recorded but must not prevent
+        // the remaining mailbox rewards from being claimed.
+        private void ClaimMessages(
+            List<MailboxMessage> messages,
+            int index,
+            List<MailboxMessage> claimed,
+            string lastError,
+            Action<MailboxMessage[]> onSuccess,
+            Action<string> onError)
+        {
+            if (index >= messages.Count)
+            {
+                if (claimed.Count > 0)
+                    onSuccess?.Invoke(claimed.ToArray());
+                else
+                    onError?.Invoke(lastError ?? "Failed to claim any messages.");
+                return;
+            }
+
+            MailboxMessage message = messages[index];
+            this.ClaimMessage(
+                message.id,
+                claimedMessage =>
+                {
+                    claimed.Add(claimedMessage ?? message);
+                    this.ClaimMessages(messages, index + 1, claimed, lastError, onSuccess, onError);
+                },
+                error => this.ClaimMessages(messages, index + 1, claimed, error, onSuccess, onError)
+            );
         }
 
         // The mailbox API only exposes deletion for one message at a time, so delete
