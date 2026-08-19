@@ -266,6 +266,8 @@ local function _get_ability_handler(ability_key)
         return lib_ability_advanced.animate_dead_execute
     elseif ability_key == "titan_fall" then
         return lib_ability_mid_game.titan_fall_execute
+    elseif ability_key == "titan_spear_sweep" then
+        return lib_ability_mid_game.titan_spear_sweep_execute
     end
     return nil
 end

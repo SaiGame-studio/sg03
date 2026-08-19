@@ -56,6 +56,13 @@ function get_ability_config(ability_key)
             target_positions = { "own_frontline" },
             requires_target_card = true,
         },
+        titan_spear_sweep = {
+            target_positions = {
+                "enemy_frontline", "enemy_backline",
+                "own_source", "enemy_source",
+            },
+            resolves_without_attack = true,
+        },
     }
     return configs[ability_key]
 end

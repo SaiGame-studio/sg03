@@ -134,3 +134,116 @@ function titan_fall_execute(state, source_card, event_data, helpers)
     table.insert(actions, source_side .. "_void_to_front_line:" .. titan_card.inventory_item_id .. "," .. tostring(target_slot_index))
     return actions, nil
 end
+
+-- ability: titan_spear_sweep
+-- Titan deals 160 damage to every opposing Character, then to one adjacent ally
+-- unless that ally is Ren.
+function titan_spear_sweep_execute(state, source_card, event_data, helpers)
+    local battle = helpers.lib_battle_common
+    local source_side = helpers.find_card_side(state, source_card)
+    if source_side == nil or source_side == "unknown" then
+        return {}, "titan_spear_sweep source card is not on the battlefield"
+    end
+
+    local titan_card = nil
+    local titan_line = nil
+    for _, line_key in ipairs({ source_side .. "_front_line", source_side .. "_back_line" }) do
+        for _, card in ipairs(state[line_key] or {}) do
+            if card.inventory_item_id ~= nil and card.inventory_item_id ~= "" and
+               card.item_definition_code_name == "titan" then
+                titan_card = card
+                titan_line = state[line_key]
+                break
+            end
+        end
+        if titan_card ~= nil then break end
+    end
+    if titan_card == nil then
+        return {}, "titan_spear_sweep requires Titan on the battlefield"
+    end
+    if titan_card.trigger == true then
+        return {}, "titan_spear_sweep requires Titan to be ready"
+    end
+
+    titan_card.trigger = true
+    titan_card.face_up = true
+    titan_card.expose = true
+
+    local ability_actions = {
+        source_side .. "_card_expose:" .. titan_card.inventory_item_id,
+        source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+            ",ability=titan_spear_sweep,selected=" .. titan_card.inventory_item_id,
+    }
+    local target_side = source_side == "alpha" and "omega" or "alpha"
+    local target_lines = {
+        { side = target_side, line = state[target_side .. "_front_line"] or {} },
+        { side = target_side, line = state[target_side .. "_back_line"] or {} },
+    }
+    local damage = 160
+
+    local function deal_sweep_damage(target_card, target_line, target_void_key)
+        table.insert(ability_actions, source_side .. "_attack:" ..
+            titan_card.inventory_item_id .. "," .. target_card.inventory_item_id)
+        local damage_actions, damage_err = helpers.deal_damage_to_character(
+            state, titan_card, target_card, damage, target_line, target_void_key
+        )
+        if damage_err ~= nil then return damage_err end
+        for _, action in ipairs(damage_actions) do
+            table.insert(ability_actions, action)
+        end
+        battle.dlog("[ability] titan_spear_sweep: titan=" .. titan_card.inventory_item_id ..
+            " target=" .. target_card.inventory_item_id .. " damage=" .. damage)
+        return nil
+    end
+
+    for _, target_entry in ipairs(target_lines) do
+        local void_key = target_entry.side .. "_the_void"
+        for _, target_card in ipairs(target_entry.line) do
+            if target_card.inventory_item_id ~= nil and target_card.inventory_item_id ~= "" and
+               battle.check_card_type(state.item_defs, target_card, "character") then
+                local damage_err = deal_sweep_damage(target_card, target_entry.line, void_key)
+                if damage_err ~= nil then return ability_actions, damage_err end
+            end
+        end
+    end
+
+    local adjacent_ally = nil
+    local titan_slot = titan_card.slot_index or 0
+    for _, adjacent_slot in ipairs({ titan_slot + 1, titan_slot - 1 }) do
+        for _, ally_card in ipairs(titan_line or {}) do
+            if ally_card.inventory_item_id ~= nil and ally_card.inventory_item_id ~= "" and
+               ally_card.inventory_item_id ~= titan_card.inventory_item_id and
+               ally_card.slot_index == adjacent_slot and
+               battle.check_card_type(state.item_defs, ally_card, "character") then
+                local ally_def = helpers.find_item_def(state.item_defs, ally_card.item_definition_code_name)
+                local ally_char_code = ally_def ~= nil and ally_def.metadata ~= nil
+                    and ally_def.metadata.char_code or nil
+                if ally_card.item_definition_code_name ~= "azure_blade" and
+                   ally_char_code ~= "azure_blade" then
+                    adjacent_ally = ally_card
+                else
+                    battle.dlog("[ability] titan_spear_sweep: adjacent Ren is immune")
+                end
+                break
+            end
+        end
+        if adjacent_ally ~= nil then break end
+    end
+
+    if adjacent_ally ~= nil then
+        local damage_err = deal_sweep_damage(
+            adjacent_ally, titan_line, source_side .. "_the_void"
+        )
+        if damage_err ~= nil then return ability_actions, damage_err end
+    end
+
+    for _, line_key in ipairs({ source_side .. "_front_line", source_side .. "_back_line", source_side .. "_hand" }) do
+        battle.remove_card_from_line(state[line_key], source_card.inventory_item_id)
+    end
+    local source_void_key = source_side .. "_the_void"
+    if state[source_void_key] == nil then state[source_void_key] = {} end
+    table.insert(state[source_void_key], source_card)
+    table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+
+    return ability_actions, nil
+end
