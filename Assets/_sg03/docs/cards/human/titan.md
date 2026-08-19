@@ -16,4 +16,4 @@ Khi Ren lâm vào thời khắc khắc nghiệt nhất, Titan đáp lại như m
 
 ## Kỹ Năng Liên Kết
 
-- [Spear Sweep](abilities/spear_sweep.md) — Đòn quét giáo trên toàn chiến trường.
+- [Spear Sweep](abilities/titan_spear_sweep.md) — Đòn quét giáo trên toàn chiến trường.

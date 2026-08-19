@@ -58,7 +58,7 @@ function get_ability_config(ability_key)
         },
         titan_spear_sweep = {
             target_positions = {
-                "enemy_frontline", "enemy_backline",
+                "enemy_frontline",
                 "own_source", "enemy_source",
             },
             resolves_without_attack = true,

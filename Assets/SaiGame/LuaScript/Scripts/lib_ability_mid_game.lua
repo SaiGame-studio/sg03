@@ -177,7 +177,6 @@ function titan_spear_sweep_execute(state, source_card, event_data, helpers)
     local target_side = source_side == "alpha" and "omega" or "alpha"
     local target_lines = {
         { side = target_side, line = state[target_side .. "_front_line"] or {} },
-        { side = target_side, line = state[target_side .. "_back_line"] or {} },
     }
     local damage = 160
 
