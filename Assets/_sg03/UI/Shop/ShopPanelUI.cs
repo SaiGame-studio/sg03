@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,6 +20,7 @@ namespace SG03.UI
         private ShopData selectedShop;
         private ShopItemViewData[] currentItems;
         private ShopCurrencyData currentShopCurrency;
+        private readonly Dictionary<string, int> selectedQuantities = new Dictionary<string, int>();
 
         public ShopPanelUI(VisualElement panelRoot, Shop shop, CurrencyWallet currencyWallet)
         {
@@ -180,23 +182,55 @@ namespace SG03.UI
             details.Add(meta);
             card.Add(details);
 
-            Button buyButton = new Button { text = $"Buy with {item.price} {this.GetCurrencyName(item)}" };
+            Button buyButton = new Button();
             buyButton.AddToClassList("shop-item-card__buy");
-            bool canPurchase = !string.IsNullOrWhiteSpace(item.id)
-                && (item.purchase_limit <= 0 || item.purchased_count < item.purchase_limit);
-            string currencyDefinitionId = this.GetCurrencyItemDefinitionId(item);
-            canPurchase &= this.currencyWallet != null
-                && this.currencyWallet.IsLoaded
-                && this.currencyWallet.CanAfford(currencyDefinitionId, item.price);
-            buyButton.SetEnabled(canPurchase);
-            buyButton.RegisterCallback<ClickEvent>(_ => this.PurchaseItem(item, buyButton));
             card.Add(buyButton);
+
+            int selectedQuantity = this.GetSelectedQuantity(item.id);
+            IntegerField quantityInput = new IntegerField { value = selectedQuantity, isDelayed = false };
+            quantityInput.AddToClassList("shop-item-card__quantity-input");
+            card.Add(quantityInput);
+
+            Action<int> updatePurchaseButton = quantity =>
+            {
+                int validQuantity = Mathf.Max(1, quantity);
+                if (quantityInput.value != validQuantity)
+                    quantityInput.SetValueWithoutNotify(validQuantity);
+                this.selectedQuantities[item.id] = validQuantity;
+
+                buyButton.text = $"Buy for {(long)item.price * validQuantity} {this.GetCurrencyName(item)}";
+                buyButton.SetEnabled(this.CanPurchaseQuantity(item, validQuantity));
+            };
+            quantityInput.RegisterValueChangedCallback(change => updatePurchaseButton(change.newValue));
+            buyButton.RegisterCallback<ClickEvent>(_ => this.PurchaseItem(item, quantityInput.value, buyButton));
+            updatePurchaseButton(quantityInput.value);
             return card;
         }
 
-        private void PurchaseItem(ShopItemViewData item, Button buyButton)
+        private int GetSelectedQuantity(string itemId)
         {
-            if (this.selectedShop == null || string.IsNullOrWhiteSpace(item.id)) return;
+            return !string.IsNullOrWhiteSpace(itemId) && this.selectedQuantities.TryGetValue(itemId, out int quantity)
+                ? Mathf.Max(1, quantity)
+                : 1;
+        }
+
+        private bool CanPurchaseQuantity(ShopItemViewData item, int quantity)
+        {
+            if (string.IsNullOrWhiteSpace(item.id) || quantity < 1 || this.currencyWallet == null || !this.currencyWallet.IsLoaded)
+                return false;
+            if (item.purchase_limit > 0)
+                if (quantity > item.purchase_limit - item.purchased_count)
+                    return false;
+
+            long totalPrice = (long)item.price * quantity;
+            return totalPrice >= 0
+                && totalPrice <= int.MaxValue
+                && this.currencyWallet.CanAfford(this.GetCurrencyItemDefinitionId(item), (int)totalPrice);
+        }
+
+        private void PurchaseItem(ShopItemViewData item, int quantity, Button buyButton)
+        {
+            if (this.selectedShop == null || !this.CanPurchaseQuantity(item, quantity)) return;
 
             string shopId = this.selectedShop.id;
             buyButton.SetEnabled(false);
@@ -204,7 +238,7 @@ namespace SG03.UI
             this.shop.PurchaseItem(
                 shopId,
                 item.id,
-                quantity: 1,
+                quantity: quantity,
                 idempotencyKey: Guid.NewGuid().ToString("N"),
                 onSuccess: _ =>
                 {
@@ -227,7 +261,7 @@ namespace SG03.UI
         private string BuildItemMeta(ShopItemViewData item)
         {
             string currency = this.GetCurrencyName(item);
-            string stock = item.stock < 0 ? "Unlimited stock" : $"Stock: {item.stock}";
+            string stock = item.stock <= 0 ? "Unlimited stock" : $"Stock: {item.stock}";
             if (item.purchase_limit > 0)
                 stock += $" · Limit: {item.purchased_count}/{item.purchase_limit}";
             return $"{item.price} {currency} · {stock}";
