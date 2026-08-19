@@ -1237,6 +1237,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 638439398466596651, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.003
+      objectReference: {fileID: 0}
     - target: {fileID: 2513543958764469397, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
       propertyPath: m_Name
       value: Card3DReview
@@ -1285,6 +1289,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 41251400}
+    - target: {fileID: 6783132589117423438, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.003
+      objectReference: {fileID: 0}
     - target: {fileID: 6923964180551665996, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

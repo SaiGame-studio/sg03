@@ -57,6 +57,12 @@ namespace SG03.UI
             return JsonUtility.FromJson<CardBaseStats>(json);
         }
 
+        private static string ParseCardType(string metadataJson)
+        {
+            if (string.IsNullOrEmpty(metadataJson)) return null;
+            return JsonUtility.FromJson<CardDefinitionMetadata>(metadataJson)?.type;
+        }
+
         // ─── Events ───────────────────────────────────────────────────────────────
 
         public event Action OnCardViewerShown;
@@ -99,12 +105,14 @@ namespace SG03.UI
                 CardBaseStats stats       = ParseBaseStats(item?.definition?.base_stats);
                 string        rawMetadata = item?.definition?.metadata;
                 string        description = item?.definition?.description;
+                string        cardType    = ParseCardType(rawMetadata);
                 Debug.Log($"[DeskContent] base_stats={item?.definition?.base_stats} | metadata={rawMetadata} | description={description}");
                 cardReviewCtrl?.RequestShow(
                     item?.definition?.item_code,
                     item?.definition?.name,
                     stats,
-                    description);
+                    description,
+                    cardType);
             };
         }
 
