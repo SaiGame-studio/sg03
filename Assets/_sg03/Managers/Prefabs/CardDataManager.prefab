@@ -56,6 +56,7 @@ MonoBehaviour:
   - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/spinning_slash.asset
   - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/titan_fall.asset
   - Assets/_sg03/Card/Data/Ability/Human/Lyra/eagle_eye.asset
+  - Assets/_sg03/Card/Data/Ability/Human/Titan/titan_spear_sweep.asset
   - Assets/_sg03/Card/Data/Ability/LightElf/holy_glow.asset
   - Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/lightning_strike.asset
   - Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset

@@ -105,6 +105,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7d9eb1a2a1a18f447aa660595a7256a9
+    m_Address: Assets/_sg03/Card/Data/Ability/Human/Titan/titan_spear_sweep.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7f274126714bab941a9c9c9f1aa0f9cd
     m_Address: Assets/_sg03/Card/Data/Env/abyssal_mist.asset
     m_ReadOnly: 0
