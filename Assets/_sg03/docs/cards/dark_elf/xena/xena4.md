@@ -11,11 +11,15 @@
 
 ## Mô Tả
 
-Xena vẫn luôn trân trọng cây gậy gỗ đã đồng hành cùng mình từ thuở nhỏ, nhưng khi lửa và điện đạt đến cấp độ cao hơn, cô hiểu rằng vũ khí ấy không còn là con đường tối ưu để giải phóng toàn bộ sức mạnh. Cô bắt đầu dồn tâm sức vào quyền thuật, biến nắm đấm, khuỷu tay và cước pháp thành những điểm phát lực chính xác cho hai nguyên tố.
+Trong một trận chiến khốc liệt, Xena ở hình thái 3 sao đã bị kẻ thù hạ gục và rơi vào trạng thái kiệt sức. Trước khi ý thức tan biến, bản năng sinh tồn trong huyết mạch quỷ vương đã thức tỉnh: cô hút sinh lực từ một lâu la ở gần đó để vá lại cơ thể và đứng dậy.
 
-Ở hình thái 4 sao, điện tập trung vào những đòn tăng tốc và phá giáp, còn lửa được nén trong các cú đánh nặng để áp đảo phòng thủ. Xena không từ bỏ cây gậy gỗ; cô chỉ để nó trở thành biểu tượng của cội nguồn, trong khi quyền thuật đưa cô đến gần hơn với tiềm năng thật sự của bản thân.
+Nguồn sinh lực bị hấp thụ hòa cùng lửa và điện đang cuộn trào, đẩy Xena vượt qua giới hạn của hình thái 3 sao để biến hình thành Xena 4 sao. Từ khoảnh khắc ấy, cô chiến đấu bằng quyền thuật mạnh mẽ hơn; điện gia tăng tốc độ và khả năng phá giáp, còn lửa được nén trong những đòn đánh nặng nhằm áp đảo phòng thủ đối thủ.
 
-## Kỹ Năng Liên Kết
+## Kỹ Năng
+
+- [Xena Awakened IV](abilities/xena_awakened4.md) — 4 sao
+
+## Bài
 
 - [Xena — 1 sao: Violet Spark Adept](xena1.md)
 - [Xena — 2 sao: Unstable Awakening](xena2.md)

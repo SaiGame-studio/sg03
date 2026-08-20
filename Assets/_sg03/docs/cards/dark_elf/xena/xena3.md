@@ -15,7 +15,11 @@ Trong một lần biến hình sâu hơn, Xena nhận ra cơ thể mình đã th
 
 Hai chiếc đuôi giúp Xena giữ thăng bằng và đổi nhịp di chuyển trong lúc giao đấu; lửa tạo áp lực không ngừng, còn điện biến từng khoảnh khắc sơ hở của đối thủ thành cơ hội kết thúc. Hình thái 3 sao là thời điểm cô chuyển từ một võ giả có sức mạnh bộc phát thành chiến binh thật sự biết phối hợp thân pháp với ma lực.
 
-## Kỹ Năng Liên Kết
+## Kỹ Năng
+
+- [Xena Awakened III](abilities/xena_awakened3.md) — 3 sao
+
+## Bài
 
 - [Xena — 1 sao: Violet Spark Adept](xena1.md)
 - [Xena — 2 sao: Unstable Awakening](xena2.md)

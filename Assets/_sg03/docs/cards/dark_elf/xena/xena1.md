@@ -15,7 +15,11 @@ Xena là con gái của Quỷ Vương, lớn lên giữa những kỳ vọng n�
 
 Vũ khí cô yêu thích là một cây gậy gỗ giản dị. Trong tay Xena, nó vừa là đòn bẩy cho những cú quét rộng, vừa là điểm tựa để đổi hướng và phản công. Hình thái 1 sao ghi lại nền tảng của cô: một chiến binh trẻ tuổi dựa vào kỹ năng, kỷ luật và niềm yêu thích thuần khiết dành cho võ thuật.
 
-## Kỹ Năng Liên Kết
+## Kỹ Năng
+
+- [Xena Awakened I](abilities/xena_awakened1.md) — 1 sao
+
+## Bài
 
 - [Xena — 2 sao: Unstable Awakening](xena2.md)
 - [Xena — 3 sao: Tempest Dualist](xena3.md)

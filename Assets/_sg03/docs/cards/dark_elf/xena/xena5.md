@@ -11,11 +11,15 @@
 
 ## Mô Tả
 
-Trong một trận chiến với kẻ thù vượt trội, Xena bị dồn đến bờ vực cái chết. Khi ý chí sinh tồn hòa cùng quyết tâm không chịu khuất phục, sức mạnh trong huyết mạch cô bùng nổ lần nữa. Đôi cánh quỷ xuất hiện sau lưng, đưa cô bước sang một dạng biến hình mới trước khi đòn kết liễu của đối phương kịp giáng xuống.
+Trong một trận chiến tàn khốc, Xena đã bị kẻ thù sát hại. Không chấp nhận mất đi con gái, Quỷ Vương buộc phải lấy ra bảo vật quý giá nhất của mình: bảy viên ngọc quỷ, mỗi viên chứa một phần sức mạnh cổ xưa của ma giới.
 
-Khả năng bay lượn biến Xena thành mối đe dọa ở mọi độ cao: cô có thể lướt qua tầm đánh, đổi góc tấn công trong chớp mắt rồi giáng xuống bằng quyền thuật hỏa–lôi. Hình thái 5 sao không chỉ là sức mạnh để sống sót; đó là minh chứng rằng Xena đã tự mở ra con đường của mình, vượt qua cả giới hạn của một công chúa quỷ tộc.
+Quỷ Vương dùng sức mạnh của bảy viên ngọc quỷ để hồi sinh Xena và dẫn dắt cô chuyển sang một hình dạng mới. Đôi cánh quỷ xuất hiện sau lưng, còn lửa và điện trong cơ thể cô đạt đến mức độ mạnh mẽ hơn. Ở hình thái 5 sao, Xena có thể lướt qua tầm đánh, đổi góc tấn công trong chớp mắt rồi giáng xuống bằng quyền thuật hỏa–lôi.
 
-## Kỹ Năng Liên Kết
+## Kỹ Năng
+
+- Chưa có kỹ năng liên kết.
+
+## Bài
 
 - [Xena — 1 sao: Violet Spark Adept](xena1.md)
 - [Xena — 2 sao: Unstable Awakening](xena2.md)
