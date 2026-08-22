@@ -11,9 +11,9 @@
 
 ## Mô Tả
 
-Trong một trận chiến tàn khốc, Xena đã bị kẻ thù sát hại. Không chấp nhận mất đi con gái, Quỷ Vương buộc phải lấy ra bảo vật quý giá nhất của mình: bảy viên ngọc quỷ, mỗi viên chứa một phần sức mạnh cổ xưa của ma giới.
+Trong một trận chiến tàn khốc, Xena đã bị kẻ thù sát hại, nhưng sau đó được hồi sinh và biến sang một hình dạng mới.
 
-Quỷ Vương dùng sức mạnh của bảy viên ngọc quỷ để hồi sinh Xena và dẫn dắt cô chuyển sang một hình dạng mới. Đôi cánh quỷ xuất hiện sau lưng, còn lửa và điện trong cơ thể cô đạt đến mức độ mạnh mẽ hơn. Ở hình thái 5 sao, Xena có thể lướt qua tầm đánh, đổi góc tấn công trong chớp mắt rồi giáng xuống bằng quyền thuật hỏa–lôi.
+Đôi cánh quỷ xuất hiện sau lưng, còn lửa và điện trong cơ thể cô đạt đến mức độ mạnh mẽ hơn. Ở hình thái 5 sao, Xena có thể lướt qua tầm đánh, đổi góc tấn công trong chớp mắt rồi giáng xuống bằng quyền thuật hỏa–lôi.
 
 ## Kỹ Năng
 
