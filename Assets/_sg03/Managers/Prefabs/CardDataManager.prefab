@@ -50,6 +50,12 @@ MonoBehaviour:
   - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/animate_dead.asset
   - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/king_return.asset
   - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/skeleton_shield.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/demon_orbs.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/demon_rite.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened1.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened2.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened3.asset
+  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened4.asset
   - Assets/_sg03/Card/Data/Ability/Goblin/back_stab.asset
   - Assets/_sg03/Card/Data/Ability/Goblin/goblin_shaman/totem_pulse.asset
   - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/cross_guard.asset
