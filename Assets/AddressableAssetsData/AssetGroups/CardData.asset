@@ -55,6 +55,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 30d2305e47ff2a54e83950a726a79a01
+    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/xena/xena4.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 325981bf9ef75574993ed66f351f820f
     m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
     m_ReadOnly: 0
@@ -72,6 +77,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3fe1da2b2c760aa4680679499fce77fd
     m_Address: Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 47ad12a667181a64680abb02562ec8ee
+    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/xena/xena3.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -120,8 +130,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9eb7d17616afe0044947081a909ef0bb
+    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/xena/xena1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1dbcb8f49ff902448d783578bd455c0
     m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/animate_dead.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aab3c5d84d4b984409a76c5b649df611
+    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/xena/xena2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b294c9150aaddb740bed376abfbffcd9
+    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/xena/xena5.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
