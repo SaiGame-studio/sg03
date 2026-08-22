@@ -36,3 +36,8 @@ Nằm tại thư mục [`cards/dark_elf/`](cards/dark_elf/)
 ### Thẻ Nhân Vật (Character)
 - [Hellscythe](cards/dark_elf/hellscythe.md) — Số sao: 0
 - [Skeleton](cards/dark_elf/skeleton.md) — Số sao: 0
+- [Xena](cards/dark_elf/xena/xena1.md) — Số sao: 1
+- [Xena](cards/dark_elf/xena/xena2.md) — Số sao: 2
+- [Xena](cards/dark_elf/xena/xena3.md) — Số sao: 3
+- [Xena](cards/dark_elf/xena/xena4.md) — Số sao: 4
+- [Xena](cards/dark_elf/xena/xena5.md) — Số sao: 5
