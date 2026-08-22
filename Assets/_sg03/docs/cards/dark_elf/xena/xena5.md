@@ -1,6 +1,6 @@
-# Xena
+# Xena V
 
-- **Tên**: Xena
+- **Tên**: Xena V
 - **Code Name**: `xena5`
 - **Số sao**: 5
 - **Tấn Công (ATK)**: 540
@@ -21,7 +21,7 @@ Trong một trận chiến tàn khốc, Xena đã bị kẻ thù sát hại, nh�
 
 ## Bài
 
-- [Xena — 1 sao: Violet Spark Adept](xena1.md)
-- [Xena — 2 sao: Unstable Awakening](xena2.md)
-- [Xena — 3 sao: Tempest Dualist](xena3.md)
-- [Xena — 4 sao: Twinflare Harbinger](xena4.md)
+- [Xena I — 1 sao: Violet Spark Adept](xena1.md)
+- [Xena II — 2 sao: Unstable Awakening](xena2.md)
+- [Xena III — 3 sao: Tempest Dualist](xena3.md)
+- [Xena IV — 4 sao: Twinflare Harbinger](xena4.md)

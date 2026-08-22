@@ -1,6 +1,6 @@
-# Xena
+# Xena II
 
-- **Tên**: Xena
+- **Tên**: Xena II
 - **Code Name**: `xena2`
 - **Số sao**: 2
 - **Tấn Công (ATK)**: 240
@@ -21,7 +21,7 @@ Trong một buổi luyện tập kéo dài đến kiệt sức, Xena đã ép c�
 
 ## Bài
 
-- [Xena — 1 sao: Violet Spark Adept](xena1.md)
-- [Xena — 3 sao: Tempest Dualist](xena3.md)
-- [Xena — 4 sao: Twinflare Harbinger](xena4.md)
-- [Xena — 5 sao: Silverhorn Sovereign](xena5.md)
+- [Xena I — 1 sao: Violet Spark Adept](xena1.md)
+- [Xena III — 3 sao: Tempest Dualist](xena3.md)
+- [Xena IV — 4 sao: Twinflare Harbinger](xena4.md)
+- [Xena V — 5 sao: Silverhorn Sovereign](xena5.md)
