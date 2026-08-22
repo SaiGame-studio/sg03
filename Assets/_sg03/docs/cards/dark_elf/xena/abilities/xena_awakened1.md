@@ -20,6 +20,8 @@ Triệu hồi 1 [Xena 2 sao](../xena2.md) **chỉ từ `the_void`** của phe b�
 2. Có ít nhất 1 Xena 2 sao trong `the_void`.
 3. Không yêu cầu Xena 1 sao phải chưa kích hoạt; kỹ năng vẫn dùng được dù `trigger` của Xena 1 sao đang là `true`.
 
+> **Lưu ý:** Nếu kích hoạt khi Xena 1 sao vẫn trụ được sau đòn tấn công, không có hiệu ứng nào xảy ra và `xena_awakened1` vẫn được đưa vào `the_void`.
+
 ### Kết Quả
 
 1. Xena 1 sao bị hạ gục được chuyển vào `the_void`.

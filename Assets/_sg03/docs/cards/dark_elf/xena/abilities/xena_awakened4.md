@@ -20,6 +20,8 @@ Khi [Xena 4 sao](../xena4.md) bị hạ gục sau khi đòn tấn công của đ
 3. [Demon Orbs](demon_orbs.md) và [Demon Rite](demon_rite.md) đều đã được triển khai trên `own_backline`.
 4. Điều kiện hiến tế của Demon Rite được thỏa mãn: có ít nhất 1 thẻ bài đồng minh từ 1 đến 4 sao đứng liền kề bên trái hoặc bên phải của Xena 4 sao. Nếu có nhiều thẻ hợp lệ, ưu tiên thẻ có số sao thấp nhất.
 
+> **Lưu ý:** Nếu kích hoạt khi Xena 4 sao vẫn trụ được sau đòn tấn công, không có hiệu ứng nào xảy ra và `xena_awakened4` vẫn được đưa vào `the_void`.
+
 ### Kết Quả Khi Thành Công
 
 1. Xena 4 sao bị hạ gục được chuyển vào `the_void`.

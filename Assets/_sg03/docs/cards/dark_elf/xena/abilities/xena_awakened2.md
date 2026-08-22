@@ -10,9 +10,9 @@
 
 ## Cơ Chế Kỹ Năng
 
-Khi [Xena 2 sao](../xena2.md) bị hạ gục sau khi đòn tấn công của đối thủ đang nhắm vào cô được giải quyết, có thể kích hoạt **Xena Awakened II**.
+Khi [Xena 2 sao](../xena2.md) chắc chắn sẽ bị hạ gục sau khi đòn tấn công của đối thủ đang nhắm vào cô thì có thể kích hoạt **Xena Awakened II**.
 
-Triệu hồi 1 [Xena 3 sao](../xena3.md) **chỉ từ `the_void`** của phe bạn vào đúng vị trí trên sân mà Xena 2 sao vừa rời khỏi. Xena 3 sao được triệu hồi **không nhận buff DEF**.
+Triệu hồi 1 [Xena 3 sao](../xena3.md) **chỉ từ `the_void`** của phe bạn vào đúng vị trí trên sân mà Xena 2 sao vừa rời khỏi. Xena 3 sao được triệu hồi nhận **+50 DEF**.
 
 ### Điều Kiện
 
@@ -20,11 +20,13 @@ Triệu hồi 1 [Xena 3 sao](../xena3.md) **chỉ từ `the_void`** của phe b�
 2. Có ít nhất 1 Xena 3 sao trong `the_void`.
 3. Không yêu cầu Xena 2 sao phải chưa kích hoạt; kỹ năng vẫn dùng được dù `trigger` của Xena 2 sao đang là `true`.
 
+> **Lưu ý:** Nếu kích hoạt khi Xena 2 sao vẫn trụ được sau đòn tấn công, không có hiệu ứng nào xảy ra và `xena_awakened2` vẫn được đưa vào `the_void`.
+
 ### Kết Quả
 
 1. Xena 2 sao bị hạ gục được chuyển vào `the_void`.
 2. Chọn 1 Xena 3 sao từ `the_void` và triệu hồi vào đúng vị trí trên sân mà Xena 2 sao vừa rời khỏi.
-3. Xena 3 sao được triệu hồi giữ nguyên chỉ số DEF hiện có, không nhận buff DEF.
+3. Xena 3 sao được triệu hồi nhận buff **+50 DEF**.
 
 ## Kỹ Năng Liên Kết
 

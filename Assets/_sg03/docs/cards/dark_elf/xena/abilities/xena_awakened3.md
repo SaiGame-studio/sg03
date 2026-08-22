@@ -21,6 +21,8 @@ Hiến tế 1 thẻ bài đồng minh thuộc chủng tộc `dark_elf` từ 1 đ
 3. Có ít nhất 1 thẻ bài đồng minh thuộc chủng tộc `dark_elf` từ 1 đến 3 sao nằm ở vị trí liền kề bên trái hoặc bên phải của Xena 3 sao để hiến tế.
 4. Không yêu cầu Xena 3 sao phải chưa kích hoạt; kỹ năng vẫn dùng được dù `trigger` của Xena 3 sao đang là `true`.
 
+> **Lưu ý:** Nếu kích hoạt khi Xena 3 sao vẫn trụ được sau đòn tấn công, không có hiệu ứng nào xảy ra và `xena_awakened3` vẫn được đưa vào `the_void`.
+
 ### Kết Quả
 
 1. Xena 3 sao bị hạ gục được chuyển vào `the_void`.
