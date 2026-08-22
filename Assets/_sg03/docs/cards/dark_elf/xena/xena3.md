@@ -1,6 +1,6 @@
-# Xena
+# Xena III
 
-- **Tên**: Xena
+- **Tên**: Xena III
 - **Code Name**: `xena3`
 - **Số sao**: 3
 - **Tấn Công (ATK)**: 340
@@ -21,7 +21,7 @@ Hai chiếc đuôi giúp Xena giữ thăng bằng và đổi nhịp di chuyển 
 
 ## Bài
 
-- [Xena — 1 sao: Violet Spark Adept](xena1.md)
-- [Xena — 2 sao: Unstable Awakening](xena2.md)
-- [Xena — 4 sao: Twinflare Harbinger](xena4.md)
-- [Xena — 5 sao: Silverhorn Sovereign](xena5.md)
+- [Xena I — 1 sao: Violet Spark Adept](xena1.md)
+- [Xena II — 2 sao: Unstable Awakening](xena2.md)
+- [Xena IV — 4 sao: Twinflare Harbinger](xena4.md)
+- [Xena V — 5 sao: Silverhorn Sovereign](xena5.md)

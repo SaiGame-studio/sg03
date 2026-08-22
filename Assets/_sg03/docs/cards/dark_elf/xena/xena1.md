@@ -1,6 +1,6 @@
-# Xena
+# Xena I
 
-- **Tên**: Xena
+- **Tên**: Xena I
 - **Code Name**: `xena1`
 - **Số sao**: 1
 - **Tấn Công (ATK)**: 140
@@ -21,7 +21,7 @@ Vũ khí cô yêu thích là một cây gậy gỗ giản dị. Trong tay Xena, 
 
 ## Bài
 
-- [Xena — 2 sao: Unstable Awakening](xena2.md)
-- [Xena — 3 sao: Tempest Dualist](xena3.md)
-- [Xena — 4 sao: Twinflare Harbinger](xena4.md)
-- [Xena — 5 sao: Silverhorn Sovereign](xena5.md)
+- [Xena II — 2 sao: Unstable Awakening](xena2.md)
+- [Xena III — 3 sao: Tempest Dualist](xena3.md)
+- [Xena IV — 4 sao: Twinflare Harbinger](xena4.md)
+- [Xena V — 5 sao: Silverhorn Sovereign](xena5.md)

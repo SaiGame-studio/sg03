@@ -1,6 +1,6 @@
-# Xena
+# Xena V
 
-- **Tên**: Xena
+- **Tên**: Xena V
 - **Code Name**: `xena5`
 - **Số sao**: 5
 - **Tấn Công (ATK)**: 540
@@ -11,9 +11,9 @@
 
 ## Mô Tả
 
-Trong một trận chiến tàn khốc, Xena đã bị kẻ thù sát hại. Không chấp nhận mất đi con gái, Quỷ Vương buộc phải lấy ra bảo vật quý giá nhất của mình: bảy viên ngọc quỷ, mỗi viên chứa một phần sức mạnh cổ xưa của ma giới.
+Trong một trận chiến tàn khốc, Xena đã bị kẻ thù sát hại, nhưng sau đó được hồi sinh và biến sang một hình dạng mới.
 
-Quỷ Vương dùng sức mạnh của bảy viên ngọc quỷ để hồi sinh Xena và dẫn dắt cô chuyển sang một hình dạng mới. Đôi cánh quỷ xuất hiện sau lưng, còn lửa và điện trong cơ thể cô đạt đến mức độ mạnh mẽ hơn. Ở hình thái 5 sao, Xena có thể lướt qua tầm đánh, đổi góc tấn công trong chớp mắt rồi giáng xuống bằng quyền thuật hỏa–lôi.
+Đôi cánh quỷ xuất hiện sau lưng, còn lửa và điện trong cơ thể cô đạt đến mức độ mạnh mẽ hơn. Ở hình thái 5 sao, Xena có thể lướt qua tầm đánh, đổi góc tấn công trong chớp mắt rồi giáng xuống bằng quyền thuật hỏa–lôi.
 
 ## Kỹ Năng
 
@@ -21,7 +21,7 @@ Quỷ Vương dùng sức mạnh của bảy viên ngọc quỷ để hồi sinh
 
 ## Bài
 
-- [Xena — 1 sao: Violet Spark Adept](xena1.md)
-- [Xena — 2 sao: Unstable Awakening](xena2.md)
-- [Xena — 3 sao: Tempest Dualist](xena3.md)
-- [Xena — 4 sao: Twinflare Harbinger](xena4.md)
+- [Xena I — 1 sao: Violet Spark Adept](xena1.md)
+- [Xena II — 2 sao: Unstable Awakening](xena2.md)
+- [Xena III — 3 sao: Tempest Dualist](xena3.md)
+- [Xena IV — 4 sao: Twinflare Harbinger](xena4.md)
