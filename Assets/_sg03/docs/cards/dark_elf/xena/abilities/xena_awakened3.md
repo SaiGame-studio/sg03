@@ -10,7 +10,7 @@
 
 ## Cơ Chế Kỹ Năng
 
-Khi [Xena III](../xena3.md) bị hạ gục sau khi đòn tấn công của đối thủ đang nhắm vào cô được giải quyết, có thể kích hoạt **Xena Awakened III**.
+Khi [Xena III](../xena3.md) chắc chắn sẽ bị hạ gục sau khi đòn tấn công của đối thủ đang nhắm vào cô được tung ra, có thể kích hoạt **Xena Awakened III**.
 
 Hiến tế 1 thẻ bài đồng minh thuộc chủng tộc `dark_elf` từ 1 đến 3 sao, nằm liền kề bên trái hoặc bên phải của Xena III, vào `the_void`, sau đó triệu hồi 1 [Xena IV](../xena4.md) **chỉ từ `the_void`** của phe bạn vào đúng vị trí trên sân mà Xena III vừa rời khỏi. Xena IV được triệu hồi **không nhận buff DEF**.
 
