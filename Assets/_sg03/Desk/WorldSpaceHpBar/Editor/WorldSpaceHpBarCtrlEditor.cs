@@ -48,17 +48,10 @@ namespace SG03.Editor
                 EditorUtility.SetDirty(hpBar.transform);
             }
 
-            using (new EditorGUI.DisabledScope(!Application.isPlaying))
+            if (GUILayout.Button("Refresh UI", GUILayout.Height(28)))
             {
-                if (GUILayout.Button("Refresh UI", GUILayout.Height(28)))
-                {
-                    ((WorldSpaceHpBarCtrl)this.target).RefreshUi();
-                }
-            }
-
-            if (!Application.isPlaying)
-            {
-                EditorGUILayout.HelpBox("Enter Play Mode to refresh the runtime UI.", MessageType.Info);
+                ((WorldSpaceHpBarCtrl)this.target).RefreshUi();
+                EditorUtility.SetDirty(this.target);
             }
         }
     }

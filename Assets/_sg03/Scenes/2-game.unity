@@ -8328,6 +8328,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 694843606}
     m_Modifications:
+    - target: {fileID: 910907888340075026, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
+      propertyPath: parentOffset.y
+      value: -4.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 910907888340075026, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
+      propertyPath: parentOffset.z
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 3193441457980298630, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
       propertyPath: m_Name
       value: HpBarUI

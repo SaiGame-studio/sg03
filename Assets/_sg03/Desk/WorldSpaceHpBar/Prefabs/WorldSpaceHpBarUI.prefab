@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2b9bc49c12d4cf6aa6b179073a8b3c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.WorldSpaceHpBarCtrl
+  despawn: {fileID: 0}
   uiDocument: {fileID: 8356789373894643313}
   currentHealth: 65
   maxHealth: 100
@@ -86,7 +87,7 @@ MonoBehaviour:
   healthLabelFontSize: 60
   miniMode: 0
   parent: {fileID: 0}
-  parentOffset: {x: 0, y: 1.5, z: 0}
+  parentOffset: {x: 0, y: -4.5, z: 0.2}
 --- !u!114 &8356789373894643313
 MonoBehaviour:
   m_ObjectHideFlags: 0

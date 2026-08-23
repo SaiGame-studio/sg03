@@ -31,7 +31,7 @@ namespace SG03
 
         [Header("Parenting")]
         [SerializeField] private Transform parent;
-        [SerializeField] private Vector3 parentOffset = new Vector3(0f, 1.5f, 0f);
+        [SerializeField] private Vector3 parentOffset = new Vector3(0f, -4.5f, 0.2f);
 
         private VisualElement fill;
         private VisualElement root;
@@ -39,6 +39,8 @@ namespace SG03
         private Label healthLabel;
         private Vector3 desiredWorldScale;
         private bool hasDesiredWorldScale;
+        private Vector3 baseWorldRotation;
+        private bool hasBaseWorldRotation;
 
         private void LateUpdate()
         {
@@ -80,7 +82,11 @@ namespace SG03
             Vector3 directionFromCamera = this.transform.position - Camera.main.transform.position;
             if (directionFromCamera.sqrMagnitude < Mathf.Epsilon) return;
 
-            this.transform.rotation = Quaternion.LookRotation(directionFromCamera, Camera.main.transform.up);
+            Vector3 worldRotation = this.hasBaseWorldRotation
+                ? this.baseWorldRotation
+                : this.transform.eulerAngles;
+            worldRotation.x = Quaternion.LookRotation(directionFromCamera, Camera.main.transform.up).eulerAngles.x;
+            this.transform.eulerAngles = worldRotation;
         }
 
         public void SetHealth(float current, float maximum)
@@ -105,6 +111,9 @@ namespace SG03
             this.hasDesiredWorldScale = true;
             this.parent = newParent;
             this.transform.SetParent(this.parent, true);
+            this.transform.localPosition = this.parentOffset;
+            this.baseWorldRotation = this.transform.eulerAngles;
+            this.hasBaseWorldRotation = true;
             this.CompensateParentScale();
         }
 
