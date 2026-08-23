@@ -351,7 +351,20 @@ namespace SG03
             if (this.IsTargeting)
                 this.arrowIndicator?.Show(this.targetingSource.transform.position, this.targetingSource.transform.position);
             OnFullDetailExited?.Invoke();
-            this.selected.ReturnFromFullDetail();
+            this.selected?.ReturnFromFullDetail();
+        }
+
+        /// <summary>
+        /// Closes the full-detail view, returning its card so callers can wait for
+        /// the return animation before starting another board animation.
+        /// </summary>
+        public Card3DCtrl ReturnFullDetailCard()
+        {
+            if (!this.fullDetail) return null;
+
+            Card3DCtrl fullDetailCard = this.selected;
+            this.ExitFullDetail();
+            return fullDetailCard;
         }
 
         private bool IsLocationNonSelectable(Location location)

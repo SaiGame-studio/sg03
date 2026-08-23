@@ -36,6 +36,7 @@ namespace SG03
 
         private OutlineMode currentOutlineMode = OutlineMode.Hidden;
         private Coroutine blinkCoroutine;
+        private bool isLampClickPending;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -197,6 +198,7 @@ namespace SG03
         {
             this.SetHover(false);
             this.SetOutlineMode(OutlineMode.Hidden);
+            this.isLampClickPending = false;
         }
 
         private void Update()
@@ -210,9 +212,28 @@ namespace SG03
         private void DetectClick()
         {
             if (this.IsBattleCompleted()) return;
-            if (this.IsFullDetailActive()) return;
+            if (this.isLampClickPending) return;
             if (!this.IsMouseButtonPressed()) return;
             if (!this.IsLampHit()) return;
+
+            if (this.IsFullDetailActive())
+            {
+                this.StartCoroutine(this.ClickLampAfterReturningFullDetailCard());
+                return;
+            }
+
+            this.OnLampClicked();
+        }
+
+        private System.Collections.IEnumerator ClickLampAfterReturningFullDetailCard()
+        {
+            this.isLampClickPending = true;
+
+            Card3DCtrl fullDetailCard = this.battleStateCtrl?.CardSelection?.ReturnFullDetailCard();
+            if (fullDetailCard != null)
+                yield return new WaitUntil(() => !fullDetailCard.IsAnimating);
+
+            this.isLampClickPending = false;
             this.OnLampClicked();
         }
 
