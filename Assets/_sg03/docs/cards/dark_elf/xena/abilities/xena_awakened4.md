@@ -34,7 +34,7 @@ Nếu Demon Orbs, Demon Rite hoặc điều kiện hiến tế không thỏa mã
 
 ## Bài Liên Kết
 
-- [Demon Orbs](demon_orbs.md) — 3 sao
+- [Demon Orbs](demon_orbs.md) — 2 sao
 - [Demon Rite](demon_rite.md) — 3 sao
 
 ## Kỹ Năng Liên Kết

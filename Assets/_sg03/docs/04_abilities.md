@@ -23,7 +23,7 @@ Danh mục bên dưới chỉ liệt kê tên và số sao của từng thẻ k�
 - [Xena Awakened II](cards/dark_elf/xena/abilities/xena_awakened2.md): 2 sao
 - [Xena Awakened III](cards/dark_elf/xena/abilities/xena_awakened3.md): 3 sao
 - [Xena Awakened IV](cards/dark_elf/xena/abilities/xena_awakened4.md): 4 sao
-- [Demon Orbs](cards/dark_elf/xena/abilities/demon_orbs.md): 3 sao
+- [Demon Orbs](cards/dark_elf/xena/abilities/demon_orbs.md): 2 sao
 - [Demon Rite](cards/dark_elf/xena/abilities/demon_rite.md): 3 sao
 - [Twin Reaper](cards/dark_elf/abilities/twin_reaper.md): 0 sao
 - [Skeleton Shield](cards/dark_elf/abilities/skeleton_shield.md): 0 sao

@@ -1,7 +1,7 @@
 # Demon Orbs
 
 - **Mã Thẻ Bài**: `demon_orbs`
-- **Số sao**: 3
+- **Số sao**: 2
 - **Loại Thẻ**: [`ability`](../../../../04_abilities.md)
 - **Chủng Tộc**: `dark_elf` (Dark Elf)
 
