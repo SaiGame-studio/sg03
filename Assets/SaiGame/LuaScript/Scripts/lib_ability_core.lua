@@ -81,6 +81,15 @@ local function _find_item_def(item_defs, code)
     return nil
 end
 
+-- Returns one base stat from a card's item definition, for example
+-- _get_card_stat(state, card, "add_def").
+local function _get_card_stat(state, card, stat_key)
+    if state == nil or card == nil or stat_key == nil or stat_key == "" then return nil end
+    local item_def = _find_item_def(state.item_defs, card.item_definition_code_name)
+    if item_def == nil or item_def.base_stats == nil then return nil end
+    return item_def.base_stats[stat_key]
+end
+
 local function _build_named_zones(state)
     return {
         { zone = state.alpha_front_line or {},  zone_key = "alpha_front_line" },
@@ -429,6 +438,7 @@ local function _build_ability_helpers()
         get_character_incoming_damage = get_character_incoming_damage,
         find_card_side = _find_card_side,
         find_item_def = _find_item_def,
+        get_card_stat = _get_card_stat,
         find_line_card_by_code = _find_line_card_by_code,
         find_line_character_by_race = _find_line_character_by_race,
         find_line_card_by_type_and_char_code = _find_line_card_by_type_and_char_code,

@@ -41,6 +41,11 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
         return actions, nil
     end
 
+    local def_buff = tonumber(helpers.get_card_stat(state, source_card, "add_def"))
+    if def_buff == nil then
+        return {}, "xena_awakened1 requires base_stats.add_def"
+    end
+
     local target_line_key = (event_data or {}).defender_line_key
     local target_line = target_line_key ~= nil and state[target_line_key] or nil
     local target_index = nil
@@ -76,7 +81,7 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
     successor_card.face_up = true
     successor_card.expose = true
     successor_card.defeated_from_line_key = nil
-    successor_card.final_def = (successor_card.final_def or 0) + 100
+    successor_card.final_def = (successor_card.final_def or 0) + def_buff
     target_line[target_index] = successor_card
 
     if state.pending_attack ~= nil and
@@ -104,7 +109,7 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
     table.insert(void_zone, source_card)
     table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
     battle.dlog("[ability] xena_awakened1: summoned Xena II=" .. successor_card.inventory_item_id ..
-        " to " .. target_line_key .. " slot=" .. tostring(successor_card.slot_index) .. " with +100 DEF")
+        " to " .. target_line_key .. " slot=" .. tostring(successor_card.slot_index) .. " with +" .. def_buff .. " DEF")
 
     return ability_actions, nil
 end
