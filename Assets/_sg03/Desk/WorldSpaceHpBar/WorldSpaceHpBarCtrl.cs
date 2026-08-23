@@ -51,6 +51,15 @@ namespace SG03
         private Vector3 worldParentOffset;
         private bool hasWorldParentOffset;
 
+        /// <summary>Runtime UI Toolkit element that renders the health fill.</summary>
+        public VisualElement FillElement => this.fill;
+
+        /// <summary>Runtime UI Toolkit root element of this health bar.</summary>
+        public VisualElement RootElement => this.root;
+
+        /// <summary>Runtime UI Toolkit element that renders the health track.</summary>
+        public VisualElement TrackElement => this.track;
+
         private void LateUpdate()
         {
             this.UpdateWorldSpacePresentation();
@@ -63,8 +72,12 @@ namespace SG03
 
         protected override void Start()
         {
-            this.RefreshUi();
+            this.InitializeHpBar();
+        }
 
+        private void InitializeHpBar()
+        {
+            this.RefreshUi();
         }
 
         private void RefreshUiWhenEnabled()
@@ -123,6 +136,7 @@ namespace SG03
             this.parent = newParent;
             this.transform.SetParent(this.parent, true);
             this.UpdateParentOffset(owner);
+            this.UpdateWorldPositionFromParent();
             this.baseWorldRotation = this.transform.eulerAngles;
             this.hasBaseWorldRotation = true;
             this.CompensateParentScale();
@@ -200,6 +214,13 @@ namespace SG03
         {
             if (!this.hasWorldParentOffset || this.parent == null || this.transform.parent != this.parent) return;
 
+            Card3D card = this.parent.GetComponent<Card3D>();
+            if (card != null && card.TryGetStatsCenterWorldPosition(out Vector3 statsCenter))
+            {
+                this.transform.position = statsCenter + Vector3.up * this.aboveCardOffset;
+                return;
+            }
+
             this.transform.position = this.parent.position + this.worldParentOffset;
         }
 
@@ -226,7 +247,6 @@ namespace SG03
             if (this.uiDocument == null)
             {
                 this.uiDocument = this.GetComponent<UIDocument>();
-                Debug.LogWarning($"{this.name}: Load UIDocument", this.gameObject);
             }
 
             if (this.uiDocument == null)
@@ -260,14 +280,20 @@ namespace SG03
         {
             if (element != null) return;
             element = uiRoot.Q<VisualElement>(elementName);
-            Debug.LogWarning($"{this.name}: Load {elementName}", this.gameObject);
+            if (element == null)
+            {
+                Debug.LogWarning($"{this.name}: UI element '{elementName}' is missing.", this.gameObject);
+            }
         }
 
         private void LoadHealthLabel(VisualElement uiRoot)
         {
             if (this.healthLabel != null) return;
             this.healthLabel = uiRoot.Q<Label>("HealthLabel");
-            Debug.LogWarning($"{this.name}: Load HealthLabel", this.gameObject);
+            if (this.healthLabel == null)
+            {
+                Debug.LogWarning($"{this.name}: UI element 'HealthLabel' is missing.", this.gameObject);
+            }
         }
 
         public void RefreshUi()

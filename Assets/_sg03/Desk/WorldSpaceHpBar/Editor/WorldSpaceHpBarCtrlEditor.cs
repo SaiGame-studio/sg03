@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SG03.Editor
 {
@@ -19,9 +20,10 @@ namespace SG03.Editor
             DrawPropertiesExcluding(this.serializedObject, "m_Script", "miniMode");
             this.serializedObject.ApplyModifiedProperties();
 
+            WorldSpaceHpBarCtrl hpBar = (WorldSpaceHpBarCtrl)this.target;
+            this.DrawRuntimeUiElements(hpBar);
             EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Display mode", EditorStyles.boldLabel);
-            WorldSpaceHpBarCtrl hpBar = (WorldSpaceHpBarCtrl)this.target;
             string toggleButtonLabel = this.serializedObject.FindProperty("miniMode").boolValue
                 ? "Switch to Full Mode (bar + values)"
                 : "Switch to Mini Mode (bar only)";
@@ -52,6 +54,23 @@ namespace SG03.Editor
             {
                 ((WorldSpaceHpBarCtrl)this.target).RefreshUi();
                 EditorUtility.SetDirty(this.target);
+            }
+        }
+
+        private void DrawRuntimeUiElements(WorldSpaceHpBarCtrl hpBar)
+        {
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("Runtime UI Elements", EditorStyles.boldLabel);
+            DrawVisualElement("Fill", hpBar.FillElement);
+            DrawVisualElement("Root", hpBar.RootElement);
+            DrawVisualElement("Track", hpBar.TrackElement);
+        }
+
+        private static void DrawVisualElement(string label, VisualElement element)
+        {
+            using (new EditorGUI.DisabledScope(true))
+            {
+                EditorGUILayout.TextField(label, element == null ? "Not bound" : element.name);
             }
         }
     }

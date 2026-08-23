@@ -72,6 +72,19 @@ namespace SG03
         [Tooltip("TextMeshPro showing the card description.")]
         [SerializeField] private TextMeshPro descriptionText;
 
+        /// <summary>Gets the world-space centre between this card's ATK and DEF text.</summary>
+        public bool TryGetStatsCenterWorldPosition(out Vector3 position)
+        {
+            if (this.atkText != null && this.defText != null)
+            {
+                position = (this.atkText.transform.position + this.defText.transform.position) * 0.5f;
+                return true;
+            }
+
+            position = this.transform.position;
+            return false;
+        }
+
         [Header("Card Size")]
         [Tooltip("Card width in pixels (converted to world units via Pixels Per Unit).")]
         [SerializeField] private int cardWidthPixels = 750;
