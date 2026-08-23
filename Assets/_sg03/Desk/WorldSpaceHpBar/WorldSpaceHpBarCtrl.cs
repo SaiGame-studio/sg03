@@ -20,8 +20,11 @@ namespace SG03
         [SerializeField, Min(1f)] private float barWidth = 640f;
         [SerializeField, Min(1f)] private float barHeight = 20f;
         [SerializeField, Min(0f)] private float borderThickness = 4f;
-        [Tooltip("Color at each HP percentage. 0% is critical (red) and 100% is safe (green).")]
+        [Tooltip("Green is on the left and red is on the right. The bar reads this gradient from left to right as HP increases.")]
         [SerializeField] private Gradient healthColorGradient = CreateDefaultHealthColorGradient();
+        [Tooltip("Offset of the HP values from the top-left corner of HealthBarRoot.")]
+        [SerializeField] private Vector2 healthLabelOffset = new(0, -45f);
+        [SerializeField, Min(1f)] private float healthLabelFontSize = 60f;
 
         [Header("Display mode")]
         [Tooltip("When enabled, only the HP bar is displayed. Disable it to also show the current and maximum HP.")]
@@ -41,15 +44,10 @@ namespace SG03
             this.FaceMainCamera();
         }
 
-        protected override void Reset()
-        {
-            base.Reset();
-            this.ResetHpBarAndUi();
-        }
-
-        private void ResetHpBarAndUi()
+        protected override void Start()
         {
             this.RefreshUi();
+
         }
 
         private void FaceMainCamera()
@@ -179,6 +177,9 @@ namespace SG03
             {
                 this.healthLabel.style.width = this.barWidth;
                 this.healthLabel.style.height = this.barHeight;
+                this.healthLabel.style.left = this.healthLabelOffset.x;
+                this.healthLabel.style.top = this.healthLabelOffset.y;
+                this.healthLabel.style.fontSize = this.healthLabelFontSize;
             }
         }
 
@@ -188,9 +189,9 @@ namespace SG03
             {
                 colorKeys = new[]
                 {
-                    new GradientColorKey(new Color(0.9f, 0.1f, 0.12f), 0f),
+                    new GradientColorKey(new Color(0.18f, 0.8f, 0.28f), 0f),
                     new GradientColorKey(new Color(0.95f, 0.72f, 0.12f), 0.5f),
-                    new GradientColorKey(new Color(0.18f, 0.8f, 0.28f), 1f),
+                    new GradientColorKey(new Color(0.9f, 0.1f, 0.12f), 1f),
                 },
                 alphaKeys = new[]
                 {
