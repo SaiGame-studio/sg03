@@ -60,12 +60,14 @@ namespace SG03
         public void NotifyHoverEntered()
         {
             this.isHover = true;
+            this.RefreshHpBarDisplayMode();
             HoverEntered?.Invoke(this);
         }
 
         public void NotifyHoverExited()
         {
             this.isHover = false;
+            this.RefreshHpBarDisplayMode();
             HoverExited?.Invoke(this);
         }
         public void NotifySelected()     => CardSelected?.Invoke(this);
@@ -152,7 +154,7 @@ namespace SG03
             this.hpBarInstance.SetPosition(holder.transform.position);
             this.hpBarInstance.SetParent(this.transform, this.cardOwner);
             this.hpBarInstance.gameObject.SetActive(true);
-            this.card.SetStatsHiddenByHpBar(true);
+            this.RefreshHpBarDisplayMode();
         }
 
         private bool ShouldShowHpBar(CardHolderCtrl holder)
@@ -184,15 +186,17 @@ namespace SG03
         private void DespawnHpBar()
         {
             this.EnsureSingleHpBarInstance();
-            if (this.hpBarInstance == null)
-            {
-                this.card.SetStatsHiddenByHpBar(false);
-                return;
-            }
+            if (this.hpBarInstance == null) return;
 
             this.ReturnHpBarToPool(this.hpBarInstance);
             this.hpBarInstance = null;
-            this.card.SetStatsHiddenByHpBar(false);
+        }
+
+        private void RefreshHpBarDisplayMode()
+        {
+            if (this.hpBarInstance == null) return;
+
+            this.hpBarInstance.SetMiniMode(!this.isHover);
         }
 
         private void EnsureSingleHpBarInstance()
