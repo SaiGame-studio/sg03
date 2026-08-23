@@ -27,16 +27,18 @@ namespace SG03
 
         [Header("Display mode")]
         [Tooltip("When enabled, only the HP bar is displayed. Disable it to also show the current and maximum HP.")]
-        [SerializeField] private bool miniMode;
+        [SerializeField] private bool miniMode = true;
 
         [Header("Parenting")]
         [SerializeField] private Transform parent;
         [Tooltip("Local offset used for Alpha cards before it is cached in world space.")]
         [InspectorName("Alpha Parent Offset")]
-        [SerializeField] private Vector3 parentOffset = new Vector3(0f, -4.5f, 0.2f);
+        [SerializeField] private Vector3 alphaParentOffset = new Vector3(0f, -4.5f, 0.2f);
         [Tooltip("Local offset used for Omega cards before it is cached in world space.")]
         [InspectorName("Omega Parent Offset")]
         [SerializeField] private Vector3 omegaParentOffset = new Vector3(0f, -4.5f, -0.2f);
+        [Tooltip("World-space height above the card. This is unaffected by card flips.")]
+        [SerializeField, Min(0f)] private float aboveCardOffset = 0.2f;
 
         private VisualElement fill;
         private VisualElement root;
@@ -127,7 +129,7 @@ namespace SG03
 
         private Vector3 GetParentOffset(Owner owner)
         {
-            return owner == Owner.omega ? this.omegaParentOffset : this.parentOffset;
+            return owner == Owner.omega ? this.omegaParentOffset : this.alphaParentOffset;
         }
 
         private void UpdateParentOffset(Owner owner)
@@ -189,6 +191,7 @@ namespace SG03
             if (this.parent == null) return;
 
             this.worldParentOffset = this.transform.position - this.parent.position;
+            this.worldParentOffset.y = this.aboveCardOffset;
             this.hasWorldParentOffset = true;
         }
 

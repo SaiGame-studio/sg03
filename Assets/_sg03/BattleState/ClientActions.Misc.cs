@@ -62,6 +62,7 @@ namespace SG03
             // Load its revealed data first; otherwise the early return below
             // leaves its face/back art hidden until it is moved to the Void.
             beforeExpose?.Invoke(inventoryItemId);
+            card.SetExpose(true);
             if (card.FaceState == FaceState.FaceUp) return null;
             return this.StartCoroutine(this.CardExposeRoutine(card));
         }

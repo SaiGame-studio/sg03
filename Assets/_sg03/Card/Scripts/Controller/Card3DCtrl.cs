@@ -115,9 +115,9 @@ namespace SG03
 
         private void SpawnHpBarAt(CardHolderCtrl holder)
         {
-            if (holder == null) return;
+            if (holder == null || holder != this.cardHolder) return;
 
-            if (!this.IsCharacter())
+            if (!this.ShouldShowHpBar(holder))
             {
                 this.DespawnHpBar();
                 return;
@@ -148,6 +148,31 @@ namespace SG03
             this.spawnedHpBar.SetPosition(holder.transform.position);
             this.spawnedHpBar.SetParent(this.transform, this.cardOwner);
             this.spawnedHpBar.gameObject.SetActive(true);
+        }
+
+        private bool ShouldShowHpBar(CardHolderCtrl holder)
+        {
+            if (!this.IsCharacter()) return false;
+            if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
+            return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;
+        }
+
+        private void RefreshHpBarVisibility()
+        {
+            if (!this.ShouldShowHpBar(this.cardHolder))
+            {
+                this.DespawnHpBar();
+                return;
+            }
+
+            if (this.cardHolder == null) return;
+            if (this.IsAnimating)
+            {
+                this.SpawnHpBarAfterCardSettles(this.cardHolder);
+                return;
+            }
+
+            this.SpawnHpBarAt(this.cardHolder);
         }
 
         private void DespawnHpBar()
@@ -306,6 +331,7 @@ namespace SG03
         {
             this.movement.FaceDownUnknown();
             FaceStateChanged?.Invoke(this, false);
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>Smoothly rotates the card to face-up using the Unknown axis, without rising.</summary>
@@ -313,6 +339,7 @@ namespace SG03
         {
             this.movement.FaceUpUnknown();
             FaceStateChanged?.Invoke(this, true);
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>Smoothly rotates the card to face-up.</summary>
@@ -320,6 +347,7 @@ namespace SG03
         {
             this.movement.FaceUp();
             FaceStateChanged?.Invoke(this, true);
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>Smoothly rotates the card to face-down.</summary>
@@ -327,6 +355,7 @@ namespace SG03
         {
             this.movement.FaceDown();
             FaceStateChanged?.Invoke(this, false);
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>Moves the card to the full-detail point without changing its logical location.</summary>
@@ -423,6 +452,8 @@ namespace SG03
                 int index = owner == Owner.alpha ? ++alphaSpawnIndex : ++omegaSpawnIndex;
                 this.name = $"{prefix}{baseName}_{index}";
             }
+
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>The owner (alpha or omega) of this card.</summary>
@@ -436,6 +467,7 @@ namespace SG03
         {
             this.definition = def;
             this.SetCardType(def?.metadata?.type);
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>The definition data currently assigned to this card.</summary>
@@ -448,7 +480,11 @@ namespace SG03
         public string CodeName => this.codeName;
 
         /// <summary>Marks whether this card is exposed (always face-up).</summary>
-        public void SetExpose(bool value) => this.expose = value;
+        public void SetExpose(bool value)
+        {
+            this.expose = value;
+            this.RefreshHpBarVisibility();
+        }
 
         /// <summary>Returns true if this card is exposed and must not be flipped face-down.</summary>
         public bool Expose => this.expose;

@@ -85,9 +85,11 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   healthLabelOffset: {x: 0, y: -45}
   healthLabelFontSize: 60
-  miniMode: 0
+  miniMode: 1
   parent: {fileID: 0}
   parentOffset: {x: 0, y: -4.5, z: 0.2}
+  omegaParentOffset: {x: 0, y: -4.5, z: -0.2}
+  aboveCardOffset: 0.2
 --- !u!114 &8356789373894643313
 MonoBehaviour:
   m_ObjectHideFlags: 0
