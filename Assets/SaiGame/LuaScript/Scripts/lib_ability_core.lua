@@ -356,6 +356,8 @@ local function _get_ability_handler(ability_key)
         return lib_ability_mid_game.titan_spear_sweep_execute
     elseif ability_key == "xena_awakened1" then
         return lib_ability_xena.xena_awakened1_execute
+    elseif ability_key == "xena_awakened2" then
+        return lib_ability_xena.xena_awakened2_execute
     end
     return nil
 end
