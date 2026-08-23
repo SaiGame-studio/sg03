@@ -1,4 +1,3 @@
-using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -6,7 +5,7 @@ namespace SG03
 {
     /// <summary>Drives a UI Toolkit health bar displayed above a world-space target.</summary>
     [AddComponentMenu("SG03/BattleState/World Space HP Bar")]
-    public sealed class WorldSpaceHpBarCtrl : SaiBehaviour
+    public sealed class WorldSpaceHpBarCtrl : PoolObj
     {
         [Header("Required runtime references")]
         [SerializeField] private UIDocument uiDocument;
@@ -43,14 +42,25 @@ namespace SG03
 
         private void LateUpdate()
         {
-            this.FaceMainCamera();
-            this.CompensateParentScale();
+            this.UpdateWorldSpacePresentation();
         }
 
         protected override void Start()
         {
             this.RefreshUi();
 
+        }
+
+        /// <summary>Returns the pool key used by <see cref="Spawner{T}"/>.</summary>
+        public override string GetName()
+        {
+            return nameof(WorldSpaceHpBarCtrl);
+        }
+
+        private void UpdateWorldSpacePresentation()
+        {
+            this.FaceMainCamera();
+            this.CompensateParentScale();
         }
 
         private void FaceMainCamera()
@@ -104,6 +114,11 @@ namespace SG03
             base.LoadComponents();
             this.CacheDesiredWorldScale();
             this.BindUi();
+        }
+
+        // This UI is returned explicitly through ObjectPool, so it needs no Despawn component.
+        protected override void LoadDespawn()
+        {
         }
 
         private void CacheDesiredWorldScale()
