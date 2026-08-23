@@ -72,6 +72,7 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
     table.remove(void_zone, successor_index)
     table.insert(void_zone, target_card)
     successor_card.slot_index = target_card.slot_index
+    battle.reset_card_turn_state(state.item_defs, successor_card)
     successor_card.face_up = true
     successor_card.expose = true
     successor_card.defeated_from_line_key = nil
