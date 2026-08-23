@@ -99,6 +99,7 @@ namespace SG03
         private bool isFacingFront = true;
         private float currentYAngle = 0f;
         private Coroutine flipCoroutine;
+        private bool statsHiddenByHpBar;
 
         // ─── Unity lifecycle ──────────────────────────────────────────────────────
 
@@ -429,9 +430,19 @@ namespace SG03
 
         private void ApplyStatsVisibility()
         {
-            bool showStats = string.Equals(this.cardType, "character", System.StringComparison.OrdinalIgnoreCase);
+            bool showStats = string.Equals(this.cardType, "character", System.StringComparison.OrdinalIgnoreCase)
+                && !this.statsHiddenByHpBar;
             if (this.atkText != null) this.atkText.gameObject.SetActive(showStats);
             if (this.defText != null) this.defText.gameObject.SetActive(showStats);
+        }
+
+        /// <summary>Hides card ATK and DEF while an HP bar occupies their display area.</summary>
+        public void SetStatsHiddenByHpBar(bool hidden)
+        {
+            if (this.statsHiddenByHpBar == hidden) return;
+
+            this.statsHiddenByHpBar = hidden;
+            this.ApplyStatsVisibility();
         }
 
         private void SetCharacterRendererVisible(bool visible)

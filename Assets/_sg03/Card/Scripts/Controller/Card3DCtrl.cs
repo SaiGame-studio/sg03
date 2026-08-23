@@ -151,6 +151,7 @@ namespace SG03
             this.hpBarInstance.SetPosition(holder.transform.position);
             this.hpBarInstance.SetParent(this.transform, this.cardOwner);
             this.hpBarInstance.gameObject.SetActive(true);
+            this.card.SetStatsHiddenByHpBar(true);
         }
 
         private bool ShouldShowHpBar(CardHolderCtrl holder)
@@ -181,10 +182,15 @@ namespace SG03
         private void DespawnHpBar()
         {
             this.EnsureSingleHpBarInstance();
-            if (this.hpBarInstance == null) return;
+            if (this.hpBarInstance == null)
+            {
+                this.card.SetStatsHiddenByHpBar(false);
+                return;
+            }
 
             this.ReturnHpBarToPool(this.hpBarInstance);
             this.hpBarInstance = null;
+            this.card.SetStatsHiddenByHpBar(false);
         }
 
         private void EnsureSingleHpBarInstance()
