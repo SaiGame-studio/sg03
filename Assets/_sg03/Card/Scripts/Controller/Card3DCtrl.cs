@@ -49,8 +49,7 @@ namespace SG03
         [SerializeField] private CardHolderCtrl cardHolder;
         [SerializeField] private ObjectPool objectPool;
         [SerializeField] private WorldSpaceHpBarCtrl hpBarPrefab;
-
-        private WorldSpaceHpBarCtrl spawnedHpBar;
+        [SerializeField] private WorldSpaceHpBarCtrl hpBarInstance;
         private Coroutine spawnHpBarRoutine;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
@@ -123,7 +122,7 @@ namespace SG03
                 return;
             }
 
-            this.DespawnHpBar();
+            this.EnsureSingleHpBarInstance();
             this.LoadObjectPool();
             if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
             {
@@ -142,12 +141,16 @@ namespace SG03
                 return;
             }
 
-            this.spawnedHpBar = this.objectPool.SpawnInactive(this.hpBarPrefab, Vector3.zero);
-            if (this.spawnedHpBar == null) return;
+            if (this.hpBarInstance == null)
+            {
+                this.hpBarInstance = this.objectPool.SpawnInactive(this.hpBarPrefab, Vector3.zero);
+            }
 
-            this.spawnedHpBar.SetPosition(holder.transform.position);
-            this.spawnedHpBar.SetParent(this.transform, this.cardOwner);
-            this.spawnedHpBar.gameObject.SetActive(true);
+            if (this.hpBarInstance == null) return;
+
+            this.hpBarInstance.SetPosition(holder.transform.position);
+            this.hpBarInstance.SetParent(this.transform, this.cardOwner);
+            this.hpBarInstance.gameObject.SetActive(true);
         }
 
         private bool ShouldShowHpBar(CardHolderCtrl holder)
@@ -177,13 +180,36 @@ namespace SG03
 
         private void DespawnHpBar()
         {
-            if (this.spawnedHpBar == null) return;
+            this.EnsureSingleHpBarInstance();
+            if (this.hpBarInstance == null) return;
+
+            this.ReturnHpBarToPool(this.hpBarInstance);
+            this.hpBarInstance = null;
+        }
+
+        private void EnsureSingleHpBarInstance()
+        {
+            WorldSpaceHpBarCtrl[] hpBars = this.GetComponentsInChildren<WorldSpaceHpBarCtrl>(true);
+            foreach (WorldSpaceHpBarCtrl hpBar in hpBars)
+            {
+                if (hpBar == this.hpBarInstance) continue;
+                if (this.hpBarInstance == null)
+                {
+                    this.hpBarInstance = hpBar;
+                    continue;
+                }
+
+                this.ReturnHpBarToPool(hpBar);
+            }
+        }
+
+        private void ReturnHpBarToPool(WorldSpaceHpBarCtrl hpBar)
+        {
+            if (hpBar == null) return;
 
             this.LoadObjectPool();
-            if (this.objectPool != null) this.objectPool.Despawn(this.spawnedHpBar);
-            else this.spawnedHpBar.gameObject.SetActive(false);
-
-            this.spawnedHpBar = null;
+            if (this.objectPool != null) this.objectPool.Despawn(hpBar);
+            else hpBar.gameObject.SetActive(false);
         }
 
         private void ReturnHpBarToPool()

@@ -92,11 +92,12 @@ namespace SG03
             Vector3 directionFromCamera = this.transform.position - Camera.main.transform.position;
             if (directionFromCamera.sqrMagnitude < Mathf.Epsilon) return;
 
+            float horizontalDistance = new Vector2(directionFromCamera.x, directionFromCamera.z).magnitude;
             Vector3 worldRotation = this.hasBaseWorldRotation
                 ? this.baseWorldRotation
                 : this.transform.eulerAngles;
-            worldRotation.x = Quaternion.LookRotation(directionFromCamera, Camera.main.transform.up).eulerAngles.x;
-            this.transform.eulerAngles = worldRotation;
+            worldRotation.x = -Mathf.Atan2(directionFromCamera.y, horizontalDistance) * Mathf.Rad2Deg;
+            this.transform.rotation = Quaternion.Euler(worldRotation);
         }
 
         public void SetHealth(float current, float maximum)
