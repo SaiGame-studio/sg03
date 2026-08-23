@@ -16,6 +16,13 @@ namespace SG03
         [SerializeField, Min(1f)] private float maxHealth = 100f;
         [SerializeField] private bool faceMainCamera = true;
 
+        [Header("Bar appearance")]
+        [SerializeField, Min(1f)] private float barWidth = 640f;
+        [SerializeField, Min(1f)] private float barHeight = 20f;
+        [SerializeField, Min(0f)] private float borderThickness = 4f;
+        [Tooltip("Color at each HP percentage. 0% is critical (red) and 100% is safe (green).")]
+        [SerializeField] private Gradient healthColorGradient = CreateDefaultHealthColorGradient();
+
         [Header("Display mode")]
         [Tooltip("When enabled, only the HP bar is displayed. Disable it to also show the current and maximum HP.")]
         [SerializeField] private bool miniMode;
@@ -25,11 +32,24 @@ namespace SG03
         [SerializeField] private Vector3 parentOffset = new Vector3(0f, 1.5f, 0f);
 
         private VisualElement fill;
+        private VisualElement root;
+        private VisualElement track;
         private Label healthLabel;
 
         private void LateUpdate()
         {
             this.FaceMainCamera();
+        }
+
+        protected override void Reset()
+        {
+            base.Reset();
+            this.ResetHpBarAndUi();
+        }
+
+        private void ResetHpBarAndUi()
+        {
+            this.RefreshUi();
         }
 
         private void FaceMainCamera()
@@ -83,11 +103,43 @@ namespace SG03
 
         private void BindUi()
         {
-            if (this.uiDocument == null) this.uiDocument = this.GetComponent<UIDocument>();
-            if (this.uiDocument == null) return;
-            VisualElement root = this.uiDocument.rootVisualElement;
-            this.fill = root.Q<VisualElement>("HealthFill");
-            this.healthLabel = root.Q<Label>("HealthLabel");
+            if (this.uiDocument == null)
+            {
+                this.uiDocument = this.GetComponent<UIDocument>();
+                Debug.LogWarning($"{this.name}: Load UIDocument", this.gameObject);
+            }
+
+            if (this.uiDocument == null)
+            {
+                Debug.LogWarning($"{this.name}: UIDocument is missing.", this.gameObject);
+                return;
+            }
+
+            VisualElement uiRoot = this.uiDocument.rootVisualElement;
+            if (uiRoot == null)
+            {
+                Debug.LogWarning($"{this.name}: UIDocument root is missing.", this.gameObject);
+                return;
+            }
+
+            this.LoadUiElement(ref this.root, uiRoot, "HealthBarRoot");
+            this.LoadUiElement(ref this.track, uiRoot, "HealthTrack");
+            this.LoadUiElement(ref this.fill, uiRoot, "HealthFill");
+            this.LoadHealthLabel(uiRoot);
+        }
+
+        private void LoadUiElement(ref VisualElement element, VisualElement uiRoot, string elementName)
+        {
+            if (element != null) return;
+            element = uiRoot.Q<VisualElement>(elementName);
+            Debug.LogWarning($"{this.name}: Load {elementName}", this.gameObject);
+        }
+
+        private void LoadHealthLabel(VisualElement uiRoot)
+        {
+            if (this.healthLabel != null) return;
+            this.healthLabel = uiRoot.Q<Label>("HealthLabel");
+            Debug.LogWarning($"{this.name}: Load HealthLabel", this.gameObject);
         }
 
         public void RefreshUi()
@@ -95,11 +147,57 @@ namespace SG03
             if (this.fill == null || this.healthLabel == null) this.BindUi();
             if (this.fill == null) return;
             float ratio = Mathf.Clamp01(this.currentHealth / this.maxHealth);
+            this.ApplyBarAppearance(ratio);
             this.fill.style.width = Length.Percent(ratio * 100f);
 
             if (this.healthLabel == null) return;
             this.healthLabel.style.display = this.miniMode ? DisplayStyle.None : DisplayStyle.Flex;
             this.healthLabel.text = $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
+        }
+
+        private void ApplyBarAppearance(float healthRatio)
+        {
+            this.fill.style.backgroundColor = this.healthColorGradient.Evaluate(healthRatio);
+
+            if (this.root != null)
+            {
+                this.root.style.width = this.barWidth;
+                this.root.style.height = this.barHeight;
+            }
+
+            if (this.track != null)
+            {
+                this.track.style.width = this.barWidth;
+                this.track.style.height = this.barHeight;
+                this.track.style.borderTopWidth = this.borderThickness;
+                this.track.style.borderRightWidth = this.borderThickness;
+                this.track.style.borderBottomWidth = this.borderThickness;
+                this.track.style.borderLeftWidth = this.borderThickness;
+            }
+
+            if (this.healthLabel != null)
+            {
+                this.healthLabel.style.width = this.barWidth;
+                this.healthLabel.style.height = this.barHeight;
+            }
+        }
+
+        private static Gradient CreateDefaultHealthColorGradient()
+        {
+            return new Gradient
+            {
+                colorKeys = new[]
+                {
+                    new GradientColorKey(new Color(0.9f, 0.1f, 0.12f), 0f),
+                    new GradientColorKey(new Color(0.95f, 0.72f, 0.12f), 0.5f),
+                    new GradientColorKey(new Color(0.18f, 0.8f, 0.28f), 1f),
+                },
+                alphaKeys = new[]
+                {
+                    new GradientAlphaKey(1f, 0f),
+                    new GradientAlphaKey(1f, 1f),
+                },
+            };
         }
     }
 }
