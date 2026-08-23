@@ -2,63 +2,63 @@
 -- is_library = true
 
 -- ability: xena_awakened1
--- Target the Xena I that was just defeated and is now in the caster's void.
--- The replacement is deliberately selected in void order because this action
--- has no second target parameter for choosing among multiple Xena II cards.
+-- Replace an attacked Character that will be defeated with Xena II from void.
 function xena_awakened1_execute(state, source_card, event_data, helpers)
     local battle = helpers.lib_battle_common
     local target_card = (event_data or {}).defender_card
+    if target_card == nil then
+        return {}, "xena_awakened1 requires a target card"
+    end
+
+    local target_def = helpers.find_item_def(state.item_defs, target_card.item_definition_code_name)
+    local target_type = target_def ~= nil and target_def.metadata ~= nil and target_def.metadata.type or nil
+    if target_type ~= "character" then
+        return {}, "xena_awakened1 target must be a Character"
+    end
+
+    if not helpers.is_character_be_attacked(state, target_card) then
+        return {}, "xena_awakened1 target is not being attacked"
+    end
+
     local source_side = helpers.find_card_side(state, source_card)
     if source_side == nil or source_side == "unknown" then
         return {}, "xena_awakened1 source card is not on a battle line"
     end
-    if target_card == nil or target_card.item_definition_code_name ~= "xena1" then
-        return {}, "xena_awakened1 requires Xena I as its target"
-    end
-    if not helpers.is_character_be_attacked(state, target_card) then
-        return {}, "xena_awakened1 requires Xena I to be the target of the current attack"
-    end
 
     local void_key = source_side .. "_the_void"
     local void_zone = state[void_key] or {}
-    local incoming_damage = helpers.get_character_incoming_damage(state, target_card)
-    local xena_gonna_die = helpers.is_character_gonna_dead(target_card, incoming_damage)
-
-    local target_index = nil
-    for i, card in ipairs(void_zone) do
-        if card.inventory_item_id == target_card.inventory_item_id then
-            target_index = i
-            break
-        end
-    end
-    if not xena_gonna_die then
-        -- The attack has resolved but Xena I survived. The ability is still
-        -- consumed, as specified, but it cannot summon a replacement.
-        local ability_actions = {
-            source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
-                ",ability=xena_awakened1,target=" .. target_card.inventory_item_id .. ",result=no_effect",
-        }
+    state[void_key] = void_zone
+    local function send_source_to_void(actions)
         for _, line_key in ipairs({ source_side .. "_front_line", source_side .. "_back_line" }) do
             battle.remove_card_from_line(state[line_key], source_card.inventory_item_id)
         end
         table.insert(void_zone, source_card)
-        table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
-        return ability_actions, nil
-    end
-    if target_index == nil then
-        return {}, "xena_awakened1 must resolve after Xena I enters own the_void"
+        table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
     end
 
-    local destination_key = target_card.defeated_from_line_key
-    local destination_line = destination_key ~= nil and state[destination_key] or nil
-    local slot_index = target_card.slot_index
-    if destination_line == nil or slot_index == nil or slot_index < 0 then
-        return {}, "xena_awakened1 cannot determine Xena I's former position"
+    local incoming_damage = helpers.get_character_incoming_damage(state, target_card)
+    if not helpers.is_character_gonna_dead(target_card, incoming_damage) then
+        local actions = {
+            source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+                ",ability=xena_awakened1,target=" .. target_card.inventory_item_id .. ",result=no_effect",
+        }
+        send_source_to_void(actions)
+        return actions, nil
     end
-    local line_slot = slot_index + 1
-    local occupied = destination_line[line_slot]
-    if occupied ~= nil and occupied.inventory_item_id ~= nil and occupied.inventory_item_id ~= "" then
-        return {}, "xena_awakened1 former position is no longer empty"
+
+    local target_line_key = (event_data or {}).defender_line_key
+    local target_line = target_line_key ~= nil and state[target_line_key] or nil
+    local target_index = nil
+    if target_line ~= nil then
+        for i, card in ipairs(target_line) do
+            if card.inventory_item_id == target_card.inventory_item_id then
+                target_index = i
+                break
+            end
+        end
+    end
+    if target_index == nil then
+        return {}, "xena_awakened1 target must be on a battle line"
     end
 
     local successor_index = nil
@@ -75,28 +75,38 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
     end
 
     table.remove(void_zone, successor_index)
-    successor_card.slot_index = slot_index
+    table.insert(void_zone, target_card)
+    successor_card.slot_index = target_card.slot_index
     successor_card.face_up = true
     successor_card.expose = true
     successor_card.defeated_from_line_key = nil
     successor_card.final_def = (successor_card.final_def or 0) + 100
-    destination_line[line_slot] = successor_card
+    target_line[target_index] = successor_card
+
+    if state.pending_attack ~= nil and
+       state.pending_attack.defender_inventory_item_id == target_card.inventory_item_id then
+        state.pending_attack.defender_inventory_item_id = successor_card.inventory_item_id
+    end
+    for _, plans in ipairs({ state.alpha_planning or {}, state.omega_planning or {} }) do
+        for _, plan in ipairs(plans) do
+            if plan.action == "card_attack_card" and plan.defender_inv_id == target_card.inventory_item_id then
+                plan.defender_inv_id = successor_card.inventory_item_id
+            end
+        end
+    end
 
     local ability_actions = {
         source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
             ",ability=xena_awakened1,target=" .. target_card.inventory_item_id ..
             ",summoned=" .. successor_card.inventory_item_id,
-        source_side .. "_void_to_" .. string.sub(destination_key, 7) .. ":" ..
-            successor_card.inventory_item_id .. "," .. slot_index,
+        source_side .. "_card_sent_to_void:" .. target_card.inventory_item_id,
+        source_side .. "_void_to_" .. string.sub(target_line_key, 7) .. ":" ..
+            successor_card.inventory_item_id .. "," .. tostring(successor_card.slot_index),
     }
 
-    for _, line_key in ipairs({ source_side .. "_front_line", source_side .. "_back_line" }) do
-        battle.remove_card_from_line(state[line_key], source_card.inventory_item_id)
-    end
-    table.insert(void_zone, source_card)
-    table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+    send_source_to_void(ability_actions)
     battle.dlog("[ability] xena_awakened1: summoned Xena II=" .. successor_card.inventory_item_id ..
-        " to " .. destination_key .. " slot=" .. slot_index .. " with +100 DEF")
+        " to " .. target_line_key .. " slot=" .. tostring(successor_card.slot_index) .. " with +100 DEF")
 
     return ability_actions, nil
 end
