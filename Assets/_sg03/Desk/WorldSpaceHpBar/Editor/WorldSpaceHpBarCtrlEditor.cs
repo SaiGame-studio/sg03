@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SG03.Editor
 {
@@ -15,12 +16,27 @@ namespace SG03.Editor
 
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
+            this.serializedObject.Update();
+            DrawPropertiesExcluding(this.serializedObject, "m_Script", "miniMode");
+            this.serializedObject.ApplyModifiedProperties();
+
+            WorldSpaceHpBarCtrl hpBar = (WorldSpaceHpBarCtrl)this.target;
+            this.DrawRuntimeUiElements(hpBar);
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("Display mode", EditorStyles.boldLabel);
+            string toggleButtonLabel = this.serializedObject.FindProperty("miniMode").boolValue
+                ? "Switch to Full Mode (bar + values)"
+                : "Switch to Mini Mode (bar only)";
+            if (GUILayout.Button(toggleButtonLabel, GUILayout.Height(28)))
+            {
+                Undo.RecordObject(hpBar, "Toggle HP Bar Display Mode");
+                hpBar.ToggleDisplayMode();
+                EditorUtility.SetDirty(hpBar);
+            }
 
             EditorGUILayout.Space(6);
             if (GUILayout.Button("Update Parent", GUILayout.Height(28)))
             {
-                WorldSpaceHpBarCtrl hpBar = (WorldSpaceHpBarCtrl)this.target;
                 Transform parent = this.parentProperty.objectReferenceValue as Transform;
                 if (parent == null)
                 {
@@ -34,17 +50,27 @@ namespace SG03.Editor
                 EditorUtility.SetDirty(hpBar.transform);
             }
 
-            using (new EditorGUI.DisabledScope(!Application.isPlaying))
+            if (GUILayout.Button("Refresh UI", GUILayout.Height(28)))
             {
-                if (GUILayout.Button("Refresh UI", GUILayout.Height(28)))
-                {
-                    ((WorldSpaceHpBarCtrl)this.target).RefreshUi();
-                }
+                ((WorldSpaceHpBarCtrl)this.target).RefreshUi();
+                EditorUtility.SetDirty(this.target);
             }
+        }
 
-            if (!Application.isPlaying)
+        private void DrawRuntimeUiElements(WorldSpaceHpBarCtrl hpBar)
+        {
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("Runtime UI Elements", EditorStyles.boldLabel);
+            DrawVisualElement("Fill", hpBar.FillElement);
+            DrawVisualElement("Root", hpBar.RootElement);
+            DrawVisualElement("Track", hpBar.TrackElement);
+        }
+
+        private static void DrawVisualElement(string label, VisualElement element)
+        {
+            using (new EditorGUI.DisabledScope(true))
             {
-                EditorGUILayout.HelpBox("Enter Play Mode to refresh the runtime UI.", MessageType.Info);
+                EditorGUILayout.TextField(label, element == null ? "Not bound" : element.name);
             }
         }
     }

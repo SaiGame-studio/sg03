@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace SG03
@@ -41,11 +42,16 @@ namespace SG03
         [SerializeField] private bool               expose;
         [SerializeField] private bool               isTrigger;
         [SerializeField] private bool               isHover;
+        private bool isFullDetail;
 
         // ─── Optional external references ─────────────────────────────────────────
 
         [Header("Optional References")]
         [SerializeField] private CardHolderCtrl cardHolder;
+        [SerializeField] private ObjectPool objectPool;
+        [SerializeField] private WorldSpaceHpBarCtrl hpBarPrefab;
+        [SerializeField] private WorldSpaceHpBarCtrl hpBarInstance;
+        private Coroutine spawnHpBarRoutine;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -54,12 +60,14 @@ namespace SG03
         public void NotifyHoverEntered()
         {
             this.isHover = true;
+            this.RefreshHpBarDisplayMode();
             HoverEntered?.Invoke(this);
         }
 
         public void NotifyHoverExited()
         {
             this.isHover = false;
+            this.RefreshHpBarDisplayMode();
             HoverExited?.Invoke(this);
         }
         public void NotifySelected()     => CardSelected?.Invoke(this);
@@ -72,6 +80,12 @@ namespace SG03
             this.LoadCard3D();
             this.LoadCardLoader();
             this.LoadCardMovement();
+            this.LoadObjectPool();
+        }
+
+        protected virtual void OnDisable()
+        {
+            this.ReturnHpBarToPool();
         }
 
         protected virtual void LoadCard3D()
@@ -93,6 +107,141 @@ namespace SG03
             if (this.movement != null) return;
             this.movement = this.GetComponent<CardMovement>();
             Debug.LogWarning(transform.name + "LoadCardMovement", gameObject);
+        }
+
+        protected virtual void LoadObjectPool()
+        {
+            if (this.objectPool != null) return;
+            this.objectPool = GameObject.FindAnyObjectByType<ObjectPool>();
+        }
+
+        private void SpawnHpBarAt(CardHolderCtrl holder)
+        {
+            if (holder == null || holder != this.cardHolder) return;
+
+            if (!this.ShouldShowHpBar(holder))
+            {
+                this.DespawnHpBar();
+                return;
+            }
+
+            this.EnsureSingleHpBarInstance();
+            this.LoadObjectPool();
+            if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
+            {
+                Debug.LogWarning($"{this.name}: ObjectPool is not ready for the HP bar.", this);
+                return;
+            }
+
+            if (this.hpBarPrefab == null)
+            {
+                this.hpBarPrefab = this.objectPool.PoolPrefabs.GetByName("HpBarUI") as WorldSpaceHpBarCtrl;
+            }
+
+            if (this.hpBarPrefab == null)
+            {
+                Debug.LogWarning($"{this.name}: HpBarUI is missing from ObjectPoolPrefabs.", this);
+                return;
+            }
+
+            if (this.hpBarInstance == null)
+            {
+                this.hpBarInstance = this.objectPool.SpawnInactive(this.hpBarPrefab, Vector3.zero);
+            }
+
+            if (this.hpBarInstance == null) return;
+
+            this.hpBarInstance.SetPosition(holder.transform.position);
+            this.hpBarInstance.SetParent(this.transform, this.cardOwner);
+            this.hpBarInstance.gameObject.SetActive(true);
+            this.RefreshHpBarDisplayMode();
+        }
+
+        private bool ShouldShowHpBar(CardHolderCtrl holder)
+        {
+            if (this.isFullDetail) return false;
+            if (!this.IsCharacter()) return false;
+            if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
+            return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;
+        }
+
+        private void RefreshHpBarVisibility()
+        {
+            if (!this.ShouldShowHpBar(this.cardHolder))
+            {
+                this.DespawnHpBar();
+                return;
+            }
+
+            if (this.cardHolder == null) return;
+            if (this.IsAnimating)
+            {
+                this.SpawnHpBarAfterCardSettles(this.cardHolder);
+                return;
+            }
+
+            this.SpawnHpBarAt(this.cardHolder);
+        }
+
+        private void DespawnHpBar()
+        {
+            this.EnsureSingleHpBarInstance();
+            if (this.hpBarInstance == null) return;
+
+            this.ReturnHpBarToPool(this.hpBarInstance);
+            this.hpBarInstance = null;
+        }
+
+        private void RefreshHpBarDisplayMode()
+        {
+            if (this.hpBarInstance == null) return;
+
+            this.hpBarInstance.SetMiniMode(!this.isHover);
+        }
+
+        private void EnsureSingleHpBarInstance()
+        {
+            WorldSpaceHpBarCtrl[] hpBars = this.GetComponentsInChildren<WorldSpaceHpBarCtrl>(true);
+            foreach (WorldSpaceHpBarCtrl hpBar in hpBars)
+            {
+                if (hpBar == this.hpBarInstance) continue;
+                if (this.hpBarInstance == null)
+                {
+                    this.hpBarInstance = hpBar;
+                    continue;
+                }
+
+                this.ReturnHpBarToPool(hpBar);
+            }
+        }
+
+        private void ReturnHpBarToPool(WorldSpaceHpBarCtrl hpBar)
+        {
+            if (hpBar == null) return;
+
+            this.LoadObjectPool();
+            if (this.objectPool != null) this.objectPool.Despawn(hpBar);
+            else hpBar.gameObject.SetActive(false);
+        }
+
+        private void ReturnHpBarToPool()
+        {
+            this.DespawnHpBar();
+        }
+
+        private void SpawnHpBarAfterCardSettles(CardHolderCtrl holder)
+        {
+            if (this.spawnHpBarRoutine != null) this.StopCoroutine(this.spawnHpBarRoutine);
+            this.spawnHpBarRoutine = this.StartCoroutine(this.SpawnHpBarAfterCardSettlesRoutine(holder));
+        }
+
+        private IEnumerator SpawnHpBarAfterCardSettlesRoutine(CardHolderCtrl holder)
+        {
+            yield return null;
+            yield return new WaitUntil(() => !this.movement.IsAnimating);
+
+            this.SpawnHpBarAt(holder);
+            this.spawnHpBarRoutine = null;
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -148,13 +297,24 @@ namespace SG03
             if (this.movement.IsFlipping) return;
             bool isNewHolder = this.cardHolder == null;
             this.cardHolder = holder;
-            if (this.cardHolder == null) return;
+            if (this.cardHolder == null)
+            {
+                this.DespawnHpBar();
+                return;
+            }
             if (!isNewHolder)
             {
                 this.MoveBackToHolder();
                 return;
             }
-            this.movement.MoveTo(this.cardHolder.transform, this.cardHolder.HolderLocation, () => this.RotateZ180(onReady));
+            this.movement.MoveTo(this.cardHolder.transform, this.cardHolder.HolderLocation, () =>
+            {
+                this.RotateZ180(() =>
+                {
+                    this.SpawnHpBarAt(this.cardHolder);
+                    onReady?.Invoke();
+                });
+            });
             this.FaceDownUnknown();
         }
 
@@ -165,7 +325,17 @@ namespace SG03
         public void MoveAndRotate(Vector3 worldPosition, Quaternion rotation, Location destination) => this.movement.MoveAndRotate(worldPosition, rotation, destination);
 
         /// <summary>Smoothly moves the card to the specified transform, position only (no rotation change).</summary>
-        public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
+        public void MoveTo(Transform target, Location destination)
+        {
+            CardHolderCtrl holder = target != null ? target.GetComponent<CardHolderCtrl>() : null;
+            if (holder == null)
+            {
+                this.movement.MoveTo(target, destination);
+                return;
+            }
+
+            this.movement.MoveTo(target, destination, () => this.SpawnHpBarAt(holder));
+        }
 
         /// <summary>Smoothly moves the card to the specified world position, no rotation change.</summary>
         public void MoveTo(Vector3 worldPosition, Location destination) => this.movement.MoveTo(worldPosition, destination);
@@ -175,10 +345,21 @@ namespace SG03
 
         /// <summary>Moves the card to <paramref name="holder"/>'s position and flips face-down via the Unknown axis.
         /// Intended for hand → line transitions.</summary>
-        public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null) => this.movement.MoveToUnknow(holder, onReady);
+        public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null)
+        {
+            this.movement.MoveToUnknow(holder, () =>
+            {
+                onReady?.Invoke();
+                this.SpawnHpBarAfterCardSettles(holder);
+            });
+        }
 
         /// <summary>Assigns the card-holder reference without triggering any movement or animation.</summary>
-        public void AssignCardHolder(CardHolderCtrl holder) => this.cardHolder = holder;
+        public void AssignCardHolder(CardHolderCtrl holder)
+        {
+            this.cardHolder = holder;
+            if (holder == null) this.DespawnHpBar();
+        }
 
         /// <summary>Rotates the card 180 degrees around the world Z axis, then invokes <paramref name="onComplete"/>.</summary>
         public void RotateZ180(System.Action onComplete = null) => this.movement.RotateY180(onComplete);
@@ -188,6 +369,7 @@ namespace SG03
         {
             this.movement.FaceDownUnknown();
             FaceStateChanged?.Invoke(this, false);
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>Smoothly rotates the card to face-up using the Unknown axis, without rising.</summary>
@@ -195,6 +377,7 @@ namespace SG03
         {
             this.movement.FaceUpUnknown();
             FaceStateChanged?.Invoke(this, true);
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>Smoothly rotates the card to face-up.</summary>
@@ -202,6 +385,7 @@ namespace SG03
         {
             this.movement.FaceUp();
             FaceStateChanged?.Invoke(this, true);
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>Smoothly rotates the card to face-down.</summary>
@@ -209,13 +393,27 @@ namespace SG03
         {
             this.movement.FaceDown();
             FaceStateChanged?.Invoke(this, false);
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>Moves the card to the full-detail point without changing its logical location.</summary>
         public void MoveToFullDetail(Transform point) => this.movement.MoveToFullDetail(point);
 
         /// <summary>Returns the card from full-detail back to its selected position in hand.</summary>
-        public void ReturnFromFullDetail() => this.movement.ReturnFromFullDetail();
+        public void ReturnFromFullDetail()
+        {
+            this.movement.ReturnFromFullDetail();
+            this.RefreshHpBarVisibility();
+        }
+
+        /// <summary>Controls HP-bar visibility while this card is displayed in full-detail view.</summary>
+        public void SetFullDetailMode(bool enabled)
+        {
+            if (this.isFullDetail == enabled) return;
+
+            this.isFullDetail = enabled;
+            if (enabled) this.DespawnHpBar();
+        }
 
         /// <summary>Plays the damage run-up animation: card rises then returns to its current position.</summary>
         public void RunUp() => this.movement.RunUp();
@@ -305,6 +503,8 @@ namespace SG03
                 int index = owner == Owner.alpha ? ++alphaSpawnIndex : ++omegaSpawnIndex;
                 this.name = $"{prefix}{baseName}_{index}";
             }
+
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>The owner (alpha or omega) of this card.</summary>
@@ -318,6 +518,7 @@ namespace SG03
         {
             this.definition = def;
             this.SetCardType(def?.metadata?.type);
+            this.RefreshHpBarVisibility();
         }
 
         /// <summary>The definition data currently assigned to this card.</summary>
@@ -330,7 +531,11 @@ namespace SG03
         public string CodeName => this.codeName;
 
         /// <summary>Marks whether this card is exposed (always face-up).</summary>
-        public void SetExpose(bool value) => this.expose = value;
+        public void SetExpose(bool value)
+        {
+            this.expose = value;
+            this.RefreshHpBarVisibility();
+        }
 
         /// <summary>Returns true if this card is exposed and must not be flipped face-down.</summary>
         public bool Expose => this.expose;
