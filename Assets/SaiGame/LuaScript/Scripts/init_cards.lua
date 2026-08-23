@@ -233,8 +233,8 @@ local function alpha_init_cards(state)
     return nil
 end
 
--- Moves every explicitly selected void card, then every remaining four-star
--- Character, out of Alpha's source before opening-hand selections or draws.
+-- Moves every explicitly selected void card, then every remaining Character
+-- with at least four stars, out of Alpha's source before opening-hand selections or draws.
 local function alpha_init_void(state)
     lib_battle_common.dlog("[init_cards] == alpha_init_void ==")
     local preset = state.alpha_preset_metadata
@@ -265,14 +265,14 @@ local function alpha_init_void(state)
 
     local function get_card_stars(card)
         local item_def = defs_by_code[card.item_definition_code_name]
-        local stars = item_def ~= nil and item_def.base_stats ~= nil and item_def.base_stats.star or 0
-        return stars
+        local stars = item_def ~= nil and item_def.base_stats ~= nil and item_def.base_stats.star or nil
+        return tonumber(stars) or 0
     end
 
     local function is_auto_void_eligible(card)
         local item_def = defs_by_code[card.item_definition_code_name]
         local card_type = item_def ~= nil and item_def.metadata ~= nil and item_def.metadata.type or nil
-        return card_type == "character" and get_card_stars(card) == 4
+        return card_type == "character" and get_card_stars(card) >= 4
     end
 
     -- Explicit void choices keep preset order and may contain any card type
