@@ -20,6 +20,7 @@ Hiến tế 1 thẻ bài đồng minh thuộc chủng tộc `dark_elf` từ 1 đ
 2. Có ít nhất 1 Xena IV trong `the_void`.
 3. Có ít nhất 1 thẻ bài đồng minh thuộc chủng tộc `dark_elf` từ 1 đến 3 sao nằm ở vị trí liền kề bên trái hoặc bên phải của Xena III để hiến tế.
 4. Không yêu cầu Xena III phải chưa kích hoạt; kỹ năng vẫn dùng được dù `trigger` của Xena III đang là `true`.
+5. Không thể hiến tế bất kỳ lá bài Xena nào.
 
 > **Lưu ý:** Nếu kích hoạt khi Xena III vẫn trụ được sau đòn tấn công, không có hiệu ứng nào xảy ra và `xena_awakened3` vẫn được đưa vào `the_void`.
 
