@@ -212,14 +212,14 @@ namespace SG03
         protected virtual void LoadOmegaFrontLine()
         {
             if (this.IsHoldersFilled(this.omegaFrontLine)) return;
-            this.LoadHoldersByOwnerAndLink(this.omegaFrontLine, Owner.omega, Link.front);
+            this.LoadHoldersFromHierarchy(this.omegaFrontLine, "OmegaFrontLine");
             Debug.LogWarning(this.transform.name + ": LoadOmegaFrontLine", this.gameObject);
         }
 
         protected virtual void LoadOmegaBackLine()
         {
             if (this.IsHoldersFilled(this.omegaBackLine)) return;
-            this.LoadHoldersByOwnerAndLink(this.omegaBackLine, Owner.omega, Link.back);
+            this.LoadHoldersFromHierarchy(this.omegaBackLine, "OmegaBackLine");
             Debug.LogWarning(this.transform.name + ": LoadOmegaBackLine", this.gameObject);
         }
 
@@ -233,6 +233,23 @@ namespace SG03
                 int idx = holder.Index;
                 if (idx < 0 || idx >= holders.Length) continue;
                 holders[idx] = holder;
+            }
+        }
+
+        private void LoadHoldersFromHierarchy(CardHolderCtrl[] holders, string lineName)
+        {
+            Transform line = this.transform.Find(lineName);
+            if (line == null)
+            {
+                Debug.LogWarning(this.transform.name + ": " + lineName + " not found", this.gameObject);
+                return;
+            }
+
+            int slotCount = Mathf.Min(holders.Length, line.childCount);
+            for (int i = 0; i < slotCount; i++)
+            {
+                if (holders[i] != null) continue;
+                holders[i] = line.GetChild(i).GetComponent<CardHolderCtrl>();
             }
         }
 
