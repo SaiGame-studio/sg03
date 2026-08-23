@@ -15,9 +15,15 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
     if target_card == nil or target_card.item_definition_code_name ~= "xena1" then
         return {}, "xena_awakened1 requires Xena I as its target"
     end
+    if not helpers.is_character_be_attacked(state, target_card) then
+        return {}, "xena_awakened1 requires Xena I to be the target of the current attack"
+    end
 
     local void_key = source_side .. "_the_void"
     local void_zone = state[void_key] or {}
+    local incoming_damage = helpers.get_character_incoming_damage(state, target_card)
+    local xena_gonna_die = helpers.is_character_gonna_dead(target_card, incoming_damage)
+
     local target_index = nil
     for i, card in ipairs(void_zone) do
         if card.inventory_item_id == target_card.inventory_item_id then
@@ -25,7 +31,7 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
             break
         end
     end
-    if target_index == nil then
+    if not xena_gonna_die then
         -- The attack has resolved but Xena I survived. The ability is still
         -- consumed, as specified, but it cannot summon a replacement.
         local ability_actions = {
@@ -39,9 +45,8 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
         table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
         return ability_actions, nil
     end
-    if (target_card.total_damage_received or 0) <= 0 or
-       (target_card.total_damage_received or 0) < (target_card.final_def or 0) then
-        return {}, "xena_awakened1 requires Xena I to be defeated by damage"
+    if target_index == nil then
+        return {}, "xena_awakened1 must resolve after Xena I enters own the_void"
     end
 
     local destination_key = target_card.defeated_from_line_key

@@ -197,6 +197,74 @@ local function _find_line_card_by_code(line, code_name)
     return fallback
 end
 
+-- Returns whether a Character will be defeated after incoming_damage is added
+-- to damage already accumulated this turn. Abilities may use this before an
+-- attack resolves to decide whether a death-trigger effect is valid.
+function is_character_gonna_dead(character_card, incoming_damage)
+    if character_card == nil then return false end
+    local accumulated_damage = character_card.total_damage_received or 0
+    local damage = incoming_damage or 0
+    local total_def = character_card.final_def or 0
+    return accumulated_damage + damage >= total_def
+end
+
+local function _find_attack_plan_for_character(plans, character_id)
+    for _, plan in ipairs(plans or {}) do
+        if plan.action == "card_attack_card" and plan.defender_inv_id == character_id then
+            return plan
+        end
+    end
+    return nil
+end
+
+-- Returns whether character_card is the defender of a queued or currently
+-- resolving card attack. This lets reactive abilities reject unrelated targets.
+function is_character_be_attacked(state, character_card)
+    if state == nil or character_card == nil then return false end
+    local character_id = character_card.inventory_item_id
+    if character_id == nil or character_id == "" then return false end
+    local pending_attack = state.pending_attack
+    if pending_attack ~= nil and pending_attack.defender_inventory_item_id == character_id then
+        return true
+    end
+    return _find_attack_plan_for_character(state.omega_planning, character_id) ~= nil or
+        _find_attack_plan_for_character(state.alpha_planning, character_id) ~= nil
+end
+
+-- Returns the damage of the queued/current attack targeting character_card.
+-- This is zero when no attacker or its definition can be resolved.
+function get_character_incoming_damage(state, character_card)
+    if state == nil or character_card == nil then return 0 end
+    local character_id = character_card.inventory_item_id
+    if character_id == nil or character_id == "" then return 0 end
+
+    local pending_attack = state.pending_attack
+    if pending_attack ~= nil and pending_attack.defender_inventory_item_id == character_id then
+        return pending_attack.damage_dealt or 0
+    end
+
+    local attack_plan = _find_attack_plan_for_character(state.omega_planning, character_id) or
+        _find_attack_plan_for_character(state.alpha_planning, character_id)
+    if attack_plan == nil then return 0 end
+
+    for _, line in ipairs({
+        state.alpha_front_line or {}, state.alpha_back_line or {},
+        state.omega_front_line or {}, state.omega_back_line or {},
+    }) do
+        for _, card in ipairs(line) do
+            if card.inventory_item_id == attack_plan.attacker_inv_id then
+                local attacker_def = _find_item_def(state.item_defs, card.item_definition_code_name)
+                if attacker_def == nil then return 0 end
+                if attacker_def.base_stats ~= nil and attacker_def.base_stats.atk ~= nil then
+                    return attacker_def.base_stats.atk
+                end
+                return attacker_def.metadata ~= nil and attacker_def.metadata.atk or 0
+            end
+        end
+    end
+    return 0
+end
+
 -- Applies damage to target_card, clears its slot from target_line if defeated, and
 -- returns the resulting client actions ("card_ability_defeated" or "card_ability_damaged").
 -- target_line and void_key may be nil if line removal is not needed.
@@ -222,8 +290,8 @@ function deal_damage_to_character(state, attacker_card, target_card, damage, tar
 
     local final_def = target_card.final_def or 0
     local prev_damage = target_card.total_damage_received or 0
+    local defeated = is_character_gonna_dead(target_card, damage)
     target_card.total_damage_received = prev_damage + damage
-    local defeated = target_card.total_damage_received >= final_def
     lib_battle_common.dlog("[ability] deal_damage: final_def=" .. final_def .. " prev_damage=" .. prev_damage .. " new_total=" .. target_card.total_damage_received .. " defeated=" .. (defeated and "yes" or "no"))
 
     if damage > 0 then
@@ -356,6 +424,9 @@ local function _build_ability_helpers()
     return {
         lib_battle_common = lib_battle_common,
         deal_damage_to_character = deal_damage_to_character,
+        is_character_gonna_dead = is_character_gonna_dead,
+        is_character_be_attacked = is_character_be_attacked,
+        get_character_incoming_damage = get_character_incoming_damage,
         find_card_side = _find_card_side,
         find_item_def = _find_item_def,
         find_line_card_by_code = _find_line_card_by_code,
