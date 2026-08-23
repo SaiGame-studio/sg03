@@ -28,13 +28,6 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
     local void_key = source_side .. "_the_void"
     local void_zone = state[void_key] or {}
     state[void_key] = void_zone
-    local function send_source_to_void(actions)
-        for _, line_key in ipairs({ source_side .. "_front_line", source_side .. "_back_line" }) do
-            battle.remove_card_from_line(state[line_key], source_card.inventory_item_id)
-        end
-        table.insert(void_zone, source_card)
-        table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
-    end
 
     local incoming_damage = helpers.get_character_incoming_damage(state, target_card)
     if not helpers.is_character_gonna_dead(target_card, incoming_damage) then
@@ -42,7 +35,9 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
             source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
                 ",ability=xena_awakened1,target=" .. target_card.inventory_item_id .. ",result=no_effect",
         }
-        send_source_to_void(actions)
+        battle.remove_card_from_line(state[source_side .. "_back_line"], source_card.inventory_item_id)
+        table.insert(void_zone, source_card)
+        table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
         return actions, nil
     end
 
@@ -104,7 +99,9 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
             successor_card.inventory_item_id .. "," .. tostring(successor_card.slot_index),
     }
 
-    send_source_to_void(ability_actions)
+    battle.remove_card_from_line(state[source_side .. "_back_line"], source_card.inventory_item_id)
+    table.insert(void_zone, source_card)
+    table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
     battle.dlog("[ability] xena_awakened1: summoned Xena II=" .. successor_card.inventory_item_id ..
         " to " .. target_line_key .. " slot=" .. tostring(successor_card.slot_index) .. " with +100 DEF")
 
