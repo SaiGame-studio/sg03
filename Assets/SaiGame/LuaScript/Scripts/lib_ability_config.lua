@@ -73,6 +73,11 @@ function get_ability_config(ability_key)
             requires_target_card = true,
             resolves_without_attack = true,
         },
+        xena_awakened3 = {
+            target_positions = { "own_frontline", "own_backline", "own_void" },
+            requires_target_card = true,
+            resolves_without_attack = true,
+        },
     }
     return configs[ability_key]
 end

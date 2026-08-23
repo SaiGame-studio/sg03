@@ -358,6 +358,8 @@ local function _get_ability_handler(ability_key)
         return lib_ability_xena.xena_awakened1_execute
     elseif ability_key == "xena_awakened2" then
         return lib_ability_xena.xena_awakened2_execute
+    elseif ability_key == "xena_awakened3" then
+        return lib_ability_xena.xena_awakened3_execute
     end
     return nil
 end

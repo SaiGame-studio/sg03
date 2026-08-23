@@ -5,6 +5,8 @@
 -- config requires ability_key, successor_code, and successor_name.
 -- sacrifice_count supports 0 (default), 1, or 2 adjacent allied cards.
 -- sacrifice_stars is an optional list of allowed card stars (each 1 through 9).
+-- sacrifice_race restricts sacrifices to one card race when provided.
+-- sacrifice_excluded_codes is an optional list of card definition codes that cannot be sacrificed.
 
 local function validate_xena_config(config)
     if config == nil or type(config.ability_key) ~= "string" or
@@ -32,12 +34,32 @@ local function validate_xena_config(config)
         end
     end
 
+    local sacrifice_race = config.sacrifice_race
+    if sacrifice_race ~= nil and type(sacrifice_race) ~= "string" then
+        return nil, config.ability_key .. " sacrifice_race must be a string"
+    end
+
+    local sacrifice_excluded_code_set = {}
+    if config.sacrifice_excluded_codes ~= nil then
+        if type(config.sacrifice_excluded_codes) ~= "table" then
+            return nil, config.ability_key .. " sacrifice_excluded_codes must be a list"
+        end
+        for _, code in ipairs(config.sacrifice_excluded_codes) do
+            if type(code) ~= "string" then
+                return nil, config.ability_key .. " sacrifice_excluded_codes entries must be strings"
+            end
+            sacrifice_excluded_code_set[code] = true
+        end
+    end
+
     return {
         ability_key = config.ability_key,
         successor_code = config.successor_code,
         successor_name = config.successor_name,
         sacrifice_count = sacrifice_count,
         sacrifice_star_set = sacrifice_star_set,
+        sacrifice_race = sacrifice_race,
+        sacrifice_excluded_code_set = sacrifice_excluded_code_set,
     }, nil
 end
 
@@ -80,22 +102,34 @@ local function find_successor_card(void_zone, successor_code)
 end
 
 local function find_sacrifice_indexes(state, target_line, target_index, source_card, target_card, settings, helpers)
-    local indexes = {}
-    if settings.sacrifice_count == 0 then return indexes, nil end
+    local candidates = {}
+    if settings.sacrifice_count == 0 then return candidates, nil end
 
     for _, index in ipairs({ target_index - 1, target_index + 1 }) do
         local card = target_line[index]
         local card_def = card ~= nil and helpers.find_item_def(state.item_defs, card.item_definition_code_name) or nil
         local card_stars = card_def ~= nil and card_def.base_stats ~= nil and tonumber(card_def.base_stats.star) or nil
+        local card_race = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.race or nil
         if card ~= nil and card.inventory_item_id ~= source_card.inventory_item_id and
            card.inventory_item_id ~= target_card.inventory_item_id and
-           (settings.sacrifice_star_set == nil or settings.sacrifice_star_set[card_stars] == true) then
-            table.insert(indexes, index)
+           (settings.sacrifice_star_set == nil or settings.sacrifice_star_set[card_stars] == true) and
+           (settings.sacrifice_race == nil or settings.sacrifice_race == card_race) and
+           settings.sacrifice_excluded_code_set[card.item_definition_code_name] ~= true then
+            table.insert(candidates, { index = index, stars = card_stars })
         end
     end
 
-    if #indexes < settings.sacrifice_count then
+    table.sort(candidates, function(a, b)
+        if a.stars == b.stars then return a.index < b.index end
+        return a.stars < b.stars
+    end)
+    if #candidates < settings.sacrifice_count then
         return nil, settings.ability_key .. " requires " .. settings.sacrifice_count .. " adjacent allied card(s) to sacrifice"
+    end
+
+    local indexes = {}
+    for index = 1, settings.sacrifice_count do
+        indexes[index] = candidates[index].index
     end
     return indexes, nil
 end
@@ -185,7 +219,7 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
     end
 
     local def_buff = tonumber(helpers.get_card_stat(state, source_card, "add_def"))
-    if def_buff == nil then return {}, settings.ability_key .. " requires base_stats.add_def" end
+    if def_buff == nil then def_buff = 0 end
 
     local target_line_key, target_line, target_index, line_err =
         find_target_line(state, event_data, target_card, settings.ability_key)
@@ -232,5 +266,20 @@ function xena_awakened2_execute(state, source_card, event_data, helpers)
         successor_code = "xena3",
         successor_name = "Xena III",
         sacrifice_count = 0,
+    })
+end
+
+-- ability: xena_awakened3
+-- Replaces an attacked Xena III that will be defeated with Xena IV from void.
+-- Sacrifices the adjacent dark_elf card with the fewest stars (1-3), excluding Xena I-III.
+function xena_awakened3_execute(state, source_card, event_data, helpers)
+    return execute_xena_awakened(state, source_card, event_data, helpers, {
+        ability_key = "xena_awakened3",
+        successor_code = "xena4",
+        successor_name = "Xena IV",
+        sacrifice_count = 1,
+        sacrifice_stars = { 1, 2, 3 },
+        sacrifice_race = "dark_elf",
+        sacrifice_excluded_codes = { "xena1", "xena2", "xena3" },
     })
 end
