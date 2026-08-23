@@ -76,11 +76,11 @@ namespace SG03
         private void FaceMainCamera()
         {
             if (!this.faceMainCamera || Camera.main == null) return;
-            Vector3 direction = this.transform.position - Camera.main.transform.position;
-            Quaternion cameraFacingRotation = Quaternion.LookRotation(direction);
-            Vector3 rotation = cameraFacingRotation.eulerAngles;
-            rotation.y = this.transform.eulerAngles.y;
-            this.transform.eulerAngles = rotation;
+
+            Vector3 directionFromCamera = this.transform.position - Camera.main.transform.position;
+            if (directionFromCamera.sqrMagnitude < Mathf.Epsilon) return;
+
+            this.transform.rotation = Quaternion.LookRotation(directionFromCamera, Camera.main.transform.up);
         }
 
         public void SetHealth(float current, float maximum)
@@ -94,6 +94,18 @@ namespace SG03
         public void SetPosition(Vector3 worldPosition)
         {
             this.transform.position = worldPosition;
+        }
+
+        /// <summary>Makes this bar follow a parent while preserving its world position and scale.</summary>
+        public void SetParent(Transform newParent)
+        {
+            if (newParent == null) return;
+
+            this.desiredWorldScale = this.transform.lossyScale;
+            this.hasDesiredWorldScale = true;
+            this.parent = newParent;
+            this.transform.SetParent(this.parent, true);
+            this.CompensateParentScale();
         }
 
         /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>

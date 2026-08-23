@@ -115,6 +115,12 @@ namespace SG03
         {
             if (holder == null) return;
 
+            if (!this.IsCharacter())
+            {
+                this.DespawnHpBar();
+                return;
+            }
+
             this.DespawnHpBar();
             this.LoadObjectPool();
             if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
@@ -138,6 +144,7 @@ namespace SG03
             if (this.spawnedHpBar == null) return;
 
             this.spawnedHpBar.SetPosition(holder.transform.position);
+            this.spawnedHpBar.SetParent(this.transform);
             this.spawnedHpBar.gameObject.SetActive(true);
         }
 
