@@ -470,34 +470,79 @@ namespace SG03
             if (this.selected.Location != Location.in_hand) return;
             if (holder.HeldCard != null) { if (this.debugLog) Debug.LogWarning($"[CardSelection] OnHolderSelected — holder '{holder.name}' already has card '{holder.HeldCard.name}' — skipped"); return; }
             if (!this.IsPlacementValid(this.selected, holder)) return;
-            this.PlaceFromHandIntoHolder(holder);
-            this.UpdateLocalStateOnPlacement(holder, this.selected);
-            this.RunDeployScript(this.selected);
+            BattleScripts scripts = this.battleStateCtrl?.BattleScripts;
+            if (scripts == null || scripts.IsRunning) return;
+            Card3DCtrl card = this.selected;
+            int handSlotIndex = this.FindAlphaHandSlotIndex(card.InventoryItemId);
+            if (handSlotIndex < 0) return;
+            this.UpdateLocalStateForDeployRequest(holder, card);
+            this.RunDeployScript(card, holder, handSlotIndex);
         }
 
-        private void RunDeployScript(Card3DCtrl card)
+        private void RunDeployScript(Card3DCtrl card, CardHolderCtrl holder, int handSlotIndex)
         {
             this.battleStateCtrl?.BattleScripts?.RunAlphaCardDeploy(
-                response => this.OnDeployScriptSuccess(response, card), null);
+                response => this.OnDeployScriptSuccess(response, card, holder, handSlotIndex),
+                error => this.OnDeployScriptError(error, card, holder, handSlotIndex));
         }
 
-        private void OnDeployScriptSuccess(string response, Card3DCtrl card)
+        private void OnDeployScriptSuccess(string response, Card3DCtrl card, CardHolderCtrl holder, int handSlotIndex)
         {
+            if (!this.IsDeployResponseSuccessful(response, out string error))
+            {
+                this.OnDeployScriptError(error, card, holder, handSlotIndex);
+                return;
+            }
+
+            this.PlaceFromHandIntoHolder(card, holder);
+            this.RegisterPlayerDeploy(card, holder);
             this.TryIncrementCharDeploy(card);
             this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
         }
 
-        private void UpdateLocalStateOnPlacement(CardHolderCtrl holder, Card3DCtrl card)
+        private bool IsDeployResponseSuccessful(string response, out string error)
+        {
+            error = "Card deploy returned an invalid response.";
+            if (string.IsNullOrWhiteSpace(response)) return false;
+
+            BattleStatusScriptResponse parsed = JsonUtility.FromJson<BattleStatusScriptResponse>(response);
+            if (parsed?.output == null) return false;
+            if (string.IsNullOrEmpty(parsed.output.error)) return true;
+
+            error = parsed.output.error;
+            return false;
+        }
+
+        private void OnDeployScriptError(string error, Card3DCtrl card, CardHolderCtrl holder, int handSlotIndex)
+        {
+            Debug.LogError($"[CardSelection] Card deploy was rejected; card remains in hand. {error}");
+            this.battleStateCtrl?.BattleState?.RestoreCardFromLineToHand(
+                card.InventoryItemId, holder.HolderLink, holder.Index, handSlotIndex);
+        }
+
+        private int FindAlphaHandSlotIndex(string inventoryItemId)
+        {
+            BattleCardSlot[] hand = this.battleStateCtrl?.BattleState?.AlphaHand;
+            if (hand == null) return -1;
+            for (int i = 0; i < hand.Length; i++)
+            {
+                if (hand[i]?.inventory_item_id == inventoryItemId) return i;
+            }
+
+            return -1;
+        }
+
+        private void UpdateLocalStateForDeployRequest(CardHolderCtrl holder, Card3DCtrl card)
         {
             if (this.battleStateCtrl?.BattleState == null) return;
-            this.RegisterPlayerDeploy(card, holder);
             this.battleStateCtrl.BattleState.MoveCardFromHandToLine(card.InventoryItemId, holder.HolderLink, holder.Index);
         }
 
-        private void PlaceFromHandIntoHolder(CardHolderCtrl targetHolder)
+        private void PlaceFromHandIntoHolder(Card3DCtrl card, CardHolderCtrl targetHolder)
         {
-            if (this.selected.IsFlipping) { if (this.debugLog) Debug.LogWarning($"[CardSelection] PlaceFromHandIntoHolder — card '{this.selected.name}' is still flipping — skipped"); return; }
-            Card3DCtrl cardToRotate = this.selected;
+            if (card == null || targetHolder == null) return;
+            if (card.IsFlipping) { if (this.debugLog) Debug.LogWarning($"[CardSelection] PlaceFromHandIntoHolder — card '{card.name}' is still flipping — skipped"); return; }
+            Card3DCtrl cardToRotate = card;
             this.ApplyBattleMotionSettings(cardToRotate);
             cardToRotate.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(cardToRotate)));
             targetHolder.SetCard(cardToRotate);
