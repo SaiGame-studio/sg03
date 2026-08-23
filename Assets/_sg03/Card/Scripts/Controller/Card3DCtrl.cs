@@ -46,6 +46,10 @@ namespace SG03
 
         [Header("Optional References")]
         [SerializeField] private CardHolderCtrl cardHolder;
+        [SerializeField] private ObjectPool objectPool;
+        [SerializeField] private WorldSpaceHpBarCtrl hpBarPrefab;
+
+        private WorldSpaceHpBarCtrl spawnedHpBar;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -72,6 +76,12 @@ namespace SG03
             this.LoadCard3D();
             this.LoadCardLoader();
             this.LoadCardMovement();
+            this.LoadObjectPool();
+        }
+
+        protected virtual void OnDisable()
+        {
+            this.ReturnHpBarToPool();
         }
 
         protected virtual void LoadCard3D()
@@ -93,6 +103,58 @@ namespace SG03
             if (this.movement != null) return;
             this.movement = this.GetComponent<CardMovement>();
             Debug.LogWarning(transform.name + "LoadCardMovement", gameObject);
+        }
+
+        protected virtual void LoadObjectPool()
+        {
+            if (this.objectPool != null) return;
+            this.objectPool = GameObject.FindAnyObjectByType<ObjectPool>();
+        }
+
+        private void SpawnHpBarAt(CardHolderCtrl holder)
+        {
+            if (holder == null) return;
+
+            this.DespawnHpBar();
+            this.LoadObjectPool();
+            if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
+            {
+                Debug.LogWarning($"{this.name}: ObjectPool is not ready for the HP bar.", this);
+                return;
+            }
+
+            if (this.hpBarPrefab == null)
+            {
+                this.hpBarPrefab = this.objectPool.PoolPrefabs.GetByName("HpBarUI") as WorldSpaceHpBarCtrl;
+            }
+
+            if (this.hpBarPrefab == null)
+            {
+                Debug.LogWarning($"{this.name}: HpBarUI is missing from ObjectPoolPrefabs.", this);
+                return;
+            }
+
+            this.spawnedHpBar = this.objectPool.SpawnInactive(this.hpBarPrefab, Vector3.zero);
+            if (this.spawnedHpBar == null) return;
+
+            this.spawnedHpBar.SetPosition(holder.transform.position);
+            this.spawnedHpBar.gameObject.SetActive(true);
+        }
+
+        private void DespawnHpBar()
+        {
+            if (this.spawnedHpBar == null) return;
+
+            this.LoadObjectPool();
+            if (this.objectPool != null) this.objectPool.Despawn(this.spawnedHpBar);
+            else this.spawnedHpBar.gameObject.SetActive(false);
+
+            this.spawnedHpBar = null;
+        }
+
+        private void ReturnHpBarToPool()
+        {
+            this.DespawnHpBar();
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -148,13 +210,21 @@ namespace SG03
             if (this.movement.IsFlipping) return;
             bool isNewHolder = this.cardHolder == null;
             this.cardHolder = holder;
-            if (this.cardHolder == null) return;
+            if (this.cardHolder == null)
+            {
+                this.DespawnHpBar();
+                return;
+            }
             if (!isNewHolder)
             {
                 this.MoveBackToHolder();
                 return;
             }
-            this.movement.MoveTo(this.cardHolder.transform, this.cardHolder.HolderLocation, () => this.RotateZ180(onReady));
+            this.movement.MoveTo(this.cardHolder.transform, this.cardHolder.HolderLocation, () =>
+            {
+                this.SpawnHpBarAt(this.cardHolder);
+                this.RotateZ180(onReady);
+            });
             this.FaceDownUnknown();
         }
 
@@ -165,7 +235,17 @@ namespace SG03
         public void MoveAndRotate(Vector3 worldPosition, Quaternion rotation, Location destination) => this.movement.MoveAndRotate(worldPosition, rotation, destination);
 
         /// <summary>Smoothly moves the card to the specified transform, position only (no rotation change).</summary>
-        public void MoveTo(Transform target, Location destination) => this.movement.MoveTo(target, destination);
+        public void MoveTo(Transform target, Location destination)
+        {
+            CardHolderCtrl holder = target != null ? target.GetComponent<CardHolderCtrl>() : null;
+            if (holder == null)
+            {
+                this.movement.MoveTo(target, destination);
+                return;
+            }
+
+            this.movement.MoveTo(target, destination, () => this.SpawnHpBarAt(holder));
+        }
 
         /// <summary>Smoothly moves the card to the specified world position, no rotation change.</summary>
         public void MoveTo(Vector3 worldPosition, Location destination) => this.movement.MoveTo(worldPosition, destination);
@@ -175,10 +255,21 @@ namespace SG03
 
         /// <summary>Moves the card to <paramref name="holder"/>'s position and flips face-down via the Unknown axis.
         /// Intended for hand → line transitions.</summary>
-        public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null) => this.movement.MoveToUnknow(holder, onReady);
+        public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null)
+        {
+            this.movement.MoveToUnknow(holder, () =>
+            {
+                this.SpawnHpBarAt(holder);
+                onReady?.Invoke();
+            });
+        }
 
         /// <summary>Assigns the card-holder reference without triggering any movement or animation.</summary>
-        public void AssignCardHolder(CardHolderCtrl holder) => this.cardHolder = holder;
+        public void AssignCardHolder(CardHolderCtrl holder)
+        {
+            this.cardHolder = holder;
+            if (holder == null) this.DespawnHpBar();
+        }
 
         /// <summary>Rotates the card 180 degrees around the world Z axis, then invokes <paramref name="onComplete"/>.</summary>
         public void RotateZ180(System.Action onComplete = null) => this.movement.RotateY180(onComplete);

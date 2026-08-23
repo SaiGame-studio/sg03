@@ -45,10 +45,20 @@ namespace SG03
             this.UpdateWorldSpacePresentation();
         }
 
+        protected void OnEnable()
+        {
+            this.RefreshUiWhenEnabled();
+        }
+
         protected override void Start()
         {
             this.RefreshUi();
 
+        }
+
+        private void RefreshUiWhenEnabled()
+        {
+            this.RefreshUi();
         }
 
         /// <summary>Returns the pool key used by <see cref="Spawner{T}"/>.</summary>
@@ -78,6 +88,12 @@ namespace SG03
             this.maxHealth = Mathf.Max(1f, maximum);
             this.currentHealth = Mathf.Clamp(current, 0f, this.maxHealth);
             this.RefreshUi();
+        }
+
+        /// <summary>Sets the health bar's world-space position.</summary>
+        public void SetPosition(Vector3 worldPosition)
+        {
+            this.transform.position = worldPosition;
         }
 
         /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>
@@ -144,8 +160,10 @@ namespace SG03
                 this.desiredWorldScale.z / parentScale.z);
         }
 
-        private void BindUi()
+        private void BindUi(bool forceRebind = false)
         {
+            if (forceRebind) this.ClearUiElementReferences();
+
             if (this.uiDocument == null)
             {
                 this.uiDocument = this.GetComponent<UIDocument>();
@@ -171,6 +189,14 @@ namespace SG03
             this.LoadHealthLabel(uiRoot);
         }
 
+        private void ClearUiElementReferences()
+        {
+            this.fill = null;
+            this.root = null;
+            this.track = null;
+            this.healthLabel = null;
+        }
+
         private void LoadUiElement(ref VisualElement element, VisualElement uiRoot, string elementName)
         {
             if (element != null) return;
@@ -187,7 +213,7 @@ namespace SG03
 
         public void RefreshUi()
         {
-            if (this.fill == null || this.healthLabel == null) this.BindUi();
+            this.BindUi(true);
             if (this.fill == null) return;
             float ratio = Mathf.Clamp01(this.currentHealth / this.maxHealth);
             this.ApplyBarAppearance(ratio);
