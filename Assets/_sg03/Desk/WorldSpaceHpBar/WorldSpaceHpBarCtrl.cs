@@ -31,7 +31,12 @@ namespace SG03
 
         [Header("Parenting")]
         [SerializeField] private Transform parent;
+        [Tooltip("Local offset used for Alpha cards before it is cached in world space.")]
+        [InspectorName("Alpha Parent Offset")]
         [SerializeField] private Vector3 parentOffset = new Vector3(0f, -4.5f, 0.2f);
+        [Tooltip("Local offset used for Omega cards before it is cached in world space.")]
+        [InspectorName("Omega Parent Offset")]
+        [SerializeField] private Vector3 omegaParentOffset = new Vector3(0f, -4.5f, -0.2f);
 
         private VisualElement fill;
         private VisualElement root;
@@ -41,13 +46,15 @@ namespace SG03
         private bool hasDesiredWorldScale;
         private Vector3 baseWorldRotation;
         private bool hasBaseWorldRotation;
+        private Vector3 worldParentOffset;
+        private bool hasWorldParentOffset;
 
         private void LateUpdate()
         {
             this.UpdateWorldSpacePresentation();
         }
 
-        protected void OnEnable()
+        private void OnEnable()
         {
             this.RefreshUiWhenEnabled();
         }
@@ -71,6 +78,7 @@ namespace SG03
 
         private void UpdateWorldSpacePresentation()
         {
+            this.UpdateWorldPositionFromParent();
             this.FaceMainCamera();
             this.CompensateParentScale();
         }
@@ -103,7 +111,7 @@ namespace SG03
         }
 
         /// <summary>Makes this bar follow a parent while preserving its world position and scale.</summary>
-        public void SetParent(Transform newParent)
+        public void SetParent(Transform newParent, Owner owner)
         {
             if (newParent == null) return;
 
@@ -111,10 +119,21 @@ namespace SG03
             this.hasDesiredWorldScale = true;
             this.parent = newParent;
             this.transform.SetParent(this.parent, true);
-            this.transform.localPosition = this.parentOffset;
+            this.UpdateParentOffset(owner);
             this.baseWorldRotation = this.transform.eulerAngles;
             this.hasBaseWorldRotation = true;
             this.CompensateParentScale();
+        }
+
+        private Vector3 GetParentOffset(Owner owner)
+        {
+            return owner == Owner.omega ? this.omegaParentOffset : this.parentOffset;
+        }
+
+        private void UpdateParentOffset(Owner owner)
+        {
+            this.transform.localPosition = this.GetParentOffset(owner);
+            this.CacheWorldParentOffset();
         }
 
         /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>
@@ -142,7 +161,7 @@ namespace SG03
             this.desiredWorldScale = this.transform.lossyScale;
             this.hasDesiredWorldScale = true;
             this.transform.SetParent(this.parent, false);
-            this.transform.localPosition = this.parentOffset;
+            this.UpdateParentOffset(Owner.alpha);
             this.CompensateParentScale();
         }
 
@@ -163,6 +182,21 @@ namespace SG03
             if (this.hasDesiredWorldScale) return;
             this.desiredWorldScale = this.transform.lossyScale;
             this.hasDesiredWorldScale = true;
+        }
+
+        private void CacheWorldParentOffset()
+        {
+            if (this.parent == null) return;
+
+            this.worldParentOffset = this.transform.position - this.parent.position;
+            this.hasWorldParentOffset = true;
+        }
+
+        private void UpdateWorldPositionFromParent()
+        {
+            if (!this.hasWorldParentOffset || this.parent == null || this.transform.parent != this.parent) return;
+
+            this.transform.position = this.parent.position + this.worldParentOffset;
         }
 
         private void CompensateParentScale()

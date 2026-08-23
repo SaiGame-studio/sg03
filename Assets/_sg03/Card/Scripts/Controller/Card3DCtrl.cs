@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace SG03
@@ -50,6 +51,7 @@ namespace SG03
         [SerializeField] private WorldSpaceHpBarCtrl hpBarPrefab;
 
         private WorldSpaceHpBarCtrl spawnedHpBar;
+        private Coroutine spawnHpBarRoutine;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -144,7 +146,7 @@ namespace SG03
             if (this.spawnedHpBar == null) return;
 
             this.spawnedHpBar.SetPosition(holder.transform.position);
-            this.spawnedHpBar.SetParent(this.transform);
+            this.spawnedHpBar.SetParent(this.transform, this.cardOwner);
             this.spawnedHpBar.gameObject.SetActive(true);
         }
 
@@ -162,6 +164,21 @@ namespace SG03
         private void ReturnHpBarToPool()
         {
             this.DespawnHpBar();
+        }
+
+        private void SpawnHpBarAfterCardSettles(CardHolderCtrl holder)
+        {
+            if (this.spawnHpBarRoutine != null) this.StopCoroutine(this.spawnHpBarRoutine);
+            this.spawnHpBarRoutine = this.StartCoroutine(this.SpawnHpBarAfterCardSettlesRoutine(holder));
+        }
+
+        private IEnumerator SpawnHpBarAfterCardSettlesRoutine(CardHolderCtrl holder)
+        {
+            yield return null;
+            yield return new WaitUntil(() => !this.movement.IsAnimating);
+
+            this.SpawnHpBarAt(holder);
+            this.spawnHpBarRoutine = null;
         }
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -229,8 +246,11 @@ namespace SG03
             }
             this.movement.MoveTo(this.cardHolder.transform, this.cardHolder.HolderLocation, () =>
             {
-                this.SpawnHpBarAt(this.cardHolder);
-                this.RotateZ180(onReady);
+                this.RotateZ180(() =>
+                {
+                    this.SpawnHpBarAt(this.cardHolder);
+                    onReady?.Invoke();
+                });
             });
             this.FaceDownUnknown();
         }
@@ -266,8 +286,8 @@ namespace SG03
         {
             this.movement.MoveToUnknow(holder, () =>
             {
-                this.SpawnHpBarAt(holder);
                 onReady?.Invoke();
+                this.SpawnHpBarAfterCardSettles(holder);
             });
         }
 
