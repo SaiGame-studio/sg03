@@ -125,16 +125,37 @@ namespace SG03
 
         private Coroutine ExecuteLampMoveToAlpha()
         {
-            if (this.lampOfSoul == null) return null;
-            this.lampOfSoul.MoveToAlpha();
-            return this.StartCoroutine(this.WaitForLamp());
+            return this.StartCoroutine(this.MoveLampToAlphaRoutine());
         }
 
         private Coroutine ExecuteLampMoveToOmega()
         {
-            if (this.lampOfSoul == null) return null;
+            return this.StartCoroutine(this.MoveLampToOmegaRoutine());
+        }
+
+        private IEnumerator MoveLampToAlphaRoutine()
+        {
+            yield return this.StartCoroutine(this.ReturnFullDetailCardBeforeLampMove());
+            if (this.lampOfSoul == null) yield break;
+
+            this.lampOfSoul.MoveToAlpha();
+            yield return this.StartCoroutine(this.WaitForLamp());
+        }
+
+        private IEnumerator MoveLampToOmegaRoutine()
+        {
+            yield return this.StartCoroutine(this.ReturnFullDetailCardBeforeLampMove());
+            if (this.lampOfSoul == null) yield break;
+
             this.lampOfSoul.MoveToOmega();
-            return this.StartCoroutine(this.WaitForLamp());
+            yield return this.StartCoroutine(this.WaitForLamp());
+        }
+
+        private IEnumerator ReturnFullDetailCardBeforeLampMove()
+        {
+            Card3DCtrl fullDetailCard = this.cardSelection?.ReturnFullDetailCard();
+            if (fullDetailCard != null)
+                yield return this.StartCoroutine(this.WaitForCard(fullDetailCard));
         }
 
         private Coroutine ExecuteOmegaEndTurn()

@@ -10,6 +10,10 @@ Treat `Assets/SaiGame/` as a read-only dependency. Implement project-specific be
 
 When creating or editing game content, use English for every official character and skill name. Vietnamese may be used only in descriptive text or explanatory notes, never as an official name, identifier, or card title.
 
+## Unity Lifecycle Methods
+
+Do not place implementation logic directly in Unity lifecycle methods (for example `Awake`, `Start`, `OnEnable`, `Update`, `LateUpdate`, `OnDisable`, or `OnDestroy`). Lifecycle methods may only call clearly named helper methods; put all logic in those helper methods instead.
+
 ## Runtime UI Assets
 
 For any UI Toolkit asset required at runtime (`VisualTreeAsset`, `StyleSheet`, `PanelSettings`, and related assets), assign a serialized reference in the owning scene or prefab. That reference must be present in source control so Unity includes the asset in every player build, including WebGL.

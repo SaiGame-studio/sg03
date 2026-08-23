@@ -378,6 +378,20 @@ namespace SG03.UI
             this.OnBattleStatusChanged?.Invoke();
         }
 
+        /// <summary>Restores a locally staged deploy when the backend rejects it.</summary>
+        public void RestoreCardFromLineToHand(string inventoryItemId, Link link, int lineSlotIndex, int handSlotIndex)
+        {
+            if (handSlotIndex < 0) return;
+            this.alphaHand = this.EnsureSlotCapacity(this.alphaHand, handSlotIndex);
+            if (this.alphaHand[handSlotIndex] != null) return;
+            BattleCardSlot slot = this.RemoveFromLine(link, lineSlotIndex);
+            if (slot == null || slot.inventory_item_id != inventoryItemId) return;
+
+            slot.slot_index = handSlotIndex;
+            this.alphaHand[handSlotIndex] = slot;
+            this.OnBattleStatusChanged?.Invoke();
+        }
+
         private BattleCardSlot RemoveFromHand(string inventoryItemId)
         {
             if (this.alphaHand == null) return null;

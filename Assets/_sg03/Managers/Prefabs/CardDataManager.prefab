@@ -66,6 +66,7 @@ MonoBehaviour:
   - Assets/_sg03/Card/Data/Ability/LightElf/holy_glow.asset
   - Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/lightning_strike.asset
   - Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
+  - Assets/_sg03/Card/Data/Character/DarkElf/common/kira.asset
   - Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
   - Assets/_sg03/Card/Data/Character/DarkElf/xena/xena1.asset
   - Assets/_sg03/Card/Data/Character/DarkElf/xena/xena2.asset

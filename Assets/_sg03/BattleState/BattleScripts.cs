@@ -116,7 +116,11 @@ namespace SG03
 
         public void RunAlphaCardDeploy(Action<string> onSuccess, Action<string> onError)
         {
-            if (this.IsBattleScriptMissing(nameof(this.RunAlphaCardDeploy))) return;
+            if (this.IsBattleScriptMissing(nameof(this.RunAlphaCardDeploy)))
+            {
+                onError?.Invoke("Battle script service is unavailable.");
+                return;
+            }
             string requestBody = this.BuildAlphaCardDeployRequestBody();
             this.LogPayload("RunAlphaCardDeploy", "#AADDFF", requestBody);
             this.RunWithLock(this.scriptNameAlphaCardDeploy, requestBody, onSuccess, onError);

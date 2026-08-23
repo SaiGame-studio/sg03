@@ -19,6 +19,7 @@ Khi [Xena IV](../xena4.md) bị hạ gục sau khi đòn tấn công của đố
 2. Có ít nhất 1 Xena V trong `the_void`.
 3. [Demon Orbs](demon_orbs.md) và [Demon Rite](demon_rite.md) đều đã được triển khai trên `own_backline`.
 4. Điều kiện hiến tế của Demon Rite được thỏa mãn: có ít nhất 1 thẻ bài đồng minh từ 1 đến 4 sao đứng liền kề bên trái hoặc bên phải của Xena IV. Nếu có nhiều thẻ hợp lệ, ưu tiên thẻ có số sao thấp nhất.
+5. Không thể hiến tế bất kỳ lá bài Xena nào.
 
 > **Lưu ý:** Nếu kích hoạt khi Xena IV vẫn trụ được sau đòn tấn công, không có hiệu ứng nào xảy ra và `xena_awakened4` vẫn được đưa vào `the_void`.
 
@@ -34,7 +35,7 @@ Nếu Demon Orbs, Demon Rite hoặc điều kiện hiến tế không thỏa mã
 
 ## Bài Liên Kết
 
-- [Demon Orbs](demon_orbs.md) — 3 sao
+- [Demon Orbs](demon_orbs.md) — 2 sao
 - [Demon Rite](demon_rite.md) — 3 sao
 
 ## Kỹ Năng Liên Kết

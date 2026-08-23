@@ -243,13 +243,40 @@ function goblin_shaman_find_extra_face_down_attacker(state)
     return face_down_count, first_face_down_attacker
 end
 
+-- Prefer an exposed Alpha Character on the front line. Within that preferred
+-- set, use the lowest DEF and preserve slot order as a deterministic tie-break.
+-- If there is no exposed Character, retain the standard target-selection rules.
+function goblin_shaman_pick_attack_target(state)
+    local selected_card = nil
+    local lowest_def = math.huge
+    for _, candidate in ipairs(state.alpha_front_line or {}) do
+        local candidate_id = candidate.inventory_item_id or ""
+        if candidate_id ~= "" and candidate.expose == true and
+           lib_battle_common.check_card_type(state.item_defs, candidate, "character") then
+            local candidate_def = candidate.final_def or 0
+            lib_battle_common.dlog("[entity_ai] goblin_shaman target candidate: exposed character=" ..
+                candidate_id .. " final_def=" .. candidate_def)
+            if candidate_def < lowest_def then
+                selected_card = candidate
+                lowest_def = candidate_def
+            end
+        end
+    end
+    if selected_card ~= nil then
+        lib_battle_common.dlog("[entity_ai] goblin_shaman target selected: exposed character=" ..
+            selected_card.inventory_item_id .. " final_def=" .. lowest_def)
+        return selected_card
+    end
+    return lib_battle_ai._pick_alpha_attack_target(state)
+end
+
 -- Attack planning: keep one hidden Character. When more than one hidden
 -- Character is on the front line, attack with a hidden one to reveal it.
 -- Returns err or nil.
 function plan_attack(state)
     lib_battle_common.dlog("[entity_ai] == goblin_shaman.plan_attack ==")
     state.omega_planning = {}
-    local defender = lib_battle_ai._pick_alpha_attack_target(state)
+    local defender = goblin_shaman_pick_attack_target(state)
     local face_down_count, face_down_attacker = goblin_shaman_find_extra_face_down_attacker(state)
     local attacker = nil
     if face_down_count > 1 then
