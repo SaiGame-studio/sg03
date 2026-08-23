@@ -17,7 +17,7 @@ namespace SG03
         [SerializeField] private bool faceMainCamera = true;
 
         [Header("Bar appearance")]
-        [SerializeField, Min(1f)] private float barWidth = 640f;
+        [SerializeField, Min(1f)] private float barWidth = 350;
         [SerializeField, Min(1f)] private float barHeight = 20f;
         [SerializeField, Min(0f)] private float borderThickness = 4f;
         [Tooltip("Green is on the left and red is on the right. The bar reads this gradient from left to right as HP increases.")]
@@ -71,7 +71,7 @@ namespace SG03
         public void SetMiniMode(bool enabled)
         {
             this.miniMode = enabled;
-            this.RefreshUi();
+            this.RefreshHealthLabel();
         }
 
         /// <summary>Switches between the mini bar-only view and the full view with HP values.</summary>
@@ -148,8 +148,16 @@ namespace SG03
             this.ApplyBarAppearance(ratio);
             this.fill.style.width = Length.Percent(ratio * 100f);
 
+            this.RefreshHealthLabel();
+        }
+
+        private void RefreshHealthLabel()
+        {
+            if (this.healthLabel == null) this.BindUi();
             if (this.healthLabel == null) return;
-            this.healthLabel.style.display = this.miniMode ? DisplayStyle.None : DisplayStyle.Flex;
+
+            // Keep the label in the UI layout when hidden so the HP bar never changes position.
+            this.healthLabel.style.visibility = this.miniMode ? Visibility.Hidden : Visibility.Visible;
             this.healthLabel.text = $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
         }
 

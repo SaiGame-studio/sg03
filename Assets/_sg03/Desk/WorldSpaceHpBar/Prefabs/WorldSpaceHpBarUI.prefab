@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3193441457980298630}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
@@ -49,7 +49,7 @@ MonoBehaviour:
   currentHealth: 65
   maxHealth: 100
   faceMainCamera: 1
-  barWidth: 640
+  barWidth: 350
   barHeight: 20
   borderThickness: 4
   healthColorGradient:
