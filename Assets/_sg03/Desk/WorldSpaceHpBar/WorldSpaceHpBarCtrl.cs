@@ -38,10 +38,13 @@ namespace SG03
         private VisualElement root;
         private VisualElement track;
         private Label healthLabel;
+        private Vector3 desiredWorldScale;
+        private bool hasDesiredWorldScale;
 
         private void LateUpdate()
         {
             this.FaceMainCamera();
+            this.CompensateParentScale();
         }
 
         protected override void Start()
@@ -89,14 +92,41 @@ namespace SG03
                 return;
             }
 
+            this.desiredWorldScale = this.transform.lossyScale;
+            this.hasDesiredWorldScale = true;
             this.transform.SetParent(this.parent, false);
             this.transform.localPosition = this.parentOffset;
+            this.CompensateParentScale();
         }
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
+            this.CacheDesiredWorldScale();
             this.BindUi();
+        }
+
+        private void CacheDesiredWorldScale()
+        {
+            if (this.hasDesiredWorldScale) return;
+            this.desiredWorldScale = this.transform.lossyScale;
+            this.hasDesiredWorldScale = true;
+        }
+
+        private void CompensateParentScale()
+        {
+            if (this.parent == null || this.transform.parent != this.parent) return;
+            this.CacheDesiredWorldScale();
+
+            Vector3 parentScale = this.parent.lossyScale;
+            if (Mathf.Approximately(parentScale.x, 0f)
+                || Mathf.Approximately(parentScale.y, 0f)
+                || Mathf.Approximately(parentScale.z, 0f)) return;
+
+            this.transform.localScale = new Vector3(
+                this.desiredWorldScale.x / parentScale.x,
+                this.desiredWorldScale.y / parentScale.y,
+                this.desiredWorldScale.z / parentScale.z);
         }
 
         private void BindUi()
