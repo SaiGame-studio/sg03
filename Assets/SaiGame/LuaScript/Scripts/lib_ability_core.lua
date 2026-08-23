@@ -231,6 +231,15 @@ function deal_damage_to_character(state, attacker_card, target_card, damage, tar
     end
 
     if defeated then
+        if target_line == state.alpha_front_line then
+            target_card.defeated_from_line_key = "alpha_front_line"
+        elseif target_line == state.alpha_back_line then
+            target_card.defeated_from_line_key = "alpha_back_line"
+        elseif target_line == state.omega_front_line then
+            target_card.defeated_from_line_key = "omega_front_line"
+        elseif target_line == state.omega_back_line then
+            target_card.defeated_from_line_key = "omega_back_line"
+        end
         if target_line ~= nil then
             lib_battle_common.remove_card_from_line(target_line, target_card.inventory_item_id)
         end
@@ -268,6 +277,8 @@ local function _get_ability_handler(ability_key)
         return lib_ability_mid_game.titan_fall_execute
     elseif ability_key == "titan_spear_sweep" then
         return lib_ability_mid_game.titan_spear_sweep_execute
+    elseif ability_key == "xena_awakened1" then
+        return lib_ability_xena.xena_awakened1_execute
     end
     return nil
 end

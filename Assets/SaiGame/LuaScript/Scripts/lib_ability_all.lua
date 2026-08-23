@@ -515,4 +515,3 @@ function skeleton_shield_execute(state, source_card, event_data, helpers)
 
     return shield_actions, nil
 end
-
