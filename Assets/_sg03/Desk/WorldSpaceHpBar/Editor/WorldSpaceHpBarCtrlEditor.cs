@@ -15,12 +15,26 @@ namespace SG03.Editor
 
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
+            this.serializedObject.Update();
+            DrawPropertiesExcluding(this.serializedObject, "m_Script", "miniMode");
+            this.serializedObject.ApplyModifiedProperties();
+
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("Display mode", EditorStyles.boldLabel);
+            WorldSpaceHpBarCtrl hpBar = (WorldSpaceHpBarCtrl)this.target;
+            string toggleButtonLabel = this.serializedObject.FindProperty("miniMode").boolValue
+                ? "Switch to Full Mode (bar + values)"
+                : "Switch to Mini Mode (bar only)";
+            if (GUILayout.Button(toggleButtonLabel, GUILayout.Height(28)))
+            {
+                Undo.RecordObject(hpBar, "Toggle HP Bar Display Mode");
+                hpBar.ToggleDisplayMode();
+                EditorUtility.SetDirty(hpBar);
+            }
 
             EditorGUILayout.Space(6);
             if (GUILayout.Button("Update Parent", GUILayout.Height(28)))
             {
-                WorldSpaceHpBarCtrl hpBar = (WorldSpaceHpBarCtrl)this.target;
                 Transform parent = this.parentProperty.objectReferenceValue as Transform;
                 if (parent == null)
                 {

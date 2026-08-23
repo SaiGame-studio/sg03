@@ -2,6 +2,6 @@
     <Style src="WorldSpaceHpBar.uss" />
     <ui:VisualElement class="health-bar-root">
         <ui:VisualElement class="health-bar-track"><ui:VisualElement name="HealthFill" class="health-bar-fill" /></ui:VisualElement>
-        <ui:Label name="HealthLabel" text="HP 65 / 100" class="health-bar-label" />
+        <ui:Label name="HealthLabel" text="65 / 100" class="health-bar-label" />
     </ui:VisualElement>
 </ui:UXML>

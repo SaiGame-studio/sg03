@@ -16,6 +16,10 @@ namespace SG03
         [SerializeField, Min(1f)] private float maxHealth = 100f;
         [SerializeField] private bool faceMainCamera = true;
 
+        [Header("Display mode")]
+        [Tooltip("When enabled, only the HP bar is displayed. Disable it to also show the current and maximum HP.")]
+        [SerializeField] private bool miniMode;
+
         [Header("Parenting")]
         [SerializeField] private Transform parent;
         [SerializeField] private Vector3 parentOffset = new Vector3(0f, 1.5f, 0f);
@@ -43,6 +47,19 @@ namespace SG03
             this.maxHealth = Mathf.Max(1f, maximum);
             this.currentHealth = Mathf.Clamp(current, 0f, this.maxHealth);
             this.RefreshUi();
+        }
+
+        /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>
+        public void SetMiniMode(bool enabled)
+        {
+            this.miniMode = enabled;
+            this.RefreshUi();
+        }
+
+        /// <summary>Switches between the mini bar-only view and the full view with HP values.</summary>
+        public void ToggleDisplayMode()
+        {
+            this.SetMiniMode(!this.miniMode);
         }
 
         /// <summary>Makes this HP bar a child of Parent and applies Parent Offset in local space.</summary>
@@ -75,11 +92,14 @@ namespace SG03
 
         public void RefreshUi()
         {
-            if (this.fill == null || this.healthLabel == null) this.LoadComponents();
-            if (this.fill == null || this.healthLabel == null) return;
+            if (this.fill == null || this.healthLabel == null) this.BindUi();
+            if (this.fill == null) return;
             float ratio = Mathf.Clamp01(this.currentHealth / this.maxHealth);
             this.fill.style.width = Length.Percent(ratio * 100f);
-            this.healthLabel.text = $"HP {Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
+
+            if (this.healthLabel == null) return;
+            this.healthLabel.style.display = this.miniMode ? DisplayStyle.None : DisplayStyle.Flex;
+            this.healthLabel.text = $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
         }
     }
 }
