@@ -340,6 +340,7 @@ namespace SG03
         {
             if (this.deskPositions == null) return;
             this.fullDetail = true;
+            this.selected.SetFullDetailMode(true);
             this.arrowIndicator?.Hide();
             OnFullDetailEntered?.Invoke();
             this.selected.MoveToFullDetail(this.deskPositions.FullDetailPoint);
@@ -348,6 +349,7 @@ namespace SG03
         private void ExitFullDetail()
         {
             this.fullDetail = false;
+            this.selected?.SetFullDetailMode(false);
             if (this.IsTargeting)
                 this.arrowIndicator?.Show(this.targetingSource.transform.position, this.targetingSource.transform.position);
             OnFullDetailExited?.Invoke();

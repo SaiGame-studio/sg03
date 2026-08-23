@@ -42,6 +42,7 @@ namespace SG03
         [SerializeField] private bool               expose;
         [SerializeField] private bool               isTrigger;
         [SerializeField] private bool               isHover;
+        private bool isFullDetail;
 
         // ─── Optional external references ─────────────────────────────────────────
 
@@ -156,6 +157,7 @@ namespace SG03
 
         private bool ShouldShowHpBar(CardHolderCtrl holder)
         {
+            if (this.isFullDetail) return false;
             if (!this.IsCharacter()) return false;
             if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
             return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;
@@ -394,7 +396,20 @@ namespace SG03
         public void MoveToFullDetail(Transform point) => this.movement.MoveToFullDetail(point);
 
         /// <summary>Returns the card from full-detail back to its selected position in hand.</summary>
-        public void ReturnFromFullDetail() => this.movement.ReturnFromFullDetail();
+        public void ReturnFromFullDetail()
+        {
+            this.movement.ReturnFromFullDetail();
+            this.RefreshHpBarVisibility();
+        }
+
+        /// <summary>Controls HP-bar visibility while this card is displayed in full-detail view.</summary>
+        public void SetFullDetailMode(bool enabled)
+        {
+            if (this.isFullDetail == enabled) return;
+
+            this.isFullDetail = enabled;
+            if (enabled) this.DespawnHpBar();
+        }
 
         /// <summary>Plays the damage run-up animation: card rises then returns to its current position.</summary>
         public void RunUp() => this.movement.RunUp();
