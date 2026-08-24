@@ -243,7 +243,7 @@ namespace SG03
                 {
                     inventory_item_id = slot?.inventory_item_id ?? string.Empty,
                     face_up           = slot?.face_up ?? false,
-                    slot_index        = slot?.slot_index ?? i
+                    slot_index        = i
                 };
             }
             return result;

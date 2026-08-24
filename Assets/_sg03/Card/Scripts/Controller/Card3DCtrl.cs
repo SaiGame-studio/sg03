@@ -471,6 +471,14 @@ namespace SG03
         /// <summary>Smoothly moves the card to the specified world position, no rotation change.</summary>
         public void MoveTo(Vector3 worldPosition, Location destination) => this.movement.MoveTo(worldPosition, destination);
 
+        /// <summary>Cancels the current transition and immediately starts returning this card to its hand slot.</summary>
+        public void ReturnToHand(Transform handTarget)
+        {
+            this.cardHolder?.SetCard(null);
+            this.AssignCardHolder(null);
+            this.movement.ReturnToHand(handTarget);
+        }
+
         /// <summary>Smoothly rotates the card in-place to the target world-space rotation.</summary>
         public void RotateTo(Quaternion targetRotation) => this.movement.RotateTo(targetRotation);
 

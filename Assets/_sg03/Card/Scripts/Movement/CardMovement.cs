@@ -324,6 +324,20 @@ namespace SG03
             this.StartMoveTween(lineDestination, this.duration, this.ease, null);
         }
 
+        /// <summary>Cancels an active line transition and returns the card to a hand slot.</summary>
+        public void ReturnToHand(Transform handTarget)
+        {
+            if (handTarget == null) return;
+
+            this.KillAllTweens();
+            this.isFlipping = false;
+            this.faceState = FaceState.FaceUp;
+            this.SetLocation(Location.in_hand);
+            this.RecordHandAnchor(handTarget, Location.in_hand);
+            this.StartMoveTween(handTarget.position, this.duration, this.ease, null);
+            this.rotateTween = this.transform.DORotateQuaternion(handTarget.rotation, this.duration).SetEase(this.ease);
+        }
+
         /// <summary>Smoothly rotates the card to face-up using global euler angles.</summary>
         public void FaceUp()
         {

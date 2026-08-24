@@ -342,6 +342,13 @@ namespace SG03
             if (this.debugLog) Debug.Log($"[CardSelection] TryIncrementCharDeploy — countCharDeploy={this.countCharDeploy}/{this.maxCharDeploy}");
         }
 
+        private void TryDecrementCharDeploy(Card3DCtrl card)
+        {
+            if (card == null || !card.IsCharacter()) return;
+            this.countCharDeploy = Mathf.Max(0, this.countCharDeploy - 1);
+            if (this.debugLog) Debug.Log($"[CardSelection] TryDecrementCharDeploy — countCharDeploy={this.countCharDeploy}/{this.maxCharDeploy}");
+        }
+
         public void ResetCharDeployCount()
         {
             this.countCharDeploy = 0;

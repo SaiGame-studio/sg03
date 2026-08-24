@@ -369,27 +369,49 @@ namespace SG03.UI
         /// Updates alpha hand, front line, and back line when the player drags a card
         /// from hand to a front or back line holder on the board.
         /// </summary>
-        public void MoveCardFromHandToLine(string inventoryItemId, Link link, int slotIndex)
+        public bool MoveCardFromHandToLine(string inventoryItemId, Link link, int slotIndex)
         {
+            if (string.IsNullOrEmpty(inventoryItemId) || slotIndex < 0) return false;
+            BattleCardSlot targetSlot = this.GetLineSlot(link, slotIndex);
+            if (!this.IsSlotEmpty(targetSlot))
+            {
+                Debug.LogWarning($"[BattleState] Cannot stage deploy of '{inventoryItemId}': {link}[{slotIndex}] contains '{targetSlot.inventory_item_id}'.", this.gameObject);
+                return false;
+            }
+
             BattleCardSlot slot = this.RemoveFromHand(inventoryItemId);
-            if (slot == null) return;
+            if (slot == null) return false;
             if (link == Link.front) this.InsertIntoFrontLine(slot, slotIndex);
             else this.InsertIntoBackLine(slot, slotIndex);
             this.OnBattleStatusChanged?.Invoke();
+            return true;
         }
 
         /// <summary>Restores a locally staged deploy when the backend rejects it.</summary>
-        public void RestoreCardFromLineToHand(string inventoryItemId, Link link, int lineSlotIndex, int handSlotIndex)
+        public bool RestoreCardFromLineToHand(string inventoryItemId, Link link, int lineSlotIndex, int handSlotIndex)
         {
-            if (handSlotIndex < 0) return;
+            if (string.IsNullOrEmpty(inventoryItemId) || lineSlotIndex < 0 || handSlotIndex < 0) return false;
             this.alphaHand = this.EnsureSlotCapacity(this.alphaHand, handSlotIndex);
-            if (this.alphaHand[handSlotIndex] != null) return;
-            BattleCardSlot slot = this.RemoveFromLine(link, lineSlotIndex);
-            if (slot == null || slot.inventory_item_id != inventoryItemId) return;
+            if (!this.IsSlotEmpty(this.alphaHand[handSlotIndex])) return false;
+
+            BattleCardSlot slot = this.GetLineSlot(link, lineSlotIndex);
+            if (slot == null || slot.inventory_item_id != inventoryItemId)
+            {
+                Debug.LogWarning($"[BattleState] Cannot roll back deploy of '{inventoryItemId}': {link}[{lineSlotIndex}] no longer contains that card.", this.gameObject);
+                return false;
+            }
+
+            this.RemoveFromLine(link, lineSlotIndex);
 
             slot.slot_index = handSlotIndex;
             this.alphaHand[handSlotIndex] = slot;
             this.OnBattleStatusChanged?.Invoke();
+            return true;
+        }
+
+        private bool IsSlotEmpty(BattleCardSlot slot)
+        {
+            return slot == null || string.IsNullOrEmpty(slot.inventory_item_id);
         }
 
         private BattleCardSlot RemoveFromHand(string inventoryItemId)
@@ -457,6 +479,8 @@ namespace SG03.UI
         /// <summary>Moves a card already on the board from one line slot to an empty slot.</summary>
         public void MoveCardOnLine(string codeName, Link fromLink, int fromIndex, Link toLink, int toIndex)
         {
+            if (fromIndex < 0 || toIndex < 0) return;
+            if (!this.IsSlotEmpty(this.GetLineSlot(toLink, toIndex))) return;
             BattleCardSlot slot = this.RemoveFromLine(fromLink, fromIndex);
             if (slot == null) return;
             if (toLink == Link.front) this.InsertIntoFrontLine(slot, toIndex);

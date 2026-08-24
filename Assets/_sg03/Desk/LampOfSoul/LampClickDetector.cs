@@ -37,6 +37,12 @@ namespace SG03
         private OutlineMode currentOutlineMode = OutlineMode.Hidden;
         private Coroutine blinkCoroutine;
         private bool isLampClickPending;
+        private bool hasOptimisticLampMove;
+        private bool lampWasAtAlphaBeforeRequest;
+        private Vector3 lampPositionBeforeRequest;
+        private float nextLampClickAllowedTime;
+
+        private const float LampClickDebounceSeconds = 0.5f;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -196,9 +202,16 @@ namespace SG03
 
         private void OnDisable()
         {
+            this.ResetInteractionState();
+        }
+
+        private void ResetInteractionState()
+        {
             this.SetHover(false);
             this.SetOutlineMode(OutlineMode.Hidden);
             this.isLampClickPending = false;
+            this.hasOptimisticLampMove = false;
+            this.nextLampClickAllowedTime = 0f;
         }
 
         private void Update()
@@ -213,8 +226,13 @@ namespace SG03
         {
             if (this.IsBattleCompleted()) return;
             if (this.isLampClickPending) return;
+            if (this.lampOfSoulCtrl != null && this.lampOfSoulCtrl.IsAnimating) return;
+            if (this.battleStateCtrl?.ClientActions?.HasPendingActions == true) return;
+            if (Time.unscaledTime < this.nextLampClickAllowedTime) return;
             if (!this.IsMouseButtonPressed()) return;
             if (!this.IsLampHit()) return;
+
+            this.isLampClickPending = true;
 
             if (this.IsFullDetailActive())
             {
@@ -227,13 +245,10 @@ namespace SG03
 
         private System.Collections.IEnumerator ClickLampAfterReturningFullDetailCard()
         {
-            this.isLampClickPending = true;
-
             Card3DCtrl fullDetailCard = this.battleStateCtrl?.CardSelection?.ReturnFullDetailCard();
             if (fullDetailCard != null)
                 yield return new WaitUntil(() => !fullDetailCard.IsAnimating);
 
-            this.isLampClickPending = false;
             this.OnLampClicked();
         }
 
@@ -266,67 +281,146 @@ namespace SG03
         private void OnLampClicked()
         {
             this.LogLampClicked();
-            this.DispatchByNextMove();
+            if (this.DispatchByNextMove())
+            {
+                this.nextLampClickAllowedTime = Time.unscaledTime + LampClickDebounceSeconds;
+                return;
+            }
+
+            this.isLampClickPending = false;
         }
 
-        private void DispatchByNextMove()
+        private bool DispatchByNextMove()
         {
-            if (this.battleStateCtrl?.BattleState == null) return;
+            if (this.battleStateCtrl?.BattleState == null) return false;
+            if (this.battleScripts == null || this.battleScripts.IsRunning) return false;
+
             NextMoveType nextMove = this.battleStateCtrl.BattleState.NextMove;
-            if (nextMove == NextMoveType.card_deploy) this.HandleCardDeploy();
-            if (nextMove == NextMoveType.alpha_turn)  this.HandleAlphaTurnEnd();
-            if (nextMove == NextMoveType.omega_turn)  this.HandleAlphaDefendingEnd();
+            if (nextMove == NextMoveType.card_deploy) return this.HandleCardDeploy();
+            if (nextMove == NextMoveType.alpha_turn) return this.HandleAlphaTurnEnd();
+            if (nextMove == NextMoveType.omega_turn) return this.HandleAlphaDefendingEnd();
+            return false;
         }
 
-        private void HandleAlphaTurnEnd()
+        private bool HandleAlphaTurnEnd()
         {
-            if (this.battleScripts == null) return;
+            this.BeginOptimisticLampMove(false);
             this.battleScripts.RunAlphaTurnEnd(this.OnAlphaTurnEndSuccess, this.OnAlphaTurnEndError);
+            return this.CompleteDispatchAttempt();
         }
 
-        private void HandleAlphaDefendingEnd()
+        private bool HandleAlphaDefendingEnd()
         {
-            if (this.battleScripts == null) return;
+            this.BeginOptimisticLampMove(false);
             this.battleScripts.RunAlphaDefendingEnd(this.OnAlphaDefendingEndSuccess, this.OnAlphaDefendingEndError);
+            return this.CompleteDispatchAttempt();
         }
 
-        private void HandleCardDeploy()
+        private bool HandleCardDeploy()
         {
-            if (this.battleScripts == null) return;
+            this.BeginOptimisticLampMove(true);
             this.battleScripts.RunCardDeploy(this.OnCardDeploySuccess, this.OnCardDeployError);
+            return this.CompleteDispatchAttempt();
+        }
+
+        private void BeginOptimisticLampMove(bool moveToAlpha)
+        {
+            if (this.lampOfSoulCtrl == null) return;
+
+            this.lampPositionBeforeRequest = this.lampOfSoulCtrl.transform.position;
+            this.lampWasAtAlphaBeforeRequest = this.lampOfSoulCtrl.IsAtAlpha;
+            this.hasOptimisticLampMove = true;
+
+            if (moveToAlpha) this.lampOfSoulCtrl.MoveToAlphaOptimistically();
+            else this.lampOfSoulCtrl.MoveToOmegaOptimistically();
+        }
+
+        private bool CompleteDispatchAttempt()
+        {
+            if (this.battleScripts.IsRunning) return true;
+            this.RollbackOptimisticLampMove();
+            return false;
         }
 
         private void OnAlphaTurnEndSuccess(string response)
         {
+            if (!this.TryAcceptSuccessfulResponse(response, this.OnAlphaTurnEndError)) return;
             Debug.Log("<color=#FFAA33><b>[LampClickDetector] Alpha turn end success</b></color> " + response);
             this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
+            this.CompleteLampClickRequest();
         }
 
         private void OnAlphaTurnEndError(string error)
         {
             Debug.LogError("[LampClickDetector] Alpha turn end error: " + error);
+            this.RollbackOptimisticLampMove();
+            this.CompleteLampClickRequest();
         }
 
         private void OnAlphaDefendingEndSuccess(string response)
         {
+            if (!this.TryAcceptSuccessfulResponse(response, this.OnAlphaDefendingEndError)) return;
             Debug.Log("<color=#88CCFF><b>[LampClickDetector] Alpha defending end success</b></color> " + response);
             this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
+            this.CompleteLampClickRequest();
         }
 
         private void OnAlphaDefendingEndError(string error)
         {
             Debug.LogError("[LampClickDetector] Alpha defending end error: " + error);
+            this.RollbackOptimisticLampMove();
+            this.CompleteLampClickRequest();
         }
 
         private void OnCardDeploySuccess(string response)
         {
+            if (!this.TryAcceptSuccessfulResponse(response, this.OnCardDeployError)) return;
             Debug.Log("<color=#FF88FF><b>[LampClickDetector] Card deploy success</b></color> " + response);
             this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
+            this.CompleteLampClickRequest();
         }
 
         private void OnCardDeployError(string error)
         {
             Debug.LogError("[LampClickDetector] Card deploy error: " + error);
+            this.RollbackOptimisticLampMove();
+            this.CompleteLampClickRequest();
+        }
+
+        private bool TryAcceptSuccessfulResponse(string response, System.Action<string> onRejected)
+        {
+            if (string.IsNullOrWhiteSpace(response))
+            {
+                onRejected?.Invoke("Backend returned an empty response.");
+                return false;
+            }
+
+            BattleStatusScriptResponse parsed = JsonUtility.FromJson<BattleStatusScriptResponse>(response);
+            if (parsed?.output == null)
+            {
+                onRejected?.Invoke("Backend returned an invalid response.");
+                return false;
+            }
+            if (!string.IsNullOrEmpty(parsed.output.error))
+            {
+                onRejected?.Invoke(parsed.output.error);
+                return false;
+            }
+
+            this.hasOptimisticLampMove = false;
+            return true;
+        }
+
+        private void RollbackOptimisticLampMove()
+        {
+            if (!this.hasOptimisticLampMove || this.lampOfSoulCtrl == null) return;
+            this.hasOptimisticLampMove = false;
+            this.lampOfSoulCtrl.RollbackOptimisticMove(this.lampPositionBeforeRequest, this.lampWasAtAlphaBeforeRequest);
+        }
+
+        private void CompleteLampClickRequest()
+        {
+            this.isLampClickPending = false;
         }
 
         private void LogLampClicked()
