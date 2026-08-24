@@ -34,6 +34,31 @@ function _find_item_def(item_defs, code)
     return nil
 end
 
+-- Returns the attack value that Alpha is allowed to see while Omega plans.
+-- Never expose stats for a hidden card.
+function _get_visible_omega_attacker_atk(state, attacker_card)
+    if attacker_card == nil or attacker_card.face_up ~= true or attacker_card.expose ~= true then
+        return 0
+    end
+
+    local attacker_def = _find_item_def(state.item_defs, attacker_card.item_definition_code_name)
+    if attacker_def == nil then return 0 end
+    if attacker_def.base_stats ~= nil and attacker_def.base_stats.atk ~= nil then
+        return attacker_def.base_stats.atk
+    end
+    if attacker_def.metadata ~= nil and attacker_def.metadata.atk ~= nil then
+        return attacker_def.metadata.atk
+    end
+    return 0
+end
+
+-- Builds a labeled client action so each parameter is self-describing.
+function build_omega_planning_character_attack_action(state, attacker_card, defender_id)
+    local visible_atk = _get_visible_omega_attacker_atk(state, attacker_card)
+    return "omega_planing_character_attack:attacker_card_id=" .. attacker_card.inventory_item_id ..
+        ",defender_card_id=" .. defender_id .. ",atk=" .. tostring(visible_atk)
+end
+
 -- Splits cards into two groups: characters (front-eligible) and others (back only).
 -- Game rule: only character-type cards may be placed in the front line.
 function _split_cards_by_type(cards, item_defs)
@@ -318,7 +343,7 @@ end
 -- Builds state.omega_planning for the current turn.
 -- Picks ONE untriggered character from omega_front_line to attack the alpha
 -- front-line card with the lowest final_def (fallback to alpha back-line).
--- Appends a "omega_plan_attack:attacker_id,defender_id" client action.
+-- Appends a labeled omega planning action with attacker, defender, and visible ATK.
 -- If no untriggered attacker exists, calls omega_end_turn directly.
 -- Returns err or nil.
 
@@ -421,7 +446,7 @@ function omega_planning_to_attack(state, hide_attackers_while_alpha_front)
         table.insert(state.omega_planning, plan_entry)
 
         lib_battle_common.append_client_action(state,
-            "omega_planing_character_attack:" .. attacker_card.inventory_item_id .. ",alpha_hp")
+            build_omega_planning_character_attack_action(state, attacker_card, "alpha_hp"))
         lib_battle_common.dlog("[lib_battle_ai] omega_planning_to_attack: planned direct attack " ..
         attacker_card.inventory_item_id .. " -> alpha_hp")
         return nil
@@ -440,7 +465,7 @@ function omega_planning_to_attack(state, hide_attackers_while_alpha_front)
     table.insert(state.omega_planning, plan_entry)
 
     lib_battle_common.append_client_action(state,
-        "omega_planing_character_attack:" .. attacker_card.inventory_item_id .. "," .. defender_card.inventory_item_id)
+        build_omega_planning_character_attack_action(state, attacker_card, defender_card.inventory_item_id))
     lib_battle_common.dlog("[lib_battle_ai] omega_planning_to_attack: planned " ..
     attacker_card.inventory_item_id .. " -> " .. defender_card.inventory_item_id)
     return nil

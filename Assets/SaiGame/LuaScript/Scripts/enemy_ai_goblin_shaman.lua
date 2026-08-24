@@ -298,7 +298,7 @@ function plan_attack(state)
         })
         lib_battle_common.append_client_action(
             state,
-            "omega_planing_character_attack:" .. attacker.inventory_item_id .. ",alpha_hp"
+            lib_battle_ai.build_omega_planning_character_attack_action(state, attacker, "alpha_hp")
         )
         return nil
     end
@@ -310,7 +310,7 @@ function plan_attack(state)
     })
     lib_battle_common.append_client_action(
         state,
-        "omega_planing_character_attack:" .. attacker.inventory_item_id .. "," .. defender.inventory_item_id
+        lib_battle_ai.build_omega_planning_character_attack_action(state, attacker, defender.inventory_item_id)
     )
     return nil
 end

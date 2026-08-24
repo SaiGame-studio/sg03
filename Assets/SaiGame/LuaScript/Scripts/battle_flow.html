@@ -198,7 +198,7 @@
           ⑤ omega_planning_to_attack → state.omega_planning<br>
           &nbsp;&nbsp;&nbsp;• chọn 1 untriggered character từ omega_front_line<br>
           &nbsp;&nbsp;&nbsp;• target: alpha_hp nếu alpha front line không có character, ngược lại chọn alpha front line card có final_def thấp nhất (fallback: back_line)<br>
-          &nbsp;&nbsp;&nbsp;• client: <code>omega_planing_character_attack:attacker_id,defender_id/alpha_hp</code><br>
+          &nbsp;&nbsp;&nbsp;• client: <code>omega_planing_character_attack:attacker_card_id=...,defender_card_id=.../alpha_hp,atk=...</code><br>
           &nbsp;&nbsp;&nbsp;• alpha_defending = true<br>
           ⑥ client: <code>alpha_take_lamp</code> · <code>alpha_turn_end:turn</code><br>
           ⑦ next_move = "omega_turn"

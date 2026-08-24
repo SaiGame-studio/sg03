@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Globalization;
 using UnityEngine;
 
 namespace SG03
@@ -33,6 +34,7 @@ namespace SG03
             Card3DCtrl card = this.cardSpawning?.FindCardById(targetId);
             if (card != null)
             {
+                card.ClearHealthPreview();
                 card.Damaged();
                 this.OnCardTakeDamageExecuted?.Invoke(targetId);
                 return this.StartCoroutine(this.WaitForCard(card));
@@ -61,6 +63,7 @@ namespace SG03
             Card3DCtrl card = this.cardSpawning?.FindCardById(targetId);
             if (card != null)
             {
+                card.ClearHealthPreview();
                 card.RunUp();
                 return this.StartCoroutine(this.WaitForCard(card));
             }
@@ -187,6 +190,8 @@ namespace SG03
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
 
+            defender.ClearHealthPreview();
+
             return this.StartCoroutine(this.OmegaAttackRoutine(attacker, defender));
         }
 
@@ -247,12 +252,37 @@ namespace SG03
         private Coroutine ExecuteOmegaPlaningCharacterAttack(string[] parameters)
         {
             if (parameters == null || parameters.Length < 2) return null;
-            string attackerId = parameters[0].Trim();
-            string defenderId = parameters[1].Trim();
+
+            string attackerId = null;
+            string defenderId = null;
+            float attackerAtk = 0f;
+            foreach (string parameter in parameters)
+            {
+                string[] keyValue = parameter.Split('=');
+                if (keyValue.Length != 2) continue;
+
+                string key = keyValue[0].Trim().ToLower();
+                string value = keyValue[1].Trim();
+                if (key == "attacker_card_id" || key == "attacker") attackerId = value;
+                else if (key == "defender_card_id" || key == "defender") defenderId = value;
+                else if (key == "atk")
+                {
+                    float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out attackerAtk);
+                }
+            }
+
+            // Keep replay compatibility with actions recorded before parameters were labeled.
+            if (string.IsNullOrEmpty(attackerId) && !parameters[0].Contains("="))
+            {
+                attackerId = parameters[0].Trim();
+                defenderId = parameters[1].Trim();
+            }
+
             if (string.IsNullOrEmpty(attackerId) || string.IsNullOrEmpty(defenderId)) return null;
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
+            defender.SetHealthPreview(attackerAtk);
             return this.StartCoroutine(this.OmegaPlaningCharacterAttackRoutine(attacker, defender));
         }
 
