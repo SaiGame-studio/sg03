@@ -23,6 +23,8 @@ namespace SG03
 
         [Header("Action Log")]
         [SerializeField] private bool logActions = false;
+        [SerializeField] private bool logAlphaHandToBackLine = true;
+        [SerializeField, Min(0.1f)] private float alphaBackLineLogInterval = 0.5f;
 
         private Coroutine dispatchRoutine;
         [SerializeField] private bool hasPendingActions;
@@ -296,7 +298,7 @@ namespace SG03
                 case "alpha_source_to_hand": result = this.ExecuteAlphaSourceToHand(parameters); break;
                 case "omega_source_to_hand": result = this.ExecuteOmegaSourceToHand(parameters); break;
                 case "alpha_hand_to_front_line": result = this.ExecuteAlphaHandToFrontLine(parameters); break;
-                case "alpha_hand_to_back_line": result = this.ExecuteAlphaHandToBackLine(parameters); break;
+                case "alpha_hand_to_back_line": result = this.ExecuteAlphaHandToBackLine(log, parameters); break;
                 case "omega_hand_to_front_line": result = this.ExecuteOmegaHandToFrontLine(parameters); break;
                 case "omega_hand_to_back_line": result = this.ExecuteOmegaHandToBackLine(parameters); break;
                 case "alpha_void_to_front_line": result = this.ExecuteAlphaVoidToFrontLine(parameters); break;
