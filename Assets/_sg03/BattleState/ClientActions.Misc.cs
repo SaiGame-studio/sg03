@@ -162,7 +162,22 @@ namespace SG03
         private Coroutine ExecuteOmegaEndTurn()
         {
             this.cardSelection?.ResetCharDeployCount();
+            this.cardSpawning?.RefreshHpBarsAfterTurnEnd();
+            this.SetHpBarVisibilityForNextTurn(Owner.alpha);
             return null;
+        }
+
+        private Coroutine ExecuteAlphaEndTurn()
+        {
+            this.cardSpawning?.RefreshHpBarsAfterTurnEnd();
+            this.SetHpBarVisibilityForNextTurn(Owner.omega);
+            return null;
+        }
+
+        private void SetHpBarVisibilityForNextTurn(Owner sideToHide)
+        {
+            this.HpBarHiddenOwner = sideToHide;
+            this.cardSpawning?.RefreshHpBarsForTurnChange();
         }
     }
 }

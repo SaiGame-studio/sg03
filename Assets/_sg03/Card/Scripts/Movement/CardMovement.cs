@@ -211,6 +211,9 @@ namespace SG03
         public bool IsFlipping => this.isFlipping;
         public bool IsAnimating =>
             (this.moveTween != null && this.moveTween.IsActive()) ||
+            (this.yTween != null && this.yTween.IsActive()) ||
+            (this.rotateTween != null && this.rotateTween.IsActive()) ||
+            (this.rotateY180Tween != null && this.rotateY180Tween.IsActive()) ||
             this.isFlipping ||
             (this.damageTween != null && this.damageTween.IsActive()) ||
             (this.attackTween != null && this.attackTween.IsActive()) ||
@@ -296,14 +299,16 @@ namespace SG03
         /// </summary>
         public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null)
         {
-            if (this.isFlipping) return;
             if (holder == null) return;
+            // The settle phase must supersede any stale face/rotation tween;
+            // otherwise the card remains at the temporary above-line position.
+            this.KillAllTweens();
+            this.isFlipping = false;
             // Debug.Log($"[CardMovement] {this.gameObject.name} MoveToUnknow → '{holder.name}' (moveTween active: {this.moveTween != null && this.moveTween.IsActive()})");
             this.ctrl.AssignCardHolder(holder);
             Location destination = holder.HolderLocation;
             this.SetLocation(destination);
             this.RecordHandAnchor(holder.transform, destination);
-            this.KillAllTweens();
             Vector3 lineDestination = holder.transform.position + new Vector3(0f, this.lineOffsetY, 0f);
             this.StartMoveTween(lineDestination, this.duration, this.ease, onReady);
             this.FaceDownUnknown();
@@ -573,6 +578,8 @@ namespace SG03
             this.damageTween = null;
             this.attackTween?.Kill();
             this.attackTween = null;
+            this.abilityTween?.Kill();
+            this.abilityTween = null;
         }
     }
 }

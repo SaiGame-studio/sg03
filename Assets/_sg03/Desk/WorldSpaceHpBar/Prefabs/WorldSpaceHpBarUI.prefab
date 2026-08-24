@@ -48,7 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.WorldSpaceHpBarCtrl
   despawn: {fileID: 0}
   uiDocument: {fileID: 8356789373894643313}
-  currentHealth: 65
+  currentHealth: 0
   maxHealth: 100
   faceMainCamera: 1
   barWidth: 350

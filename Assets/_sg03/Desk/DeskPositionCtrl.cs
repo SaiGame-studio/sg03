@@ -198,7 +198,7 @@ namespace SG03
         protected virtual void LoadAlphaFrontLine()
         {
             if (this.IsHoldersFilled(this.alphaFrontLine)) return;
-            this.LoadHoldersByOwnerAndLink(this.alphaFrontLine, Owner.alpha, Link.front);
+            this.LoadHoldersFromHierarchy(this.alphaFrontLine, "AlphaFrontLine");
             Debug.LogWarning(this.transform.name + ": LoadAlphaFrontLine", this.gameObject);
         }
 

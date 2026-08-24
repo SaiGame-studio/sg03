@@ -34,6 +34,7 @@ namespace SG03
             if (card != null)
             {
                 card.Damaged();
+                this.OnCardTakeDamageExecuted?.Invoke(targetId);
                 return this.StartCoroutine(this.WaitForCard(card));
             }
 

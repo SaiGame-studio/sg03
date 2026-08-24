@@ -1,3 +1,5 @@
+using System.Collections;
+using SG03.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,9 +11,10 @@ namespace SG03
     {
         [Header("Required runtime references")]
         [SerializeField] private UIDocument uiDocument;
+        [SerializeField] private BattleStateCtrl battleStateCtrl;
 
         [Header("Preview health")]
-        [SerializeField, Min(0f)] private float currentHealth = 65f;
+        [SerializeField, Min(0f)] private float currentHealth = 0f;
         [SerializeField, Min(1f)] private float maxHealth = 100f;
         [SerializeField] private bool faceMainCamera = true;
 
@@ -50,6 +53,10 @@ namespace SG03
         private bool hasBaseWorldRotation;
         private Vector3 worldParentOffset;
         private bool hasWorldParentOffset;
+        private Owner parentOwner;
+
+        private ClientActions subscribedClientActions;
+        private Coroutine deferredUiRefreshRoutine;
 
         /// <summary>Runtime UI Toolkit element that renders the health fill.</summary>
         public VisualElement FillElement => this.fill;
@@ -67,7 +74,12 @@ namespace SG03
 
         private void OnEnable()
         {
-            this.RefreshUiWhenEnabled();
+            this.HandleEnabled();
+        }
+
+        private void OnDisable()
+        {
+            this.HandleDisabled();
         }
 
         protected override void Start()
@@ -85,6 +97,34 @@ namespace SG03
             this.RefreshUi();
         }
 
+        private void HandleEnabled()
+        {
+            this.RefreshUiWhenEnabled();
+            this.RefreshUiWhenDocumentIsReady();
+            this.BindClientActionEvents();
+            this.RefreshMaxHealthFromBattleState();
+        }
+
+        private void HandleDisabled()
+        {
+            this.UnbindClientActionEvents();
+            this.deferredUiRefreshRoutine = null;
+        }
+
+        private void RefreshUiWhenDocumentIsReady()
+        {
+            if (this.deferredUiRefreshRoutine != null) return;
+            this.deferredUiRefreshRoutine = this.StartCoroutine(this.RefreshUiWhenDocumentIsReadyRoutine());
+        }
+
+        private IEnumerator RefreshUiWhenDocumentIsReadyRoutine()
+        {
+            yield return null;
+            this.deferredUiRefreshRoutine = null;
+            if (!this.isActiveAndEnabled) yield break;
+            this.RefreshUi();
+        }
+
         /// <summary>Returns the pool key used by <see cref="Spawner{T}"/>.</summary>
         public override string GetName()
         {
@@ -98,6 +138,12 @@ namespace SG03
             this.CompensateParentScale();
         }
 
+        /// <summary>Immediately aligns this bar with its tracked card after a face-state change.</summary>
+        public void RefreshWorldSpacePresentation()
+        {
+            this.UpdateWorldSpacePresentation();
+        }
+
         private void FaceMainCamera()
         {
             if (!this.faceMainCamera || Camera.main == null) return;
@@ -105,12 +151,67 @@ namespace SG03
             Vector3 directionFromCamera = this.transform.position - Camera.main.transform.position;
             if (directionFromCamera.sqrMagnitude < Mathf.Epsilon) return;
 
+            // IMPORTANT: Update only pitch (X). Y/Z define the card-side orientation and must
+            // remain unchanged; do not replace this with LookAt or transform.forward assignment.
             float horizontalDistance = new Vector2(directionFromCamera.x, directionFromCamera.z).magnitude;
             Vector3 worldRotation = this.hasBaseWorldRotation
                 ? this.baseWorldRotation
                 : this.transform.eulerAngles;
             worldRotation.x = -Mathf.Atan2(directionFromCamera.y, horizontalDistance) * Mathf.Rad2Deg;
             this.transform.rotation = Quaternion.Euler(worldRotation);
+        }
+
+        /// <summary>Gets the active DEF value for the card this bar is attached to.</summary>
+        private int GetFinalDef()
+        {
+            return this.TryGetBattleCardSlot(out BattleCardSlot slot) ? slot.final_def : 0;
+        }
+
+        private int GetTotalDamageReceived()
+        {
+            return this.TryGetBattleCardSlot(out BattleCardSlot slot) ? slot.total_damage_received : 0;
+        }
+
+        private void RefreshMaxHealthFromBattleState()
+        {
+            if (!this.TryGetBattleCardSlot(out _)) return;
+
+            this.SetMaxHealth(this.GetFinalDef());
+        }
+
+        private bool TryGetBattleCardSlot(out BattleCardSlot result)
+        {
+            result = null;
+            // Pool activation occurs before Card3DCtrl assigns the tracked card through SetParent.
+            // Use Unity's null check explicitly; ?. does not handle destroyed/unassigned Unity objects.
+            if (this.parent == null) return false;
+
+            Card3DCtrl card = this.parent.GetComponent<Card3DCtrl>();
+            string inventoryItemId = card?.InventoryItemId;
+            BattleState state = this.battleStateCtrl?.BattleState;
+            if (state == null || string.IsNullOrEmpty(inventoryItemId)) return false;
+
+            result = this.FindSlot(state.AlphaHand, inventoryItemId)
+                ?? this.FindSlot(state.AlphaFrontLine, inventoryItemId)
+                ?? this.FindSlot(state.AlphaBackLine, inventoryItemId)
+                ?? this.FindSlot(state.AlphaTheVoid, inventoryItemId)
+                ?? this.FindSlot(state.AlphaTheSource, inventoryItemId)
+                ?? this.FindSlot(state.OmegaHand, inventoryItemId)
+                ?? this.FindSlot(state.OmegaFrontLine, inventoryItemId)
+                ?? this.FindSlot(state.OmegaBackLine, inventoryItemId)
+                ?? this.FindSlot(state.OmegaTheVoid, inventoryItemId);
+            return result != null;
+        }
+
+        private BattleCardSlot FindSlot(BattleCardSlot[] slots, string inventoryItemId)
+        {
+            if (slots == null) return null;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot != null && slot.inventory_item_id == inventoryItemId) return slot;
+            }
+
+            return null;
         }
 
         public void SetHealth(float current, float maximum)
@@ -120,26 +221,42 @@ namespace SG03
             this.RefreshUi();
         }
 
+        private void SetMaxHealth(float maximum)
+        {
+            this.maxHealth = Mathf.Max(1f, maximum);
+            this.currentHealth = Mathf.Clamp(this.currentHealth, 0f, this.maxHealth);
+            this.RefreshUi();
+        }
+
+        private void ResetCurrentHealthForNewCard()
+        {
+            this.currentHealth = 0f;
+        }
+
         /// <summary>Sets the health bar's world-space position.</summary>
         public void SetPosition(Vector3 worldPosition)
         {
             this.transform.position = worldPosition;
         }
 
-        /// <summary>Makes this bar follow a parent while preserving its world position and scale.</summary>
+        /// <summary>Assigns the card this bar follows without inheriting its transform.</summary>
         public void SetParent(Transform newParent, Owner owner)
         {
             if (newParent == null) return;
 
+            bool isNewCard = this.parent != newParent;
             this.desiredWorldScale = this.transform.lossyScale;
             this.hasDesiredWorldScale = true;
             this.parent = newParent;
-            this.transform.SetParent(this.parent, true);
-            this.UpdateParentOffset(owner);
+            this.parentOwner = owner;
+            if (isNewCard) this.ResetCurrentHealthForNewCard();
+            this.transform.SetParent(null, true);
+            this.SetWorldParentOffset();
             this.UpdateWorldPositionFromParent();
             this.baseWorldRotation = this.transform.eulerAngles;
             this.hasBaseWorldRotation = true;
-            this.CompensateParentScale();
+            this.BindClientActionEvents();
+            this.RefreshMaxHealthFromBattleState();
         }
 
         private Vector3 GetParentOffset(Owner owner)
@@ -147,16 +264,18 @@ namespace SG03
             return owner == Owner.omega ? this.omegaParentOffset : this.alphaParentOffset;
         }
 
-        private void UpdateParentOffset(Owner owner)
+        private void SetWorldParentOffset()
         {
-            this.transform.localPosition = this.GetParentOffset(owner);
-            this.CacheWorldParentOffset();
+            this.worldParentOffset = this.GetParentOffset(this.parentOwner);
+            this.worldParentOffset.y = this.aboveCardOffset;
+            this.hasWorldParentOffset = true;
         }
 
         /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>
         public void SetMiniMode(bool enabled)
         {
             this.miniMode = enabled;
+            this.RefreshTrackVisibility();
             this.RefreshHealthLabel();
         }
 
@@ -166,7 +285,7 @@ namespace SG03
             this.SetMiniMode(!this.miniMode);
         }
 
-        /// <summary>Makes this HP bar a child of Parent and applies Parent Offset in local space.</summary>
+        /// <summary>Reapplies the world-space follow offset for the assigned parent.</summary>
         public void UpdateParent()
         {
             if (this.parent == null)
@@ -177,9 +296,9 @@ namespace SG03
 
             this.desiredWorldScale = this.transform.lossyScale;
             this.hasDesiredWorldScale = true;
-            this.transform.SetParent(this.parent, false);
-            this.UpdateParentOffset(Owner.alpha);
-            this.CompensateParentScale();
+            this.transform.SetParent(null, true);
+            this.SetWorldParentOffset();
+            this.UpdateWorldPositionFromParent();
         }
 
         protected override void LoadComponents()
@@ -187,6 +306,59 @@ namespace SG03
             base.LoadComponents();
             this.CacheDesiredWorldScale();
             this.BindUi();
+            this.LoadBattleStateCtrl();
+        }
+
+        private void LoadBattleStateCtrl()
+        {
+            if (this.battleStateCtrl != null) return;
+            this.battleStateCtrl = FindAnyObjectByType<BattleStateCtrl>();
+        }
+
+        private void BindClientActionEvents()
+        {
+            this.LoadBattleStateCtrl();
+            ClientActions clientActions = this.battleStateCtrl?.ClientActions;
+            if (clientActions == this.subscribedClientActions) return;
+
+            this.UnbindClientActionEvents();
+            this.subscribedClientActions = clientActions;
+            if (this.subscribedClientActions != null)
+            {
+                this.subscribedClientActions.OnCardTakeDamageExecuted += this.OnCardTakeDamageExecuted;
+            }
+        }
+
+        private void UnbindClientActionEvents()
+        {
+            if (this.subscribedClientActions == null) return;
+            this.subscribedClientActions.OnCardTakeDamageExecuted -= this.OnCardTakeDamageExecuted;
+            this.subscribedClientActions = null;
+        }
+
+        private void OnCardTakeDamageExecuted(string targetCardId)
+        {
+            if (this.parent == null) return;
+
+            string cardId = this.parent.GetComponent<Card3DCtrl>()?.InventoryItemId;
+            if (string.IsNullOrEmpty(cardId) || cardId != targetCardId) return;
+            this.RefreshHealthFromDamageAction();
+        }
+
+        private void RefreshHealthFromDamageAction()
+        {
+            // The client action selects when to refresh; the battle state is the source of truth.
+            this.SetHealth(this.GetTotalDamageReceived(), this.GetFinalDef());
+            // The damage animation starts in the same action. Re-anchor now rather than waiting
+            // for the next LateUpdate, so the bar remains above the card for this frame as well.
+            this.RefreshWorldSpacePresentation();
+        }
+
+        /// <summary>Refreshes both values from battle state after an end-turn action resets card state.</summary>
+        public void RefreshHealthFromTurnEnd()
+        {
+            if (!this.TryGetBattleCardSlot(out _)) return;
+            this.SetHealth(this.GetTotalDamageReceived(), this.GetFinalDef());
         }
 
         // This UI is returned explicitly through ObjectPool, so it needs no Despawn component.
@@ -201,18 +373,9 @@ namespace SG03
             this.hasDesiredWorldScale = true;
         }
 
-        private void CacheWorldParentOffset()
-        {
-            if (this.parent == null) return;
-
-            this.worldParentOffset = this.transform.position - this.parent.position;
-            this.worldParentOffset.y = this.aboveCardOffset;
-            this.hasWorldParentOffset = true;
-        }
-
         private void UpdateWorldPositionFromParent()
         {
-            if (!this.hasWorldParentOffset || this.parent == null || this.transform.parent != this.parent) return;
+            if (!this.hasWorldParentOffset || this.parent == null) return;
 
             Card3D card = this.parent.GetComponent<Card3D>();
             if (card != null && card.TryGetStatsCenterWorldPosition(out Vector3 statsCenter))
@@ -258,7 +421,7 @@ namespace SG03
             VisualElement uiRoot = this.uiDocument.rootVisualElement;
             if (uiRoot == null)
             {
-                Debug.LogWarning($"{this.name}: UIDocument root is missing.", this.gameObject);
+                // Expected while SpawnInactive configures this object before it is enabled.
                 return;
             }
 
@@ -304,7 +467,22 @@ namespace SG03
             this.ApplyBarAppearance(ratio);
             this.fill.style.width = Length.Percent(ratio * 100f);
 
+            this.RefreshTrackVisibility();
             this.RefreshHealthLabel();
+        }
+
+        private void RefreshTrackVisibility()
+        {
+            if (this.track == null) this.BindUi();
+            if (this.track == null) return;
+
+            // On hover, an undamaged card shows only its final DEF as a centered value.
+            this.track.style.display = this.ShouldShowFinalDefOnly() ? DisplayStyle.None : DisplayStyle.Flex;
+        }
+
+        private bool ShouldShowFinalDefOnly()
+        {
+            return !this.miniMode && Mathf.Approximately(this.currentHealth, 0f);
         }
 
         private void RefreshHealthLabel()
@@ -314,7 +492,9 @@ namespace SG03
 
             // Keep the label in the UI layout when hidden so the HP bar never changes position.
             this.healthLabel.style.visibility = this.miniMode ? Visibility.Hidden : Visibility.Visible;
-            this.healthLabel.text = $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
+            this.healthLabel.text = this.ShouldShowFinalDefOnly()
+                ? $"{Mathf.CeilToInt(this.maxHealth)}"
+                : $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
         }
 
         private void ApplyBarAppearance(float healthRatio)
