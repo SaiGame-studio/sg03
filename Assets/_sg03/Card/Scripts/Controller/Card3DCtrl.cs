@@ -167,8 +167,15 @@ namespace SG03
         {
             if (this.isFullDetail) return false;
             if (!this.IsCharacter()) return false;
+            if (this.ShouldHideHpBarForCurrentTurn()) return false;
             if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
             return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;
+        }
+
+        private bool ShouldHideHpBarForCurrentTurn()
+        {
+            this.LoadClientActions();
+            return this.clientActions != null && this.clientActions.HpBarHiddenOwner == this.cardOwner;
         }
 
         private void RefreshHpBarVisibility()
@@ -209,6 +216,18 @@ namespace SG03
 
         /// <summary>Re-evaluates the HP bar after a resume action sequence is complete.</summary>
         public void RefreshHpBarAfterResume()
+        {
+            this.RefreshHpBarVisibility();
+        }
+
+        /// <summary>Refreshes this card's active HP bar after either side ends a turn.</summary>
+        public void RefreshHpBarAfterTurnEnd()
+        {
+            this.hpBarInstance?.RefreshHealthFromTurnEnd();
+        }
+
+        /// <summary>Re-evaluates HP-bar visibility when the active side changes.</summary>
+        public void RefreshHpBarAfterTurnChange()
         {
             this.RefreshHpBarVisibility();
         }

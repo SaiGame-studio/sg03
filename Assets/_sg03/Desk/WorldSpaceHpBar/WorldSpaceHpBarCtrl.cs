@@ -1,3 +1,4 @@
+using System.Collections;
 using SG03.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -55,6 +56,7 @@ namespace SG03
         private Owner parentOwner;
 
         private ClientActions subscribedClientActions;
+        private Coroutine deferredUiRefreshRoutine;
 
         /// <summary>Runtime UI Toolkit element that renders the health fill.</summary>
         public VisualElement FillElement => this.fill;
@@ -98,6 +100,7 @@ namespace SG03
         private void HandleEnabled()
         {
             this.RefreshUiWhenEnabled();
+            this.RefreshUiWhenDocumentIsReady();
             this.BindClientActionEvents();
             this.RefreshMaxHealthFromBattleState();
         }
@@ -105,6 +108,21 @@ namespace SG03
         private void HandleDisabled()
         {
             this.UnbindClientActionEvents();
+            this.deferredUiRefreshRoutine = null;
+        }
+
+        private void RefreshUiWhenDocumentIsReady()
+        {
+            if (this.deferredUiRefreshRoutine != null) return;
+            this.deferredUiRefreshRoutine = this.StartCoroutine(this.RefreshUiWhenDocumentIsReadyRoutine());
+        }
+
+        private IEnumerator RefreshUiWhenDocumentIsReadyRoutine()
+        {
+            yield return null;
+            this.deferredUiRefreshRoutine = null;
+            if (!this.isActiveAndEnabled) yield break;
+            this.RefreshUi();
         }
 
         /// <summary>Returns the pool key used by <see cref="Spawner{T}"/>.</summary>
@@ -330,6 +348,16 @@ namespace SG03
         {
             // The client action selects when to refresh; the battle state is the source of truth.
             this.SetHealth(this.GetTotalDamageReceived(), this.GetFinalDef());
+            // The damage animation starts in the same action. Re-anchor now rather than waiting
+            // for the next LateUpdate, so the bar remains above the card for this frame as well.
+            this.RefreshWorldSpacePresentation();
+        }
+
+        /// <summary>Refreshes both values from battle state after an end-turn action resets card state.</summary>
+        public void RefreshHealthFromTurnEnd()
+        {
+            if (!this.TryGetBattleCardSlot(out _)) return;
+            this.SetHealth(this.GetTotalDamageReceived(), this.GetFinalDef());
         }
 
         // This UI is returned explicitly through ObjectPool, so it needs no Despawn component.
@@ -392,7 +420,7 @@ namespace SG03
             VisualElement uiRoot = this.uiDocument.rootVisualElement;
             if (uiRoot == null)
             {
-                Debug.LogWarning($"{this.name}: UIDocument root is missing.", this.gameObject);
+                // Expected while SpawnInactive configures this object before it is enabled.
                 return;
             }
 

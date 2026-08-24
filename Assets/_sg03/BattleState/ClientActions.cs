@@ -34,11 +34,26 @@ namespace SG03
         public bool HasPendingActions => this.hasPendingActions;
 
         [SerializeField] private bool isResuming;
-        /// <summary>True if the current action dispatch is a resume or game start sequence.</summary>
+        /// <summary>True only while the explicitly requested battle-resume sequence is being dispatched.</summary>
         public bool IsResuming => this.isResuming;
+
+        /// <summary>The side whose character HP bars are hidden for the current turn.</summary>
+        public Owner? HpBarHiddenOwner { get; private set; }
 
         public event Action<string> OnBattleCompleted;
         public event Action<string> OnCardTakeDamageExecuted;
+
+        /// <summary>Marks the next received action sequence as an explicit battle resume.</summary>
+        public void BeginResume()
+        {
+            this.isResuming = true;
+        }
+
+        /// <summary>Cancels resume mode when the battle-status request fails or is abandoned.</summary>
+        public void CancelResume()
+        {
+            this.isResuming = false;
+        }
 
         [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
 
@@ -139,20 +154,7 @@ namespace SG03
         {
             if (actions == null) return;
             this.BuildActionLogs(actions);
-            this.UpdateIsResuming(actions);
             this.TryStartDispatchWhenDefinitionsLoaded();
-        }
-
-        private void UpdateIsResuming(string[] actions)
-        {
-            foreach (string entry in actions)
-            {
-                if (entry.Contains("alpha_source_spawn_card") || entry.Contains("omega_source_spawn_card"))
-                {
-                    this.isResuming = true;
-                    return;
-                }
-            }
         }
 
         private void TryStartDispatchWhenDefinitionsLoaded()
@@ -383,6 +385,7 @@ namespace SG03
                 case "omega_planing_character_attack": result = this.ExecuteOmegaPlaningCharacterAttack(parameters); break;
                 case "alpha_take_lamp": result = this.ExecuteLampMoveToAlpha(); break;
                 case "omega_take_lamp": result = this.ExecuteLampMoveToOmega(); break;
+                case "alpha_turn_end": result = this.ExecuteAlphaEndTurn(); break;
                 case "omega_turn_end": result = this.ExecuteOmegaEndTurn(); break;
                 case "battle_completed":
                     string winner = parameters.Length > 0 ? parameters[0].Trim() : string.Empty;

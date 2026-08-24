@@ -156,6 +156,7 @@ namespace SG03.UI
         {
             BattleScripts scripts = this.getBattleScripts();
             if (!this.CanStartBattle(scripts)) return;
+            this.getBattleStateCtrl()?.ClientActions?.CancelResume();
             string enemyCodeName = this.GetEnemyCodeName();
             string presetInstanceId = this.selectedPreset.id;
             string requestBody = this.BuildBattleStartRequestBody(enemyCodeName, presetInstanceId);
@@ -172,6 +173,7 @@ namespace SG03.UI
                 return;
             }
 
+            this.getBattleStateCtrl()?.ClientActions?.BeginResume();
             this.SetResumeBattleLoading(true);
             scripts.RunBattleStatus(this.OnResumeBattleSucceeded, this.OnResumeBattleFailed);
         }
@@ -250,6 +252,7 @@ namespace SG03.UI
 
         private void OnResumeBattleFailed(string error)
         {
+            this.getBattleStateCtrl()?.ClientActions?.CancelResume();
             this.SetResumeBattleLoading(false);
             Debug.LogWarning("GameBattleActionsUI: Resume battle failed: " + error);
         }
