@@ -31,6 +31,7 @@ namespace SG03
         [Header("Display mode")]
         [Tooltip("When enabled, only the HP bar is displayed. Disable it to also show the current and maximum HP.")]
         [SerializeField] private bool miniMode = true;
+        private bool finalDefOnlyMode;
 
         [Header("Parenting")]
         [SerializeField] private Transform parent;
@@ -274,7 +275,14 @@ namespace SG03
         /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>
         public void SetMiniMode(bool enabled)
         {
-            this.miniMode = enabled;
+            this.SetDisplayMode(enabled, false);
+        }
+
+        /// <summary>Sets the compact/full presentation and whether the full view contains only final DEF.</summary>
+        public void SetDisplayMode(bool miniModeEnabled, bool finalDefOnlyEnabled)
+        {
+            this.miniMode = miniModeEnabled;
+            this.finalDefOnlyMode = !miniModeEnabled && finalDefOnlyEnabled;
             this.RefreshTrackVisibility();
             this.RefreshHealthLabel();
         }
@@ -476,13 +484,13 @@ namespace SG03
             if (this.track == null) this.BindUi();
             if (this.track == null) return;
 
-            // On hover, an undamaged card shows only its final DEF as a centered value.
+            // A bar revealed specifically by hover shows only final DEF as a centered value.
             this.track.style.display = this.ShouldShowFinalDefOnly() ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
         private bool ShouldShowFinalDefOnly()
         {
-            return !this.miniMode && Mathf.Approximately(this.currentHealth, 0f);
+            return !this.miniMode && this.finalDefOnlyMode;
         }
 
         private void RefreshHealthLabel()

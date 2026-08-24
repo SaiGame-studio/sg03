@@ -44,6 +44,7 @@ namespace SG03
         [SerializeField] private bool               isTrigger;
         [SerializeField] private bool               isHover;
         private bool isFullDetail;
+        private bool showFinalDefOnlyOnHover;
 
         // ─── Optional external references ─────────────────────────────────────────
 
@@ -62,6 +63,9 @@ namespace SG03
 
         public void NotifyHoverEntered()
         {
+            if (!this.isHover)
+                this.showFinalDefOnlyOnHover = !this.IsHpBarVisible();
+
             this.isHover = true;
             this.RefreshHpBarVisibility();
             this.RefreshHpBarDisplayMode();
@@ -71,6 +75,7 @@ namespace SG03
         public void NotifyHoverExited()
         {
             this.isHover = false;
+            this.showFinalDefOnlyOnHover = false;
             this.RefreshHpBarVisibility();
             this.RefreshHpBarDisplayMode();
             HoverExited?.Invoke(this);
@@ -291,7 +296,14 @@ namespace SG03
         {
             if (this.hpBarInstance == null) return;
 
-            this.hpBarInstance.SetMiniMode(!this.isHover);
+            this.hpBarInstance.SetDisplayMode(
+                !this.isHover,
+                this.isHover && this.showFinalDefOnlyOnHover);
+        }
+
+        private bool IsHpBarVisible()
+        {
+            return this.hpBarInstance != null && this.hpBarInstance.gameObject.activeInHierarchy;
         }
 
         private void RefreshHpBarAfterFaceStateChanged()
