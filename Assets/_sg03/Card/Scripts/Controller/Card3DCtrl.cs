@@ -562,9 +562,6 @@ namespace SG03
         public Location Location   => this.movement.Location;
         public bool    IsFlipping  => this.movement.IsFlipping;
         public bool    IsAnimating => this.movement.IsAnimating;
-        public string  AnimationDebugState => this.movement != null
-            ? this.movement.GetAnimationDebugState()
-            : "movement=NULL";
         public string  InventoryItemId => this.inventoryItemId;
 
         public void SetMoveDuration(float d)  => this.movement.SetMoveDuration(d);

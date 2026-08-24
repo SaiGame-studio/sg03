@@ -220,22 +220,6 @@ namespace SG03
             (this.abilityTween != null && this.abilityTween.IsActive());
         public FaceState FaceState => this.faceState;
 
-        public string GetAnimationDebugState()
-        {
-            return $"move={DescribeTween(this.moveTween)}, y={DescribeTween(this.yTween)}, "
-                + $"rotate={DescribeTween(this.rotateTween)}, face={DescribeTween(this.faceTween)}, "
-                + $"rotateY180={DescribeTween(this.rotateY180Tween)}, isFlipping={this.isFlipping}, "
-                + $"damage={DescribeTween(this.damageTween)}, attack={DescribeTween(this.attackTween)}, "
-                + $"ability={DescribeTween(this.abilityTween)}";
-        }
-
-        private static string DescribeTween(Tween tween)
-        {
-            if (tween == null) return "null";
-            if (!tween.IsActive()) return "inactive";
-            return tween.IsPlaying() ? "playing" : "active-paused";
-        }
-
         public void SetMoveDuration(float d) { this.duration = d; }
         public void SetRotateDuration(float d)
         {
