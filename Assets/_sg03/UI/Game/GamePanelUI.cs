@@ -24,6 +24,7 @@ namespace SG03.UI
         [SerializeField] private string lobbySceneName = "1-lobby";
 
         private Button btnBackToLobby;
+        private Button btnCancelLastGame;
         private Button btnEndBattle;
         private Button btnStartBattle;
         private Label playerNameLabel;
@@ -267,6 +268,7 @@ namespace SG03.UI
         private void BindBattleActions(VisualElement panelRoot)
         {
             this.btnStartBattle = panelRoot.Q<Button>("BtnStartBattle");
+            this.btnCancelLastGame = panelRoot.Q<Button>("BtnCancelLastGame");
             this.btnEndBattle = panelRoot.Q<Button>("BtnEndBattle");
             this.battleActionsUI = new GameBattleActionsUI(
                 this.GetCurrentBattleScripts,
@@ -274,6 +276,7 @@ namespace SG03.UI
             this.battleActionsUI.Bind(panelRoot);
             this.battleActionsUI.OnBattleStarted += this.RefreshCurrencyWallet;
             this.battleActionsUI.OnBattleStartedOrResumed += this.HideBattleSetupControls;
+            this.battleActionsUI.OnBattleCancelled += this.ShowNewGameSetup;
         }
 
         private void RefreshCurrencyWallet()
@@ -398,6 +401,7 @@ namespace SG03.UI
         {
             if (this.battleDeskInfo != null) this.battleDeskInfo.style.display = DisplayStyle.Flex;
             if (this.btnStartBattle != null) this.btnStartBattle.style.display = DisplayStyle.Flex;
+            if (this.btnCancelLastGame != null) this.btnCancelLastGame.style.display = DisplayStyle.None;
             if (this.btnEndBattle != null) this.btnEndBattle.style.display = DisplayStyle.None;
         }
 
@@ -405,6 +409,7 @@ namespace SG03.UI
         {
             if (this.battleDeskInfo != null) this.battleDeskInfo.style.display = DisplayStyle.None;
             if (this.btnStartBattle != null) this.btnStartBattle.style.display = DisplayStyle.Flex;
+            if (this.btnCancelLastGame != null) this.btnCancelLastGame.style.display = DisplayStyle.Flex;
             if (this.btnEndBattle != null) this.btnEndBattle.style.display = DisplayStyle.None;
         }
 
@@ -412,6 +417,7 @@ namespace SG03.UI
         {
             if (this.battleDeskInfo != null) this.battleDeskInfo.style.display = DisplayStyle.None;
             if (this.btnStartBattle != null) this.btnStartBattle.style.display = DisplayStyle.None;
+            if (this.btnCancelLastGame != null) this.btnCancelLastGame.style.display = DisplayStyle.None;
             if (this.btnEndBattle != null) this.btnEndBattle.style.display = DisplayStyle.Flex;
         }
 

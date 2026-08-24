@@ -7,8 +7,7 @@ using SG03.UI.Components;
 
 namespace SG03.UI
 {
-    // Handles all battle-action buttons: Init Card, Check Status, Start Battle, End Battle,
-    // End Turn, Draw Card, and Attack.
+    // Handles the Start, Resume, Cancel Last Game, and End Game controls.
     // Receives the selected preset via HandlePresetTabSelected / HandlePresetSlotsLoaded
     // so it can validate and initiate StartBattle.
     public class GameBattleActionsUI
@@ -24,6 +23,7 @@ namespace SG03.UI
         private PresetData selectedPreset;
 
         private Button btnEndBattle;
+        private Button btnCancelLastGame;
         private Button btnStartBattle;
         private DropdownField enemyCodeNameInput;
 
@@ -31,6 +31,7 @@ namespace SG03.UI
 
         public event Action OnBattleStartedOrResumed;
         public event Action OnBattleStarted;
+        public event Action OnBattleCancelled;
 
         public GameBattleActionsUI(
             Func<BattleScripts> getBattleScripts,
@@ -49,6 +50,7 @@ namespace SG03.UI
         private void BindButtons(VisualElement root)
         {
             this.btnEndBattle = root.Q<Button>("BtnEndBattle");
+            this.btnCancelLastGame = root.Q<Button>("BtnCancelLastGame");
             this.btnStartBattle = root.Q<Button>("BtnStartBattle");
             this.enemyCodeNameInput = root.Q<DropdownField>("EnemyCodeNameInput");
             this.enemyCodeNameInput?.SetValueWithoutNotify(DefaultEnemyCodeName);
@@ -57,6 +59,7 @@ namespace SG03.UI
         private void RegisterCallbacks()
         {
             this.btnEndBattle?.RegisterCallback<ClickEvent>(_ => this.OnEndBattleClicked());
+            this.btnCancelLastGame?.RegisterCallback<ClickEvent>(_ => this.OnCancelLastGameClicked());
             this.btnStartBattle?.RegisterCallback<ClickEvent>(_ => this.OnStartBattleClicked());
             this.enemyCodeNameInput?.RegisterValueChangedCallback(_ => this.ResetStartBattleButtonText());
         }
@@ -104,6 +107,67 @@ namespace SG03.UI
                 return;
             }
             this.TriggerStartBattle();
+        }
+
+        protected virtual void OnCancelLastGameClicked()
+        {
+            this.TriggerCancelLastGame();
+        }
+
+        private void TriggerCancelLastGame()
+        {
+            BattleScripts scripts = this.getBattleScripts();
+            if (scripts == null)
+            {
+                this.SetCancelLastGameButtonText("No Script");
+                return;
+            }
+            if (scripts.IsRunning)
+            {
+                ToastMessage.ShowError("Another battle action is still running.", this.btnCancelLastGame);
+                return;
+            }
+
+            this.SetCancelLastGameLoading(true);
+            scripts.RunBattleEnd(this.OnBattleCancelSucceeded, this.OnBattleCancelFailed);
+        }
+
+        private void SetCancelLastGameLoading(bool isLoading)
+        {
+            if (this.btnCancelLastGame != null)
+            {
+                this.btnCancelLastGame.SetEnabled(!isLoading);
+                this.btnCancelLastGame.text = isLoading ? "Cancelling..." : "Cancel Last Game";
+            }
+            this.btnStartBattle?.SetEnabled(!isLoading);
+        }
+
+        private void SetCancelLastGameButtonText(string text)
+        {
+            if (this.btnCancelLastGame == null) return;
+            this.btnCancelLastGame.text = text;
+        }
+
+        private void OnBattleCancelSucceeded(string response)
+        {
+            this.SetCancelLastGameLoading(false);
+            if (TryGetScriptError(response, out string error))
+            {
+                ToastMessage.ShowError(error, this.btnCancelLastGame);
+                return;
+            }
+
+            this.hasActiveBattleSession = false;
+            this.getBattleStateCtrl()?.ClientActions?.CancelResume();
+            this.getBattleStateCtrl()?.BattleState?.ClearData();
+            this.OnBattleCancelled?.Invoke();
+        }
+
+        private void OnBattleCancelFailed(string error)
+        {
+            this.SetCancelLastGameLoading(false);
+            ToastMessage.ShowError(error, this.btnCancelLastGame);
+            Debug.LogWarning("GameBattleActionsUI: Cancel last game failed: " + error);
         }
 
         private void TriggerEndBattle()
