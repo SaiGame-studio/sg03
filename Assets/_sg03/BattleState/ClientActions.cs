@@ -20,6 +20,7 @@ namespace SG03
         [SerializeField] private BattleStateCtrl battleStateCtrl;
         [SerializeField] private float actionInterval = 0.1f;
         [SerializeField] private float omegaFrontLinePostDelay = 0.5f;
+        [SerializeField, Min(1f)] private float resumeMoveSpeedMultiplier = 2f;
 
         [Header("Action Log")]
         [SerializeField] private bool logActions = false;
@@ -53,12 +54,14 @@ namespace SG03
         public void BeginResume()
         {
             this.isResuming = true;
+            this.SyncActionMoveDuration();
         }
 
         /// <summary>Cancels resume mode when the battle-status request fails or is abandoned.</summary>
         public void CancelResume()
         {
             this.isResuming = false;
+            this.SyncActionMoveDuration();
         }
 
         /// <summary>Pauses or resumes the queue between client actions.</summary>
@@ -264,6 +267,7 @@ namespace SG03
             if (this.hasPendingActions || !this.isResuming) return;
 
             this.isResuming = false;
+            this.SyncActionMoveDuration();
             this.cardSpawning?.SpawnHpBarsAfterResume();
         }
 
@@ -339,7 +343,9 @@ namespace SG03
         private void SyncActionMoveDuration()
         {
             if (this.cardSpawning == null) return;
-            this.cardSpawning.ActionMoveDuration = this.battleStateCtrl != null ? this.battleStateCtrl.CardMoveDuration : 1f;
+            float normalMoveDuration = this.battleStateCtrl != null ? this.battleStateCtrl.CardMoveDuration : 1f;
+            float speedMultiplier = this.isResuming ? Mathf.Max(1f, this.resumeMoveSpeedMultiplier) : 1f;
+            this.cardSpawning.ActionMoveDuration = normalMoveDuration / speedMultiplier;
             this.cardSpawning.ActionRotateDuration = this.battleStateCtrl != null ? this.battleStateCtrl.CardRotateDuration : 0.4f;
         }
 
