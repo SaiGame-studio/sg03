@@ -51,6 +51,9 @@ MonoBehaviour:
   currentHealth: 0
   maxHealth: 100
   faceMainCamera: 1
+  healthPreviewDelta: 0
+  previewOpacity: 1
+  previewColorAnimationSpeed: 0.5
   barWidth: 350
   barHeight: 20
   borderThickness: 4

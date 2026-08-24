@@ -7390,9 +7390,8 @@ MonoBehaviour:
   battleStateCtrl: {fileID: 2015755444}
   actionInterval: 0.1
   omegaFrontLinePostDelay: 0.5
+  resumeMoveSpeedMultiplier: 2
   logActions: 0
-  logAlphaHandToBackLine: 1
-  alphaBackLineLogInterval: 0.5
   hasPendingActions: 0
   isResuming: 0
   actionLog: []
@@ -8347,7 +8346,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3193441457980298630, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3482978470714320713, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
       propertyPath: m_LocalPosition.x
@@ -8392,7 +8391,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3193441457980298630, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
 --- !u!1001 &6418814622862749946
 PrefabInstance:
