@@ -10,6 +10,7 @@ namespace SG03
         {
             if (parameters == null || parameters.Length == 0) return null;
             string moveType = parameters[0].Trim();
+            this.SetHpBarVisibilityForNextMove(moveType);
             
             if (moveType == "init_cards")
             {
@@ -163,21 +164,36 @@ namespace SG03
         {
             this.cardSelection?.ResetCharDeployCount();
             this.cardSpawning?.RefreshHpBarsAfterTurnEnd();
-            this.SetHpBarVisibilityForNextTurn(Owner.alpha);
             return null;
         }
 
         private Coroutine ExecuteAlphaEndTurn()
         {
             this.cardSpawning?.RefreshHpBarsAfterTurnEnd();
-            this.SetHpBarVisibilityForNextTurn(Owner.omega);
             return null;
         }
 
-        private void SetHpBarVisibilityForNextTurn(Owner sideToHide)
+        private void SetHpBarVisibilityForNextMove(string moveType)
         {
-            this.HpBarHiddenOwner = sideToHide;
+            Owner? sideToHide = this.GetHpBarHiddenOwner(moveType);
+            if (!sideToHide.HasValue || this.HpBarHiddenOwner == sideToHide) return;
+
+            this.HpBarHiddenOwner = sideToHide.Value;
             this.cardSpawning?.RefreshHpBarsForTurnChange();
+        }
+
+        private Owner? GetHpBarHiddenOwner(string moveType)
+        {
+            switch (moveType)
+            {
+                case "alpha_draw":
+                case "alpha_turn":
+                    return Owner.alpha;
+                case "omega_turn":
+                    return Owner.omega;
+                default:
+                    return null;
+            }
         }
     }
 }
