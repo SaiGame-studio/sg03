@@ -38,6 +38,7 @@ namespace SG03
         public bool IsResuming => this.isResuming;
 
         public event Action<string> OnBattleCompleted;
+        public event Action<string> OnCardTakeDamageExecuted;
 
         [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
 
@@ -236,7 +237,15 @@ namespace SG03
             }
             this.dispatchRoutine = null;
             this.hasPendingActions = this.HasUnexecutedActions();
-            if (!this.hasPendingActions) this.isResuming = false;
+            this.FinishResumeWhenActionsComplete();
+        }
+
+        private void FinishResumeWhenActionsComplete()
+        {
+            if (this.hasPendingActions || !this.isResuming) return;
+
+            this.isResuming = false;
+            this.cardSpawning?.SpawnHpBarsAfterResume();
         }
 
         private IEnumerator DispatchSourceSpawnActions()

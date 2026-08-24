@@ -50,6 +50,16 @@ namespace SG03
         public float ActionMoveDuration   { get; set; } = 1f;
         public float ActionRotateDuration { get; set; } = 0.4f;
 
+        /// <summary>Spawns HP bars for all eligible character cards after resume playback finishes.</summary>
+        public void SpawnHpBarsAfterResume()
+        {
+            Card3DCtrl[] cards = FindObjectsByType<Card3DCtrl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (Card3DCtrl card in cards)
+            {
+                card.RefreshHpBarAfterResume();
+            }
+        }
+
         public Coroutine SpawnAlphaSourceCards(int count)
         {
             if (this.alphaSourceRoutine != null) this.StopCoroutine(this.alphaSourceRoutine);

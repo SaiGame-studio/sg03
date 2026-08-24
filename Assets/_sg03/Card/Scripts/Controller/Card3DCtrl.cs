@@ -51,6 +51,7 @@ namespace SG03
         [SerializeField] private ObjectPool objectPool;
         [SerializeField] private WorldSpaceHpBarCtrl hpBarPrefab;
         [SerializeField] private WorldSpaceHpBarCtrl hpBarInstance;
+        private ClientActions clientActions;
         private Coroutine spawnHpBarRoutine;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
@@ -118,6 +119,11 @@ namespace SG03
         private void SpawnHpBarAt(CardHolderCtrl holder)
         {
             if (holder == null || holder != this.cardHolder) return;
+            if (this.IsBattleResuming())
+            {
+                this.DespawnHpBar();
+                return;
+            }
 
             if (!this.ShouldShowHpBar(holder))
             {
@@ -167,6 +173,12 @@ namespace SG03
 
         private void RefreshHpBarVisibility()
         {
+            if (this.IsBattleResuming())
+            {
+                this.DespawnHpBar();
+                return;
+            }
+
             if (!this.ShouldShowHpBar(this.cardHolder))
             {
                 this.DespawnHpBar();
@@ -183,6 +195,24 @@ namespace SG03
             this.SpawnHpBarAt(this.cardHolder);
         }
 
+        private bool IsBattleResuming()
+        {
+            this.LoadClientActions();
+            return this.clientActions != null && this.clientActions.IsResuming;
+        }
+
+        private void LoadClientActions()
+        {
+            if (this.clientActions != null) return;
+            this.clientActions = FindAnyObjectByType<ClientActions>();
+        }
+
+        /// <summary>Re-evaluates the HP bar after a resume action sequence is complete.</summary>
+        public void RefreshHpBarAfterResume()
+        {
+            this.RefreshHpBarVisibility();
+        }
+
         private void DespawnHpBar()
         {
             this.EnsureSingleHpBarInstance();
@@ -197,6 +227,12 @@ namespace SG03
             if (this.hpBarInstance == null) return;
 
             this.hpBarInstance.SetMiniMode(!this.isHover);
+        }
+
+        private void RefreshHpBarAfterFaceStateChanged()
+        {
+            this.RefreshHpBarVisibility();
+            this.hpBarInstance?.RefreshWorldSpacePresentation();
         }
 
         private void EnsureSingleHpBarInstance()
@@ -369,7 +405,7 @@ namespace SG03
         {
             this.movement.FaceDownUnknown();
             FaceStateChanged?.Invoke(this, false);
-            this.RefreshHpBarVisibility();
+            this.RefreshHpBarAfterFaceStateChanged();
         }
 
         /// <summary>Smoothly rotates the card to face-up using the Unknown axis, without rising.</summary>
@@ -377,7 +413,7 @@ namespace SG03
         {
             this.movement.FaceUpUnknown();
             FaceStateChanged?.Invoke(this, true);
-            this.RefreshHpBarVisibility();
+            this.RefreshHpBarAfterFaceStateChanged();
         }
 
         /// <summary>Smoothly rotates the card to face-up.</summary>
@@ -385,7 +421,7 @@ namespace SG03
         {
             this.movement.FaceUp();
             FaceStateChanged?.Invoke(this, true);
-            this.RefreshHpBarVisibility();
+            this.RefreshHpBarAfterFaceStateChanged();
         }
 
         /// <summary>Smoothly rotates the card to face-down.</summary>
@@ -393,7 +429,7 @@ namespace SG03
         {
             this.movement.FaceDown();
             FaceStateChanged?.Invoke(this, false);
-            this.RefreshHpBarVisibility();
+            this.RefreshHpBarAfterFaceStateChanged();
         }
 
         /// <summary>Moves the card to the full-detail point without changing its logical location.</summary>
