@@ -18,6 +18,13 @@ namespace SG03
         [SerializeField, Min(1f)] private float maxHealth = 100f;
         [SerializeField] private bool faceMainCamera = true;
 
+        [Header("Health change preview")]
+        [Tooltip("Signed preview amount. Positive previews healing; negative previews damage. Zero hides the preview.")]
+        [SerializeField] private float healthPreviewDelta;
+        [SerializeField, Range(0f, 1f)] private float previewOpacity = 1f;
+        [Tooltip("Number of full gradient traversals per second. Zero pauses the color animation.")]
+        [SerializeField, Min(0f)] private float previewColorAnimationSpeed = 1.5f;
+
         [Header("Bar appearance")]
         [SerializeField, Min(1f)] private float barWidth = 350;
         [SerializeField, Min(1f)] private float barHeight = 20f;
@@ -31,6 +38,7 @@ namespace SG03
         [Header("Display mode")]
         [Tooltip("When enabled, only the HP bar is displayed. Disable it to also show the current and maximum HP.")]
         [SerializeField] private bool miniMode = true;
+        private bool finalDefOnlyMode;
 
         [Header("Parenting")]
         [SerializeField] private Transform parent;
@@ -44,6 +52,7 @@ namespace SG03
         [SerializeField, Min(0f)] private float aboveCardOffset = 0.2f;
 
         private VisualElement fill;
+        private VisualElement healthPreview;
         private VisualElement root;
         private VisualElement track;
         private Label healthLabel;
@@ -57,9 +66,13 @@ namespace SG03
 
         private ClientActions subscribedClientActions;
         private Coroutine deferredUiRefreshRoutine;
+        private float previewColorAnimationTime;
 
         /// <summary>Runtime UI Toolkit element that renders the health fill.</summary>
         public VisualElement FillElement => this.fill;
+
+        /// <summary>Runtime UI Toolkit element that renders a pending health change.</summary>
+        public VisualElement HealthPreviewElement => this.healthPreview;
 
         /// <summary>Runtime UI Toolkit root element of this health bar.</summary>
         public VisualElement RootElement => this.root;
@@ -136,6 +149,7 @@ namespace SG03
             this.UpdateWorldPositionFromParent();
             this.FaceMainCamera();
             this.CompensateParentScale();
+            this.UpdateHealthPreviewAnimation();
         }
 
         /// <summary>Immediately aligns this bar with its tracked card after a face-state change.</summary>
@@ -221,6 +235,20 @@ namespace SG03
             this.RefreshUi();
         }
 
+        /// <summary>Previews a signed health change without modifying the current health value.</summary>
+        public void SetHealthPreview(float signedDelta)
+        {
+            this.healthPreviewDelta = signedDelta;
+            this.previewColorAnimationTime = 0f;
+            this.RefreshHealthPreview();
+        }
+
+        /// <summary>Hides the pending health-change preview.</summary>
+        public void ClearHealthPreview()
+        {
+            this.SetHealthPreview(0f);
+        }
+
         private void SetMaxHealth(float maximum)
         {
             this.maxHealth = Mathf.Max(1f, maximum);
@@ -231,6 +259,8 @@ namespace SG03
         private void ResetCurrentHealthForNewCard()
         {
             this.currentHealth = 0f;
+            this.healthPreviewDelta = 0f;
+            this.previewColorAnimationTime = 0f;
         }
 
         /// <summary>Sets the health bar's world-space position.</summary>
@@ -274,7 +304,14 @@ namespace SG03
         /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>
         public void SetMiniMode(bool enabled)
         {
-            this.miniMode = enabled;
+            this.SetDisplayMode(enabled, false);
+        }
+
+        /// <summary>Sets the compact/full presentation and whether the full view contains only final DEF.</summary>
+        public void SetDisplayMode(bool miniModeEnabled, bool finalDefOnlyEnabled)
+        {
+            this.miniMode = miniModeEnabled;
+            this.finalDefOnlyMode = !miniModeEnabled && finalDefOnlyEnabled;
             this.RefreshTrackVisibility();
             this.RefreshHealthLabel();
         }
@@ -428,12 +465,14 @@ namespace SG03
             this.LoadUiElement(ref this.root, uiRoot, "HealthBarRoot");
             this.LoadUiElement(ref this.track, uiRoot, "HealthTrack");
             this.LoadUiElement(ref this.fill, uiRoot, "HealthFill");
+            this.LoadUiElement(ref this.healthPreview, uiRoot, "HealthPreview");
             this.LoadHealthLabel(uiRoot);
         }
 
         private void ClearUiElementReferences()
         {
             this.fill = null;
+            this.healthPreview = null;
             this.root = null;
             this.track = null;
             this.healthLabel = null;
@@ -463,12 +502,58 @@ namespace SG03
         {
             this.BindUi(true);
             if (this.fill == null) return;
-            float ratio = Mathf.Clamp01(this.currentHealth / this.maxHealth);
-            this.ApplyBarAppearance(ratio);
-            this.fill.style.width = Length.Percent(ratio * 100f);
+            float currentRatio = Mathf.Clamp01(this.currentHealth / this.maxHealth);
+            this.ApplyBarAppearance(currentRatio);
+            this.RefreshHealthPreview();
 
             this.RefreshTrackVisibility();
             this.RefreshHealthLabel();
+        }
+
+        private void RefreshHealthPreview()
+        {
+            if (this.fill == null || this.healthPreview == null) this.BindUi();
+            if (this.fill == null || this.healthPreview == null) return;
+
+            float currentRatio = Mathf.Clamp01(this.currentHealth / this.maxHealth);
+            float previewHealth = Mathf.Clamp(this.currentHealth + this.healthPreviewDelta, 0f, this.maxHealth);
+            float previewRatio = Mathf.Clamp01(previewHealth / this.maxHealth);
+            bool hasPreview = !Mathf.Approximately(previewRatio, currentRatio);
+
+            this.healthPreview.style.display = hasPreview ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!hasPreview)
+            {
+                this.fill.style.width = Length.Percent(currentRatio * 100f);
+                return;
+            }
+
+            bool isHealing = previewRatio > currentRatio;
+            float segmentStart = Mathf.Min(currentRatio, previewRatio);
+            float segmentWidth = Mathf.Abs(previewRatio - currentRatio);
+            this.fill.style.width = Length.Percent((isHealing ? currentRatio : previewRatio) * 100f);
+            this.healthPreview.style.left = Length.Percent(segmentStart * 100f);
+            this.healthPreview.style.width = Length.Percent(segmentWidth * 100f);
+            this.healthPreview.style.backgroundColor = this.GetHealthPreviewColor(isHealing);
+            this.healthPreview.style.opacity = this.previewOpacity;
+        }
+
+        private Color GetHealthPreviewColor(bool isHealing)
+        {
+            float animationPosition = Mathf.PingPong(
+                this.previewColorAnimationTime * this.previewColorAnimationSpeed,
+                1f);
+            float gradientPosition = isHealing ? animationPosition : 1f - animationPosition;
+            return this.healthColorGradient.Evaluate(gradientPosition);
+        }
+
+        private void UpdateHealthPreviewAnimation()
+        {
+            if (this.healthPreview == null || this.healthPreview.resolvedStyle.display == DisplayStyle.None) return;
+
+            this.previewColorAnimationTime += Time.deltaTime;
+            bool isHealing = this.healthPreviewDelta > 0f;
+            this.healthPreview.style.backgroundColor = this.GetHealthPreviewColor(isHealing);
+            this.healthPreview.style.opacity = this.previewOpacity;
         }
 
         private void RefreshTrackVisibility()
@@ -476,13 +561,15 @@ namespace SG03
             if (this.track == null) this.BindUi();
             if (this.track == null) return;
 
-            // On hover, an undamaged card shows only its final DEF as a centered value.
+            // A bar revealed specifically by hover shows only final DEF as a centered value.
             this.track.style.display = this.ShouldShowFinalDefOnly() ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
         private bool ShouldShowFinalDefOnly()
         {
-            return !this.miniMode && Mathf.Approximately(this.currentHealth, 0f);
+            return !this.miniMode
+                && this.finalDefOnlyMode
+                && Mathf.Approximately(this.healthPreviewDelta, 0f);
         }
 
         private void RefreshHealthLabel()
@@ -492,9 +579,13 @@ namespace SG03
 
             // Keep the label in the UI layout when hidden so the HP bar never changes position.
             this.healthLabel.style.visibility = this.miniMode ? Visibility.Hidden : Visibility.Visible;
-            this.healthLabel.text = this.ShouldShowFinalDefOnly()
-                ? $"{Mathf.CeilToInt(this.maxHealth)}"
-                : $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
+            if (this.ShouldShowFinalDefOnly())
+            {
+                this.healthLabel.text = $"{Mathf.CeilToInt(this.maxHealth)}";
+                return;
+            }
+
+            this.healthLabel.text = $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
         }
 
         private void ApplyBarAppearance(float healthRatio)
@@ -544,5 +635,6 @@ namespace SG03
                 },
             };
         }
+
     }
 }

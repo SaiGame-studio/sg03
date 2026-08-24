@@ -50,6 +50,7 @@ namespace SG03
         [SerializeField] private ArrowIndicatorCtrl arrowIndicator;
         [SerializeField] private Card3DCtrl targeted;
         private Card3DCtrl targetingSource;
+        private Card3DCtrl healthPreviewTarget;
 
         [Header("Front Line Holders")]
         [SerializeField] private CardHolderCtrl[] alphaFrontLineHolders;
@@ -406,6 +407,7 @@ namespace SG03
 
         private void Unsubscribe()
         {
+            this.ClearHealthPreviewTarget();
             Card3DCtrl.HoverEntered -= this.OnCardHoverEntered;
             Card3DCtrl.HoverExited -= this.OnCardHoverExited;
             CardHolderCtrl.HoverEntered -= this.OnHolderHoverEntered;
@@ -439,9 +441,45 @@ namespace SG03
 
         // ─── Card hover handlers ──────────────────────────────────────────────────
 
-        private void OnCardHoverEntered(Card3DCtrl card) => this.hovered = card;
+        private void OnCardHoverEntered(Card3DCtrl card)
+        {
+            this.hovered = card;
+            this.RefreshHealthPreviewTarget(card);
+        }
 
-        private void OnCardHoverExited(Card3DCtrl card) => this.ClearHoveredIfMatch(card);
+        private void OnCardHoverExited(Card3DCtrl card)
+        {
+            this.ClearHealthPreviewTarget(card);
+            this.ClearHoveredIfMatch(card);
+        }
+
+        private void RefreshHealthPreviewTarget(Card3DCtrl card)
+        {
+            this.ClearHealthPreviewTarget();
+            if (!this.CanPreviewAlphaAttackOn(card)) return;
+
+            int attack = this.targetingSource.Definition?.GetBaseStatInt("atk") ?? 0;
+            if (attack <= 0) return;
+
+            this.healthPreviewTarget = card;
+            this.healthPreviewTarget.SetHealthPreview(attack);
+        }
+
+        private bool CanPreviewAlphaAttackOn(Card3DCtrl card)
+        {
+            if (!this.IsTargeting || card == null || card == this.targetingSource) return false;
+            if (!this.targetingSource.IsCharacter() || this.targetingSource.CardOwner != Owner.alpha) return false;
+            return card.IsCharacter() && card.CardOwner == Owner.omega;
+        }
+
+        private void ClearHealthPreviewTarget(Card3DCtrl card = null)
+        {
+            if (this.healthPreviewTarget == null) return;
+            if (card != null && this.healthPreviewTarget != card) return;
+
+            this.healthPreviewTarget.ClearHealthPreview();
+            this.healthPreviewTarget = null;
+        }
 
         private void ClearHoveredIfMatch(Card3DCtrl card)
         {
@@ -571,6 +609,7 @@ namespace SG03
 
         private void ClearInteractionState()
         {
+            this.ClearHealthPreviewTarget();
             this.fullDetail = false;
             this.selected = null;
             this.targeted = null;

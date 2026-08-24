@@ -44,6 +44,7 @@ namespace SG03
         [SerializeField] private bool               isTrigger;
         [SerializeField] private bool               isHover;
         private bool isFullDetail;
+        private bool showFinalDefOnlyOnHover;
 
         // ─── Optional external references ─────────────────────────────────────────
 
@@ -55,6 +56,7 @@ namespace SG03
         private ClientActions clientActions;
         private BattleStateCtrl battleStateCtrl;
         private Coroutine spawnHpBarRoutine;
+        private float healthPreviewDelta;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -62,6 +64,9 @@ namespace SG03
 
         public void NotifyHoverEntered()
         {
+            if (!this.isHover)
+                this.showFinalDefOnlyOnHover = !this.IsHpBarVisible();
+
             this.isHover = true;
             this.RefreshHpBarVisibility();
             this.RefreshHpBarDisplayMode();
@@ -71,6 +76,7 @@ namespace SG03
         public void NotifyHoverExited()
         {
             this.isHover = false;
+            this.showFinalDefOnlyOnHover = false;
             this.RefreshHpBarVisibility();
             this.RefreshHpBarDisplayMode();
             HoverExited?.Invoke(this);
@@ -164,6 +170,7 @@ namespace SG03
             this.hpBarInstance.SetPosition(holder.transform.position);
             this.hpBarInstance.SetParent(this.transform, this.cardOwner);
             this.hpBarInstance.gameObject.SetActive(true);
+            this.hpBarInstance.SetHealthPreview(this.healthPreviewDelta);
             this.RefreshHpBarDisplayMode();
         }
 
@@ -278,6 +285,22 @@ namespace SG03
             this.RefreshHpBarVisibility();
         }
 
+        /// <summary>Previews a pending positive damage amount on this card's HP bar.</summary>
+        public void SetHealthPreview(float positiveDelta)
+        {
+            this.healthPreviewDelta = Mathf.Max(0f, positiveDelta);
+            this.hpBarInstance?.SetHealthPreview(this.healthPreviewDelta);
+            this.RefreshHpBarDisplayMode();
+        }
+
+        /// <summary>Clears this card's pending HP-bar preview.</summary>
+        public void ClearHealthPreview()
+        {
+            this.healthPreviewDelta = 0f;
+            this.hpBarInstance?.ClearHealthPreview();
+            this.RefreshHpBarDisplayMode();
+        }
+
         private void DespawnHpBar()
         {
             this.EnsureSingleHpBarInstance();
@@ -291,7 +314,14 @@ namespace SG03
         {
             if (this.hpBarInstance == null) return;
 
-            this.hpBarInstance.SetMiniMode(!this.isHover);
+            this.hpBarInstance.SetDisplayMode(
+                !this.isHover,
+                this.isHover && this.showFinalDefOnlyOnHover);
+        }
+
+        private bool IsHpBarVisible()
+        {
+            return this.hpBarInstance != null && this.hpBarInstance.gameObject.activeInHierarchy;
         }
 
         private void RefreshHpBarAfterFaceStateChanged()
@@ -567,7 +597,11 @@ namespace SG03
         public void SetMoveDuration(float d)  => this.movement.SetMoveDuration(d);
         public void SetRotateDuration(float d) => this.movement.SetRotateDuration(d);
 
-        public void SetInventoryItemId(string id) { this.inventoryItemId = id; }
+        public void SetInventoryItemId(string id)
+        {
+            if (this.inventoryItemId != id) this.ClearHealthPreview();
+            this.inventoryItemId = id;
+        }
 
         /// <summary>The holder this card is currently assigned to, or null if none.</summary>
         public CardHolderCtrl CardHolder => this.cardHolder;

@@ -18,9 +18,9 @@ namespace SG03.Editor
         {
             this.serializedObject.Update();
             DrawPropertiesExcluding(this.serializedObject, "m_Script", "miniMode");
-            this.serializedObject.ApplyModifiedProperties();
-
             WorldSpaceHpBarCtrl hpBar = (WorldSpaceHpBarCtrl)this.target;
+            if (this.serializedObject.ApplyModifiedProperties()) hpBar.RefreshUi();
+
             this.DrawRuntimeUiElements(hpBar);
             EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Display mode", EditorStyles.boldLabel);
@@ -62,6 +62,7 @@ namespace SG03.Editor
             EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Runtime UI Elements", EditorStyles.boldLabel);
             DrawVisualElement("Fill", hpBar.FillElement);
+            DrawVisualElement("Health Preview", hpBar.HealthPreviewElement);
             DrawVisualElement("Root", hpBar.RootElement);
             DrawVisualElement("Track", hpBar.TrackElement);
         }

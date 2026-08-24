@@ -47,6 +47,7 @@ namespace SG03
 
         private void CancelTargeting()
         {
+            this.ClearHealthPreviewTarget();
             this.targetingSource = null;
             this.targeted = null;
             this.arrowIndicator?.Hide();
