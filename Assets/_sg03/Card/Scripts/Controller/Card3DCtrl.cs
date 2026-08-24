@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using SG03.UI;
 using UnityEngine;
 
 namespace SG03
@@ -52,6 +53,7 @@ namespace SG03
         [SerializeField] private WorldSpaceHpBarCtrl hpBarPrefab;
         [SerializeField] private WorldSpaceHpBarCtrl hpBarInstance;
         private ClientActions clientActions;
+        private BattleStateCtrl battleStateCtrl;
         private Coroutine spawnHpBarRoutine;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
@@ -61,6 +63,7 @@ namespace SG03
         public void NotifyHoverEntered()
         {
             this.isHover = true;
+            this.RefreshHpBarVisibility();
             this.RefreshHpBarDisplayMode();
             HoverEntered?.Invoke(this);
         }
@@ -68,6 +71,7 @@ namespace SG03
         public void NotifyHoverExited()
         {
             this.isHover = false;
+            this.RefreshHpBarVisibility();
             this.RefreshHpBarDisplayMode();
             HoverExited?.Invoke(this);
         }
@@ -167,7 +171,11 @@ namespace SG03
         {
             if (this.isFullDetail) return false;
             if (!this.IsCharacter()) return false;
+            // Turn visibility is authoritative. Hover remains the only deliberate
+            // exception, so inspecting a card can reveal its bar on either turn.
+            if (this.isHover) return true;
             if (this.ShouldHideHpBarForCurrentTurn()) return false;
+            if (this.HasAccumulatedDamage()) return true;
             if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
             return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;
         }
@@ -176,6 +184,35 @@ namespace SG03
         {
             this.LoadClientActions();
             return this.clientActions != null && this.clientActions.HpBarHiddenOwner == this.cardOwner;
+        }
+
+        private bool HasAccumulatedDamage()
+        {
+            this.LoadBattleStateCtrl();
+            BattleState state = this.battleStateCtrl?.BattleState;
+            if (state == null || string.IsNullOrEmpty(this.inventoryItemId)) return false;
+
+            BattleCardSlot slot = this.FindBattleSlot(state.AlphaHand)
+                ?? this.FindBattleSlot(state.AlphaFrontLine)
+                ?? this.FindBattleSlot(state.AlphaBackLine)
+                ?? this.FindBattleSlot(state.AlphaTheVoid)
+                ?? this.FindBattleSlot(state.AlphaTheSource)
+                ?? this.FindBattleSlot(state.OmegaHand)
+                ?? this.FindBattleSlot(state.OmegaFrontLine)
+                ?? this.FindBattleSlot(state.OmegaBackLine)
+                ?? this.FindBattleSlot(state.OmegaTheVoid);
+            return slot != null && slot.total_damage_received > 0;
+        }
+
+        private BattleCardSlot FindBattleSlot(BattleCardSlot[] slots)
+        {
+            if (slots == null) return null;
+            foreach (BattleCardSlot slot in slots)
+            {
+                if (slot != null && slot.inventory_item_id == this.inventoryItemId) return slot;
+            }
+
+            return null;
         }
 
         private void RefreshHpBarVisibility()
@@ -211,7 +248,16 @@ namespace SG03
         private void LoadClientActions()
         {
             if (this.clientActions != null) return;
-            this.clientActions = FindAnyObjectByType<ClientActions>();
+            this.LoadBattleStateCtrl();
+            this.clientActions = this.battleStateCtrl?.ClientActions;
+            if (this.clientActions == null)
+                this.clientActions = FindAnyObjectByType<ClientActions>();
+        }
+
+        private void LoadBattleStateCtrl()
+        {
+            if (this.battleStateCtrl != null) return;
+            this.battleStateCtrl = FindAnyObjectByType<BattleStateCtrl>();
         }
 
         /// <summary>Re-evaluates the HP bar after a resume action sequence is complete.</summary>

@@ -38,7 +38,9 @@ namespace SG03
         public bool IsResuming => this.isResuming;
 
         /// <summary>The side whose character HP bars are hidden for the current turn.</summary>
-        public Owner? HpBarHiddenOwner { get; private set; }
+        // Battles begin on alpha's turn. Later turn-end actions are the sole source
+        // that changes this value; do not derive it from BattleState.NextMove.
+        public Owner? HpBarHiddenOwner { get; private set; } = Owner.alpha;
 
         public event Action<string> OnBattleCompleted;
         public event Action<string> OnCardTakeDamageExecuted;

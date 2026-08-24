@@ -275,6 +275,7 @@ namespace SG03
         public void SetMiniMode(bool enabled)
         {
             this.miniMode = enabled;
+            this.RefreshTrackVisibility();
             this.RefreshHealthLabel();
         }
 
@@ -466,7 +467,22 @@ namespace SG03
             this.ApplyBarAppearance(ratio);
             this.fill.style.width = Length.Percent(ratio * 100f);
 
+            this.RefreshTrackVisibility();
             this.RefreshHealthLabel();
+        }
+
+        private void RefreshTrackVisibility()
+        {
+            if (this.track == null) this.BindUi();
+            if (this.track == null) return;
+
+            // On hover, an undamaged card shows only its final DEF as a centered value.
+            this.track.style.display = this.ShouldShowFinalDefOnly() ? DisplayStyle.None : DisplayStyle.Flex;
+        }
+
+        private bool ShouldShowFinalDefOnly()
+        {
+            return !this.miniMode && Mathf.Approximately(this.currentHealth, 0f);
         }
 
         private void RefreshHealthLabel()
@@ -476,7 +492,9 @@ namespace SG03
 
             // Keep the label in the UI layout when hidden so the HP bar never changes position.
             this.healthLabel.style.visibility = this.miniMode ? Visibility.Hidden : Visibility.Visible;
-            this.healthLabel.text = $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
+            this.healthLabel.text = this.ShouldShowFinalDefOnly()
+                ? $"{Mathf.CeilToInt(this.maxHealth)}"
+                : $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
         }
 
         private void ApplyBarAppearance(float healthRatio)
