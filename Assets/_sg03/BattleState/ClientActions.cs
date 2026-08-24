@@ -26,12 +26,16 @@ namespace SG03
 
         private Coroutine dispatchRoutine;
         [SerializeField] private bool hasPendingActions;
+        private bool isProcessingActions = true;
 
         /// <summary>True while client actions are still being dispatched.</summary>
         public bool IsDispatching => this.dispatchRoutine != null;
 
         /// <summary>True while there are client actions that have not finished yet.</summary>
         public bool HasPendingActions => this.hasPendingActions;
+
+        /// <summary>True when the dispatcher may start the next queued client action.</summary>
+        public bool IsProcessingActions => this.isProcessingActions;
 
         [SerializeField] private bool isResuming;
         /// <summary>True only while the explicitly requested battle-resume sequence is being dispatched.</summary>
@@ -55,6 +59,18 @@ namespace SG03
         public void CancelResume()
         {
             this.isResuming = false;
+        }
+
+        /// <summary>Pauses or resumes the queue between client actions.</summary>
+        public void ToggleActionProcessing()
+        {
+            this.SetActionProcessing(!this.isProcessingActions);
+        }
+
+        public void SetActionProcessing(bool shouldProcess)
+        {
+            this.isProcessingActions = shouldProcess;
+            if (shouldProcess) this.StartDispatch();
         }
 
         [SerializeField] private List<ClientActionLog> actionLog = new List<ClientActionLog>();
@@ -211,33 +227,32 @@ namespace SG03
 
         private void StartDispatch()
         {
-            if (this.dispatchRoutine != null) this.StopCoroutine(this.dispatchRoutine);
+            // New battle-status responses may append actions while the current
+            // action is still animating. Keep the existing dispatcher alive so
+            // there is only one consumer of the queue at a time.
+            if (this.dispatchRoutine != null) return;
+            if (!this.HasUnexecutedActions())
+            {
+                this.hasPendingActions = false;
+                this.FinishResumeWhenActionsComplete();
+                return;
+            }
             this.dispatchRoutine = this.StartCoroutine(this.DispatchRoutine());
         }
 
         private IEnumerator DispatchRoutine()
         {
-            yield return this.StartCoroutine(this.DispatchSourceSpawnActions());
             int i = 0;
             while (i < this.actionLog.Count)
             {
                 ClientActionLog log = this.actionLog[i];
                 if (log.Executed) { i++; continue; }
-                if (this.TryGetParallelGroupMatcher(log.ActionName, out Func<string, bool> matcher))
-                {
-                    int groupEnd = this.FindConsecutiveParallelGroupEnd(i, matcher);
-                    yield return this.StartCoroutine(this.DispatchParallelGroup(i, groupEnd));
-                    float postDelay = this.GetPostGroupDelay(log.ActionName);
-                    if (postDelay > 0f) yield return new WaitForSeconds(postDelay);
-                    i = groupEnd;
-                }
-                else
-                {
-                    Coroutine actionRoutine = this.ExecuteAction(log);
-                    if (actionRoutine != null) yield return actionRoutine;
-                    yield return new WaitForSeconds(this.actionInterval);
-                    i++;
-                }
+                yield return new WaitUntil(() => this.isProcessingActions);
+                Coroutine actionRoutine = this.ExecuteAction(log);
+                if (actionRoutine != null) yield return actionRoutine;
+                log.MarkExecuted();
+                yield return new WaitForSeconds(this.GetPostActionDelay(log.ActionName));
+                i++;
             }
             this.dispatchRoutine = null;
             this.hasPendingActions = this.HasUnexecutedActions();
@@ -252,91 +267,10 @@ namespace SG03
             this.cardSpawning?.SpawnHpBarsAfterResume();
         }
 
-        private IEnumerator DispatchSourceSpawnActions()
-        {
-            int launched = 0;
-            int done = 0;
-            foreach (ClientActionLog log in this.actionLog)
-            {
-                if (log.Executed) continue;
-                if (!this.IsSourceSpawnAction(log.ActionName)) continue;
-                Coroutine c = this.ExecuteAction(log);
-                launched++;
-                if (c != null)
-                    this.StartCoroutine(this.WaitThenSignal(c, () => done++));
-                else
-                    done++;
-            }
-            yield return new WaitUntil(() => done >= launched);
-        }
-
-        private bool IsSourceSpawnAction(string actionName)
-            => actionName == "alpha_source_spawn_card" || actionName == "omega_source_spawn_card";
-
-        private bool TryGetParallelGroupMatcher(string actionName, out Func<string, bool> matcher)
-        {
-            if (actionName == "alpha_source_spawn_card" || actionName == "omega_source_spawn_card")
-            {
-                matcher = static n => n == "alpha_source_spawn_card" || n == "omega_source_spawn_card";
-                return true;
-            }
-            if (actionName == "alpha_source_to_hand")
-            {
-                matcher = static n => n == "alpha_source_to_hand";
-                return true;
-            }
-            // omega_source_to_hand runs in parallel; slot collision is handled in
-            // MoveOmegaSourceToHand by falling back to the next available slot.
-            if (actionName == "omega_source_to_hand")
-            {
-                matcher = static n => n == "omega_source_to_hand";
-                return true;
-            }
-            if (actionName == "omega_hand_to_front_line")
-            {
-                matcher = static n => n == "omega_hand_to_front_line";
-                return true;
-            }
-            matcher = null;
-            return false;
-        }
-
-        private float GetPostGroupDelay(string actionName)
+        private float GetPostActionDelay(string actionName)
         {
             if (actionName == "omega_hand_to_front_line") return this.omegaFrontLinePostDelay;
-            return 0f;
-        }
-
-        private int FindConsecutiveParallelGroupEnd(int from, Func<string, bool> matcher)
-        {
-            int end = from;
-            while (end < this.actionLog.Count && !this.actionLog[end].Executed && matcher(this.actionLog[end].ActionName))
-                end++;
-            return end;
-        }
-
-        private IEnumerator DispatchParallelGroup(int from, int to)
-        {
-            int launched = 0;
-            int done = 0;
-            for (int i = from; i < to; i++)
-            {
-                ClientActionLog log = this.actionLog[i];
-                if (log.Executed) continue;
-                Coroutine actionRoutine = this.ExecuteAction(log);
-                launched++;
-                if (actionRoutine != null)
-                    this.StartCoroutine(this.WaitThenSignal(actionRoutine, () => done++));
-                else
-                    done++;
-            }
-            yield return new WaitUntil(() => done >= launched);
-        }
-
-        private IEnumerator WaitThenSignal(Coroutine routine, System.Action onDone)
-        {
-            yield return routine;
-            onDone();
+            return this.actionInterval;
         }
 
         private void LogAction(ClientActionLog log)
@@ -397,7 +331,6 @@ namespace SG03
                     Debug.LogWarning($"<color=#88FFFF>[ClientActions]</color> Unknown action: {log.ActionName}", this.gameObject);
                     break;
             }
-            log.MarkExecuted();
             return result;
         }
 
