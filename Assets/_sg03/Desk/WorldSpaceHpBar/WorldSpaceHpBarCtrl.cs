@@ -567,7 +567,9 @@ namespace SG03
 
         private bool ShouldShowFinalDefOnly()
         {
-            return !this.miniMode && this.finalDefOnlyMode;
+            return !this.miniMode
+                && this.finalDefOnlyMode
+                && Mathf.Approximately(this.healthPreviewDelta, 0f);
         }
 
         private void RefreshHealthLabel()
@@ -577,9 +579,13 @@ namespace SG03
 
             // Keep the label in the UI layout when hidden so the HP bar never changes position.
             this.healthLabel.style.visibility = this.miniMode ? Visibility.Hidden : Visibility.Visible;
-            this.healthLabel.text = this.ShouldShowFinalDefOnly()
-                ? $"{Mathf.CeilToInt(this.maxHealth)}"
-                : $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
+            if (this.ShouldShowFinalDefOnly())
+            {
+                this.healthLabel.text = $"{Mathf.CeilToInt(this.maxHealth)}";
+                return;
+            }
+
+            this.healthLabel.text = $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
         }
 
         private void ApplyBarAppearance(float healthRatio)

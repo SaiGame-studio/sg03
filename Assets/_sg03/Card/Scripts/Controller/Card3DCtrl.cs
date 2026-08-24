@@ -290,6 +290,7 @@ namespace SG03
         {
             this.healthPreviewDelta = Mathf.Max(0f, positiveDelta);
             this.hpBarInstance?.SetHealthPreview(this.healthPreviewDelta);
+            this.RefreshHpBarDisplayMode();
         }
 
         /// <summary>Clears this card's pending HP-bar preview.</summary>
@@ -297,6 +298,7 @@ namespace SG03
         {
             this.healthPreviewDelta = 0f;
             this.hpBarInstance?.ClearHealthPreview();
+            this.RefreshHpBarDisplayMode();
         }
 
         private void DespawnHpBar()
