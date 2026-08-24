@@ -7,6 +7,9 @@
 -- sacrifice_stars is an optional list of allowed card stars (each 1 through 9).
 -- sacrifice_race restricts sacrifices to one card race when provided.
 -- sacrifice_excluded_codes is an optional list of card definition codes that cannot be sacrificed.
+-- target_code restricts the attacked Character to one card definition when provided.
+-- required_backline_codes lists cards that must be deployed on the source side's back line.
+-- consume_source_on_ritual_failure sends the Ability to void when a required ritual card or sacrifice is missing.
 
 local function validate_xena_config(config)
     if config == nil or type(config.ability_key) ~= "string" or
@@ -39,6 +42,30 @@ local function validate_xena_config(config)
         return nil, config.ability_key .. " sacrifice_race must be a string"
     end
 
+    local target_code = config.target_code
+    if target_code ~= nil and type(target_code) ~= "string" then
+        return nil, config.ability_key .. " target_code must be a string"
+    end
+
+    local required_backline_codes = nil
+    if config.required_backline_codes ~= nil then
+        if type(config.required_backline_codes) ~= "table" then
+            return nil, config.ability_key .. " required_backline_codes must be a list"
+        end
+        required_backline_codes = {}
+        for _, code in ipairs(config.required_backline_codes) do
+            if type(code) ~= "string" then
+                return nil, config.ability_key .. " required_backline_codes entries must be strings"
+            end
+            table.insert(required_backline_codes, code)
+        end
+    end
+
+    if config.consume_source_on_ritual_failure ~= nil and
+       type(config.consume_source_on_ritual_failure) ~= "boolean" then
+        return nil, config.ability_key .. " consume_source_on_ritual_failure must be a boolean"
+    end
+
     local sacrifice_excluded_code_set = {}
     if config.sacrifice_excluded_codes ~= nil then
         if type(config.sacrifice_excluded_codes) ~= "table" then
@@ -60,16 +87,23 @@ local function validate_xena_config(config)
         sacrifice_star_set = sacrifice_star_set,
         sacrifice_race = sacrifice_race,
         sacrifice_excluded_code_set = sacrifice_excluded_code_set,
+        target_code = target_code,
+        required_backline_codes = required_backline_codes,
+        consume_source_on_ritual_failure = config.consume_source_on_ritual_failure == true,
     }, nil
 end
 
-local function find_xena_target(state, source_card, event_data, helpers, ability_key)
+local function find_xena_target(state, source_card, event_data, helpers, settings)
+    local ability_key = settings.ability_key
     local target_card = (event_data or {}).defender_card
     if target_card == nil then return nil, ability_key .. " requires a target card" end
 
     local target_def = helpers.find_item_def(state.item_defs, target_card.item_definition_code_name)
     local target_type = target_def ~= nil and target_def.metadata ~= nil and target_def.metadata.type or nil
     if target_type ~= "character" then return nil, ability_key .. " target must be a Character" end
+    if settings.target_code ~= nil and target_card.item_definition_code_name ~= settings.target_code then
+        return nil, ability_key .. " target must be " .. settings.target_code
+    end
     if not helpers.is_character_be_attacked(state, target_card) then
         return nil, ability_key .. " target is not being attacked"
     end
@@ -79,6 +113,21 @@ local function find_xena_target(state, source_card, event_data, helpers, ability
         return nil, ability_key .. " source card is not on a battle line"
     end
     return { target_card = target_card, source_side = source_side }, nil
+end
+
+local function find_missing_backline_code(state, source_side, settings)
+    if settings.required_backline_codes == nil then return nil end
+
+    local deployed_codes = {}
+    for _, card in ipairs(state[source_side .. "_back_line"] or {}) do
+        if card.inventory_item_id ~= nil and card.inventory_item_id ~= "" then
+            deployed_codes[card.item_definition_code_name] = true
+        end
+    end
+    for _, code in ipairs(settings.required_backline_codes) do
+        if deployed_codes[code] ~= true then return code end
+    end
+    return nil
 end
 
 local function find_target_line(state, event_data, target_card, ability_key)
@@ -194,11 +243,22 @@ local function send_source_to_void(state, source_side, source_card, void_zone, b
     table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
 end
 
+local function fail_ritual(state, source_side, source_card, target_card, void_zone, battle, settings, reason)
+    local actions = {
+        source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+            ",ability=" .. settings.ability_key .. ",target=" .. target_card.inventory_item_id ..
+            ",result=failed,reason=" .. reason,
+    }
+    send_source_to_void(state, source_side, source_card, void_zone, battle, actions)
+    battle.dlog("[ability] " .. settings.ability_key .. ": ritual failed - " .. reason)
+    return actions, nil
+end
+
 local function execute_xena_awakened(state, source_card, event_data, helpers, config)
     local settings, config_err = validate_xena_config(config)
     if config_err ~= nil then return {}, config_err end
 
-    local target_context, target_err = find_xena_target(state, source_card, event_data, helpers, settings.ability_key)
+    local target_context, target_err = find_xena_target(state, source_card, event_data, helpers, settings)
     if target_err ~= nil then return {}, target_err end
 
     local battle = helpers.lib_battle_common
@@ -230,9 +290,24 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
         return {}, settings.ability_key .. " requires " .. settings.successor_name .. " in own the_void"
     end
 
+    local missing_backline_code = find_missing_backline_code(state, source_side, settings)
+    if missing_backline_code ~= nil then
+        if settings.consume_source_on_ritual_failure then
+            return fail_ritual(state, source_side, source_card, target_card, void_zone, battle, settings,
+                "missing_" .. missing_backline_code)
+        end
+        return {}, settings.ability_key .. " requires " .. missing_backline_code .. " in own back_line"
+    end
+
     local sacrifice_indexes, sacrifice_err = find_sacrifice_indexes(
         state, target_line, target_index, source_card, target_card, settings, helpers)
-    if sacrifice_err ~= nil then return {}, sacrifice_err end
+    if sacrifice_err ~= nil then
+        if settings.consume_source_on_ritual_failure then
+            return fail_ritual(state, source_side, source_card, target_card, void_zone, battle, settings,
+                "missing_sacrifice")
+        end
+        return {}, sacrifice_err
+    end
 
     local sacrificed_cards = replace_xena_on_line(state, target_line, target_index, void_zone, successor_index,
         successor_card, target_card, sacrifice_indexes, settings, helpers, def_buff)
@@ -281,5 +356,23 @@ function xena_awakened3_execute(state, source_card, event_data, helpers)
         sacrifice_stars = { 1, 2, 3 },
         sacrifice_race = "dark_elf",
         sacrifice_excluded_codes = { "xena1", "xena2", "xena3" },
+    })
+end
+
+-- ability: xena_awakened4
+-- Replaces an attacked Xena IV that will be defeated with Xena V from void.
+-- Requires Demon Orbs and Demon Rite on the back line, then sacrifices the
+-- adjacent non-Xena card with the fewest stars (1-4).
+function xena_awakened4_execute(state, source_card, event_data, helpers)
+    return execute_xena_awakened(state, source_card, event_data, helpers, {
+        ability_key = "xena_awakened4",
+        target_code = "xena4",
+        successor_code = "xena5",
+        successor_name = "Xena V",
+        sacrifice_count = 1,
+        sacrifice_stars = { 1, 2, 3, 4 },
+        sacrifice_excluded_codes = { "xena1", "xena2", "xena3", "xena4", "xena5" },
+        required_backline_codes = { "demon_orbs", "demon_rite" },
+        consume_source_on_ritual_failure = true,
     })
 end
