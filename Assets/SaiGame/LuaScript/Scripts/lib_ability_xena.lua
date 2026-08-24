@@ -417,7 +417,16 @@ function xena_awakened4_execute(state, source_card, event_data, helpers)
     }
     local incoming_damage = helpers.get_character_incoming_damage(state, target_card)
     if not helpers.is_character_gonna_dead(target_card, incoming_damage) then
-        return execute_xena_awakened(state, source_card, event_data, helpers, awakening_config)
+        local actions = {
+            source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+                ",ability=xena_awakened4,target=" .. target_card.inventory_item_id ..
+                ",result=no_effect",
+        }
+        local void_key = source_side .. "_the_void"
+        if state[void_key] == nil then state[void_key] = {} end
+        send_source_to_void(
+            state, source_side, source_card, state[void_key], helpers.lib_battle_common, actions)
+        return actions, nil
     end
 
     local _, _, _, line_err = find_target_line(state, event_data, target_card, "xena_awakened4")
@@ -426,7 +435,16 @@ function xena_awakened4_execute(state, source_card, event_data, helpers)
     local void_zone = state[source_side .. "_the_void"] or {}
     local _, successor_card = find_successor_card(void_zone, "xena5")
     if successor_card == nil then
-        return execute_xena_awakened(state, source_card, event_data, helpers, awakening_config)
+        local actions = {
+            source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+                ",ability=xena_awakened4,target=" .. target_card.inventory_item_id ..
+                ",result=no_effect",
+        }
+        local void_key = source_side .. "_the_void"
+        if state[void_key] == nil then state[void_key] = {} end
+        send_source_to_void(
+            state, source_side, source_card, state[void_key], helpers.lib_battle_common, actions)
+        return actions, nil
     end
 
     local rite_result, demon_rite_err = demon_rite_execute(
