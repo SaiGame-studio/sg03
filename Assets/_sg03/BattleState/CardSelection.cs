@@ -515,7 +515,15 @@ namespace SG03
             Card3DCtrl card = this.selected;
             int handSlotIndex = this.FindAlphaHandSlotIndex(card.InventoryItemId);
             if (handSlotIndex < 0) return;
-            this.UpdateLocalStateForDeployRequest(holder, card);
+            if (!this.UpdateLocalStateForDeployRequest(holder, card))
+            {
+                Debug.LogError($"[CardSelection] Card deploy was not sent because local state rejected target {holder.HolderLink}[{holder.Index}].");
+                this.RefreshBattleStateAfterDeployError();
+                return;
+            }
+            this.PlaceFromHandIntoHolder(card, holder);
+            this.RegisterPlayerDeploy(card, holder);
+            this.TryIncrementCharDeploy(card);
             this.RunDeployScript(card, holder, handSlotIndex);
         }
 
@@ -534,9 +542,6 @@ namespace SG03
                 return;
             }
 
-            this.PlaceFromHandIntoHolder(card, holder);
-            this.RegisterPlayerDeploy(card, holder);
-            this.TryIncrementCharDeploy(card);
             this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
         }
 
@@ -555,9 +560,35 @@ namespace SG03
 
         private void OnDeployScriptError(string error, Card3DCtrl card, CardHolderCtrl holder, int handSlotIndex)
         {
-            Debug.LogError($"[CardSelection] Card deploy was rejected; card remains in hand. {error}");
+            Debug.LogError($"[CardSelection] Card deploy was rejected; returning card to hand. {error}");
+            this.pendingPlayerDeploys.Remove(card.InventoryItemId);
+            this.TryDecrementCharDeploy(card);
             this.battleStateCtrl?.BattleState?.RestoreCardFromLineToHand(
                 card.InventoryItemId, holder.HolderLink, holder.Index, handSlotIndex);
+            this.ReturnCardToHand(card, holder, handSlotIndex);
+            this.RefreshBattleStateAfterDeployError();
+        }
+
+        private void RefreshBattleStateAfterDeployError()
+        {
+            BattleScripts scripts = this.battleStateCtrl?.BattleScripts;
+            if (scripts == null || scripts.IsRunning) return;
+
+            scripts.RunBattleStatus(
+                response => this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response),
+                error => Debug.LogWarning($"[CardSelection] Failed to refresh battle state after deploy rejection: {error}"));
+        }
+
+        private void ReturnCardToHand(Card3DCtrl card, CardHolderCtrl lineHolder, int handSlotIndex)
+        {
+            if (card == null || this.deskPositions == null) return;
+
+            Transform handTarget = this.deskPositions.GetAlphaHand(handSlotIndex);
+            if (handTarget == null) return;
+
+            if (lineHolder != null && lineHolder.HeldCard == card) lineHolder.SetCard(null);
+            this.ApplyBattleMotionSettings(card);
+            card.ReturnToHand(handTarget);
         }
 
         private int FindAlphaHandSlotIndex(string inventoryItemId)
@@ -572,25 +603,25 @@ namespace SG03
             return -1;
         }
 
-        private void UpdateLocalStateForDeployRequest(CardHolderCtrl holder, Card3DCtrl card)
+        private bool UpdateLocalStateForDeployRequest(CardHolderCtrl holder, Card3DCtrl card)
         {
-            if (this.battleStateCtrl?.BattleState == null) return;
-            this.battleStateCtrl.BattleState.MoveCardFromHandToLine(card.InventoryItemId, holder.HolderLink, holder.Index);
+            if (this.battleStateCtrl?.BattleState == null) return false;
+            return this.battleStateCtrl.BattleState.MoveCardFromHandToLine(card.InventoryItemId, holder.HolderLink, holder.Index);
         }
 
         private void PlaceFromHandIntoHolder(Card3DCtrl card, CardHolderCtrl targetHolder)
         {
             if (card == null || targetHolder == null) return;
-            if (card.IsFlipping) { if (this.debugLog) Debug.LogWarning($"[CardSelection] PlaceFromHandIntoHolder — card '{card.name}' is still flipping — skipped"); return; }
             Card3DCtrl cardToRotate = card;
             this.ApplyBattleMotionSettings(cardToRotate);
-            cardToRotate.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(cardToRotate)));
+            cardToRotate.MoveToUnknow(targetHolder, () => this.StartCoroutine(this.RotateAfterArrival(cardToRotate, targetHolder)));
             targetHolder.SetCard(cardToRotate);
         }
 
-        private IEnumerator RotateAfterArrival(Card3DCtrl card)
+        private IEnumerator RotateAfterArrival(Card3DCtrl card, CardHolderCtrl expectedHolder)
         {
             yield return new UnityEngine.WaitUntil(() => !card.IsFlipping);
+            if (card.CardHolder != expectedHolder) yield break;
             card.RotateZ180();
         }
 

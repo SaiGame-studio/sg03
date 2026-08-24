@@ -286,6 +286,15 @@
     padding: 10px 8px;
 }
 
+.game-bottom-menu #BtnCancelLastGame {
+    flex: 0 0 164px;
+    width: 164px;
+    min-width: 164px;
+    max-width: 164px;
+    margin: 0 8px;
+    padding: 10px 8px;
+}
+
 .game-bottom-btn {
     flex: 1;
     margin: 0 6px;

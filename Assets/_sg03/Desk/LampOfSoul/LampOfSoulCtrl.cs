@@ -19,6 +19,15 @@ namespace SG03
         [SerializeField] private bool isAtAlpha = false;
         public bool IsAtAlpha => this.isAtAlpha;
 
+        private enum OptimisticDestination
+        {
+            None,
+            Alpha,
+            Omega
+        }
+
+        private OptimisticDestination optimisticDestination;
+
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         protected override void LoadComponents()
@@ -83,6 +92,7 @@ namespace SG03
 
         private void MoveToCardDeployPosition()
         {
+            this.optimisticDestination = OptimisticDestination.None;
             this.isAtAlpha = false;
             if (this.deskPosition == null) return;
             if (this.deskPosition.CardDeployPosition == null) return;
@@ -108,13 +118,61 @@ namespace SG03
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>Moves the lamp to the specified target transform.</summary>
-        public void MoveTo(Transform target) => this.movement.MoveTo(target);
+        public void MoveTo(Transform target)
+        {
+            this.optimisticDestination = OptimisticDestination.None;
+            this.movement.MoveTo(target);
+        }
 
         /// <summary>Moves the lamp to the alpha lamp position.</summary>
-        public void MoveToAlpha() => this.MoveToAlphaLampPosition();
+        public void MoveToAlpha()
+        {
+            this.optimisticDestination = OptimisticDestination.None;
+            this.MoveToAlphaLampPosition();
+        }
 
         /// <summary>Moves the lamp to the omega lamp position.</summary>
-        public void MoveToOmega() => this.MoveToOmegaLampPosition();
+        public void MoveToOmega()
+        {
+            this.optimisticDestination = OptimisticDestination.None;
+            this.MoveToOmegaLampPosition();
+        }
+
+        public void MoveToAlphaOptimistically()
+        {
+            this.optimisticDestination = OptimisticDestination.Alpha;
+            this.MoveToAlphaLampPosition();
+        }
+
+        public void MoveToOmegaOptimistically()
+        {
+            this.optimisticDestination = OptimisticDestination.Omega;
+            this.MoveToOmegaLampPosition();
+        }
+
+        public bool TryConsumeOptimisticMoveToAlpha()
+        {
+            return this.TryConsumeOptimisticMove(OptimisticDestination.Alpha);
+        }
+
+        public bool TryConsumeOptimisticMoveToOmega()
+        {
+            return this.TryConsumeOptimisticMove(OptimisticDestination.Omega);
+        }
+
+        public void RollbackOptimisticMove(Vector3 previousPosition, bool wasAtAlpha)
+        {
+            this.optimisticDestination = OptimisticDestination.None;
+            this.isAtAlpha = wasAtAlpha;
+            this.movement?.MoveTo(previousPosition);
+        }
+
+        private bool TryConsumeOptimisticMove(OptimisticDestination destination)
+        {
+            if (this.optimisticDestination != destination) return false;
+            this.optimisticDestination = OptimisticDestination.None;
+            return true;
+        }
 
         /// <summary>Returns the movement component of this lamp.</summary>
         public LampMovement Movement => this.movement;

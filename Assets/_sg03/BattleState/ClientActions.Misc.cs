@@ -140,6 +140,12 @@ namespace SG03
             yield return this.StartCoroutine(this.ReturnFullDetailCardBeforeLampMove());
             if (this.lampOfSoul == null) yield break;
 
+            if (this.lampOfSoul.TryConsumeOptimisticMoveToAlpha())
+            {
+                yield return this.StartCoroutine(this.WaitForLamp());
+                yield break;
+            }
+
             this.lampOfSoul.MoveToAlpha();
             yield return this.StartCoroutine(this.WaitForLamp());
         }
@@ -148,6 +154,12 @@ namespace SG03
         {
             yield return this.StartCoroutine(this.ReturnFullDetailCardBeforeLampMove());
             if (this.lampOfSoul == null) yield break;
+
+            if (this.lampOfSoul.TryConsumeOptimisticMoveToOmega())
+            {
+                yield return this.StartCoroutine(this.WaitForLamp());
+                yield break;
+            }
 
             this.lampOfSoul.MoveToOmega();
             yield return this.StartCoroutine(this.WaitForLamp());

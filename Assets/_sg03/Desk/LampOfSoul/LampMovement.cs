@@ -51,8 +51,16 @@ namespace SG03
         /// <summary>Smoothly moves the lamp to the target transform position.</summary>
         public void MoveTo(Transform target)
         {
+            if (target == null) return;
             this.KillMoveTween();
             this.StartMoveTween(target.position);
+        }
+
+        /// <summary>Smoothly moves the lamp to a world-space position.</summary>
+        public void MoveTo(Vector3 position)
+        {
+            this.KillMoveTween();
+            this.StartMoveTween(position);
         }
 
         /// <summary>True while an active move tween is playing.</summary>
