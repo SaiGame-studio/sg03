@@ -1,7 +1,7 @@
 # Back Stab
 
 - **Mã Thẻ Bài**: `back_stab`
-- **Loại Thẻ**: [`ability`](../../../04_abilities.md)
+- **Loại Thẻ**: [`ability`](../../../../04_abilities.md)
 - **Chủng Tộc Chính**: **Natureborn**
 - **Tộc Nhánh**: Goblin (định danh kỹ thuật: `goblin`)
 - **Vị Trí Nhắm Mục Tiêu**: `enemy_frontline`

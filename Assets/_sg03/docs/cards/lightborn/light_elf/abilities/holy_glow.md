@@ -1,7 +1,7 @@
 # Holy Glow
 
 - **Mã Thẻ Bài**: `holy_glow`
-- **Loại Thẻ**: [`ability`](../../../04_abilities.md)
+- **Loại Thẻ**: [`ability`](../../../../04_abilities.md)
 - **Chủng Tộc Chính**: **Lightborn**
 - **Tộc Nhánh**: Light Elf (định danh kỹ thuật: `elf` / `light_elf`)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline`, `own_backline`, `own_source`, `own_void`

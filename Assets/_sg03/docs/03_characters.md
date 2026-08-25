@@ -30,22 +30,22 @@ Nằm tại thư mục [`cards/darkborn/demon/`](cards/darkborn/demon/)
 ---
 
 ## Lightborn
-Nằm tại thư mục [`cards/elf/`](cards/elf/)
+Nằm tại thư mục [`cards/lightborn/light_elf/`](cards/lightborn/light_elf/)
 
-Tộc nhánh hiện có: Light Elf. Thư mục và định danh `elf` / `light_elf` là tên kỹ thuật hiện hành.
+Tộc nhánh hiện có: Light Elf. Định danh `elf` / `light_elf` là tên kỹ thuật hiện hành.
 
 ### Thẻ Nhân Vật (Character)
-- [Light Elf](cards/elf/light_elf.md) — Số sao: 0
+- [Light Elf](cards/lightborn/light_elf/light_elf.md) — Số sao: 0
 
 ---
 
 ## Natureborn
-Nằm tại thư mục [`cards/goblin/`](cards/goblin/)
+Nằm tại thư mục [`cards/natureborn/goblin/`](cards/natureborn/goblin/)
 
-Tộc nhánh hiện có: Goblin. Thư mục và định danh `goblin` là tên kỹ thuật hiện hành.
+Tộc nhánh hiện có: Goblin. Định danh `goblin` là tên kỹ thuật hiện hành.
 
 ### Thẻ Nhân Vật (Character)
-- [Goblin Shaman](cards/goblin/goblin_shaman.md) — Số sao: 0
+- [Goblin Shaman](cards/natureborn/goblin/goblin_shaman.md) — Số sao: 0
 
 ---
 

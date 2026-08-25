@@ -18,6 +18,7 @@ Bốn chủng tộc chính thức là **Darkborn**, **Lightborn**, **Natureborn*
 
 - Bản sắc chiến đấu: hồi phục, bảo hộ, thanh tẩy và hỗ trợ.
 - Tộc nhánh hiện có: Light Elf.
+- Thư mục card: [`cards/lightborn/light_elf/`](cards/lightborn/light_elf/).
 - Đồng minh thường gặp: các vương quốc Humans coi trọng trật tự, tri thức và sự bảo hộ; những cộng đồng thuộc các chủng tộc khác cùng chống lại sự mất cân bằng linh lực.
 - Kẻ thù thường gặp: các phe Darkborn lạm dụng linh hồn và tử thuật; những thế lực phá vỡ trật tự linh giới hoặc biến ánh sáng thành công cụ thống trị.
 
@@ -27,6 +28,7 @@ Bốn chủng tộc chính thức là **Darkborn**, **Lightborn**, **Natureborn*
 
 - Bản sắc chiến đấu: totem, bẫy, đánh úp và hiệu ứng theo đội hình.
 - Tộc nhánh hiện có: Goblin.
+- Thư mục card: [`cards/natureborn/goblin/`](cards/natureborn/goblin/).
 - Đồng minh thường gặp: các cộng đồng Darkborn sống ngoài trật tự của những vương quốc lớn; những nhóm Humans hoặc Lightborn tôn trọng lãnh địa và quy luật tự nhiên.
 - Kẻ thù thường gặp: **Humans**, đặc biệt là các thế lực mở rộng lãnh thổ và khai thác tài nguyên quá mức; những giáo đoàn Lightborn muốn áp đặt trật tự tuyệt đối lên vùng đất hoang dã.
 
