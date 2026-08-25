@@ -8138,79 +8138,79 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[0]'
-      value: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/demon_orbs.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/demon_orbs.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[1]'
-      value: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/demon_rite.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/demon_rite.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[2]'
-      value: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/xena_awakened1.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened1.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[3]'
-      value: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/xena_awakened2.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened2.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[4]'
-      value: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/xena_awakened3.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened3.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[5]'
-      value: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/xena_awakened4.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened4.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[6]'
-      value: Assets/_sg03/Card/Data/Ability/Darkborn/Undead/Ria/animate_dead.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/animate_dead.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[7]'
-      value: Assets/_sg03/Card/Data/Ability/Darkborn/Undead/Ria/king_return.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/king_return.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[8]'
-      value: Assets/_sg03/Card/Data/Ability/Darkborn/Undead/Ria/skeleton_shield.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/skeleton_shield.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[9]'
-      value: Assets/_sg03/Card/Data/Ability/Human/AzureBlade/cross_guard.asset
+      value: Assets/_sg03/Card/Data/Character/Human/abilities/AzureBlade/cross_guard.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[10]'
-      value: Assets/_sg03/Card/Data/Ability/Human/AzureBlade/spinning_slash.asset
+      value: Assets/_sg03/Card/Data/Character/Human/abilities/AzureBlade/spinning_slash.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[11]'
-      value: Assets/_sg03/Card/Data/Ability/Human/AzureBlade/titan_fall.asset
+      value: Assets/_sg03/Card/Data/Character/Human/abilities/AzureBlade/titan_fall.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[12]'
-      value: Assets/_sg03/Card/Data/Ability/Human/Lyra/eagle_eye.asset
+      value: Assets/_sg03/Card/Data/Character/Human/abilities/Lyra/eagle_eye.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[13]'
-      value: Assets/_sg03/Card/Data/Ability/Human/Titan/titan_spear_sweep.asset
+      value: Assets/_sg03/Card/Data/Character/Human/abilities/Titan/titan_spear_sweep.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[14]'
-      value: Assets/_sg03/Card/Data/Ability/Lightborn/LightElf/holy_glow.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/holy_glow.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[15]'
-      value: Assets/_sg03/Card/Data/Ability/Lightborn/LightElf/volt_heart/lightning_strike.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/lightning_strike.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[16]'
-      value: Assets/_sg03/Card/Data/Ability/Lightborn/LightElf/volt_heart/static_bind.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/static_bind.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[17]'
-      value: Assets/_sg03/Card/Data/Ability/Natureborn/Goblin/back_stab.asset
+      value: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/back_stab.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[18]'
-      value: Assets/_sg03/Card/Data/Ability/Natureborn/Goblin/goblin_shaman/totem_pulse.asset
+      value: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/goblin_shaman/totem_pulse.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[20]'
