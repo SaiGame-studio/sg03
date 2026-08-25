@@ -19,7 +19,7 @@ namespace SG03
         [SerializeField] private DeskPositionCtrl deskPosition;
         [SerializeField] private BattleStateCtrl battleStateCtrl;
         [SerializeField] private float actionInterval = 0.1f;
-        [SerializeField] private float omegaFrontLinePostDelay = 0.5f;
+        [SerializeField] private float omegaFrontLinePostDelay = 0.1f;
         [SerializeField, Min(1f)] private float resumeMoveSpeedMultiplier = 2f;
 
         [Header("Action Log")]
@@ -255,7 +255,8 @@ namespace SG03
                 Coroutine actionRoutine = this.ExecuteAction(log);
                 if (actionRoutine != null) yield return actionRoutine;
                 log.MarkExecuted();
-                yield return new WaitForSeconds(this.GetPostActionDelay(log.ActionName));
+                float postActionDelay = this.GetPostActionDelay(log.ActionName);
+                if (postActionDelay > 0f) yield return new WaitForSeconds(postActionDelay);
                 i++;
             }
             this.dispatchRoutine = null;
@@ -282,7 +283,7 @@ namespace SG03
         private float GetPostActionDelay(string actionName)
         {
             if (actionName == "omega_hand_to_front_line") return this.omegaFrontLinePostDelay;
-            return this.actionInterval;
+            return 0f;
         }
 
         private void LogAction(ClientActionLog log)
