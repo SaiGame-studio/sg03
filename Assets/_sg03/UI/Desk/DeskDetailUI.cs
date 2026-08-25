@@ -17,6 +17,7 @@ namespace SG03.UI
         private readonly Label detailTitle;
         private readonly Label slotCountLabel;
         private readonly Label starCountLabel;
+        private readonly Label highStarCardCountLabel;
         private readonly Label voidCountLabel;
         private readonly Label duplicateCardWarning;
         private readonly Button backBtn;
@@ -55,6 +56,7 @@ namespace SG03.UI
             this.detailTitle     = deskRoot.Q<Label>("DetailTitle");
             this.slotCountLabel  = deskRoot.Q<Label>("SlotCountLabel");
             this.starCountLabel  = deskRoot.Q<Label>("StarCountLabel");
+            this.highStarCardCountLabel = deskRoot.Q<Label>("HighStarCardCountLabel");
             this.voidCountLabel  = deskRoot.Q<Label>("VoidCountLabel");
             this.duplicateCardWarning = deskRoot.Q<Label>("DuplicateCardWarning");
             this.slotGrid        = deskRoot.Q<ScrollView>("SlotGrid");
@@ -187,6 +189,7 @@ namespace SG03.UI
                 this.slotCountLabel.text = $"{filledSlots}/{maxSlots}";
 
             this.UpdateStarCount();
+            this.UpdateHighStarCardCount(desk);
             this.UpdateVoidCount();
             this.UpdateDuplicateCardWarning(desk);
 
@@ -566,6 +569,31 @@ namespace SG03.UI
         {
             if (this.starCountLabel == null) return;
             this.starCountLabel.text = $"Stars {this.starredSlots.Count} / {MaxStarredSlots}";
+        }
+
+        private void UpdateHighStarCardCount(PresetData desk)
+        {
+            if (this.highStarCardCountLabel == null) return;
+
+            Dictionary<string, InventoryItemData> itemsById = new Dictionary<string, InventoryItemData>();
+            foreach (InventoryItemData item in this.allInventoryItems)
+            {
+                if (!string.IsNullOrEmpty(item?.id)) itemsById[item.id] = item;
+            }
+
+            int highStarCardCount = 0;
+            if (desk?.slots != null)
+            {
+                foreach (PresetSlotData slot in desk.slots)
+                {
+                    if (!string.IsNullOrEmpty(slot.inventory_item_id)
+                        && itemsById.TryGetValue(slot.inventory_item_id, out InventoryItemData item)
+                        && this.GetCardStarCount(item) >= 4)
+                        highStarCardCount++;
+                }
+            }
+
+            this.highStarCardCountLabel.text = $"4+ Stars: {highStarCardCount}";
         }
 
         private void UpdateVoidCount()
