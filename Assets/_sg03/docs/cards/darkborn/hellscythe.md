@@ -1,7 +1,8 @@
-# Hellscythe (Tử Thần Chiêu Hồn)
+# Hellscythe
 
 - **Loại Thẻ**: [`character`](../../03_characters.md)
-- **Chủng Tộc**: `darkborn` / `undead` (Bóng Tối / Tử Thần)
+- **Chủng Tộc Chính**: **Darkborn**
+- **Tộc Nhánh**: Undead (định danh kỹ thuật: `darkborn` / `undead`)
 - **Vai Trò**: Necromancer Commander
 
 ## Mô Tả

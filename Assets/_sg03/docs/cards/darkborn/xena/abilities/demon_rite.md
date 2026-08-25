@@ -3,7 +3,7 @@
 - **Mã Thẻ Bài**: `demon_rite`
 - **Số sao**: 3
 - **Loại Thẻ**: [`ability`](../../../../04_abilities.md)
-- **Chủng Tộc**: `darkborn` (Darkborn)
+- **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
 
 ---
 

@@ -2,23 +2,9 @@
 
 ## Danh Mục Kỹ Năng Theo Chủng Tộc
 
-Danh mục bên dưới chỉ liệt kê tên và số sao của từng thẻ kỹ năng.
+Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability theo bốn chủng tộc chính thức. Xem [Thế Giới Và Bốn Chủng Tộc](00_world_and_races.md) để biết quy ước ánh xạ các tộc nhánh.
 
-### 🛡️ Chủng Tộc Nhân Loại (Human)
-- [Spinning Slash](cards/human/abilities/spinning_slash.md): 3 sao
-- [Cross Guard](cards/human/abilities/cross_guard.md): 1 sao
-- [Eagle Eye](cards/human/abilities/eagle_eye.md): 2 sao
-- [Titan Fall](cards/human/abilities/titan_fall.md): 5 sao
-- [Spear Sweep](cards/human/abilities/titan_spear_sweep.md): 1 sao
-
-### 🌿 Chủng Tộc Tinh Linh (Elf / Light Elf)
-- [Holy Glow](cards/elf/abilities/holy_glow.md): 0 sao
-
-### 👺 Chủng Tộc Yêu Tinh (Goblin)
-- [Totem Pulse](cards/goblin/abilities/totem_pulse.md): 0 sao
-- [Back Stab](cards/goblin/abilities/back_stab.md): 0 sao
-
-### 💀 Chủng Tộc Bóng Tối (Darkborn / Undead)
+### Darkborn
 - [Xena Awakened I](cards/darkborn/xena/abilities/xena_awakened1.md): 1 sao
 - [Xena Awakened II](cards/darkborn/xena/abilities/xena_awakened2.md): 2 sao
 - [Xena Awakened III](cards/darkborn/xena/abilities/xena_awakened3.md): 3 sao
@@ -28,3 +14,17 @@ Danh mục bên dưới chỉ liệt kê tên và số sao của từng thẻ k�
 - [Twin Reaper](cards/darkborn/abilities/twin_reaper.md): 0 sao
 - [Skeleton Shield](cards/darkborn/abilities/skeleton_shield.md): 0 sao
 - [Animate Dead](cards/darkborn/abilities/animate_dead.md): 0 sao
+
+### Lightborn
+- [Holy Glow](cards/elf/abilities/holy_glow.md): 0 sao
+
+### Natureborn
+- [Totem Pulse](cards/goblin/abilities/totem_pulse.md): 0 sao
+- [Back Stab](cards/goblin/abilities/back_stab.md): 0 sao
+
+### Humans
+- [Spinning Slash](cards/human/abilities/spinning_slash.md): 3 sao
+- [Cross Guard](cards/human/abilities/cross_guard.md): 1 sao
+- [Eagle Eye](cards/human/abilities/eagle_eye.md): 2 sao
+- [Titan Fall](cards/human/abilities/titan_fall.md): 5 sao
+- [Spear Sweep](cards/human/abilities/titan_spear_sweep.md): 1 sao

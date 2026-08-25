@@ -1,11 +1,11 @@
-# Lyra - Huấn Luyện Sư Đại Bàng
+# Lyra
 
 - **Tên**: Lyra
 - **Số sao**: 2
 - **Tấn Công (ATK)**: 170
 - **Phòng Thủ (DEF)**: 240
 - **Loại Thẻ**: [`character`](../../03_characters.md)
-- **Chủng tộc**: `human` (Nhân Loại)
+- **Chủng Tộc Chính**: **Humans** (định danh kỹ thuật: `human`)
 - **Vai Trò**: Support / Aerial Scout
 
 ## Mô Tả

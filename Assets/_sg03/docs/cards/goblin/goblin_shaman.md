@@ -1,7 +1,8 @@
-# Goblin Shaman (Pháp Sư Goblin)
+# Goblin Shaman
 
 - **Loại Thẻ**: [`character`](../../03_characters.md)
-- **Chủng Tộc**: `goblin` (Yêu Tinh)
+- **Chủng Tộc Chính**: **Natureborn**
+- **Tộc Nhánh**: Goblin (định danh kỹ thuật: `goblin`)
 - **Vai Trò**: Caster / Totemic Support
 
 ## Mô Tả

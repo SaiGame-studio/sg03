@@ -6,7 +6,7 @@
 - **Tấn Công (ATK)**: 440
 - **Phòng Thủ (DEF)**: 470
 - **Loại Thẻ**: [`character`](../../../03_characters.md)
-- **Chủng Tộc**: `darkborn` (Darkborn)
+- **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
 - **Vai Trò**: Stormfire Fistmaster
 
 ## Mô Tả

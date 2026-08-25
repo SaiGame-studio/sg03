@@ -1,7 +1,8 @@
-# Light Elf (Tu Sĩ Ánh Sáng)
+# Light Elf
 
 - **Loại Thẻ**: [`character`](../../03_characters.md)
-- **Chủng Tộc**: `elf` / `light_elf` (Tinh Linh)
+- **Chủng Tộc Chính**: **Lightborn**
+- **Tộc Nhánh**: Light Elf (định danh kỹ thuật: `elf` / `light_elf`)
 - **Vai Trò**: Holy Healer / Support Caster
 
 ## Mô Tả

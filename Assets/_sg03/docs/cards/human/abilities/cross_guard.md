@@ -1,8 +1,8 @@
-# Cross Guard (Đỡ Kiếm Phản Vệ)
+# Cross Guard
 
 - **Loại Thẻ**: [`ability`](../../../04_abilities.md)
 - **Số sao**: 1
-- **Chủng Tộc**: `human` (Nhân Loại)
+- **Chủng Tộc Chính**: **Humans** (định danh kỹ thuật: `human`)
 - **Vị Trí Nhắm Mục Tiêu**: Hàng trước đồng minh
 - **Thẻ Nhân Vật Yêu Cầu**: [Ren](../azure_blade.md)
 

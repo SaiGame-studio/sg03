@@ -1,8 +1,9 @@
-# Holy Glow (Thánh Quang Hồi Năng)
+# Holy Glow
 
 - **Mã Thẻ Bài**: `holy_glow`
 - **Loại Thẻ**: [`ability`](../../../04_abilities.md)
-- **Chủng Tộc**: `elf` / `light_elf` (Tinh Linh)
+- **Chủng Tộc Chính**: **Lightborn**
+- **Tộc Nhánh**: Light Elf (định danh kỹ thuật: `elf` / `light_elf`)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline`, `own_backline`, `own_source`, `own_void`
 - **Thẻ Nhân Vật Yêu Cầu**: [Light Elf](../light_elf.md)
 

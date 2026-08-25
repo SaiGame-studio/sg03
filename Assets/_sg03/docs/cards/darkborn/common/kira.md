@@ -5,7 +5,8 @@
 - **Tấn Công (ATK)**: 140
 - **Phòng Thủ (DEF)**: 160
 - **Loại Thẻ**: [`character`](../../../03_characters.md)
-- **Chủng Tộc**: `darkborn` / `demon` (Darkborn / Demon)
+- **Chủng Tộc Chính**: **Darkborn**
+- **Tộc Nhánh**: Demon (định danh kỹ thuật: `darkborn` / `demon`)
 - **Vai Trò**: Assassin / Naval Scout
 
 ## Mô Tả

@@ -1,8 +1,9 @@
-# Totem Pulse (Sóng Mạch Totem)
+# Totem Pulse
 
 - **Mã Thẻ Bài**: `totem_pulse`
 - **Loại Thẻ**: [`ability`](../../../04_abilities.md)
-- **Chủng Tộc**: `goblin` (Yêu Tinh)
+- **Chủng Tộc Chính**: **Natureborn**
+- **Tộc Nhánh**: Goblin (định danh kỹ thuật: `goblin`)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline`
 - **Thẻ Nhân Vật Yêu Cầu**: [Goblin Shaman](../goblin_shaman.md)
 

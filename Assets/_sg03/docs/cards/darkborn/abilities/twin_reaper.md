@@ -1,8 +1,9 @@
-# Twin Reaper (Song Tử Trảm)
+# Twin Reaper
 
 - **Mã Thẻ Bài**: `twin_reaper`
 - **Loại Thẻ**: [`ability`](../../../04_abilities.md)
-- **Chủng Tộc**: `darkborn` / `undead` (Bóng Tối / Tử Thần)
+- **Chủng Tộc Chính**: **Darkborn**
+- **Tộc Nhánh**: Undead (định danh kỹ thuật: `darkborn` / `undead`)
 - **Vị Trí Nhắm Mục Tiêu**: `enemy_frontline`
 - **Thẻ Nhân Vật Yêu Cầu**: [Hellscythe](../hellscythe.md)
 

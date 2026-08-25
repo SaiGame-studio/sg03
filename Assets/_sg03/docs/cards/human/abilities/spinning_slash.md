@@ -1,8 +1,8 @@
-# Spinning Slash (Trảm Xoay)
+# Spinning Slash
 
 - **Loại Thẻ**: [`ability`](../../../04_abilities.md)
 - **Số sao**: 3
-- **Chủng Tộc**: `human` (Nhân Loại)
+- **Chủng Tộc Chính**: **Humans** (định danh kỹ thuật: `human`)
 - **Vị Trí Nhắm Mục Tiêu**: Hàng trước đối thủ
 - **Thẻ Nhân Vật Yêu Cầu**: [Ren](../azure_blade.md)
 

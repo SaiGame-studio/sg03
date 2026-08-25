@@ -1,8 +1,9 @@
-# Animate Dead (Chiêu Hồn Binh Đoàn Xương)
+# Animate Dead
 
 - **Mã Thẻ Bài**: `animate_dead`
 - **Loại Thẻ**: [`ability`](../../../04_abilities.md)
-- **Chủng Tộc**: `darkborn` / `undead` (Bóng Tối / Tử Thần)
+- **Chủng Tộc Chính**: **Darkborn**
+- **Tộc Nhánh**: Undead (định danh kỹ thuật: `darkborn` / `undead`)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline` / `own_hand`
 - **Thẻ Nhân Vật Yêu Cầu**: [Hellscythe](../hellscythe.md)
 

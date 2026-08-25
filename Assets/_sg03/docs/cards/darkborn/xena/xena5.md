@@ -6,7 +6,7 @@
 - **Tấn Công (ATK)**: 540
 - **Phòng Thủ (DEF)**: 570
 - **Loại Thẻ**: [`character`](../../../03_characters.md)
-- **Chủng Tộc**: `darkborn` (Darkborn)
+- **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
 - **Vai Trò**: Winged Demon Scion
 
 ## Mô Tả

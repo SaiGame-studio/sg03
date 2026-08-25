@@ -3,7 +3,7 @@
 - **Mã Thẻ Bài**: `xena_awakened2`
 - **Số sao**: 2
 - **Loại Thẻ**: [`ability`](../../../../04_abilities.md)
-- **Chủng Tộc**: `darkborn` (Darkborn)
+- **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
 - **Thẻ Nhân Vật Yêu Cầu**: [Xena II](../xena2.md)
 
 ---

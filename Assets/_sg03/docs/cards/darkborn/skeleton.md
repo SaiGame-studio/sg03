@@ -1,7 +1,8 @@
-# Skeleton (Lính Xương Trỗi Dậy)
+# Skeleton
 
 - **Loại Thẻ**: [`character`](../../03_characters.md)
-- **Chủng Tộc**: `darkborn` / `undead` (Bóng Tối / Lính Xương)
+- **Chủng Tộc Chính**: **Darkborn**
+- **Tộc Nhánh**: Undead (định danh kỹ thuật: `darkborn` / `undead`)
 - **Vai Trò**: Minion / Meatshield thế thân
 
 ## Mô Tả
