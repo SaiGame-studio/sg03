@@ -18,6 +18,9 @@ namespace SG03
         [SerializeField] private CardHolderCtrl ctrl;
         [SerializeField] private MeshRenderer   meshRenderer;
 
+        [Header("Visual")]
+        [SerializeField] private bool showVisual = true;
+
         // ─── Alpha materials ──────────────────────────────────────────────────────
 
         [Header("Alpha Materials")]
@@ -50,6 +53,7 @@ namespace SG03
         protected override void ResetValue()
         {
             this.SetMaterial(this.ResolveDefault());
+            this.ApplyVisualToggleInEditor();
         }
 
         protected virtual void LoadCtrl()
@@ -178,6 +182,20 @@ namespace SG03
             this.SetMaterial(this.ResolveDefault());
         }
 
+#if UNITY_EDITOR
+        private void OnValidate() => this.ApplyVisualToggleInEditor();
+#endif
+
+        private void ApplyVisualToggleInEditor()
+        {
+#if UNITY_EDITOR
+            MeshRenderer targetRenderer = this.meshRenderer != null
+                ? this.meshRenderer
+                : this.GetComponent<MeshRenderer>();
+            if (targetRenderer != null) targetRenderer.enabled = this.showVisual;
+#endif
+        }
+
         // ─── Material resolve ─────────────────────────────────────────────────────
 
         private Material ResolveDefault()  => this.ctrl.HolderOwner == Owner.alpha ? this.alphaDefault  : this.omegaDefault;
@@ -187,7 +205,7 @@ namespace SG03
         private void SetMaterial(Material mat)
         {
             if (this.meshRenderer == null) return;
-            this.meshRenderer.material = mat;
+            this.meshRenderer.sharedMaterial = mat;
         }
     }
 }
