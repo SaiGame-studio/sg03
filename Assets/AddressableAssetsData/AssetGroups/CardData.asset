@@ -16,17 +16,17 @@ MonoBehaviour:
   m_GUID: 23f565229de3a5e479ee3849d00fd09c
   m_SerializeEntries:
   - m_GUID: 0c0eb85feafe74a459900e7e7f8c886f
-    m_Address: Assets/_sg03/Card/Data/Character/Undead/skeleton.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/skeleton.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0fd00c6a0911c63439351264592baf5d
-    m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_shaman.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 19813d66ce1892f47bc3d58d7e0dfd7e
-    m_Address: Assets/_sg03/Card/Data/Character/LightElf/volt_heart.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/volt_heart.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -46,7 +46,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 282a862c3062e2f4bb6094fe43bb2f47
-    m_Address: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Lightborn/LightElf/volt_heart/static_bind.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -56,12 +56,12 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 30d2305e47ff2a54e83950a726a79a01
-    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/xena/xena4.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena4.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 325981bf9ef75574993ed66f351f820f
-    m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_saboteur.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -71,27 +71,27 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 34016b5d7f4437240bc9e76d6281c068
-    m_Address: Assets/_sg03/Card/Data/Ability/Goblin/back_stab.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Natureborn/Goblin/back_stab.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3fe1da2b2c760aa4680679499fce77fd
-    m_Address: Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_female.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 47ad12a667181a64680abb02562ec8ee
-    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/xena/xena3.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena3.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 54b73085f240c714e91a9f87491d14bf
-    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/hellscythe/king_return.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/Undead/Ria/king_return.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 55a3dfc83811bee45b54ee5ccb994fe9
-    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/hellscythe/skeleton_shield.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/Undead/Ria/skeleton_shield.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -101,17 +101,17 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6afd6f7305243ca49b6994795e032089
-    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/hellscythe.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/hellscythe.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c511028519219e489397271c6c2e6f2
-    m_Address: Assets/_sg03/Card/Data/Character/Goblin/goblin_grunt.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_grunt.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c9191ef9875b3e4eae0e4a6123c74cc
-    m_Address: Assets/_sg03/Card/Data/Ability/LightElf/holy_glow.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Lightborn/LightElf/holy_glow.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -131,52 +131,52 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9023e70859451354db9a88a1fc4a29e9
-    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/demon_rite.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/demon_rite.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 90fe52712c19574439e735d06a9c0cc0
-    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/demon_orbs.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/demon_orbs.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9eb7d17616afe0044947081a909ef0bb
-    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/xena/xena1.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena1.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1dbcb8f49ff902448d783578bd455c0
-    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/hellscythe/animate_dead.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/Undead/Ria/animate_dead.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a4db73509a007f14c999c098c8599c8f
-    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/common/kira.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Common/kira.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aab3c5d84d4b984409a76c5b649df611
-    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/xena/xena2.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena2.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b294c9150aaddb740bed376abfbffcd9
-    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/xena/xena5.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena5.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b54d7ce8ddf795a46b14aa2c5ba7b894
-    m_Address: Assets/_sg03/Card/Data/Ability/Goblin/goblin_shaman/totem_pulse.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Natureborn/Goblin/goblin_shaman/totem_pulse.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bc3ec7de058d9324b99e7f17efe0c932
-    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/xena_awakened3.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/xena_awakened3.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c47dbeb3327fdd64aaf74f8835c734b9
-    m_Address: Assets/_sg03/Card/Data/Character/LightElf/zelene.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/zelene.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -186,32 +186,32 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d7b3a1d2f007ace4e86c6b864f3c33b7
-    m_Address: Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_male.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: de3a2dce44549984897c65d7b2f0adb8
-    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/xena_awakened1.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/xena_awakened1.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e313158a88c9caa4abb2ee8ce2e810ee
-    m_Address: Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/skeleton_king.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f3fdd7b769a53db44a4a24f0d90075f2
-    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/xena_awakened2.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/xena_awakened2.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f862093a6f712ea4086b3d6af12163b1
-    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/xena_awakened4.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/Demon/Xena/xena_awakened4.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fb951131c1f83df4596191934e87c025
-    m_Address: Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/lightning_strike.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Lightborn/LightElf/volt_heart/lightning_strike.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
