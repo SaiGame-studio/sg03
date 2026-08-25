@@ -18,7 +18,6 @@ namespace SG03
         [SerializeField] private CardSelection cardSelection;
         [SerializeField] private DeskPositionCtrl deskPosition;
         [SerializeField] private BattleStateCtrl battleStateCtrl;
-        [SerializeField] private float actionInterval = 0.1f;
         [SerializeField] private float omegaFrontLinePostDelay = 0.1f;
         [SerializeField, Min(1f)] private float resumeMoveSpeedMultiplier = 2f;
 
@@ -252,10 +251,11 @@ namespace SG03
                 ClientActionLog log = this.actionLog[i];
                 if (log.Executed) { i++; continue; }
                 yield return new WaitUntil(() => this.isProcessingActions);
-                if (this.IsSourceSpawnAction(log.ActionName))
+                if (this.IsParallelSourceAction(log.ActionName))
                 {
-                    int groupEnd = this.FindSourceSpawnGroupEnd(i);
-                    yield return this.StartCoroutine(this.DispatchSourceSpawnGroup(i, groupEnd));
+                    bool isSpawnGroup = this.IsSourceSpawnAction(log.ActionName);
+                    int groupEnd = this.FindParallelSourceGroupEnd(i, isSpawnGroup);
+                    yield return this.StartCoroutine(this.DispatchParallelSourceGroup(i, groupEnd));
                     i = groupEnd;
                     continue;
                 }
@@ -277,19 +277,32 @@ namespace SG03
             return actionName == "alpha_source_spawn_card" || actionName == "omega_source_spawn_card";
         }
 
-        private int FindSourceSpawnGroupEnd(int startIndex)
+        private bool IsSourceToHandAction(string actionName)
+        {
+            return actionName == "alpha_source_to_hand" || actionName == "omega_source_to_hand";
+        }
+
+        private bool IsParallelSourceAction(string actionName)
+        {
+            return this.IsSourceSpawnAction(actionName) || this.IsSourceToHandAction(actionName);
+        }
+
+        private int FindParallelSourceGroupEnd(int startIndex, bool isSpawnGroup)
         {
             int endIndex = startIndex;
             while (endIndex < this.actionLog.Count)
             {
                 ClientActionLog log = this.actionLog[endIndex];
-                if (log.Executed || !this.IsSourceSpawnAction(log.ActionName)) break;
+                bool belongsToGroup = isSpawnGroup
+                    ? this.IsSourceSpawnAction(log.ActionName)
+                    : this.IsSourceToHandAction(log.ActionName);
+                if (log.Executed || !belongsToGroup) break;
                 endIndex++;
             }
             return endIndex;
         }
 
-        private IEnumerator DispatchSourceSpawnGroup(int startIndex, int endIndex)
+        private IEnumerator DispatchParallelSourceGroup(int startIndex, int endIndex)
         {
             int pendingCount = 0;
             for (int index = startIndex; index < endIndex; index++)
@@ -303,13 +316,13 @@ namespace SG03
                 }
 
                 pendingCount++;
-                this.StartCoroutine(this.WaitForSourceSpawnAction(actionRoutine, log, () => pendingCount--));
+                this.StartCoroutine(this.WaitForParallelSourceAction(actionRoutine, log, () => pendingCount--));
             }
 
             yield return new WaitUntil(() => pendingCount == 0);
         }
 
-        private IEnumerator WaitForSourceSpawnAction(
+        private IEnumerator WaitForParallelSourceAction(
             Coroutine actionRoutine,
             ClientActionLog log,
             Action onComplete)
