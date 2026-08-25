@@ -75,6 +75,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3863bb6691a5487bb0849d023db6f577
+    m_Address: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/goblin_shaman/brute_call.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3fe1da2b2c760aa4680679499fce77fd
     m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_female.asset
     m_ReadOnly: 0
@@ -82,6 +87,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 47ad12a667181a64680abb02562ec8ee
     m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena3.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4bfab25d790c42748add4c617aafd0f4
+    m_Address: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_brute.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

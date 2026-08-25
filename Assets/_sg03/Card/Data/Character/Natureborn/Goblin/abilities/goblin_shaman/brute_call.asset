@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f9cbdcc53c1dd447ae715e2d0f04f14, type: 3}
-  m_Name: back_stab
+  m_Name: brute_call
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardData
   frameTexture: {fileID: 0}
-  characterTexture: {fileID: 2800000, guid: 0a2b928543c71fe46952a743c903174d, type: 3}
+  characterTexture: {fileID: 2800000, guid: ae92260655d79ef478cc747c65bd1da7, type: 3}
   backTexture: {fileID: 0}
