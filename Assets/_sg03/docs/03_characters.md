@@ -45,7 +45,10 @@ Nằm tại thư mục [`cards/natureborn/goblin/`](cards/natureborn/goblin/)
 Tộc nhánh hiện có: Goblin. Định danh `goblin` là tên kỹ thuật hiện hành.
 
 ### Thẻ Nhân Vật (Character)
-- [Goblin Shaman](cards/natureborn/goblin/goblin_shaman.md) — Số sao: 0
+- [Goblin Grunt](cards/natureborn/goblin/goblin_grunt.md) — Số sao: 1
+- [Goblin Saboteur](cards/natureborn/goblin/goblin_saboteur.md) — Số sao: 2
+- [Goblin Shaman](cards/natureborn/goblin/goblin_shaman.md) — Số sao: 3
+- [Goblin Brute](cards/natureborn/goblin/goblin_brute.md) — Số sao: 4
 
 ---
 

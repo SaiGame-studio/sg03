@@ -100,6 +100,9 @@
 - Công thức tổng số sao hiến tế đạt tối thiểu **$K - 1$ Sao** là khung định mức tổng giá trị sao tối thiểu để triệu hồi 1 lá Character **$K$ Sao** ($K \ge 4$) từ **Mộ Bài (`the_void`)**:
   $$\text{Tổng Số Sao Các Đơn Vị Hiến Tế} \ge K - 1$$
 
+#### Ngoại Lệ Được Chỉ Định
+- [Brute Call](cards/natureborn/goblin/abilities/brute_call.md) là Ability 3 sao nhưng triệu gọi [Goblin Brute](cards/natureborn/goblin/goblin_brute.md) 4 sao và không bắt buộc phải hiến tế đủ 3 sao. Nếu có Goblin 1 hoặc 2 sao đứng liền kề Goblin Shaman, một đơn vị hợp lệ sẽ bị Goblin Brute giẫm chết; nếu không có, Goblin Brute vẫn được triệu gọi vào một vị trí liền kề đang trống mà không cần hiến tế. Nếu không có vị trí hợp lệ, lần gọi thất bại và Brute Call vẫn bị đưa vào `the_void`. Đây là ngoại lệ đối với cả quy tắc tính sao theo tổng số sao được triệu hồi và định mức hiến tế tối thiểu.
+
 ### Quy Tắc Điều Kiện Hiến Tế Riêng Theo Từng Lá Bài (Specific Sacrifice Requirement)
 - **Không Hiến Tế Tùy Ý**: Công thức $K - 1$ chỉ là định mức tổng giá trị sao. **Mỗi lá bài Chiêu Hồi đều có quy định điều kiện hiến tế riêng biệt** được mô tả trên từng lá (ví dụ: Yêu cầu vật tế đúng Chủng tộc chỉ định, đúng Tên bài chỉ định, hoặc đúng Loại thẻ nòng cốt). **Không phải cứ gom ngẫu nhiên đủ sao là có thể kích hoạt được**.
 

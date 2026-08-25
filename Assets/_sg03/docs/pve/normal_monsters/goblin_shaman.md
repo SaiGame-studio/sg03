@@ -8,7 +8,7 @@
 
 ## 1. Tổng Quan Về Quái Thường Goblin Shaman
 
-**Goblin Shaman** là một đơn vị **Quái Thường (Normal Monster)** thuộc tộc nhánh Goblin của **Natureborn** trong chế độ PvE. Mặc dù là quái thường, Goblin Shaman sở hữu chiến thuật cắm Totem phòng thủ và hỗ trợ đồng đội rất khó chịu nếu người chơi không tập trung dồn sát thương tiêu diệt sớm.
+**Goblin Shaman** là một đơn vị nữ thuộc nhóm **Quái Thường (Normal Monster)**, tộc nhánh Goblin của **Natureborn**, trong chế độ PvE. Mặc dù là quái thường, cô sở hữu chiến thuật cắm Totem phòng thủ và hỗ trợ đồng đội rất khó chịu nếu người chơi không tập trung dồn sát thương tiêu diệt sớm.
 
 ---
 

@@ -27,6 +27,7 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 ### Natureborn
 - [Totem Pulse](cards/natureborn/goblin/abilities/totem_pulse.md): 0 sao
 - [Back Stab](cards/natureborn/goblin/abilities/back_stab.md): 0 sao
+- [Brute Call](cards/natureborn/goblin/abilities/brute_call.md): 3 sao
 
 ### Humans
 - [Spinning Slash](cards/human/abilities/spinning_slash.md): 3 sao
