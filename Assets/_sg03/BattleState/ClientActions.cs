@@ -252,6 +252,13 @@ namespace SG03
                 ClientActionLog log = this.actionLog[i];
                 if (log.Executed) { i++; continue; }
                 yield return new WaitUntil(() => this.isProcessingActions);
+                if (this.IsSourceSpawnAction(log.ActionName))
+                {
+                    int groupEnd = this.FindSourceSpawnGroupEnd(i);
+                    yield return this.StartCoroutine(this.DispatchSourceSpawnGroup(i, groupEnd));
+                    i = groupEnd;
+                    continue;
+                }
                 Coroutine actionRoutine = this.ExecuteAction(log);
                 if (actionRoutine != null) yield return actionRoutine;
                 log.MarkExecuted();
@@ -263,6 +270,53 @@ namespace SG03
             this.hasPendingActions = this.HasUnexecutedActions();
             this.ReconcileBoardWhenActionsComplete();
             this.FinishResumeWhenActionsComplete();
+        }
+
+        private bool IsSourceSpawnAction(string actionName)
+        {
+            return actionName == "alpha_source_spawn_card" || actionName == "omega_source_spawn_card";
+        }
+
+        private int FindSourceSpawnGroupEnd(int startIndex)
+        {
+            int endIndex = startIndex;
+            while (endIndex < this.actionLog.Count)
+            {
+                ClientActionLog log = this.actionLog[endIndex];
+                if (log.Executed || !this.IsSourceSpawnAction(log.ActionName)) break;
+                endIndex++;
+            }
+            return endIndex;
+        }
+
+        private IEnumerator DispatchSourceSpawnGroup(int startIndex, int endIndex)
+        {
+            int pendingCount = 0;
+            for (int index = startIndex; index < endIndex; index++)
+            {
+                ClientActionLog log = this.actionLog[index];
+                Coroutine actionRoutine = this.ExecuteAction(log);
+                if (actionRoutine == null)
+                {
+                    log.MarkExecuted();
+                    continue;
+                }
+
+                pendingCount++;
+                this.StartCoroutine(this.WaitForSourceSpawnAction(actionRoutine, log, () => pendingCount--));
+            }
+
+            yield return new WaitUntil(() => pendingCount == 0);
+        }
+
+        private IEnumerator WaitForSourceSpawnAction(
+            Coroutine actionRoutine,
+            ClientActionLog log,
+            Action onComplete)
+        {
+            yield return actionRoutine;
+            log.MarkExecuted();
+            onComplete?.Invoke();
         }
 
         private void ReconcileBoardWhenActionsComplete()
