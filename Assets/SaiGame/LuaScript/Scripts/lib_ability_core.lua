@@ -8,10 +8,10 @@
 -- A card with a nil/empty metadata.abilities string has no active abilities.
 --
 -- To add a new ability:
---   1. Create/edit its source under `LuaScript/AbilitySources`.
---   2. Add its config to `lib_ability_config.get_ability_config`.
---   3. Add a branch in `_get_ability_handler` so the dispatcher can call `lib_ability_all.<ability>_execute(...)`.
---   4. Regenerate `Scripts/lib_ability_all.lua` from the sources.
+--   1. Define `<ability_key>_execute(...)` in the appropriate ability library.
+--   2. Add its config and `handler_group` to `lib_ability_config.get_ability_config`.
+--   3. Only when introducing a new handler group, register its library in `_get_ability_library`
+--      and require that library from every regular script that loads `lib_ability_core`.
 
 
 -- Parses card.metadata.abilities into an array of trimmed, non-empty keys.
@@ -329,39 +329,20 @@ function deal_damage_to_character(state, attacker_card, target_card, damage, tar
     return damage_actions, nil
 end
 
-local function _get_ability_handler(ability_key)
-    if ability_key == "twin_reaper" then
-        return lib_ability_character_passives.twin_reaper_execute
-    elseif ability_key == "scout_strike" then
-        return lib_ability_character_passives.scout_strike_execute
-    elseif ability_key == "eagle_eye" then
-        return lib_ability_all.eagle_eye_execute
-    elseif ability_key == "spinning_slash" then
-        return lib_ability_all.spinning_slash_execute
-    elseif ability_key == "cross_guard" then
-        return lib_ability_all.cross_guard_execute
-    elseif ability_key == "totem_pulse" then
-        return lib_ability_all.totem_pulse_execute
-    elseif ability_key == "back_stab" then
-        return lib_ability_all.back_stab_execute
-    elseif ability_key == "holy_glow" then
-        return lib_ability_all.holy_glow_execute
-    elseif ability_key == "skeleton_shield" then
-        return lib_ability_all.skeleton_shield_execute
-    elseif ability_key == "animate_dead" then
-        return lib_ability_advanced.animate_dead_execute
-    elseif ability_key == "titan_fall" then
-        return lib_ability_mid_game.titan_fall_execute
-    elseif ability_key == "titan_spear_sweep" then
-        return lib_ability_mid_game.titan_spear_sweep_execute
-    elseif ability_key == "xena_awakened1" then
-        return lib_ability_xena.xena_awakened1_execute
-    elseif ability_key == "xena_awakened2" then
-        return lib_ability_xena.xena_awakened2_execute
-    elseif ability_key == "xena_awakened3" then
-        return lib_ability_xena.xena_awakened3_execute
-    end
+local function _get_ability_library(handler_group)
+    if handler_group == "all" then return lib_ability_all end
+    if handler_group == "advanced" then return lib_ability_advanced end
+    if handler_group == "mid_game" then return lib_ability_mid_game end
+    if handler_group == "xena" then return lib_ability_xena end
+    if handler_group == "character_passives" then return lib_ability_character_passives end
     return nil
+end
+
+local function _get_ability_handler(ability_key, ability_def)
+    if ability_def == nil or type(ability_def.handler_group) ~= "string" then return nil end
+    local ability_library = _get_ability_library(ability_def.handler_group)
+    if type(ability_library) ~= "table" then return nil end
+    return ability_library[ability_key .. "_execute"]
 end
 
 local function _get_item_def_race(item_def)
@@ -471,7 +452,7 @@ local function _dispatch_one_ability(state, source_card, key, trigger_event, eve
         return {}, target_err
     end
 
-    local ability_handler = _get_ability_handler(key)
+    local ability_handler = _get_ability_handler(key, ability_def)
     if type(ability_handler) ~= "function" then
         lib_battle_common.dlog("[ability] dispatch: key=" .. key .. " ERROR - execute handler missing")
         return {}, "no handler for ability key: " .. tostring(key)

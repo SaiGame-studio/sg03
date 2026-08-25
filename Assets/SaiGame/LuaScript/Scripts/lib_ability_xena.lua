@@ -198,7 +198,8 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
     local settings, config_err = validate_xena_config(config)
     if config_err ~= nil then return {}, config_err end
 
-    local target_context, target_err = find_xena_target(state, source_card, event_data, helpers, settings.ability_key)
+    local target_context, target_err = find_xena_target(
+        state, source_card, event_data, helpers, settings.ability_key)
     if target_err ~= nil then return {}, target_err end
 
     local battle = helpers.lib_battle_common
@@ -282,4 +283,184 @@ function xena_awakened3_execute(state, source_card, event_data, helpers)
         sacrifice_race = "dark_elf",
         sacrifice_excluded_codes = { "xena1", "xena2", "xena3" },
     })
+end
+
+-- ability: demon_rite
+-- Conditional ability: it must be triggered by another card and is intentionally
+-- not registered in lib_ability_config for direct card activation.
+-- Returns ritual_result, err. Ritual conditions use ritual_result.success=false,
+-- while invalid invocation or malformed target context returns err.
+function demon_rite_execute(state, source_card, event_data, helpers)
+    if source_card == nil then return nil, "demon_rite requires a triggering card" end
+    if source_card.item_definition_code_name == "demon_rite" then
+        return nil, "demon_rite cannot be activated directly by Demon Rite"
+    end
+
+    local target_card = (event_data or {}).defender_card
+    if target_card == nil then return nil, "demon_rite requires a target from its triggering card" end
+
+    local source_side = helpers.find_card_side(state, source_card)
+    if source_side == nil or source_side == "unknown" then
+        return nil, "demon_rite triggering card is not on a battle line"
+    end
+    if helpers.find_card_side(state, target_card) ~= source_side then
+        return nil, "demon_rite target must be allied with its triggering card"
+    end
+
+    local target_line_key, target_line, target_index, line_err =
+        find_target_line(state, event_data, target_card, "demon_rite")
+    if line_err ~= nil then return nil, line_err end
+
+    local back_line = state[source_side .. "_back_line"] or {}
+    local demon_rite_card = helpers.find_line_card_by_code(back_line, "demon_rite")
+    if demon_rite_card == nil then
+        return { success = false, reason = "missing_demon_rite", actions = {} }, nil
+    end
+    local demon_orbs_card = helpers.find_line_card_by_code(back_line, "demon_orbs")
+    if demon_orbs_card == nil then
+        return { success = false, reason = "missing_demon_orbs", actions = {} }, nil
+    end
+
+    local actions = {}
+    local expose_orbs_action = helpers.expose_ability_selected_card(state, demon_orbs_card)
+    if expose_orbs_action ~= nil then table.insert(actions, expose_orbs_action) end
+    demon_rite_card.trigger = true
+    local expose_rite_action = helpers.expose_ability_selected_card(state, demon_rite_card)
+    if expose_rite_action ~= nil then table.insert(actions, expose_rite_action) end
+
+    local settings = {
+        ability_key = "demon_rite",
+        sacrifice_count = 1,
+        sacrifice_star_set = { [1] = true, [2] = true, [3] = true, [4] = true },
+        sacrifice_race = nil,
+        sacrifice_excluded_code_set = {
+            xena1 = true,
+            xena2 = true,
+            xena3 = true,
+            xena4 = true,
+            xena5 = true,
+        },
+    }
+    local sacrifice_indexes, sacrifice_err = find_sacrifice_indexes(
+        state, target_line, target_index, source_card, target_card, settings, helpers)
+    if sacrifice_err ~= nil then
+        table.insert(actions, source_side .. "_card_ability:source=" .. demon_rite_card.inventory_item_id ..
+            ",ability=demon_rite,triggered_by=" .. source_card.inventory_item_id ..
+            ",target=" .. target_card.inventory_item_id .. ",result=failed,reason=missing_sacrifice")
+        return {
+            success = false,
+            reason = "missing_sacrifice",
+            actions = actions,
+            demon_rite_card = demon_rite_card,
+            demon_orbs_card = demon_orbs_card,
+        }, nil
+    end
+
+    local sacrifice_card = target_line[sacrifice_indexes[1]]
+    target_line[sacrifice_indexes[1]] = {}
+    local void_key = source_side .. "_the_void"
+    if state[void_key] == nil then state[void_key] = {} end
+    table.insert(state[void_key], sacrifice_card)
+
+    table.insert(actions, source_side .. "_card_ability:source=" .. demon_rite_card.inventory_item_id ..
+        ",ability=demon_rite,triggered_by=" .. source_card.inventory_item_id ..
+        ",target=" .. target_card.inventory_item_id ..
+        ",sacrificed=" .. sacrifice_card.inventory_item_id)
+    table.insert(actions, source_side .. "_card_sent_to_void:" .. sacrifice_card.inventory_item_id)
+    helpers.lib_battle_common.dlog("[ability] demon_rite: target=" .. target_card.inventory_item_id ..
+        " sacrificed=" .. sacrifice_card.inventory_item_id .. " from " .. target_line_key)
+    return {
+        success = true,
+        reason = nil,
+        actions = actions,
+        demon_rite_card = demon_rite_card,
+        demon_orbs_card = demon_orbs_card,
+        sacrifice_card = sacrifice_card,
+    }, nil
+end
+
+local function append_actions(target_actions, source_actions)
+    for _, action in ipairs(source_actions or {}) do table.insert(target_actions, action) end
+end
+
+local function fail_xena_awakened4_ritual(state, source_card, target_card, source_side, reason, helpers, actions)
+    local result_actions = actions or {}
+    table.insert(result_actions, source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+        ",ability=xena_awakened4,target=" .. target_card.inventory_item_id ..
+        ",result=failed,reason=" .. reason)
+    local void_key = source_side .. "_the_void"
+    if state[void_key] == nil then state[void_key] = {} end
+    send_source_to_void(state, source_side, source_card, state[void_key], helpers.lib_battle_common, result_actions)
+    helpers.lib_battle_common.dlog("[ability] xena_awakened4: ritual failed - " .. reason)
+    return result_actions, nil
+end
+
+-- ability: xena_awakened4
+-- Replaces an attacked Xena IV that will be defeated with Xena V from void.
+-- Runs the conditional Demon Rite before the shared awakening.
+function xena_awakened4_execute(state, source_card, event_data, helpers)
+    local target_context, target_err = find_xena_target(
+        state, source_card, event_data, helpers, "xena_awakened4")
+    if target_err ~= nil then return {}, target_err end
+
+    local target_card = target_context.target_card
+    local source_side = target_context.source_side
+    if target_card.item_definition_code_name ~= "xena4" then
+        return {}, "xena_awakened4 target must be xena4"
+    end
+
+    local awakening_config = {
+        ability_key = "xena_awakened4",
+        successor_code = "xena5",
+        successor_name = "Xena V",
+        sacrifice_count = 0,
+    }
+    local incoming_damage = helpers.get_character_incoming_damage(state, target_card)
+    if not helpers.is_character_gonna_dead(target_card, incoming_damage) then
+        local actions = {
+            source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+                ",ability=xena_awakened4,target=" .. target_card.inventory_item_id ..
+                ",result=no_effect",
+        }
+        local void_key = source_side .. "_the_void"
+        if state[void_key] == nil then state[void_key] = {} end
+        send_source_to_void(
+            state, source_side, source_card, state[void_key], helpers.lib_battle_common, actions)
+        return actions, nil
+    end
+
+    local _, _, _, line_err = find_target_line(state, event_data, target_card, "xena_awakened4")
+    if line_err ~= nil then return {}, line_err end
+
+    local void_zone = state[source_side .. "_the_void"] or {}
+    local _, successor_card = find_successor_card(void_zone, "xena5")
+    if successor_card == nil then
+        local actions = {
+            source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+                ",ability=xena_awakened4,target=" .. target_card.inventory_item_id ..
+                ",result=no_effect",
+        }
+        local void_key = source_side .. "_the_void"
+        if state[void_key] == nil then state[void_key] = {} end
+        send_source_to_void(
+            state, source_side, source_card, state[void_key], helpers.lib_battle_common, actions)
+        return actions, nil
+    end
+
+    local rite_result, demon_rite_err = demon_rite_execute(
+        state, source_card, event_data, helpers)
+    if demon_rite_err ~= nil then
+        return {}, demon_rite_err
+    end
+    local ritual_actions = rite_result.actions or {}
+    if rite_result.success ~= true then
+        return fail_xena_awakened4_ritual(
+            state, source_card, target_card, source_side, rite_result.reason, helpers, ritual_actions)
+    end
+
+    local awakening_actions, awakening_err = execute_xena_awakened(
+        state, source_card, event_data, helpers, awakening_config)
+    if awakening_err ~= nil then return ritual_actions, awakening_err end
+    append_actions(ritual_actions, awakening_actions)
+    return ritual_actions, nil
 end
