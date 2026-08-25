@@ -8,6 +8,12 @@
 - **Thẻ Nhân Vật Yêu Cầu**: [Goblin Grunt](../goblin_grunt.md), [Goblin Saboteur](../goblin_saboteur.md) hoặc [Goblin Shaman](../goblin_shaman.md)
 - **Ngoại Lệ**: [Goblin Brute](../goblin_brute.md) không thể sử dụng Back Stab
 
+## Mô Tả Kỹ Năng
+
+Back Stab là chiến thuật đánh úp đặc trưng của những Goblin nhỏ con và linh hoạt. Họ tận dụng bụi rậm, địa hình gồ ghề cùng sự hỗn loạn trên chiến trường để lẩn khỏi tầm quan sát, vòng qua phòng tuyến rồi bất ngờ tấn công vào điểm mù của đối phương.
+
+Khi kích hoạt, sức tấn công của Goblin thực hiện đòn đánh được kết hợp với sức mạnh của Back Stab để tạo thành một đòn sát thương tập trung. Goblin Grunt, Goblin Saboteur và Goblin Shaman đều có thể vận dụng chiến thuật này theo cách riêng; riêng Goblin Brute có thân hình quá đồ sộ để ẩn mình và tiếp cận mục tiêu nên không thể sử dụng Back Stab.
+
 ---
 
 ## 🗡️ Cơ Chế & Luồng Thực Thi Kỹ Năng

@@ -7,6 +7,12 @@
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline`
 - **Thẻ Nhân Vật Yêu Cầu**: [Goblin Shaman](../goblin_shaman.md)
 
+## Mô Tả Kỹ Năng
+
+Goblin Shaman dựng Totem giữa chiến địa và dẫn truyền vào đó linh lực nguyên thủy của đất, cây cỏ cùng sức sống hoang dã. Khi nghi lễ hoàn tất, Totem cộng hưởng với nhịp sống của vùng đất rồi giải phóng một xung năng lượng lan dọc toàn bộ tiền tuyến phe mình.
+
+Luồng linh lực bao bọc các đồng minh như một lớp vỏ tự nhiên, củng cố khả năng phòng thủ và giúp đội hình đứng vững trước đòn tấn công đang ập đến. Sau khi truyền hết năng lượng bảo hộ, Totem hoàn thành sứ mệnh và được đưa vào `the_void`.
+
 ---
 
 ## 🗿 Cơ Chế & Luồng Thực Thi Kỹ Năng
