@@ -372,7 +372,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaBack0
+      value: omega_back_0
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalPosition.x
@@ -771,7 +771,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaBack2
+      value: omega_back_2
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalPosition.x
@@ -936,7 +936,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaBack3
+      value: omega_back_3
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1782,7 +1782,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaFront4
+      value: omega_front_4
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -2746,34 +2746,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2088691973}
     m_Modifications:
-    - target: {fileID: 2588388141430089581, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_Size.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_Size.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_Size.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.1
-      objectReference: {fileID: 0}
     - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: m_LocalPosition.x
       value: -17
@@ -2818,10 +2790,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: alpha_hand_0
       objectReference: {fileID: 0}
-    - target: {fileID: 6696618329774845696, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: boxCollider
-      value: 
-      objectReference: {fileID: 1722471836}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3227,7 +3195,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaFront2
+      value: omega_front_2
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -4850,7 +4818,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaBack4
+      value: omega_back_4
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5316,6 +5284,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: alpha_back_3
       objectReference: {fileID: 0}
+    - target: {fileID: 6696618329774845696, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: link
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5472,11 +5444,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c832dcdd38554f84f8a63e7ef94c7a8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardHolderCtrl
---- !u!65 &1722471836 stripped
-BoxCollider:
-  m_CorrespondingSourceObject: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-  m_PrefabInstance: {fileID: 783278246}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1742238187
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5830,7 +5797,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaFront1
+      value: omega_front_1
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -6245,6 +6212,10 @@ PrefabInstance:
       propertyPath: alphaColor.r
       value: 0.004
       objectReference: {fileID: 0}
+    - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
+      propertyPath: m_Name
+      value: omega_front_0
+      objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalScale.x
       value: 7.5
@@ -6543,7 +6514,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaFront3
+      value: omega_front_3
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -7097,7 +7068,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaBack1
+      value: omega_back_1
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalPosition.x
@@ -7265,6 +7236,7 @@ MonoBehaviour:
   hovered: {fileID: 0}
   holderSelected: {fileID: 0}
   holderHover: {fileID: 0}
+  holderHoverDetector: {fileID: 0}
   deskPositions: {fileID: 948749802}
   fullDetail: 0
   markSelected: {fileID: 311934903}
@@ -8362,7 +8334,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3193441457980298630, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3482978470714320713, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
       propertyPath: m_LocalPosition.x
@@ -8407,10 +8379,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3193441457980298630, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
 --- !u!1001 &6418814622862749946
 PrefabInstance:

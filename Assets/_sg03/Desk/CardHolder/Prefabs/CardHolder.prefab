@@ -127,8 +127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardHolderCtrl
   owner: 0
-  link: 1
-  index: 3
+  link: 2
   heldCard: {fileID: 0}
 --- !u!114 &4627032858346784398
 MonoBehaviour:

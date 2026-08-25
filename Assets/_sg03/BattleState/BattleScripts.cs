@@ -126,6 +126,20 @@ namespace SG03
             this.RunWithLock(this.scriptNameAlphaCardDeploy, requestBody, onSuccess, onError);
         }
 
+        public void RunAlphaCardDeploy(string inventoryItemId, Link targetLink, int targetIndex,
+            Action<string> onSuccess, Action<string> onError)
+        {
+            if (this.IsBattleScriptMissing(nameof(this.RunAlphaCardDeploy)))
+            {
+                onError?.Invoke("Battle script service is unavailable.");
+                return;
+            }
+            string requestBody = this.BuildAlphaCardDeployRequestBody(
+                inventoryItemId, targetLink, targetIndex);
+            this.LogPayload("RunAlphaCardDeploy", "#AADDFF", requestBody);
+            this.RunWithLock(this.scriptNameAlphaCardDeploy, requestBody, onSuccess, onError);
+        }
+
         public void RunAlphaTurnEnd(Action<string> onSuccess, Action<string> onError)
         {
             if (this.IsBattleScriptMissing(nameof(this.RunAlphaTurnEnd))) return;
@@ -218,6 +232,43 @@ namespace SG03
             string frontJson = this.ToJsonLineSlotArray(frontLine);
             string backJson  = this.ToJsonLineSlotArray(backLine);
             return $"{{\"payload\":{{\"hand\":{handJson},\"front_line\":{frontJson},\"back_line\":{backJson}}}}}";
+        }
+
+        private string BuildAlphaCardDeployRequestBody(string inventoryItemId, Link targetLink, int targetIndex)
+        {
+            string[] hand = this.CollectInventoryIdsExcept(
+                this.battleState?.AlphaHand, inventoryItemId);
+            CardDeployLineSlot[] frontLine = this.CollectLineSlots(this.battleState?.AlphaFrontLine);
+            CardDeployLineSlot[] backLine = this.CollectLineSlots(this.battleState?.AlphaBackLine);
+            CardDeployLineSlot[] targetLine = targetLink == Link.front ? frontLine : backLine;
+            if (targetIndex >= 0 && targetIndex < targetLine.Length)
+            {
+                targetLine[targetIndex] = new CardDeployLineSlot
+                {
+                    inventory_item_id = inventoryItemId ?? string.Empty,
+                    face_up = false,
+                    slot_index = targetIndex
+                };
+            }
+
+            string handJson = this.ToJsonStringArray(hand);
+            string frontJson = this.ToJsonLineSlotArray(frontLine);
+            string backJson = this.ToJsonLineSlotArray(backLine);
+            return $"{{\"payload\":{{\"hand\":{handJson},\"front_line\":{frontJson},\"back_line\":{backJson}}}}}";
+        }
+
+        private string[] CollectInventoryIdsExcept(BattleCardSlot[] slots, string excludedInventoryItemId)
+        {
+            if (slots == null) return Array.Empty<string>();
+            string[] result = new string[slots.Length];
+            for (int i = 0; i < slots.Length; i++)
+            {
+                string inventoryItemId = slots[i]?.inventory_item_id;
+                result[i] = inventoryItemId == excludedInventoryItemId
+                    ? string.Empty
+                    : inventoryItemId ?? string.Empty;
+            }
+            return result;
         }
 
         private string BuildCardDeployRequestBody()

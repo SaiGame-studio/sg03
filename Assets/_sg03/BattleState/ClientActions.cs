@@ -237,6 +237,7 @@ namespace SG03
             if (!this.HasUnexecutedActions())
             {
                 this.hasPendingActions = false;
+                this.ReconcileBoardWhenActionsComplete();
                 this.FinishResumeWhenActionsComplete();
                 return;
             }
@@ -259,7 +260,14 @@ namespace SG03
             }
             this.dispatchRoutine = null;
             this.hasPendingActions = this.HasUnexecutedActions();
+            this.ReconcileBoardWhenActionsComplete();
             this.FinishResumeWhenActionsComplete();
+        }
+
+        private void ReconcileBoardWhenActionsComplete()
+        {
+            if (this.hasPendingActions) return;
+            this.cardSpawning?.ReconcileLineBindingsFromBattleState();
         }
 
         private void FinishResumeWhenActionsComplete()
