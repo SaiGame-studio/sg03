@@ -2,7 +2,7 @@
 
 - **Mã Thẻ Bài**: `twin_reaper`
 - **Loại Thẻ**: [`ability`](../../../04_abilities.md)
-- **Chủng Tộc**: `dark_elf` / `undead` (Bóng Tối / Tử Thần)
+- **Chủng Tộc**: `darkborn` / `undead` (Bóng Tối / Tử Thần)
 - **Vị Trí Nhắm Mục Tiêu**: `enemy_frontline`
 - **Thẻ Nhân Vật Yêu Cầu**: [Hellscythe](../hellscythe.md)
 

@@ -272,7 +272,7 @@ end
 
 -- ability: xena_awakened3
 -- Replaces an attacked Xena III that will be defeated with Xena IV from void.
--- Sacrifices the adjacent dark_elf card with the fewest stars (1-3), excluding Xena I-III.
+-- Sacrifices the adjacent darkborn card with the fewest stars (1-3), excluding Xena I-III.
 function xena_awakened3_execute(state, source_card, event_data, helpers)
     return execute_xena_awakened(state, source_card, event_data, helpers, {
         ability_key = "xena_awakened3",
@@ -280,7 +280,7 @@ function xena_awakened3_execute(state, source_card, event_data, helpers)
         successor_name = "Xena IV",
         sacrifice_count = 1,
         sacrifice_stars = { 1, 2, 3 },
-        sacrifice_race = "dark_elf",
+        sacrifice_race = "darkborn",
         sacrifice_excluded_codes = { "xena1", "xena2", "xena3" },
     })
 end

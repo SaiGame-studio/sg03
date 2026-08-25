@@ -18,13 +18,13 @@ Danh mục bên dưới chỉ liệt kê tên và số sao của từng thẻ k�
 - [Totem Pulse](cards/goblin/abilities/totem_pulse.md): 0 sao
 - [Back Stab](cards/goblin/abilities/back_stab.md): 0 sao
 
-### 💀 Chủng Tộc Bóng Tối (Dark Elf / Undead)
-- [Xena Awakened I](cards/dark_elf/xena/abilities/xena_awakened1.md): 1 sao
-- [Xena Awakened II](cards/dark_elf/xena/abilities/xena_awakened2.md): 2 sao
-- [Xena Awakened III](cards/dark_elf/xena/abilities/xena_awakened3.md): 3 sao
-- [Xena Awakened IV](cards/dark_elf/xena/abilities/xena_awakened4.md): 4 sao
-- [Demon Orbs](cards/dark_elf/xena/abilities/demon_orbs.md): 2 sao
-- [Demon Rite](cards/dark_elf/xena/abilities/demon_rite.md): 3 sao
-- [Twin Reaper](cards/dark_elf/abilities/twin_reaper.md): 0 sao
-- [Skeleton Shield](cards/dark_elf/abilities/skeleton_shield.md): 0 sao
-- [Animate Dead](cards/dark_elf/abilities/animate_dead.md): 0 sao
+### 💀 Chủng Tộc Bóng Tối (Darkborn / Undead)
+- [Xena Awakened I](cards/darkborn/xena/abilities/xena_awakened1.md): 1 sao
+- [Xena Awakened II](cards/darkborn/xena/abilities/xena_awakened2.md): 2 sao
+- [Xena Awakened III](cards/darkborn/xena/abilities/xena_awakened3.md): 3 sao
+- [Xena Awakened IV](cards/darkborn/xena/abilities/xena_awakened4.md): 4 sao
+- [Demon Orbs](cards/darkborn/xena/abilities/demon_orbs.md): 2 sao
+- [Demon Rite](cards/darkborn/xena/abilities/demon_rite.md): 3 sao
+- [Twin Reaper](cards/darkborn/abilities/twin_reaper.md): 0 sao
+- [Skeleton Shield](cards/darkborn/abilities/skeleton_shield.md): 0 sao
+- [Animate Dead](cards/darkborn/abilities/animate_dead.md): 0 sao

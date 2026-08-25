@@ -6,7 +6,7 @@
 - **Tấn Công (ATK)**: 340
 - **Phòng Thủ (DEF)**: 370
 - **Loại Thẻ**: [`character`](../../../03_characters.md)
-- **Chủng Tộc**: `dark_elf` (Dark Elf)
+- **Chủng Tộc**: `darkborn` (Darkborn)
 - **Vai Trò**: Twin-Tail Elementalist
 
 ## Mô Tả

@@ -3,7 +3,7 @@
 - **Mã Thẻ Bài**: `xena_awakened4`
 - **Số sao**: 4
 - **Loại Thẻ**: [`ability`](../../../../04_abilities.md)
-- **Chủng Tộc**: `dark_elf` (Dark Elf)
+- **Chủng Tộc**: `darkborn` (Darkborn)
 - **Thẻ Nhân Vật Yêu Cầu**: [Xena IV](../xena4.md)
 - **Bài Yêu Cầu**: [Demon Orbs](demon_orbs.md) và [Demon Rite](demon_rite.md)
 

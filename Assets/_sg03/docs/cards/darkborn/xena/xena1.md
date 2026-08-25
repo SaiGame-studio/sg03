@@ -6,7 +6,7 @@
 - **Tấn Công (ATK)**: 140
 - **Phòng Thủ (DEF)**: 170
 - **Loại Thẻ**: [`character`](../../../03_characters.md)
-- **Chủng Tộc**: `dark_elf` (Dark Elf)
+- **Chủng Tộc**: `darkborn` (Darkborn)
 - **Vai Trò**: Wooden Staff Prodigy
 
 ## Mô Tả

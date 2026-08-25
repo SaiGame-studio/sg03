@@ -3,7 +3,7 @@
 - **Mã Thẻ Bài**: `xena_awakened1`
 - **Số sao**: 1
 - **Loại Thẻ**: [`ability`](../../../../04_abilities.md)
-- **Chủng Tộc**: `dark_elf` (Dark Elf)
+- **Chủng Tộc**: `darkborn` (Darkborn)
 - **Thẻ Nhân Vật Yêu Cầu**: [Xena I](../xena1.md)
 
 ---

@@ -5,7 +5,7 @@
 - **Tấn Công (ATK)**: 140
 - **Phòng Thủ (DEF)**: 160
 - **Loại Thẻ**: [`character`](../../../03_characters.md)
-- **Chủng Tộc**: `dark_elf` / `demon` (Dark Elf / Demon)
+- **Chủng Tộc**: `darkborn` / `demon` (Darkborn / Demon)
 - **Vai Trò**: Assassin / Naval Scout
 
 ## Mô Tả

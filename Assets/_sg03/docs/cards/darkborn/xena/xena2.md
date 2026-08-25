@@ -6,7 +6,7 @@
 - **Tấn Công (ATK)**: 240
 - **Phòng Thủ (DEF)**: 270
 - **Loại Thẻ**: [`character`](../../../03_characters.md)
-- **Chủng Tộc**: `dark_elf` (Dark Elf)
+- **Chủng Tộc**: `darkborn` (Darkborn)
 - **Vai Trò**: Unstable Awakening
 
 ## Mô Tả

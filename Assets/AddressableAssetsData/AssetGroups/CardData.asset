@@ -56,7 +56,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 30d2305e47ff2a54e83950a726a79a01
-    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/xena/xena4.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/xena/xena4.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -81,17 +81,17 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 47ad12a667181a64680abb02562ec8ee
-    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/xena/xena3.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/xena/xena3.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 54b73085f240c714e91a9f87491d14bf
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/king_return.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/hellscythe/king_return.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 55a3dfc83811bee45b54ee5ccb994fe9
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/skeleton_shield.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/hellscythe/skeleton_shield.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -101,7 +101,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6afd6f7305243ca49b6994795e032089
-    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/hellscythe.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -131,37 +131,37 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9023e70859451354db9a88a1fc4a29e9
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/xena/demon_rite.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/demon_rite.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 90fe52712c19574439e735d06a9c0cc0
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/xena/demon_orbs.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/demon_orbs.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9eb7d17616afe0044947081a909ef0bb
-    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/xena/xena1.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/xena/xena1.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1dbcb8f49ff902448d783578bd455c0
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/animate_dead.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/hellscythe/animate_dead.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a4db73509a007f14c999c098c8599c8f
-    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/common/kira.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/common/kira.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aab3c5d84d4b984409a76c5b649df611
-    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/xena/xena2.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/xena/xena2.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b294c9150aaddb740bed376abfbffcd9
-    m_Address: Assets/_sg03/Card/Data/Character/DarkElf/xena/xena5.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/xena/xena5.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -171,7 +171,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bc3ec7de058d9324b99e7f17efe0c932
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened3.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/xena_awakened3.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -191,7 +191,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: de3a2dce44549984897c65d7b2f0adb8
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened1.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/xena_awakened1.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -201,12 +201,12 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f3fdd7b769a53db44a4a24f0d90075f2
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened2.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/xena_awakened2.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f862093a6f712ea4086b3d6af12163b1
-    m_Address: Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened4.asset
+    m_Address: Assets/_sg03/Card/Data/Ability/Darkborn/xena/xena_awakened4.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

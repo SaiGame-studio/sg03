@@ -3,7 +3,7 @@
 - **Mã Thẻ Bài**: `demon_rite`
 - **Số sao**: 3
 - **Loại Thẻ**: [`ability`](../../../../04_abilities.md)
-- **Chủng Tộc**: `dark_elf` (Dark Elf)
+- **Chủng Tộc**: `darkborn` (Darkborn)
 
 ---
 
