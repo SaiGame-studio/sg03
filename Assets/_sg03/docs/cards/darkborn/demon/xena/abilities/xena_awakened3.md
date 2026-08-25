@@ -2,8 +2,9 @@
 
 - **Mã Thẻ Bài**: `xena_awakened3`
 - **Số sao**: 3
-- **Loại Thẻ**: [`ability`](../../../../04_abilities.md)
+- **Loại Thẻ**: [`ability`](../../../../../04_abilities.md)
 - **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
+- **Tộc Nhánh**: **Demon**
 - **Thẻ Nhân Vật Yêu Cầu**: [Xena III](../xena3.md)
 
 ---

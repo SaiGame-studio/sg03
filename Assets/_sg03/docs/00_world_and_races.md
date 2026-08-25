@@ -8,6 +8,7 @@ Bốn chủng tộc chính thức là **Darkborn**, **Lightborn**, **Natureborn*
 
 - Bản sắc chiến đấu: điều khiển linh lực, chuyển hóa, hồi sinh, đánh đổi tài nguyên và sức mạnh tăng tiến.
 - Tộc nhánh hiện có: Undead, Demon.
+- Thư mục card: [`cards/darkborn/undead/`](cards/darkborn/undead/) và [`cards/darkborn/demon/`](cards/darkborn/demon/).
 - Đồng minh thường gặp: các cộng đồng Natureborn tôn trọng chu kỳ sinh tử; những cá nhân Humans hoặc Lightborn chấp nhận nghiên cứu và sử dụng linh lực bóng tối có kiểm soát.
 - Kẻ thù thường gặp: các giáo đoàn Lightborn cực đoan săn đuổi mọi sức mạnh liên quan đến tử giới; những phe phái muốn chiếm đoạt hoặc tiêu diệt Darkborn vì sợ hãi sức mạnh của họ.
 

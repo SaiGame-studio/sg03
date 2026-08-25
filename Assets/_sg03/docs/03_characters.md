@@ -9,14 +9,23 @@ Nằm tại thư mục [`cards/darkborn/`](cards/darkborn/)
 
 Các tộc nhánh hiện có gồm Undead và Demon.
 
-### Thẻ Nhân Vật (Character)
-- [Hellscythe](cards/darkborn/hellscythe.md) — Số sao: 0
-- [Skeleton](cards/darkborn/skeleton.md) — Số sao: 0
-- [Xena I](cards/darkborn/xena/xena1.md) — Số sao: 1
-- [Xena II](cards/darkborn/xena/xena2.md) — Số sao: 2
-- [Xena III](cards/darkborn/xena/xena3.md) — Số sao: 3
-- [Xena IV](cards/darkborn/xena/xena4.md) — Số sao: 4
-- [Xena V](cards/darkborn/xena/xena5.md) — Số sao: 5
+### Undead
+
+Nằm tại thư mục [`cards/darkborn/undead/Ria/`](cards/darkborn/undead/Ria/)
+
+- [Hellscythe](cards/darkborn/undead/Ria/hellscythe.md) — Số sao: 0
+- [Skeleton](cards/darkborn/undead/Ria/skeleton.md) — Số sao: 0
+
+### Demon
+
+Nằm tại thư mục [`cards/darkborn/demon/`](cards/darkborn/demon/)
+
+- [Kira](cards/darkborn/demon/common/kira.md) — Số sao: 1, nhóm Common
+- [Xena I](cards/darkborn/demon/xena/xena1.md) — Số sao: 1
+- [Xena II](cards/darkborn/demon/xena/xena2.md) — Số sao: 2
+- [Xena III](cards/darkborn/demon/xena/xena3.md) — Số sao: 3
+- [Xena IV](cards/darkborn/demon/xena/xena4.md) — Số sao: 4
+- [Xena V](cards/darkborn/demon/xena/xena5.md) — Số sao: 5
 
 ---
 

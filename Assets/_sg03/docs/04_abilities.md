@@ -5,15 +5,21 @@
 Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability theo bốn chủng tộc chính thức. Xem [Thế Giới Và Bốn Chủng Tộc](00_world_and_races.md) để biết quy ước ánh xạ các tộc nhánh.
 
 ### Darkborn
-- [Xena Awakened I](cards/darkborn/xena/abilities/xena_awakened1.md): 1 sao
-- [Xena Awakened II](cards/darkborn/xena/abilities/xena_awakened2.md): 2 sao
-- [Xena Awakened III](cards/darkborn/xena/abilities/xena_awakened3.md): 3 sao
-- [Xena Awakened IV](cards/darkborn/xena/abilities/xena_awakened4.md): 4 sao
-- [Demon Orbs](cards/darkborn/xena/abilities/demon_orbs.md): 2 sao
-- [Demon Rite](cards/darkborn/xena/abilities/demon_rite.md): 3 sao
-- [Twin Reaper](cards/darkborn/abilities/twin_reaper.md): 0 sao
-- [Skeleton Shield](cards/darkborn/abilities/skeleton_shield.md): 0 sao
-- [Animate Dead](cards/darkborn/abilities/animate_dead.md): 0 sao
+
+#### Undead
+
+- [Twin Reaper](cards/darkborn/undead/Ria/abilities/twin_reaper.md): 0 sao
+- [Skeleton Shield](cards/darkborn/undead/Ria/abilities/skeleton_shield.md): 0 sao
+- [Animate Dead](cards/darkborn/undead/Ria/abilities/animate_dead.md): 0 sao
+
+#### Demon
+
+- [Xena Awakened I](cards/darkborn/demon/xena/abilities/xena_awakened1.md): 1 sao
+- [Xena Awakened II](cards/darkborn/demon/xena/abilities/xena_awakened2.md): 2 sao
+- [Xena Awakened III](cards/darkborn/demon/xena/abilities/xena_awakened3.md): 3 sao
+- [Xena Awakened IV](cards/darkborn/demon/xena/abilities/xena_awakened4.md): 4 sao
+- [Demon Orbs](cards/darkborn/demon/xena/abilities/demon_orbs.md): 2 sao
+- [Demon Rite](cards/darkborn/demon/xena/abilities/demon_rite.md): 3 sao
 
 ### Lightborn
 - [Holy Glow](cards/elf/abilities/holy_glow.md): 0 sao

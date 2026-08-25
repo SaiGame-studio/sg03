@@ -5,8 +5,9 @@
 - **Số sao**: 1
 - **Tấn Công (ATK)**: 140
 - **Phòng Thủ (DEF)**: 170
-- **Loại Thẻ**: [`character`](../../../03_characters.md)
+- **Loại Thẻ**: [`character`](../../../../03_characters.md)
 - **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
+- **Tộc Nhánh**: **Demon**
 - **Vai Trò**: Wooden Staff Prodigy
 
 ## Mô Tả

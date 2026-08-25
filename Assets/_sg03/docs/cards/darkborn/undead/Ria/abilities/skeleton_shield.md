@@ -1,7 +1,7 @@
 # Skeleton Shield
 
 - **Mã Thẻ Bài**: `skeleton_shield`
-- **Loại Thẻ**: [`ability`](../../../04_abilities.md)
+- **Loại Thẻ**: [`ability`](../../../../../04_abilities.md)
 - **Chủng Tộc Chính**: **Darkborn**
 - **Tộc Nhánh**: Undead (định danh kỹ thuật: `darkborn` / `undead`)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline`

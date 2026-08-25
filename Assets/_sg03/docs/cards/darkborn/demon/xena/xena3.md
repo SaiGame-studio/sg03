@@ -5,8 +5,9 @@
 - **Số sao**: 3
 - **Tấn Công (ATK)**: 340
 - **Phòng Thủ (DEF)**: 370
-- **Loại Thẻ**: [`character`](../../../03_characters.md)
+- **Loại Thẻ**: [`character`](../../../../03_characters.md)
 - **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
+- **Tộc Nhánh**: **Demon**
 - **Vai Trò**: Twin-Tail Elementalist
 
 ## Mô Tả

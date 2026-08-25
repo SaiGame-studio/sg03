@@ -5,8 +5,9 @@
 - **Số sao**: 2
 - **Tấn Công (ATK)**: 240
 - **Phòng Thủ (DEF)**: 270
-- **Loại Thẻ**: [`character`](../../../03_characters.md)
+- **Loại Thẻ**: [`character`](../../../../03_characters.md)
 - **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
+- **Tộc Nhánh**: **Demon**
 - **Vai Trò**: Unstable Awakening
 
 ## Mô Tả

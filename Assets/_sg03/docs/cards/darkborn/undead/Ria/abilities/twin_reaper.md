@@ -1,7 +1,7 @@
 # Twin Reaper
 
 - **Mã Thẻ Bài**: `twin_reaper`
-- **Loại Thẻ**: [`ability`](../../../04_abilities.md)
+- **Loại Thẻ**: [`ability`](../../../../../04_abilities.md)
 - **Chủng Tộc Chính**: **Darkborn**
 - **Tộc Nhánh**: Undead (định danh kỹ thuật: `darkborn` / `undead`)
 - **Vị Trí Nhắm Mục Tiêu**: `enemy_frontline`
