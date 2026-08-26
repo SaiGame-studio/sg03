@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using SaiGame.Services;
 using SG03.UI;
+using SG03.UI.Components;
 using UnityEngine;
 
 namespace SG03
@@ -176,8 +177,28 @@ namespace SG03
                 this.isRunning = false;
                 if (this.logPayload)
                     this.LogResponse(scriptName, result);
+                this.ShowScriptOutputError(scriptName, result);
                 onSuccess?.Invoke(result);
             };
+        }
+
+        private void ShowScriptOutputError(string scriptName, string result)
+        {
+            if (string.IsNullOrWhiteSpace(result)) return;
+
+            try
+            {
+                BattleStatusScriptResponse response = JsonUtility.FromJson<BattleStatusScriptResponse>(result);
+                string error = response?.output?.error;
+                if (string.IsNullOrWhiteSpace(error)) return;
+
+                Debug.LogWarning($"[BattleScripts] '{scriptName}' output error: {error}", this.gameObject);
+                ToastMessage.ShowError(error);
+            }
+            catch (ArgumentException exception)
+            {
+                Debug.LogWarning($"[BattleScripts] Could not inspect '{scriptName}' response for an output error: {exception.Message}", this.gameObject);
+            }
         }
 
         private void LogResponse(string scriptName, string result)
@@ -199,6 +220,7 @@ namespace SG03
             {
                 this.isRunning = false;
                 Debug.LogWarning($"[BattleScripts] '{scriptName}' error: {error}", this.gameObject);
+                ToastMessage.ShowError(error);
                 onError?.Invoke(error);
             };
         }

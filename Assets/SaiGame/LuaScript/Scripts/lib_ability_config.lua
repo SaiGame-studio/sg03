@@ -50,6 +50,12 @@ function get_ability_config(ability_key)
             target_positions = { "enemy_frontline" },
             requires_target_card = true,
         },
+        brute_call = {
+            handler_group = "all",
+            target_positions = { "own_frontline" },
+            requires_target_card = true,
+            resolves_without_attack = true,
+        },
         holy_glow = {
             handler_group = "all",
             target_positions = { "own_frontline", "own_backline", "own_source", "own_void" },

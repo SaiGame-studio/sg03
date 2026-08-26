@@ -230,6 +230,8 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
     if successor_card == nil then
         return {}, settings.ability_key .. " requires " .. settings.successor_name .. " in own the_void"
     end
+    local summon_turn_err = battle.validate_summon_card_turn(state, state.item_defs, successor_card)
+    if summon_turn_err ~= nil then return {}, summon_turn_err end
 
     local sacrifice_indexes, sacrifice_err = find_sacrifice_indexes(
         state, target_line, target_index, source_card, target_card, settings, helpers)
@@ -446,6 +448,9 @@ function xena_awakened4_execute(state, source_card, event_data, helpers)
             state, source_side, source_card, state[void_key], helpers.lib_battle_common, actions)
         return actions, nil
     end
+    local summon_turn_err = helpers.lib_battle_common.validate_summon_card_turn(
+        state, state.item_defs, successor_card)
+    if summon_turn_err ~= nil then return {}, summon_turn_err end
 
     local rite_result, demon_rite_err = demon_rite_execute(
         state, source_card, event_data, helpers)

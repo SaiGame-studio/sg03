@@ -57,6 +57,36 @@ function reset_card_turn_state(item_defs, reset_card)
     reset_card.total_damage_received = 0
 end
 
+-- Returns an error when a 4-star-or-higher card is summoned before turn 4.
+-- Cards with 1-3 stars are not turn-restricted.
+function validate_summon_card_turn(state, item_defs, summon_card)
+    if summon_card == nil then return "summon requires a card" end
+
+    local summon_def = nil
+    for _, item_def in ipairs(item_defs or {}) do
+        if item_def.item_code == summon_card.item_definition_code_name then
+            summon_def = item_def
+            break
+        end
+    end
+    if summon_def == nil then
+        return "summon card definition not found: " .. tostring(summon_card.item_definition_code_name)
+    end
+
+    local stars = summon_def.base_stats ~= nil and tonumber(summon_def.base_stats.star) or nil
+    if stars == nil then
+        return "summon card star is missing: " .. tostring(summon_card.item_definition_code_name)
+    end
+    if stars < 4 then return nil end
+
+    local current_turn = tonumber(state ~= nil and state.turn or nil) or 0
+    if current_turn < 4 then
+        return tostring(stars) .. "-star card can only be summoned from turn 4: " ..
+            tostring(summon_card.item_definition_code_name)
+    end
+    return nil
+end
+
 -- ─── append_client_action ───────────────────────────────────────────────────
 -- Appends a client action with an auto-incremented index prefix.
 -- Format: [index]:[action_name] or [index]:[action_name]:[params]

@@ -274,6 +274,149 @@ function back_stab_execute(state, source_card, event_data, helpers)
     return ability_actions, nil
 end
 
+-- ability: brute_call
+-- Summons Goblin Brute from the void beside the selected Goblin Shaman.
+-- An adjacent 1- or 2-star Goblin is trampled; otherwise an empty adjacent
+-- slot is used. The Ability is consumed even when neither slot is valid.
+function brute_call_execute(state, source_card, event_data, helpers)
+    local battle = helpers.lib_battle_common
+    battle.dlog("== [ability] brute_call ====================")
+
+    local shaman_card = (event_data or {}).defender_card
+    if shaman_card == nil then
+        return {}, "brute_call requires a Goblin Shaman target"
+    end
+
+    local source_side = helpers.find_card_side(state, source_card)
+    if source_side == nil or source_side == "unknown" then
+        return {}, "brute_call source card is not on a battle line"
+    end
+
+    local front_line_key = source_side .. "_front_line"
+    local front_line = state[front_line_key] or {}
+    local shaman_index = nil
+    for index, card in ipairs(front_line) do
+        if card.inventory_item_id == shaman_card.inventory_item_id then
+            shaman_index = index
+            break
+        end
+    end
+    if shaman_index == nil then
+        return {}, "brute_call target must be on own front_line"
+    end
+
+    local shaman_def = helpers.find_item_def(state.item_defs, shaman_card.item_definition_code_name)
+    local shaman_type = shaman_def ~= nil and shaman_def.metadata ~= nil and shaman_def.metadata.type or nil
+    local shaman_code = shaman_def ~= nil and shaman_def.metadata ~= nil and shaman_def.metadata.char_code or nil
+    if shaman_type ~= "character" or
+       (shaman_card.item_definition_code_name ~= "goblin_shaman" and shaman_code ~= "goblin_shaman") then
+        return {}, "brute_call target must be Goblin Shaman"
+    end
+
+    local void_key = source_side .. "_the_void"
+    local void_zone = state[void_key] or {}
+    local brute_card = nil
+    local brute_index = nil
+    for index, card in ipairs(void_zone) do
+        if card.item_definition_code_name == "goblin_brute" then
+            brute_card = card
+            brute_index = index
+            break
+        end
+    end
+    if brute_card == nil then
+        return {}, "brute_call requires Goblin Brute in own the_void"
+    end
+    local summon_turn_err = battle.validate_summon_card_turn(state, state.item_defs, brute_card)
+    if summon_turn_err ~= nil then return {}, summon_turn_err end
+
+    local adjacent_indexes = { shaman_index - 1, shaman_index + 1 }
+    local chosen_index = nil
+    local chosen_sacrifice = nil
+    local chosen_stars = nil
+    for _, index in ipairs(adjacent_indexes) do
+        local card = front_line[index]
+        if card ~= nil and card.inventory_item_id ~= nil and card.inventory_item_id ~= "" then
+            local card_def = helpers.find_item_def(state.item_defs, card.item_definition_code_name)
+            local card_type = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.type or nil
+            local card_race = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.race or nil
+            local card_stars = card_def ~= nil and card_def.base_stats ~= nil and tonumber(card_def.base_stats.star) or nil
+            if card_type == "character" and card_race == "goblin" and
+               (card_stars == 1 or card_stars == 2) and
+               (chosen_stars == nil or card_stars < chosen_stars) then
+                chosen_index = index
+                chosen_sacrifice = card
+                chosen_stars = card_stars
+            end
+        end
+    end
+
+    if chosen_index == nil then
+        for _, index in ipairs(adjacent_indexes) do
+            if index >= 1 and index <= #front_line then
+                local card = front_line[index]
+                if card == nil or card.inventory_item_id == nil or card.inventory_item_id == "" then
+                    chosen_index = index
+                    break
+                end
+            end
+        end
+    end
+
+    local ability_actions = {}
+    local expose_action = helpers.expose_ability_selected_card(state, shaman_card)
+    if expose_action ~= nil then table.insert(ability_actions, expose_action) end
+    shaman_card.trigger = true
+
+    if chosen_index ~= nil then
+        if chosen_sacrifice ~= nil then
+            front_line[chosen_index] = {}
+            table.insert(void_zone, chosen_sacrifice)
+        end
+
+        table.remove(void_zone, brute_index)
+        battle.reset_card_turn_state(state.item_defs, brute_card)
+        brute_card.slot_index = chosen_index - 1
+        brute_card.face_up = true
+        brute_card.expose = true
+        brute_card.trigger = true
+        brute_card.defeated_from_line_key = nil
+        front_line[chosen_index] = brute_card
+
+        local success_action = source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+            ",ability=brute_call,target=" .. shaman_card.inventory_item_id ..
+            ",selected=" .. shaman_card.inventory_item_id ..
+            ",result=success,summoned=" .. brute_card.inventory_item_id
+        if chosen_sacrifice ~= nil then
+            success_action = success_action .. ",sacrificed=" .. chosen_sacrifice.inventory_item_id
+        end
+        table.insert(ability_actions, success_action)
+        if chosen_sacrifice ~= nil then
+            table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. chosen_sacrifice.inventory_item_id)
+        end
+        table.insert(ability_actions, source_side .. "_void_to_front_line:" ..
+            brute_card.inventory_item_id .. "," .. tostring(brute_card.slot_index))
+        battle.dlog("[ability] brute_call: summoned=" .. brute_card.inventory_item_id ..
+            " beside shaman=" .. shaman_card.inventory_item_id ..
+            " slot=" .. tostring(brute_card.slot_index))
+    else
+        table.insert(ability_actions, source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+            ",ability=brute_call,target=" .. shaman_card.inventory_item_id ..
+            ",selected=" .. shaman_card.inventory_item_id ..
+            ",result=failed,reason=no_adjacent_position")
+        battle.dlog("[ability] brute_call: failed - no valid adjacent position beside shaman=" ..
+            shaman_card.inventory_item_id)
+    end
+
+    for _, line_key in ipairs({ source_side .. "_front_line", source_side .. "_back_line", source_side .. "_hand" }) do
+        battle.remove_card_from_line(state[line_key], source_card.inventory_item_id)
+    end
+    table.insert(void_zone, source_card)
+    table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+
+    return ability_actions, nil
+end
+
 -- ability: holy_glow
 function holy_glow_execute(state, source_card, event_data, helpers)
     local battle = helpers.lib_battle_common

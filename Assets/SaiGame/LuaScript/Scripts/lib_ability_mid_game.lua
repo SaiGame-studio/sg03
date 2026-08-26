@@ -113,6 +113,8 @@ function titan_fall_execute(state, source_card, event_data, helpers)
     if titan_card == nil then
         return {}, "titan_fall requires titan in the_void"
     end
+    local summon_turn_err = battle.validate_summon_card_turn(state, state.item_defs, titan_card)
+    if summon_turn_err ~= nil then return {}, summon_turn_err end
 
     local target_slot_index = target_card.slot_index
     table.remove(state[void_key], titan_index)

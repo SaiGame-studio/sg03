@@ -62,6 +62,8 @@ function animate_dead_execute(state, source_card, event_data, helpers)
             battle.dlog("[ability] animate_dead: no more skeleton in " .. void_key)
             break
         end
+        local summon_turn_err = battle.validate_summon_card_turn(state, state.item_defs, skeleton_card)
+        if summon_turn_err ~= nil then return ability_actions, summon_turn_err end
 
         local free_slots = {}
         for i = 1, 5 do
