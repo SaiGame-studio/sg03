@@ -1,3 +1,4 @@
+using System;
 using SaiGame.Services;
 using SG03.UI.Components;
 using UnityEngine;
@@ -381,6 +382,12 @@ namespace SG03.UI
 
             if (!string.IsNullOrWhiteSpace(output.error))
             {
+                if (this.IsBattleSessionNotFoundError(output.error))
+                {
+                    this.ShowNewGameSetup();
+                    return;
+                }
+
                 Debug.LogWarning("[GamePanelUI] battle_session_exists error: " + output.error);
                 this.ShowNewGameSetup();
                 return;
@@ -393,6 +400,7 @@ namespace SG03.UI
                 return;
             }
 
+            // A missing battle session is a valid successful response: { exists: false }.
             this.ShowNewGameSetup();
         }
 
@@ -400,6 +408,14 @@ namespace SG03.UI
         {
             Debug.LogWarning("[GamePanelUI] battle_session_exists failed: " + error);
             this.ShowNewGameSetup();
+        }
+
+        private bool IsBattleSessionNotFoundError(string error)
+        {
+            return string.Equals(error, "no active battle session found", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(error, "no active battle session", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(error, "current battle session not found", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(error, "battle session not found", StringComparison.OrdinalIgnoreCase);
         }
 
         private void ShowNewGameSetup()
