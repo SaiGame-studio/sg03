@@ -290,6 +290,8 @@ end
 -- ability: demon_rite
 -- Conditional ability: it must be triggered by another card and is intentionally
 -- not registered in lib_ability_config for direct card activation.
+-- Demon Rite only needs to exist as a backend item definition; it is not deployed
+-- or exposed as a battle-line ability card, and Demon Orbs is not part of this flow.
 -- Returns ritual_result, err. Ritual conditions use ritual_result.success=false,
 -- while invalid invocation or malformed target context returns err.
 function demon_rite_execute(state, source_card, event_data, helpers)
@@ -313,22 +315,13 @@ function demon_rite_execute(state, source_card, event_data, helpers)
         find_target_line(state, event_data, target_card, "demon_rite")
     if line_err ~= nil then return nil, line_err end
 
-    local back_line = state[source_side .. "_back_line"] or {}
-    local demon_rite_card = helpers.find_line_card_by_code(back_line, "demon_rite")
-    if demon_rite_card == nil then
+    local demon_rite_def, demon_rite_lookup_err = game.get_item_def_by_code("demon_rite")
+    if demon_rite_lookup_err ~= nil then return nil, demon_rite_lookup_err end
+    if demon_rite_def == nil then
         return { success = false, reason = "missing_demon_rite", actions = {} }, nil
-    end
-    local demon_orbs_card = helpers.find_line_card_by_code(back_line, "demon_orbs")
-    if demon_orbs_card == nil then
-        return { success = false, reason = "missing_demon_orbs", actions = {} }, nil
     end
 
     local actions = {}
-    local expose_orbs_action = helpers.expose_ability_selected_card(state, demon_orbs_card)
-    if expose_orbs_action ~= nil then table.insert(actions, expose_orbs_action) end
-    demon_rite_card.trigger = true
-    local expose_rite_action = helpers.expose_ability_selected_card(state, demon_rite_card)
-    if expose_rite_action ~= nil then table.insert(actions, expose_rite_action) end
 
     local settings = {
         ability_key = "demon_rite",
@@ -346,15 +339,13 @@ function demon_rite_execute(state, source_card, event_data, helpers)
     local sacrifice_indexes, sacrifice_err = find_sacrifice_indexes(
         state, target_line, target_index, source_card, target_card, settings, helpers)
     if sacrifice_err ~= nil then
-        table.insert(actions, source_side .. "_card_ability:source=" .. demon_rite_card.inventory_item_id ..
-            ",ability=demon_rite,triggered_by=" .. source_card.inventory_item_id ..
+        table.insert(actions, source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+            ",ability=demon_rite" ..
             ",target=" .. target_card.inventory_item_id .. ",result=failed,reason=missing_sacrifice")
         return {
             success = false,
             reason = "missing_sacrifice",
             actions = actions,
-            demon_rite_card = demon_rite_card,
-            demon_orbs_card = demon_orbs_card,
         }, nil
     end
 
@@ -364,8 +355,8 @@ function demon_rite_execute(state, source_card, event_data, helpers)
     if state[void_key] == nil then state[void_key] = {} end
     table.insert(state[void_key], sacrifice_card)
 
-    table.insert(actions, source_side .. "_card_ability:source=" .. demon_rite_card.inventory_item_id ..
-        ",ability=demon_rite,triggered_by=" .. source_card.inventory_item_id ..
+    table.insert(actions, source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+        ",ability=demon_rite" ..
         ",target=" .. target_card.inventory_item_id ..
         ",sacrificed=" .. sacrifice_card.inventory_item_id)
     table.insert(actions, source_side .. "_card_sent_to_void:" .. sacrifice_card.inventory_item_id)
@@ -375,8 +366,6 @@ function demon_rite_execute(state, source_card, event_data, helpers)
         success = true,
         reason = nil,
         actions = actions,
-        demon_rite_card = demon_rite_card,
-        demon_orbs_card = demon_orbs_card,
         sacrifice_card = sacrifice_card,
     }, nil
 end

@@ -137,7 +137,5 @@ It standardizes every raw error string into a unique `ErrorKey`, regex pattern, 
 | `ERR_DEMON_RITE_NO_TRIGGER_CARD` | `demon_rite requires a triggering card` | Demon Rite must be triggered by another card. | Nghi Lễ Quỷ Dữ phải qua thẻ bài khác. | `lib_ability_xena.lua` |
 | `ERR_DEMON_RITE_DIRECT_DISABLED` | `demon_rite cannot be activated directly by Demon Rite` | Demon Rite cannot be cast directly. | Nghi Lễ Quỷ Dữ không thể tự kích hoạt. | `lib_ability_xena.lua` |
 | `ERR_DEMON_RITE_TARGET_MISMATCH` | `demon_rite target must be allied with its triggering card` | Ritual target must be an allied card. | Mục tiêu Nghi Lễ Quỷ Dữ phải là thẻ đồng minh. | `lib_ability_xena.lua` |
-| `ERR_DEMON_RITE_MISSING_RITE` | `missing_demon_rite` | Missing Demon Rite card on the back line. | Thiếu lá Nghi Lễ Quỷ Dữ ở hàng sau. | `lib_ability_xena.lua` |
-| `ERR_DEMON_RITE_MISSING_ORBS` | `missing_demon_orbs` | Missing Demon Orbs card on the back line. | Thiếu lá Ngọc Quỷ ở hàng sau. | `lib_ability_xena.lua` |
+| `ERR_DEMON_RITE_MISSING_RITE` | `missing_demon_rite` | The Demon Rite card definition does not exist in the backend. | Backend không có định nghĩa lá Nghi Lễ Quỷ Dữ. | `lib_ability_xena.lua` |
 | `ERR_XENA4_TARGET_MUST_BE_XENA4` | `xena_awakened4 target must be xena4` | Xena Awakened IV can only target Xena IV. | Thức Tỉnh IV chỉ áp dụng trên Xena IV. | `lib_ability_xena.lua` |
-
