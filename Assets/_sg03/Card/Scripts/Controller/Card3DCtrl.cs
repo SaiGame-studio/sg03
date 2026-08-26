@@ -301,6 +301,18 @@ namespace SG03
             this.RefreshHpBarDisplayMode();
         }
 
+        /// <summary>
+        /// Rebinds a planned damage preview after an effect changes this card's
+        /// battle stats. The amount remains owned by the card, rather than the
+        /// pooled HP-bar instance, so a DEF refresh cannot discard it.
+        /// </summary>
+        public void RefreshPlannedDamagePreview()
+        {
+            this.hpBarInstance?.RefreshHealthFromBattleState();
+            this.hpBarInstance?.SetHealthPreview(this.healthPreviewDelta);
+            this.RefreshHpBarDisplayMode();
+        }
+
         private void DespawnHpBar()
         {
             this.EnsureSingleHpBarInstance();

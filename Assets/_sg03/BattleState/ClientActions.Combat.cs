@@ -63,7 +63,10 @@ namespace SG03
             Card3DCtrl card = this.cardSpawning?.FindCardById(targetId);
             if (card != null)
             {
-                card.ClearHealthPreview();
+                // Guarded is also emitted for DEF buffs while an Omega attack is
+                // still being planned. Keep the target-owned preview amount and
+                // redraw it against the newly resolved final DEF.
+                card.RefreshPlannedDamagePreview();
                 card.RunUp();
                 return this.StartCoroutine(this.WaitForCard(card));
             }
