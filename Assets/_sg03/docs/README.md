@@ -19,9 +19,9 @@ Assets/_sg03/docs/
 │
 ├── pve/                          # [DÀNH RIÊNG CHẾ ĐỘ PVE]
 │   ├── pve_overview.md           # Tổng quan chế độ PvE & Luồng trận đấu
-│   ├── normal_monsters/          # Quái Thường (Ví dụ: Goblin Shaman)
-│   ├── elite_monsters/           # Quái Tinh Anh
-│   ├── boss_monsters/            # Boss Trùm
+│   ├── normal_enemies/           # Kẻ Địch Thường (Ví dụ: Goblin Shaman)
+│   ├── elite_enemies/            # Kẻ Địch Tinh Anh
+│   ├── boss_enemies/             # Kẻ Địch Boss
 │   └── pve_preset_scenarios.md   # Cấu hình bộ bài Mẫu & Metadata Kịch bản
 │
 └── pvp/                          # [ĐỊNH HƯỚNG MỞ RỘNG PVP]
@@ -47,7 +47,7 @@ Assets/_sg03/docs/
 
 #### ⚔️ Chế độ PvE (Đang Triển Khai) `[/docs/pve/]`
 - **[Tổng Quan Chế Độ PvE](pve/pve_overview.md)** — Hướng dẫn luồng trận đấu đánh Boss singleplayer và khởi tạo kịch bản.
-- **[Thuật Toán AI Goblin Shaman (Quái Thường)](pve/normal_monsters/goblin_shaman.md)** — Phân tích kỹ thuật cây quyết định của script `enemy_ai_goblin_shaman.lua`.
+- **[Thuật Toán AI Goblin Shaman (Normal Enemy)](pve/normal_enemies/goblin_shaman.md)** — Phân tích kỹ thuật cây quyết định của script `enemy_ai_goblin_shaman.lua`.
 - **[Cấu Hình Kịch Bản Mẫu PvE](pve/pve_preset_scenarios.md)** — Hướng dẫn cấu hình metadata bộ bài preset và khởi tạo trận đấu.
 
 #### ⚔️ Chế độ PvP (Định Hướng Mở Rộng) `[/docs/pvp/]`
