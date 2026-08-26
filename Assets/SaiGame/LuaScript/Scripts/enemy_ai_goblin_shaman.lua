@@ -150,7 +150,7 @@ function goblin_shaman_pick_attack_target(state)
             selected_card.inventory_item_id .. " final_def=" .. lowest_def)
         return selected_card
     end
-    return lib_battle_ai._pick_alpha_attack_target(state)
+    return enemy_ai_core.pick_alpha_front_line_character_target(state)
 end
 
 -- Attack planning: keep one hidden Character. When more than one hidden

@@ -94,7 +94,9 @@ function deploy(state)
     return front_line, back_line, new_hand, nil
 end
 
--- Baseline attack plan: attack the weakest Alpha front-line Character, or Alpha HP.
+-- Prefer the weakest exposed Alpha Character, then any front-line Character, or Alpha HP.
 function plan_attack(state)
-    return enemy_ai_core.plan_basic_omega_attack(state)
+    local defender = enemy_ai_core.pick_alpha_exposed_front_line_character_target(state)
+        or enemy_ai_core.pick_alpha_front_line_character_target(state)
+    return enemy_ai_core.plan_omega_attack_with_target(state, defender)
 end

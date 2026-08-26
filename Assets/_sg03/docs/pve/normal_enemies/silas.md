@@ -140,7 +140,7 @@ defend(state)
 Ngoài lượt thực hiện combo, baseline:
 
 - chọn Character Omega chưa kích hoạt đầu tiên, loại trừ các card đang reserve trong hand;
-- ưu tiên Character Alpha có `final_def` thấp nhất ở tiền tuyến;
+- ưu tiên Character Alpha đang face-up có `final_def` thấp nhất ở tiền tuyến; nếu không có Character face-up, chọn Character tiền tuyến có `final_def` thấp nhất;
 - nếu Alpha không còn Character tiền tuyến, lập kế hoạch đánh `alpha_hp`;
 - không có attacker hợp lệ thì kết thúc lượt Omega.
 
@@ -176,7 +176,7 @@ Battle state của Omega phải được chuẩn bị để thỏa toàn bộ đ
 
 ## Kịch bản kiểm thử tối thiểu
 
-1. Mỗi card trong danh sách entity tạo đúng ba bản trong `omega_the_source`.
+1. Mỗi card trong danh sách entity tạo đúng ba bản trên `omega_the_source` và `omega_the_void`; riêng một `goblin_brute` được chuẩn bị trong `omega_the_void`, còn hai bản ở `omega_the_source`.
 2. Mỗi draw thông thường lấy tối đa hai card.
 3. Opening hand lấy ba card preset và hai card ngẫu nhiên theo code hiện tại.
 4. Trước turn 4, Goblin Shaman và Brute Call đã reserve không bị deploy.

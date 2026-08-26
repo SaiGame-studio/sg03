@@ -116,7 +116,44 @@ function defend_with_back_line_ability_when_front_line_takes_damage(state, abili
     })
 end
 
-function plan_basic_omega_attack(state)
+-- Returns the lowest-DEF Alpha Character on the front line. Back-line cards,
+-- including Ability cards, are intentionally not valid combat targets here.
+function pick_alpha_front_line_character_target(state)
+    local selected_card = nil
+    local lowest_def = math.huge
+    for _, card in ipairs(state.alpha_front_line or {}) do
+        local has_card = card.inventory_item_id ~= nil and card.inventory_item_id ~= ""
+        if has_card and lib_battle_common.check_card_type(state.item_defs, card, "character") then
+            local card_def = card.final_def or 0
+            if card_def < lowest_def then
+                selected_card = card
+                lowest_def = card_def
+            end
+        end
+    end
+    return selected_card
+end
+
+-- Returns the lowest-DEF exposed Alpha Character on the front line.
+function pick_alpha_exposed_front_line_character_target(state)
+    local selected_card = nil
+    local lowest_def = math.huge
+    for _, card in ipairs(state.alpha_front_line or {}) do
+        local has_card = card.inventory_item_id ~= nil and card.inventory_item_id ~= ""
+        if has_card and card.expose == true
+            and lib_battle_common.check_card_type(state.item_defs, card, "character") then
+            local card_def = card.final_def or 0
+            if card_def < lowest_def then
+                selected_card = card
+                lowest_def = card_def
+            end
+        end
+    end
+    return selected_card
+end
+
+-- Plans one Omega Character attack against defender, or Alpha HP when defender is nil.
+function plan_omega_attack_with_target(state, defender)
     state.omega_planning = {}
     local attacker = lib_battle_ai._find_omega_attacker(state, true)
     if attacker == nil then
@@ -124,7 +161,6 @@ function plan_basic_omega_attack(state)
         return nil
     end
 
-    local defender = lib_battle_ai._pick_alpha_attack_target(state)
     local defender_id = defender ~= nil and defender.inventory_item_id or "alpha_hp"
     table.insert(state.omega_planning, {
         action = defender ~= nil and "card_attack_card" or "omega_attack_alpha_hp",
@@ -135,4 +171,9 @@ function plan_basic_omega_attack(state)
         state, lib_battle_ai.build_omega_planning_character_attack_action(state, attacker, defender_id)
     )
     return nil
+end
+
+function plan_basic_omega_attack(state)
+    local defender = pick_alpha_front_line_character_target(state)
+    return plan_omega_attack_with_target(state, defender)
 end
