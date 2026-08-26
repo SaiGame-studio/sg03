@@ -1,4 +1,5 @@
 using SaiGame.Services;
+using SG03.UI.Components;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -39,6 +40,17 @@ namespace SG03.UI
         private GameBattleStatusUI battleStatusUI;
         private GameBattleActionsUI battleActionsUI;
         private SoulEnergyUI soulEnergyUI;
+
+        public void ShowErrorToast(string error)
+        {
+            VisualElement toastSource = this.root ?? this.uiDocument?.rootVisualElement;
+            if (toastSource == null)
+            {
+                Debug.LogWarning("[GamePanelUI] Cannot show error toast because the main UI root is unavailable.", this.gameObject);
+                return;
+            }
+            ToastMessage.ShowError(error, toastSource);
+        }
 
         protected override void LoadComponents()
         {

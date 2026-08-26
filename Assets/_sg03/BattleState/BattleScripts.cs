@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using SaiGame.Services;
 using SG03.UI;
-using SG03.UI.Components;
 using UnityEngine;
 
 namespace SG03
@@ -32,6 +31,9 @@ namespace SG03
 
         [SerializeField] private BattleState battleState;
 
+        [Header("UI")]
+        [SerializeField] private GamePanelUI gamePanelUI;
+
         private bool isRunning;
 
         /// <summary>True while a script request is in-flight (waiting for server response).</summary>
@@ -44,6 +46,7 @@ namespace SG03
         {
             base.LoadComponents();
             this.LoadBattleState();
+            this.LoadGamePanelUI();
         }
 
         protected virtual void LoadBattleState()
@@ -51,6 +54,12 @@ namespace SG03
             if (this.battleState != null) return;
             this.battleState = UnityEngine.Object.FindFirstObjectByType<BattleState>(FindObjectsInactive.Include);
             Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
+        }
+
+        private void LoadGamePanelUI()
+        {
+            if (this.gamePanelUI != null) return;
+            this.gamePanelUI = UnityEngine.Object.FindFirstObjectByType<GamePanelUI>(FindObjectsInactive.Include);
         }
 
         public void RunBattleStart(string requestBody, Action<string> onSuccess, Action<string> onError)
@@ -193,12 +202,23 @@ namespace SG03
                 if (string.IsNullOrWhiteSpace(error)) return;
 
                 Debug.LogWarning($"[BattleScripts] '{scriptName}' output error: {error}", this.gameObject);
-                ToastMessage.ShowError(error);
+                this.ShowToastError(error);
             }
             catch (ArgumentException exception)
             {
                 Debug.LogWarning($"[BattleScripts] Could not inspect '{scriptName}' response for an output error: {exception.Message}", this.gameObject);
             }
+        }
+
+        private void ShowToastError(string error)
+        {
+            if (string.IsNullOrWhiteSpace(error)) return;
+            if (this.gamePanelUI == null)
+            {
+                Debug.LogWarning("[BattleScripts] GamePanelUI is not assigned for error toast.", this.gameObject);
+                return;
+            }
+            this.gamePanelUI.ShowErrorToast(error);
         }
 
         private void LogResponse(string scriptName, string result)
@@ -220,7 +240,7 @@ namespace SG03
             {
                 this.isRunning = false;
                 Debug.LogWarning($"[BattleScripts] '{scriptName}' error: {error}", this.gameObject);
-                ToastMessage.ShowError(error);
+                this.ShowToastError(error);
                 onError?.Invoke(error);
             };
         }

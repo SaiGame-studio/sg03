@@ -54,7 +54,7 @@ namespace SG03.UI.Components
             Button closeButton = toast.Q<Button>(CloseButtonName);
             if (closeButton == null)
             {
-                closeButton = new Button { name = CloseButtonName, text = "×" };
+                closeButton = new Button { name = CloseButtonName, text = "X" };
                 closeButton.style.position = Position.Absolute;
                 closeButton.style.right = 8;
                 closeButton.style.top = 7;
@@ -106,7 +106,7 @@ namespace SG03.UI.Components
 
         private static VisualElement GetRoot(VisualElement source)
         {
-            if (source?.panel?.visualTree != null) return source.panel.visualTree;
+            if (source != null) return source.panel?.visualTree;
 
             UIDocument document = Object.FindFirstObjectByType<UIDocument>();
             return document?.rootVisualElement;

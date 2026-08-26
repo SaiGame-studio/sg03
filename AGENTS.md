@@ -14,6 +14,14 @@ When creating or editing game content, use English for every official character 
 
 Do not place implementation logic directly in Unity lifecycle methods (for example `Awake`, `Start`, `OnEnable`, `Update`, `LateUpdate`, `OnDisable`, or `OnDestroy`). Lifecycle methods may only call clearly named helper methods; put all logic in those helper methods instead.
 
+## Unity Component Loading
+
+Resolve Unity component references through the `LoadComponents()` mechanism. Every `SaiBehaviour` that needs component dependencies must override `LoadComponents()`, call `base.LoadComponents()` first, and invoke clearly named `Load...` helper methods for those dependencies.
+
+Stable scene and prefab dependencies should also have serialized references. A `Load...` helper may use `GetComponent`, `FindFirstObjectByType`, or a similar lookup only as a fallback when its cached or serialized reference is null.
+
+Do not resolve missing component references lazily from gameplay actions, event callbacks, request callbacks, UI handlers, or other runtime execution paths. Those paths must consume references already prepared by `LoadComponents()` and fail clearly if a required reference is unavailable.
+
 ## Runtime UI Assets
 
 For any UI Toolkit asset required at runtime (`VisualTreeAsset`, `StyleSheet`, `PanelSettings`, and related assets), assign a serialized reference in the owning scene or prefab. That reference must be present in source control so Unity includes the asset in every player build, including WebGL.
