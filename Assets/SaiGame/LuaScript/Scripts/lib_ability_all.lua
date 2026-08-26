@@ -334,20 +334,32 @@ function brute_call_execute(state, source_card, event_data, helpers)
     local chosen_index = nil
     local chosen_sacrifice = nil
     local chosen_stars = nil
+
+    -- Brute Call has exactly two valid sacrifices. Do not infer eligibility
+    -- from race, type, or star metadata: those fields are unrelated to this
+    -- ability's card-specific requirement.
+    local function get_adjacent_goblin_sacrifice(card)
+        if card == nil or card.inventory_item_id == nil or card.inventory_item_id == "" then
+            return nil
+        end
+
+        local code = card.item_definition_code_name
+        if code == "goblin_grunt" then
+            return 1
+        end
+        if code == "goblin_saboteur" then
+            return 2
+        end
+        return nil
+    end
+
     for _, index in ipairs(adjacent_indexes) do
         local card = front_line[index]
-        if card ~= nil and card.inventory_item_id ~= nil and card.inventory_item_id ~= "" then
-            local card_def = helpers.find_item_def(state.item_defs, card.item_definition_code_name)
-            local card_type = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.type or nil
-            local card_race = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.race or nil
-            local card_stars = card_def ~= nil and card_def.base_stats ~= nil and tonumber(card_def.base_stats.star) or nil
-            if card_type == "character" and card_race == "goblin" and
-               (card_stars == 1 or card_stars == 2) and
-               (chosen_stars == nil or card_stars < chosen_stars) then
-                chosen_index = index
-                chosen_sacrifice = card
-                chosen_stars = card_stars
-            end
+        local card_stars = get_adjacent_goblin_sacrifice(card)
+        if card_stars ~= nil and (chosen_stars == nil or card_stars < chosen_stars) then
+            chosen_index = index
+            chosen_sacrifice = card
+            chosen_stars = card_stars
         end
     end
 
