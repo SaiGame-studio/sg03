@@ -33,6 +33,7 @@ namespace SG03
         [Header("Holders")]
         [SerializeField] private CardHolderCtrl holderSelected;
         [SerializeField] private CardHolderCtrl holderHover;
+        [SerializeField] private CardHolderHoverDetector holderHoverDetector;
 
 
         [Header("Full Detail")]
@@ -74,6 +75,14 @@ namespace SG03
             this.LoadMarkIdlePosition();
             this.LoadArrowIndicator();
             this.LoadAlphaFrontLineHolders();
+            this.LoadHolderHoverDetector();
+        }
+
+        protected virtual void LoadHolderHoverDetector()
+        {
+            if (this.holderHoverDetector != null) return;
+            this.holderHoverDetector = Object.FindFirstObjectByType<CardHolderHoverDetector>(FindObjectsInactive.Include);
+            Debug.LogWarning(this.transform.name + ": LoadHolderHoverDetector", this.gameObject);
         }
 
         protected virtual void LoadAlphaFrontLineHolders()
@@ -320,8 +329,11 @@ namespace SG03
 
         private void HandleHolderClick()
         {
-            if (this.holderHover == null) return;
-            this.holderHover.NotifySelected();
+            CardHolderCtrl clickedHolder = this.holderHoverDetector != null
+                ? this.holderHoverDetector.GetHolderUnderPointer()
+                : this.holderHover;
+            if (clickedHolder == null) return;
+            clickedHolder.NotifySelected();
         }
 
         private bool IsClickOnSelected()
@@ -516,11 +528,8 @@ namespace SG03
             int handSlotIndex = this.FindAlphaHandSlotIndex(card.InventoryItemId);
             if (handSlotIndex < 0) return;
             if (!this.UpdateLocalStateForDeployRequest(holder, card))
-            {
-                Debug.LogError($"[CardSelection] Card deploy was not sent because local state rejected target {holder.HolderLink}[{holder.Index}].");
-                this.RefreshBattleStateAfterDeployError();
-                return;
-            }
+                Debug.LogWarning($"[CardSelection] Local deploy staging was skipped for " +
+                    $"{holder.HolderLink}[{holder.Index}]; sending card_deploy from the selected card and holder.");
             this.PlaceFromHandIntoHolder(card, holder);
             this.RegisterPlayerDeploy(card, holder);
             this.TryIncrementCharDeploy(card);
@@ -530,6 +539,9 @@ namespace SG03
         private void RunDeployScript(Card3DCtrl card, CardHolderCtrl holder, int handSlotIndex)
         {
             this.battleStateCtrl?.BattleScripts?.RunAlphaCardDeploy(
+                card.InventoryItemId,
+                holder.HolderLink,
+                holder.Index,
                 response => this.OnDeployScriptSuccess(response, card, holder, handSlotIndex),
                 error => this.OnDeployScriptError(error, card, holder, handSlotIndex));
         }
@@ -566,17 +578,6 @@ namespace SG03
             this.battleStateCtrl?.BattleState?.RestoreCardFromLineToHand(
                 card.InventoryItemId, holder.HolderLink, holder.Index, handSlotIndex);
             this.ReturnCardToHand(card, holder, handSlotIndex);
-            this.RefreshBattleStateAfterDeployError();
-        }
-
-        private void RefreshBattleStateAfterDeployError()
-        {
-            BattleScripts scripts = this.battleStateCtrl?.BattleScripts;
-            if (scripts == null || scripts.IsRunning) return;
-
-            scripts.RunBattleStatus(
-                response => this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response),
-                error => Debug.LogWarning($"[CardSelection] Failed to refresh battle state after deploy rejection: {error}"));
         }
 
         private void ReturnCardToHand(Card3DCtrl card, CardHolderCtrl lineHolder, int handSlotIndex)

@@ -302,6 +302,13 @@ namespace SG03.UI
             this.SyncTriggerStates();
             this.OnBattleStatusChanged?.Invoke();
             this.NotifyClientActions();
+            this.ReconcileVisualStateWhenNoClientActions();
+        }
+
+        private void ReconcileVisualStateWhenNoClientActions()
+        {
+            if (this.clientActions != null && this.clientActions.Length > 0) return;
+            this.cardSpawning?.ReconcileLineBindingsFromBattleState();
         }
 
         private void SyncTriggerStates()

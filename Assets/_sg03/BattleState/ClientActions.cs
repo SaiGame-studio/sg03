@@ -18,8 +18,7 @@ namespace SG03
         [SerializeField] private CardSelection cardSelection;
         [SerializeField] private DeskPositionCtrl deskPosition;
         [SerializeField] private BattleStateCtrl battleStateCtrl;
-        [SerializeField] private float actionInterval = 0.1f;
-        [SerializeField] private float omegaFrontLinePostDelay = 0.5f;
+        [SerializeField] private float omegaFrontLinePostDelay = 0.1f;
         [SerializeField, Min(1f)] private float resumeMoveSpeedMultiplier = 2f;
 
         [Header("Action Log")]
@@ -237,6 +236,7 @@ namespace SG03
             if (!this.HasUnexecutedActions())
             {
                 this.hasPendingActions = false;
+                this.ReconcileBoardWhenActionsComplete();
                 this.FinishResumeWhenActionsComplete();
                 return;
             }
@@ -251,15 +251,91 @@ namespace SG03
                 ClientActionLog log = this.actionLog[i];
                 if (log.Executed) { i++; continue; }
                 yield return new WaitUntil(() => this.isProcessingActions);
+                if (this.IsParallelSourceAction(log.ActionName))
+                {
+                    bool isSpawnGroup = this.IsSourceSpawnAction(log.ActionName);
+                    int groupEnd = this.FindParallelSourceGroupEnd(i, isSpawnGroup);
+                    yield return this.StartCoroutine(this.DispatchParallelSourceGroup(i, groupEnd));
+                    i = groupEnd;
+                    continue;
+                }
                 Coroutine actionRoutine = this.ExecuteAction(log);
                 if (actionRoutine != null) yield return actionRoutine;
                 log.MarkExecuted();
-                yield return new WaitForSeconds(this.GetPostActionDelay(log.ActionName));
+                float postActionDelay = this.GetPostActionDelay(log.ActionName);
+                if (postActionDelay > 0f) yield return new WaitForSeconds(postActionDelay);
                 i++;
             }
             this.dispatchRoutine = null;
             this.hasPendingActions = this.HasUnexecutedActions();
+            this.ReconcileBoardWhenActionsComplete();
             this.FinishResumeWhenActionsComplete();
+        }
+
+        private bool IsSourceSpawnAction(string actionName)
+        {
+            return actionName == "alpha_source_spawn_card" || actionName == "omega_source_spawn_card";
+        }
+
+        private bool IsSourceToHandAction(string actionName)
+        {
+            return actionName == "alpha_source_to_hand" || actionName == "omega_source_to_hand";
+        }
+
+        private bool IsParallelSourceAction(string actionName)
+        {
+            return this.IsSourceSpawnAction(actionName) || this.IsSourceToHandAction(actionName);
+        }
+
+        private int FindParallelSourceGroupEnd(int startIndex, bool isSpawnGroup)
+        {
+            int endIndex = startIndex;
+            while (endIndex < this.actionLog.Count)
+            {
+                ClientActionLog log = this.actionLog[endIndex];
+                bool belongsToGroup = isSpawnGroup
+                    ? this.IsSourceSpawnAction(log.ActionName)
+                    : this.IsSourceToHandAction(log.ActionName);
+                if (log.Executed || !belongsToGroup) break;
+                endIndex++;
+            }
+            return endIndex;
+        }
+
+        private IEnumerator DispatchParallelSourceGroup(int startIndex, int endIndex)
+        {
+            int pendingCount = 0;
+            for (int index = startIndex; index < endIndex; index++)
+            {
+                ClientActionLog log = this.actionLog[index];
+                Coroutine actionRoutine = this.ExecuteAction(log);
+                if (actionRoutine == null)
+                {
+                    log.MarkExecuted();
+                    continue;
+                }
+
+                pendingCount++;
+                this.StartCoroutine(this.WaitForParallelSourceAction(actionRoutine, log, () => pendingCount--));
+            }
+
+            yield return new WaitUntil(() => pendingCount == 0);
+        }
+
+        private IEnumerator WaitForParallelSourceAction(
+            Coroutine actionRoutine,
+            ClientActionLog log,
+            Action onComplete)
+        {
+            yield return actionRoutine;
+            log.MarkExecuted();
+            onComplete?.Invoke();
+        }
+
+        private void ReconcileBoardWhenActionsComplete()
+        {
+            if (this.hasPendingActions) return;
+            this.cardSpawning?.ReconcileLineBindingsFromBattleState();
         }
 
         private void FinishResumeWhenActionsComplete()
@@ -274,7 +350,7 @@ namespace SG03
         private float GetPostActionDelay(string actionName)
         {
             if (actionName == "omega_hand_to_front_line") return this.omegaFrontLinePostDelay;
-            return this.actionInterval;
+            return 0f;
         }
 
         private void LogAction(ClientActionLog log)

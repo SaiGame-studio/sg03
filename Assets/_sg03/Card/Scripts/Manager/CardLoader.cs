@@ -35,6 +35,7 @@ namespace SG03
 
         private AsyncOperationHandle<CardData> handle;
         private bool                           handleIsValid;
+        private int                            handleVersion;
 
 // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -63,6 +64,7 @@ namespace SG03
             _ = this.LoadAndApply();
         }
 
+        private void OnDisable() => this.ReleaseHandle();
         private void OnDestroy() => this.ReleaseHandle();
 
         // ─── Public API ───────────────────────────────────────────────────────────
@@ -83,21 +85,27 @@ namespace SG03
 
             this.ReleaseHandle();
 
-            this.handle        = Addressables.LoadAssetAsync<CardData>(resolvedAddress);
+            int operationVersion = ++this.handleVersion;
+            AsyncOperationHandle<CardData> operation = Addressables.LoadAssetAsync<CardData>(resolvedAddress);
+            this.handle        = operation;
             this.handleIsValid = true;
 
             try
             {
-                await this.handle.Task;
+                await operation.Task;
             }
             catch (Exception e)
             {
+                if (operationVersion != this.handleVersion) return null;
                 Debug.LogError($"[CardLoader] Failed to load '{resolvedAddress}': {e.Message}", this);
                 this.ReleaseHandle();
                 return null;
             }
 
-            if (this.handle.Status != AsyncOperationStatus.Succeeded)
+            if (operationVersion != this.handleVersion || !this.handleIsValid || !operation.IsValid())
+                return null;
+
+            if (operation.Status != AsyncOperationStatus.Succeeded)
             {
                 Debug.LogError($"[CardLoader] Addressables load failed for '{resolvedAddress}'.", this);
                 this.ReleaseHandle();
@@ -120,8 +128,9 @@ namespace SG03
         /// <summary>Releases the loaded Addressables handle.</summary>
         public void ReleaseHandle()
         {
+            this.handleVersion++;
             if (!this.handleIsValid) return;
-            Addressables.Release(this.handle);
+            if (this.handle.IsValid()) Addressables.Release(this.handle);
             this.handleIsValid = false;
         }
 

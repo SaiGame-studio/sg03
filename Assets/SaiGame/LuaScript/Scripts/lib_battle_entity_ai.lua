@@ -20,6 +20,19 @@ function run_enemy_ai_handler(state, handler_name)
         return nil, nil, nil, "unknown handler for goblin_shaman: " .. tostring(handler_name)
     end
 
+    if enemy_key == "silas" then
+        if handler_name == "defend" then
+            return enemy_ai_silas.defend(state)
+        end
+        if handler_name == "plan_attack" then
+            return enemy_ai_silas.plan_attack(state)
+        end
+        if handler_name == "deploy" then
+            return enemy_ai_silas.deploy(state)
+        end
+        return nil, nil, nil, "unknown handler for silas: " .. tostring(handler_name)
+    end
+
     if handler_name == "deploy" then
         return nil, nil, nil, "no deploy handler for enemy_entity_key: " .. tostring(enemy_key)
     end

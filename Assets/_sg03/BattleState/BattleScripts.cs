@@ -31,6 +31,9 @@ namespace SG03
 
         [SerializeField] private BattleState battleState;
 
+        [Header("UI")]
+        [SerializeField] private GamePanelUI gamePanelUI;
+
         private bool isRunning;
 
         /// <summary>True while a script request is in-flight (waiting for server response).</summary>
@@ -43,6 +46,7 @@ namespace SG03
         {
             base.LoadComponents();
             this.LoadBattleState();
+            this.LoadGamePanelUI();
         }
 
         protected virtual void LoadBattleState()
@@ -50,6 +54,12 @@ namespace SG03
             if (this.battleState != null) return;
             this.battleState = UnityEngine.Object.FindFirstObjectByType<BattleState>(FindObjectsInactive.Include);
             Debug.LogWarning(this.transform.name + ": LoadBattleState", this.gameObject);
+        }
+
+        private void LoadGamePanelUI()
+        {
+            if (this.gamePanelUI != null) return;
+            this.gamePanelUI = UnityEngine.Object.FindFirstObjectByType<GamePanelUI>(FindObjectsInactive.Include);
         }
 
         public void RunBattleStart(string requestBody, Action<string> onSuccess, Action<string> onError)
@@ -126,6 +136,20 @@ namespace SG03
             this.RunWithLock(this.scriptNameAlphaCardDeploy, requestBody, onSuccess, onError);
         }
 
+        public void RunAlphaCardDeploy(string inventoryItemId, Link targetLink, int targetIndex,
+            Action<string> onSuccess, Action<string> onError)
+        {
+            if (this.IsBattleScriptMissing(nameof(this.RunAlphaCardDeploy)))
+            {
+                onError?.Invoke("Battle script service is unavailable.");
+                return;
+            }
+            string requestBody = this.BuildAlphaCardDeployRequestBody(
+                inventoryItemId, targetLink, targetIndex);
+            this.LogPayload("RunAlphaCardDeploy", "#AADDFF", requestBody);
+            this.RunWithLock(this.scriptNameAlphaCardDeploy, requestBody, onSuccess, onError);
+        }
+
         public void RunAlphaTurnEnd(Action<string> onSuccess, Action<string> onError)
         {
             if (this.IsBattleScriptMissing(nameof(this.RunAlphaTurnEnd))) return;
@@ -162,8 +186,39 @@ namespace SG03
                 this.isRunning = false;
                 if (this.logPayload)
                     this.LogResponse(scriptName, result);
+                this.ShowScriptOutputError(scriptName, result);
                 onSuccess?.Invoke(result);
             };
+        }
+
+        private void ShowScriptOutputError(string scriptName, string result)
+        {
+            if (string.IsNullOrWhiteSpace(result)) return;
+
+            try
+            {
+                BattleStatusScriptResponse response = JsonUtility.FromJson<BattleStatusScriptResponse>(result);
+                string error = response?.output?.error;
+                if (string.IsNullOrWhiteSpace(error)) return;
+
+                Debug.LogWarning($"[BattleScripts] '{scriptName}' output error: {error}", this.gameObject);
+                this.ShowToastError(error);
+            }
+            catch (ArgumentException exception)
+            {
+                Debug.LogWarning($"[BattleScripts] Could not inspect '{scriptName}' response for an output error: {exception.Message}", this.gameObject);
+            }
+        }
+
+        private void ShowToastError(string error)
+        {
+            if (string.IsNullOrWhiteSpace(error)) return;
+            if (this.gamePanelUI == null)
+            {
+                Debug.LogWarning("[BattleScripts] GamePanelUI is not assigned for error toast.", this.gameObject);
+                return;
+            }
+            this.gamePanelUI.ShowErrorToast(error);
         }
 
         private void LogResponse(string scriptName, string result)
@@ -185,6 +240,7 @@ namespace SG03
             {
                 this.isRunning = false;
                 Debug.LogWarning($"[BattleScripts] '{scriptName}' error: {error}", this.gameObject);
+                this.ShowToastError(error);
                 onError?.Invoke(error);
             };
         }
@@ -218,6 +274,43 @@ namespace SG03
             string frontJson = this.ToJsonLineSlotArray(frontLine);
             string backJson  = this.ToJsonLineSlotArray(backLine);
             return $"{{\"payload\":{{\"hand\":{handJson},\"front_line\":{frontJson},\"back_line\":{backJson}}}}}";
+        }
+
+        private string BuildAlphaCardDeployRequestBody(string inventoryItemId, Link targetLink, int targetIndex)
+        {
+            string[] hand = this.CollectInventoryIdsExcept(
+                this.battleState?.AlphaHand, inventoryItemId);
+            CardDeployLineSlot[] frontLine = this.CollectLineSlots(this.battleState?.AlphaFrontLine);
+            CardDeployLineSlot[] backLine = this.CollectLineSlots(this.battleState?.AlphaBackLine);
+            CardDeployLineSlot[] targetLine = targetLink == Link.front ? frontLine : backLine;
+            if (targetIndex >= 0 && targetIndex < targetLine.Length)
+            {
+                targetLine[targetIndex] = new CardDeployLineSlot
+                {
+                    inventory_item_id = inventoryItemId ?? string.Empty,
+                    face_up = false,
+                    slot_index = targetIndex
+                };
+            }
+
+            string handJson = this.ToJsonStringArray(hand);
+            string frontJson = this.ToJsonLineSlotArray(frontLine);
+            string backJson = this.ToJsonLineSlotArray(backLine);
+            return $"{{\"payload\":{{\"hand\":{handJson},\"front_line\":{frontJson},\"back_line\":{backJson}}}}}";
+        }
+
+        private string[] CollectInventoryIdsExcept(BattleCardSlot[] slots, string excludedInventoryItemId)
+        {
+            if (slots == null) return Array.Empty<string>();
+            string[] result = new string[slots.Length];
+            for (int i = 0; i < slots.Length; i++)
+            {
+                string inventoryItemId = slots[i]?.inventory_item_id;
+                result[i] = inventoryItemId == excludedInventoryItemId
+                    ? string.Empty
+                    : inventoryItemId ?? string.Empty;
+            }
+            return result;
         }
 
         private string BuildCardDeployRequestBody()

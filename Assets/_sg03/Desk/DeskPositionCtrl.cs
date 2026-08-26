@@ -204,8 +204,7 @@ namespace SG03
 
         protected virtual void LoadAlphaBackLine()
         {
-            if (this.IsHoldersFilled(this.alphaBackLine)) return;
-            this.LoadHoldersByOwnerAndLink(this.alphaBackLine, Owner.alpha, Link.back);
+            this.LoadHoldersFromHierarchy(this.alphaBackLine, "AlphaBackLine");
             Debug.LogWarning(this.transform.name + ": LoadAlphaBackLine", this.gameObject);
         }
 
@@ -223,19 +222,6 @@ namespace SG03
             Debug.LogWarning(this.transform.name + ": LoadOmegaBackLine", this.gameObject);
         }
 
-        private void LoadHoldersByOwnerAndLink(CardHolderCtrl[] holders, Owner owner, Link link)
-        {
-            CardHolderCtrl[] all = Object.FindObjectsByType<CardHolderCtrl>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (CardHolderCtrl holder in all)
-            {
-                if (holder.HolderOwner != owner) continue;
-                if (holder.HolderLink != link) continue;
-                int idx = holder.Index;
-                if (idx < 0 || idx >= holders.Length) continue;
-                holders[idx] = holder;
-            }
-        }
-
         private void LoadHoldersFromHierarchy(CardHolderCtrl[] holders, string lineName)
         {
             Transform line = this.transform.Find(lineName);
@@ -245,12 +231,10 @@ namespace SG03
                 return;
             }
 
+            for (int i = 0; i < holders.Length; i++) holders[i] = null;
             int slotCount = Mathf.Min(holders.Length, line.childCount);
             for (int i = 0; i < slotCount; i++)
-            {
-                if (holders[i] != null) continue;
                 holders[i] = line.GetChild(i).GetComponent<CardHolderCtrl>();
-            }
         }
 
         private bool IsHoldersFilled(CardHolderCtrl[] holders)

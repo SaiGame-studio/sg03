@@ -37,6 +37,7 @@ local resolve_mode           -- forward declaration
 local build_state            -- forward declaration
 local load_player_the_source -- forward declaration
 local load_enemy_the_source  -- forward declaration
+local prepare_enemy_void_cards -- forward declaration
 local load_item_defs         -- forward declaration
 local charge_start_battle_fee -- forward declaration
 
@@ -71,15 +72,18 @@ local function main()
     local enemy_the_source = load_enemy_the_source(enemy)
     lib_battle_common.dlog("[battle_start] enemy source loaded: " .. tostring(#enemy_the_source) .. " cards")
 
+    local omega_the_void, void_err = prepare_enemy_void_cards(payload.enemy_entity_key, enemy_the_source)
+    if void_err ~= nil then output.error = void_err ; return end
+
     local selected_mode = resolve_mode(enemy)
     lib_battle_common.dlog("[battle_start] battle mode: " .. tostring(selected_mode))
 
-    local state = build_state(enemy, selected_mode, player_the_source, enemy_the_source, preset)
+    local state = build_state(enemy, selected_mode, player_the_source, enemy_the_source, omega_the_void, preset)
     lib_battle_common.append_client_action(state, "alpha_source_spawn_card:" .. #player_the_source)
     lib_battle_common.append_client_action(state, "omega_source_spawn_card:" .. #enemy_the_source)
     lib_battle_common.append_client_action(state, "next_move:init_cards")
 
-    local item_defs, defs_err = load_item_defs(player_the_source, enemy_the_source)
+    local item_defs, defs_err = load_item_defs(player_the_source, enemy_the_source, omega_the_void)
     if defs_err ~= nil then output.error = defs_err ; return end
     state.item_defs = item_defs
     lib_battle_common.dlog("[battle_start] item_defs loaded: " .. tostring(#item_defs) .. " definitions")
@@ -131,7 +135,7 @@ resolve_mode = function(enemy)
     return selected
 end
 
-build_state = function(enemy, selected_mode, player_the_source, enemy_the_source, preset)
+build_state = function(enemy, selected_mode, player_the_source, enemy_the_source, omega_the_void, preset)
     local hp_map = { fast = 4000, normal = 7000, long = 16000 }
     local hp = hp_map[selected_mode]
     hp = 1000 --debug only
@@ -156,7 +160,7 @@ build_state = function(enemy, selected_mode, player_the_source, enemy_the_source
         omega_hp           = hp,
         omega_max_hp       = hp,
         omega_the_source   = enemy_the_source,
-        omega_the_void     = {},
+        omega_the_void     = omega_the_void,
         omega_hand         = { {}, {}, {}, {}, {} },  -- 5 slots
         omega_front_line   = { {}, {}, {}, {}, {} },  -- 5 slots
         omega_back_line    = { {}, {}, {}, {}, {} },  -- 5 slots
@@ -197,6 +201,28 @@ load_enemy_the_source = function(enemy)
         end
     end
     return source
+end
+
+-- Prepares cards that must already be in a zone for an enemy Ability to use.
+-- Silas's Brute Call summons a Brute from the void; the AI never places it directly.
+prepare_enemy_void_cards = function(enemy_key, enemy_source)
+    local enemy_void = {}
+    if enemy_key ~= "silas" then return enemy_void, nil end
+
+    for index, card in ipairs(enemy_source or {}) do
+        if card.item_definition_code_name == "goblin_brute" then
+            table.remove(enemy_source, index)
+            card.inventory_item_id = gen_id()
+            card.slot_index        = nil
+            card.face_up           = true
+            card.expose            = true
+            card.trigger           = false
+            table.insert(enemy_void, card)
+            return enemy_void, nil
+        end
+    end
+
+    return nil, "silas requires goblin_brute in enemy_the_source"
 end
 
 verify_player_preset = function(preset_instance_id)
@@ -251,10 +277,10 @@ check_enemy = function(e)
     return nil
 end
 
-load_item_defs = function(player_source, enemy_source)
+load_item_defs = function(player_source, enemy_source, enemy_void)
     local seen       = {}
     local codes      = {}
-    local all_sources = { player_source or {}, enemy_source or {} }
+    local all_sources = { player_source or {}, enemy_source or {}, enemy_void or {} }
     for _, source_list in ipairs(all_sources) do
         for _, source_card in ipairs(source_list) do
             local code = source_card.item_definition_code_name

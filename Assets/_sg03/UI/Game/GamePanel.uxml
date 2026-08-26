@@ -12,7 +12,7 @@
 
             <ui:VisualElement name="TopMenu" class="game-top-menu">
                 <ui:Label name="BattleTitle" text="Omega" class="game-top-menu__title" />
-                <ui:DropdownField name="EnemyCodeNameInput" label="Enemy" choices="goblin_shaman" value="goblin_shaman" class="game-bottom-input" />
+                <ui:DropdownField name="EnemyCodeNameInput" label="Enemy" choices="silas,goblin_shaman" value="silas" class="game-bottom-input" />
                 <ui:VisualElement name="PlayerNavigation">
                     <ui:Button name="SoulEnergy" class="soul-energy" tooltip="Soul Collector">
                         <ui:VisualElement tooltip="Soul Energy" class="soul-energy__icon" />
@@ -43,7 +43,10 @@
                     <ui:Label name="CardCountLabel" text="Card Count: 0" class="game-top-menu__card-count" />
                 </ui:VisualElement>
 
-                <ui:Label name="NextMoveLabel" text="Move: --" class="game-top-menu__title" style="margin-left: auto;" />
+                <ui:VisualElement name="BattleTurnInfo" class="game-bottom-menu__turn-info">
+                    <ui:Label name="NextMoveLabel" text="Move: --" class="game-top-menu__title game-bottom-menu__move-label" />
+                    <ui:Label name="TurnLabel" text="Turn: --" class="game-bottom-menu__turn-label" />
+                </ui:VisualElement>
             </ui:VisualElement>
 
         </ui:VisualElement>

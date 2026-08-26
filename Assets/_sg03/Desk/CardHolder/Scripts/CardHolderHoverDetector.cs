@@ -64,12 +64,18 @@ namespace SG03
             Vector2 mousePos = Mouse.current.position.ReadValue();
             Ray ray = this.mainCamera.ScreenPointToRay(mousePos);
             RaycastHit[] hits = Physics.RaycastAll(ray);
+            CardHolderCtrl closestHolder = null;
+            float closestDistance = float.PositiveInfinity;
             foreach (RaycastHit hit in hits)
             {
                 CardHolderCtrl holder = hit.collider.GetComponent<CardHolderCtrl>();
-                if (holder != null) return holder;
+                if (holder == null || hit.distance >= closestDistance) continue;
+                closestHolder = holder;
+                closestDistance = hit.distance;
             }
-            return null;
+            return closestHolder;
         }
+
+        public CardHolderCtrl GetHolderUnderPointer() => this.RaycastHolder();
     }
 }

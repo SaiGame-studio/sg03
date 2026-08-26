@@ -6,6 +6,10 @@ Never create, modify, move, rename, or delete files under `Assets/SaiGame/`, exc
 
 Treat `Assets/SaiGame/` as a read-only dependency. Implement project-specific behavior only outside that directory, except for game-specific Lua scripts directly inside `Assets/SaiGame/LuaScript/Scripts/`, unless the user explicitly revokes this rule for a specific change.
 
+## Lua Error Catalog
+
+Whenever a Lua script introduces a new error type, error string, or failure reason, add the corresponding entry to `Assets/SaiGame/LuaScript/Scripts/LuaErrorCatalog.md` as part of the same change.
+
 ## Game Content Naming
 
 When creating or editing game content, use English for every official character and skill name. Vietnamese may be used only in descriptive text or explanatory notes, never as an official name, identifier, or card title.
@@ -13,6 +17,14 @@ When creating or editing game content, use English for every official character 
 ## Unity Lifecycle Methods
 
 Do not place implementation logic directly in Unity lifecycle methods (for example `Awake`, `Start`, `OnEnable`, `Update`, `LateUpdate`, `OnDisable`, or `OnDestroy`). Lifecycle methods may only call clearly named helper methods; put all logic in those helper methods instead.
+
+## Unity Component Loading
+
+Resolve Unity component references through the `LoadComponents()` mechanism. Every `SaiBehaviour` that needs component dependencies must override `LoadComponents()`, call `base.LoadComponents()` first, and invoke clearly named `Load...` helper methods for those dependencies.
+
+Stable scene and prefab dependencies should also have serialized references. A `Load...` helper may use `GetComponent`, `FindFirstObjectByType`, or a similar lookup only as a fallback when its cached or serialized reference is null.
+
+Do not resolve missing component references lazily from gameplay actions, event callbacks, request callbacks, UI handlers, or other runtime execution paths. Those paths must consume references already prepared by `LoadComponents()` and fail clearly if a required reference is unavailable.
 
 ## Runtime UI Assets
 

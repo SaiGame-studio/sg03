@@ -7,7 +7,7 @@
 
 ## 1. Tổng Quan
 
-Trong **Chế độ PvE**, người chơi (**Phe Alpha**) thi đấu đối đầu với Quái/Boss AI được điều khiển bởi server (**Phe Omega**).
+Trong **Chế độ PvE**, người chơi (**Phe Alpha**) thi đấu với Enemy AI được điều khiển bởi server (**Phe Omega**).
 
 ### Các Đặc Điểm Chính Của PvE
 - **Trải Nghiệm Singleplayer**: Không cần chờ đợi đối thủ qua mạng.
@@ -16,12 +16,12 @@ Trong **Chế độ PvE**, người chơi (**Phe Alpha**) thi đấu đối đ�
 
 ---
 
-## 2. Phân Loại Quái PvE
+## 2. Phân Loại Enemies PvE
 
-Tài liệu thiết kế thuật toán AI cho quái PvE được phân chia theo 3 cấp độ trong các thư mục:
-- **[Quái Thường (`normal_monsters/`)](normal_monsters/_normal_monsters.md)** — Các đơn vị lính/quái thường (xem [Danh sách Quái Thường](normal_monsters/_normal_monsters.md)).
-- **[Quái Tinh Anh (`elite_monsters/`)](elite_monsters/_elite_monsters.md)** — Các đơn vị quái tinh anh sở hữu bộ kỹ năng đặc biệt (xem [Danh sách Quái Tinh Anh](elite_monsters/_elite_monsters.md)).
-- **[Boss (`boss_monsters/`)](boss_monsters/_boss_monsters.md)** — Trùm cuối màn chơi với các cơ chế chiến đấu đa giai đoạn (xem [Danh sách Boss](boss_monsters/_boss_monsters.md)).
+Tài liệu thiết kế thuật toán AI cho enemies PvE được phân chia theo ba cấp độ trong các thư mục:
+- **[Kẻ Địch Thường (`normal_enemies/`)](normal_enemies/_normal_enemies.md)** — Các enemy thông thường (xem [Danh sách Normal Enemies](normal_enemies/_normal_enemies.md)).
+- **[Kẻ Địch Tinh Anh (`elite_enemies/`)](elite_enemies/_elite_enemies.md)** — Các enemy tinh anh sở hữu bộ kỹ năng đặc biệt (xem [Danh sách Elite Enemies](elite_enemies/_elite_enemies.md)).
+- **[Kẻ Địch Boss (`boss_enemies/`)](boss_enemies/_boss_enemies.md)** — Các boss với cơ chế chiến đấu đa giai đoạn (xem [Danh sách Boss Enemies](boss_enemies/_boss_enemies.md)).
 
 ---
 
@@ -59,5 +59,5 @@ sequenceDiagram
 
 ## 4. Tài Liệu PvE Liên Quan
 
-- [Thuật Toán AI Goblin Shaman (Quái Thường)](normal_monsters/goblin_shaman.md) — Phân tích kỹ thuật cây quyết định AI Goblin Shaman và thuật toán quét dòng.
+- [Thuật Toán AI Goblin Shaman (Normal Enemy)](normal_enemies/goblin_shaman.md) — Phân tích kỹ thuật cây quyết định AI Goblin Shaman và thuật toán quét dòng.
 - [Cấu Hình Kịch Bản Mẫu PvE](pve_preset_scenarios.md) — Hướng dẫn cấu hình bộ bài preset và metadata kịch bản cho Alpha và Omega.

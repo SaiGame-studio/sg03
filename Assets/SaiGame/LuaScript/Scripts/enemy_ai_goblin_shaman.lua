@@ -1,90 +1,6 @@
 -- enemy_ai_goblin_shaman  (is_library = true)
 -- AI module for the goblin_shaman enemy.
 
--- Searches back_line for cards matching code_name.
--- Returns the first exposed card (expose==true) if found; otherwise the first unexposed card.
--- Returns nil if no match exists.
-function goblin_shaman_find_back_line_card_prefer_exposed(back_line, code_name)
-    lib_battle_common.dlog("[entity_ai] searching back_line (count=" .. #back_line .. ") for code=" .. code_name .. " (prefer exposed)")
-    local unexposed_fallback = nil
-    for _, back_card in ipairs(back_line) do
-        local card_id      = back_card.inventory_item_id or ""
-        local card_code    = back_card.item_definition_code_name or ""
-        local card_exposed = back_card.expose == true
-        lib_battle_common.dlog("[entity_ai] checking back_line card: id=" .. card_id .. " code=" .. card_code .. " expose=" .. tostring(back_card.expose))
-        if card_id == "" then
-            lib_battle_common.dlog("[entity_ai] skip: no inventory_item_id")
-        elseif card_code ~= code_name then
-            lib_battle_common.dlog("[entity_ai] skip: code mismatch (want=" .. code_name .. ")")
-        elseif card_exposed then
-            lib_battle_common.dlog("[entity_ai] found exposed match: id=" .. card_id)
-            return back_card
-        else
-            lib_battle_common.dlog("[entity_ai] found unexposed match (saved as fallback): id=" .. card_id)
-            if unexposed_fallback == nil then
-                unexposed_fallback = back_card
-            end
-        end
-    end
-    if unexposed_fallback ~= nil then
-        lib_battle_common.dlog("[entity_ai] using unexposed fallback: id=" .. unexposed_fallback.inventory_item_id)
-    end
-    return unexposed_fallback
-end
-
--- Returns true if pending_attack targets a card on omega_front_line AND deals positive damage.
-function goblin_shaman_is_omega_front_line_taking_damage(state)
-    local pending_atk = state.pending_attack
-    if pending_atk == nil then
-        lib_battle_common.dlog("[entity_ai] is_omega_front_line_taking_damage: no pending_attack")
-        return false
-    end
-    local damage = pending_atk.damage_dealt or 0
-    if damage <= 0 then
-        lib_battle_common.dlog("[entity_ai] is_omega_front_line_taking_damage: damage_dealt=" .. damage .. " (no damage)")
-        return false
-    end
-    local defender_id      = pending_atk.defender_inventory_item_id or ""
-    local omega_front_line = state.omega_front_line or {}
-    for _, front_card in ipairs(omega_front_line) do
-        if front_card.inventory_item_id == defender_id then
-            lib_battle_common.dlog("[entity_ai] is_omega_front_line_taking_damage: defender=" .. defender_id .. " on omega_front_line damage=" .. damage)
-            return true
-        end
-    end
-    lib_battle_common.dlog("[entity_ai] is_omega_front_line_taking_damage: defender=" .. defender_id .. " not on omega_front_line, skip")
-    return false
-end
-
--- Triggers an on_defend ability on source_card, appends resulting actions into state.
--- Returns err or nil.
-function goblin_shaman_trigger_defend_ability(state, source_card, ability_key)
-    local source_item_def = nil
-    if state.item_defs ~= nil then
-        for _, item_def in ipairs(state.item_defs) do
-            if item_def.item_code == ability_key then
-                source_item_def = item_def
-                break
-            end
-        end
-    end
-    local def_add = (source_item_def ~= nil and source_item_def.base_stats and source_item_def.base_stats.def_add) or 0
-    lib_battle_common.dlog("[entity_ai] trigger_defend_ability: id=" .. source_card.inventory_item_id .. " ability=" .. ability_key .. " def_add=" .. def_add)
-    lib_battle_common.dlog("[entity_ai] pending_attack.damage_dealt=" .. tostring(state.pending_attack ~= nil and state.pending_attack.damage_dealt or "nil"))
-    local defend_event_data = {}
-    defend_event_data.pending_attack = state.pending_attack
-    local ability_actions, ability_err = lib_ability_core.trigger_ability_by_key(state, source_card, ability_key, "on_defend", defend_event_data)
-    if ability_err ~= nil then
-        lib_battle_common.dlog("[entity_ai] ability error: " .. ability_err)
-        return ability_err
-    end
-    lib_battle_common.dlog("[entity_ai] ability_actions count=" .. #ability_actions)
-    for _, ability_action in ipairs(ability_actions) do
-        lib_battle_common.append_client_action(state, ability_action)
-    end
-    return nil
-end
-
 -- Logs the final_def of every card in the given front line (for post-buff inspection).
 function goblin_shaman_log_front_line_def(front_line, label)
     lib_battle_common.dlog("[entity_ai] " .. label .. " front_line def (count=" .. #front_line .. "):")
@@ -96,46 +12,13 @@ function goblin_shaman_log_front_line_def(front_line, label)
     end
 end
 
--- Filters a card list, returning only cards with code_name == "totem_pulse".
-function goblin_shaman_filter_totem_pulse_cards(other_cards)
-    local totem_pulse_cards = {}
-    for _, other_card in ipairs(other_cards) do
-        if other_card.item_definition_code_name == "totem_pulse" then
-            table.insert(totem_pulse_cards, other_card)
-        end
-    end
-    return totem_pulse_cards
-end
-
 -- Defend reaction: trigger totem_pulse from back_line if omega front-line is taking damage.
 -- Returns err or nil.
 function defend(state)
     lib_battle_common.dlog("[entity_ai] == goblin_shaman.defend ==")
-    if not goblin_shaman_is_omega_front_line_taking_damage(state) then
-        lib_battle_common.dlog("[entity_ai] goblin_shaman.defend: attack does not damage omega front-line, skip totem")
-        return nil
-    end
-    local omega_back_line = state.omega_back_line or {}
-    local totem_card = goblin_shaman_find_back_line_card_prefer_exposed(omega_back_line, "totem_pulse")
-    if totem_card == nil then
-        lib_battle_common.dlog("[entity_ai] goblin_shaman.defend: no totem_pulse in back_line, skip")
-        return nil
-    end
-
-    local omega_front_line = state.omega_front_line or {}
-    local has_shaman = false
-    for _, card in ipairs(omega_front_line) do
-        if card.item_definition_code_name == "goblin_shaman" and card.trigger ~= true then
-            has_shaman = true
-            break
-        end
-    end
-    if not has_shaman then
-        lib_battle_common.dlog("[entity_ai] goblin_shaman.defend: no untriggered goblin_shaman in front_line, skip totem_pulse")
-        return nil
-    end
-
-    local ability_err = goblin_shaman_trigger_defend_ability(state, totem_card, "totem_pulse")
+    local ability_err = enemy_ai_core.defend_with_back_line_ability_when_front_line_takes_damage(
+        state, "totem_pulse", "goblin_shaman"
+    )
     if ability_err ~= nil then return ability_err end
     goblin_shaman_log_front_line_def(state.omega_front_line or {}, "omega")
     lib_battle_common.dlog("[entity_ai] goblin_shaman.defend done")
@@ -174,7 +57,7 @@ function deploy(state)
 
     local hand_cards                   = lib_battle_ai._collect_cards(state.omega_hand or {})
     local character_cards, other_cards = lib_battle_ai._split_cards_by_type(hand_cards, state.item_defs)
-    local totem_pulse_cards            = goblin_shaman_filter_totem_pulse_cards(other_cards)
+    local totem_pulse_cards            = enemy_ai_core.filter_cards_by_code(other_cards, "totem_pulse")
     lib_battle_common.dlog("[entity_ai] goblin_shaman.deploy: characters=" .. #character_cards .. " totem_pulse=" .. #totem_pulse_cards)
 
     -- Keep the one-character-per-turn rule. Retain hidden information while
@@ -267,7 +150,7 @@ function goblin_shaman_pick_attack_target(state)
             selected_card.inventory_item_id .. " final_def=" .. lowest_def)
         return selected_card
     end
-    return lib_battle_ai._pick_alpha_attack_target(state)
+    return enemy_ai_core.pick_alpha_front_line_character_target(state)
 end
 
 -- Attack planning: keep one hidden Character. When more than one hidden

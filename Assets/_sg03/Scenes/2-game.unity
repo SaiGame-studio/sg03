@@ -372,7 +372,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaBack0
+      value: omega_back_0
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalPosition.x
@@ -424,6 +424,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 2088691973}
     m_Modifications:
     - target: {fileID: 2278403789962914213, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2278403789962914213, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 7dfa6ceae083bc0469033801e18feba8, type: 2}
@@ -442,6 +446,10 @@ PrefabInstance:
     - target: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: m_Size.z
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4627032858346784398, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: showVisual
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: m_LocalScale.x
@@ -771,7 +779,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaBack2
+      value: omega_back_2
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalPosition.x
@@ -936,7 +944,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaBack3
+      value: omega_back_3
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1782,7 +1790,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaFront4
+      value: omega_front_4
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -2746,33 +2754,13 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2088691973}
     m_Modifications:
-    - target: {fileID: 2588388141430089581, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_IsActive
+    - target: {fileID: 2278403789962914213, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_Size.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_Size.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_Size.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.1
+    - target: {fileID: 4627032858346784398, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: showVisual
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2818,10 +2806,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: alpha_hand_0
       objectReference: {fileID: 0}
-    - target: {fileID: 6696618329774845696, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-      propertyPath: boxCollider
-      value: 
-      objectReference: {fileID: 1722471836}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3227,7 +3211,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaFront2
+      value: omega_front_2
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -3895,6 +3879,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 2088691973}
     m_Modifications:
     - target: {fileID: 2278403789962914213, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2278403789962914213, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 7dfa6ceae083bc0469033801e18feba8, type: 2}
@@ -3913,6 +3901,10 @@ PrefabInstance:
     - target: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: m_Size.z
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4627032858346784398, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: showVisual
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: m_LocalScale.x
@@ -4850,7 +4842,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaBack4
+      value: omega_back_4
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5316,6 +5308,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: alpha_back_3
       objectReference: {fileID: 0}
+    - target: {fileID: 6696618329774845696, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: link
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5346,6 +5342,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 2088691973}
     m_Modifications:
     - target: {fileID: 2278403789962914213, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2278403789962914213, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 7dfa6ceae083bc0469033801e18feba8, type: 2}
@@ -5364,6 +5364,10 @@ PrefabInstance:
     - target: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: m_Size.z
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4627032858346784398, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: showVisual
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: m_LocalScale.x
@@ -5472,11 +5476,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c832dcdd38554f84f8a63e7ef94c7a8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardHolderCtrl
---- !u!65 &1722471836 stripped
-BoxCollider:
-  m_CorrespondingSourceObject: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
-  m_PrefabInstance: {fileID: 783278246}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1742238187
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5830,7 +5829,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaFront1
+      value: omega_front_1
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -6245,6 +6244,10 @@ PrefabInstance:
       propertyPath: alphaColor.r
       value: 0.004
       objectReference: {fileID: 0}
+    - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
+      propertyPath: m_Name
+      value: omega_front_0
+      objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalScale.x
       value: 7.5
@@ -6543,7 +6546,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaFront3
+      value: omega_front_3
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalScale.x
@@ -6591,6 +6594,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 2088691973}
     m_Modifications:
     - target: {fileID: 2278403789962914213, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2278403789962914213, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 7dfa6ceae083bc0469033801e18feba8, type: 2}
@@ -6609,6 +6616,10 @@ PrefabInstance:
     - target: {fileID: 3890381777051524021, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: m_Size.z
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4627032858346784398, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
+      propertyPath: showVisual
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5416226888589389978, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
       propertyPath: m_LocalScale.x
@@ -7097,7 +7108,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6989567135411735464, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_Name
-      value: OmegaBack1
+      value: omega_back_1
       objectReference: {fileID: 0}
     - target: {fileID: 7390411922329882547, guid: 37625623bcd4444e8d6df45136124dfc, type: 3}
       propertyPath: m_LocalPosition.x
@@ -7265,6 +7276,7 @@ MonoBehaviour:
   hovered: {fileID: 0}
   holderSelected: {fileID: 0}
   holderHover: {fileID: 0}
+  holderHoverDetector: {fileID: 0}
   deskPositions: {fileID: 948749802}
   fullDetail: 0
   markSelected: {fileID: 311934903}
@@ -7367,6 +7379,7 @@ MonoBehaviour:
   scriptNameAlphaTurnEnd: alpha_turn_end
   scriptNameAlphaDefendingEnd: alpha_defending_end
   battleState: {fileID: 2015755439}
+  gamePanelUI: {fileID: 2030001004}
   logPayload: 1
 --- !u!114 &2015755446
 MonoBehaviour:
@@ -7388,8 +7401,7 @@ MonoBehaviour:
   cardSelection: {fileID: 2015755440}
   deskPosition: {fileID: 948749802}
   battleStateCtrl: {fileID: 2015755444}
-  actionInterval: 0.1
-  omegaFrontLinePostDelay: 0.5
+  omegaFrontLinePostDelay: 0.1
   resumeMoveSpeedMultiplier: 2
   logActions: 0
   hasPendingActions: 0
@@ -8125,6 +8137,186 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 331941082}
     m_Modifications:
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: cardAddresses.Array.size
+      value: 44
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[0]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Common/kira.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[1]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/demon_orbs.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[2]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/demon_rite.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[3]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened1.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[4]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened2.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[5]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened3.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[6]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened4.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[7]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena1.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[8]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena2.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[9]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena3.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[10]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena4.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[11]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena5.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[12]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/animate_dead.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[13]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/king_return.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[14]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/skeleton_shield.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[15]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/hellscythe.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[16]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/skeleton.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[17]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/skeleton_king.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[18]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_female.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[19]'
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_male.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[20]'
+      value: Assets/_sg03/Card/Data/Character/Human/abilities/AzureBlade/cross_guard.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[21]'
+      value: Assets/_sg03/Card/Data/Character/Human/abilities/AzureBlade/spinning_slash.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[22]'
+      value: Assets/_sg03/Card/Data/Character/Human/abilities/AzureBlade/titan_fall.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[23]'
+      value: Assets/_sg03/Card/Data/Character/Human/abilities/Lyra/eagle_eye.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[24]'
+      value: Assets/_sg03/Card/Data/Character/Human/abilities/Titan/titan_spear_sweep.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[25]'
+      value: Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[26]'
+      value: Assets/_sg03/Card/Data/Character/Human/lyra.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[27]'
+      value: Assets/_sg03/Card/Data/Character/Human/titan.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[28]'
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/holy_glow.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[29]'
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/lightning_strike.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[30]'
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/static_bind.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[31]'
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/volt_heart.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[32]'
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/zelene.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[33]'
+      value: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/back_stab.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[34]'
+      value: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/goblin_shaman/brute_call.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[35]'
+      value: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/goblin_shaman/totem_pulse.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[36]'
+      value: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_brute.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[37]'
+      value: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_grunt.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[38]'
+      value: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_saboteur.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[39]'
+      value: Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_shaman.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[40]'
+      value: Assets/_sg03/Card/Data/Env/abyssal_mist.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[41]'
+      value: Assets/_sg03/Card/Data/Env/graveyard.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[42]'
+      value: Assets/_sg03/Card/Data/Env/gright_forest.asset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
+      propertyPath: 'cardAddresses.Array.data[43]'
+      value: Assets/_sg03/Card/Data/Env/iron_citadel.asset
+      objectReference: {fileID: 0}
     - target: {fileID: 3901108077790416459, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -8362,7 +8554,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3193441457980298630, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3482978470714320713, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
       propertyPath: m_LocalPosition.x
@@ -8407,10 +8599,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3193441457980298630, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
 --- !u!1001 &6418814622862749946
 PrefabInstance:

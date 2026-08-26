@@ -644,6 +644,13 @@
     padding: 8px 10px 4px 0;
 }
 
+.desk-detail-high-star-card-count {
+    font-size: 11px;
+    color: rgb(235, 190, 70);
+    -unity-font-style: bold;
+    padding: 8px 10px 4px 0;
+}
+
 .desk-detail-void-count {
     font-size: 11px;
     color: rgb(180, 100, 255);

@@ -47,44 +47,44 @@ MonoBehaviour:
   card3DReview: {fileID: 0}
   card3DLoader: {fileID: 0}
   cardAddresses:
-  - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/animate_dead.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/king_return.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/hellscythe/skeleton_shield.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/demon_orbs.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/demon_rite.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened1.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened2.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened3.asset
-  - Assets/_sg03/Card/Data/Ability/DarkElf/xena/xena_awakened4.asset
-  - Assets/_sg03/Card/Data/Ability/Goblin/back_stab.asset
-  - Assets/_sg03/Card/Data/Ability/Goblin/goblin_shaman/totem_pulse.asset
-  - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/cross_guard.asset
-  - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/spinning_slash.asset
-  - Assets/_sg03/Card/Data/Ability/Human/AzureBlade/titan_fall.asset
-  - Assets/_sg03/Card/Data/Ability/Human/Lyra/eagle_eye.asset
-  - Assets/_sg03/Card/Data/Ability/Human/Titan/titan_spear_sweep.asset
-  - Assets/_sg03/Card/Data/Ability/LightElf/holy_glow.asset
-  - Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/lightning_strike.asset
-  - Assets/_sg03/Card/Data/Ability/LightElf/volt_heart/static_bind.asset
-  - Assets/_sg03/Card/Data/Character/DarkElf/common/kira.asset
-  - Assets/_sg03/Card/Data/Character/DarkElf/hellscythe.asset
-  - Assets/_sg03/Card/Data/Character/DarkElf/xena/xena1.asset
-  - Assets/_sg03/Card/Data/Character/DarkElf/xena/xena2.asset
-  - Assets/_sg03/Card/Data/Character/DarkElf/xena/xena3.asset
-  - Assets/_sg03/Card/Data/Character/DarkElf/xena/xena4.asset
-  - Assets/_sg03/Card/Data/Character/DarkElf/xena/xena5.asset
-  - Assets/_sg03/Card/Data/Character/Goblin/goblin_grunt.asset
-  - Assets/_sg03/Card/Data/Character/Goblin/goblin_saboteur.asset
-  - Assets/_sg03/Card/Data/Character/Goblin/goblin_shaman.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/animate_dead.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/king_return.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/skeleton_shield.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/demon_orbs.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/demon_rite.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened1.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened2.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened3.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/abilities/xena_awakened4.asset
+  - Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/back_stab.asset
+  - Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/goblin_shaman/totem_pulse.asset
+  - Assets/_sg03/Card/Data/Character/Human/abilities/AzureBlade/cross_guard.asset
+  - Assets/_sg03/Card/Data/Character/Human/abilities/AzureBlade/spinning_slash.asset
+  - Assets/_sg03/Card/Data/Character/Human/abilities/AzureBlade/titan_fall.asset
+  - Assets/_sg03/Card/Data/Character/Human/abilities/Lyra/eagle_eye.asset
+  - Assets/_sg03/Card/Data/Character/Human/abilities/Titan/titan_spear_sweep.asset
+  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/holy_glow.asset
+  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/lightning_strike.asset
+  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/static_bind.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Common/kira.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/hellscythe.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena1.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena2.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena3.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena4.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Demon/Xena/xena5.asset
+  - Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_grunt.asset
+  - Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_saboteur.asset
+  - Assets/_sg03/Card/Data/Character/Natureborn/Goblin/goblin_shaman.asset
   - Assets/_sg03/Card/Data/Character/Human/azure_blade.asset
   - Assets/_sg03/Card/Data/Character/Human/lyra.asset
   - Assets/_sg03/Card/Data/Character/Human/titan.asset
-  - Assets/_sg03/Card/Data/Character/LightElf/volt_heart.asset
-  - Assets/_sg03/Card/Data/Character/LightElf/zelene.asset
-  - Assets/_sg03/Card/Data/Character/Undead/skeleton.asset
-  - Assets/_sg03/Card/Data/Character/Undead/skeleton_king.asset
-  - Assets/_sg03/Card/Data/Character/Undead/zombie_female.asset
-  - Assets/_sg03/Card/Data/Character/Undead/zombie_male.asset
+  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/volt_heart.asset
+  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/zelene.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/skeleton.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/skeleton_king.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_female.asset
+  - Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_male.asset
   - Assets/_sg03/Card/Data/Env/abyssal_mist.asset
   - Assets/_sg03/Card/Data/Env/graveyard.asset
   - Assets/_sg03/Card/Data/Env/gright_forest.asset

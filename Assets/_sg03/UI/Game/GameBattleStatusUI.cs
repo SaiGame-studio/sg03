@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 namespace SG03.UI
 {
     // Subscribes to BattleState events and refreshes all battle-status labels
-    // (HP, Source count, Void count, NextMove) in the Game panel.
+    // (HP, Source count, Void count, NextMove, Turn) in the Game panel.
     public class GameBattleStatusUI
     {
         private readonly Func<BattleStateCtrl> getBattleStateCtrl;
@@ -16,6 +16,7 @@ namespace SG03.UI
         private Label alphaTheVoidCountLabel;
         private Label omegaTheVoidCountLabel;
         private Label nextMoveLabel;
+        private Label turnLabel;
 
         private bool eventsSubscribed;
 
@@ -39,6 +40,7 @@ namespace SG03.UI
             this.alphaTheVoidCountLabel = root.Q<Label>("AlphaTheVoidCountLabel");
             this.omegaTheVoidCountLabel = root.Q<Label>("OmegaTheVoidCountLabel");
             this.nextMoveLabel = root.Q<Label>("NextMoveLabel");
+            this.turnLabel = root.Q<Label>("TurnLabel");
         }
 
         private void SubscribeToStateEvents()
@@ -58,6 +60,7 @@ namespace SG03.UI
             this.SetBattleSourceCounts(state.AlphaTheSourceCount, state.OmegaTheSourceCount);
             this.SetBattleVoidCounts(state.AlphaTheVoidCount, state.OmegaTheVoidCount);
             this.SetNextMoveLabel(state.NextMove);
+            this.SetTurnLabel(state.Turn);
         }
 
         private void SetBattleHp(int alphaHp, int omegaHp)
@@ -82,6 +85,12 @@ namespace SG03.UI
         {
             if (this.nextMoveLabel == null) return;
             this.nextMoveLabel.text = $"Move: {move}";
+        }
+
+        private void SetTurnLabel(int turn)
+        {
+            if (this.turnLabel == null) return;
+            this.turnLabel.text = $"Turn: {turn}";
         }
 
         public void Dispose()

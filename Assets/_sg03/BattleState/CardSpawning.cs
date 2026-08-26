@@ -305,6 +305,158 @@ namespace SG03
             return null;
         }
 
+        /// <summary>
+        /// Rebuilds all battle-line holder bindings from the latest authoritative
+        /// BattleState snapshot. Client actions remain responsible for animation;
+        /// this method repairs any state/view drift after their queue is drained.
+        /// </summary>
+        public bool ReconcileLineBindingsFromBattleState()
+        {
+            if (this.battleState == null || this.deskPosition == null) return false;
+
+            Dictionary<string, Card3DCtrl> cardsById = this.FindActiveCardsByInventoryId();
+            this.ClearIncorrectLineBindings(
+                this.deskPosition.AlphaFrontLine, this.battleState.AlphaFrontLine);
+            this.ClearIncorrectLineBindings(
+                this.deskPosition.AlphaBackLine, this.battleState.AlphaBackLine);
+            this.ClearIncorrectLineBindings(
+                this.deskPosition.OmegaFrontLine, this.battleState.OmegaFrontLine);
+            this.ClearIncorrectLineBindings(
+                this.deskPosition.OmegaBackLine, this.battleState.OmegaBackLine);
+
+            bool reconciled = true;
+            reconciled &= this.BindSnapshotLine(
+                this.deskPosition.AlphaFrontLine, this.battleState.AlphaFrontLine, Owner.alpha, cardsById);
+            reconciled &= this.BindSnapshotLine(
+                this.deskPosition.AlphaBackLine, this.battleState.AlphaBackLine, Owner.alpha, cardsById);
+            reconciled &= this.BindSnapshotLine(
+                this.deskPosition.OmegaFrontLine, this.battleState.OmegaFrontLine, Owner.omega, cardsById);
+            reconciled &= this.BindSnapshotLine(
+                this.deskPosition.OmegaBackLine, this.battleState.OmegaBackLine, Owner.omega, cardsById);
+            return reconciled;
+        }
+
+        private Dictionary<string, Card3DCtrl> FindActiveCardsByInventoryId()
+        {
+            Dictionary<string, Card3DCtrl> cardsById = new Dictionary<string, Card3DCtrl>();
+            Card3DCtrl[] cards = Object.FindObjectsByType<Card3DCtrl>(
+                FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (Card3DCtrl card in cards)
+            {
+                if (card == null || string.IsNullOrEmpty(card.InventoryItemId)) continue;
+                if (!cardsById.ContainsKey(card.InventoryItemId))
+                    cardsById.Add(card.InventoryItemId, card);
+            }
+            return cardsById;
+        }
+
+        private void ClearIncorrectLineBindings(CardHolderCtrl[] holders, BattleCardSlot[] slots)
+        {
+            if (holders == null) return;
+            for (int i = 0; i < holders.Length; i++)
+            {
+                CardHolderCtrl holder = holders[i];
+                if (holder == null) continue;
+                string expectedId = i < (slots?.Length ?? 0) ? slots[i]?.inventory_item_id : null;
+                Card3DCtrl heldCard = holder.HeldCard;
+                string actualId = heldCard?.InventoryItemId;
+                if (string.Equals(expectedId ?? string.Empty, actualId ?? string.Empty,
+                    System.StringComparison.Ordinal)) continue;
+
+                this.slotOccupancy.Remove(holder.transform);
+                holder.SetCard(null);
+                if (heldCard != null && heldCard.CardHolder == holder)
+                    heldCard.AssignCardHolder(null);
+            }
+        }
+
+        private bool BindSnapshotLine(CardHolderCtrl[] holders, BattleCardSlot[] slots, Owner owner,
+            Dictionary<string, Card3DCtrl> cardsById)
+        {
+            if (holders == null) return slots == null || slots.Length == 0;
+            bool reconciled = true;
+            for (int i = 0; i < holders.Length; i++)
+            {
+                CardHolderCtrl holder = holders[i];
+                BattleCardSlot slot = i < (slots?.Length ?? 0) ? slots[i] : null;
+                if (holder == null)
+                {
+                    if (!string.IsNullOrEmpty(slot?.inventory_item_id)) reconciled = false;
+                    continue;
+                }
+                if (string.IsNullOrEmpty(slot?.inventory_item_id)) continue;
+
+                if (!cardsById.TryGetValue(slot.inventory_item_id, out Card3DCtrl card))
+                {
+                    Card3DCtrl prefab = this.ResolvePrefab();
+                    card = this.SpawnCardAt(prefab, holder.transform);
+                    if (card == null)
+                    {
+                        Debug.LogError($"[CardSpawning] Cannot reconcile {owner} {holder.HolderLink}[{i}]: " +
+                            $"card '{slot.inventory_item_id}' is missing and could not be spawned.", this.gameObject);
+                        reconciled = false;
+                        continue;
+                    }
+                    cardsById[slot.inventory_item_id] = card;
+                }
+
+                bool holderChanged = card.CardHolder != holder;
+                this.RemoveCardFromNonLineRegistries(card, slot.inventory_item_id);
+                if (holderChanged) this.RemoveFromSlotOccupancy(card);
+                this.ApplySnapshotCardData(card, slot, owner);
+                holder.SetCard(card);
+                card.AssignCardHolder(holder);
+                this.slotOccupancy[holder.transform] = card;
+                if (holderChanged || card.Location != holder.HolderLocation)
+                {
+                    card.SetMoveDuration(this.ActionMoveDuration);
+                    card.SetRotateDuration(this.ActionRotateDuration);
+                    card.MoveTo(holder.transform, holder.HolderLocation);
+                }
+            }
+            return reconciled;
+        }
+
+        private void ApplySnapshotCardData(Card3DCtrl card, BattleCardSlot slot, Owner owner)
+        {
+            card.SetOwner(owner);
+            card.SetInventoryItemId(slot.inventory_item_id);
+            string code = slot.item_definition_code_name;
+            if (!string.IsNullOrEmpty(code) && (card.CodeName != code || card.Definition == null))
+            {
+                card.SetCodeName(code);
+                CardDefinitionData definition = this.battleCardDefinitions?.GetDefinitionByCode(code);
+                this.ApplyCardFallbacks(card, slot.item_definition_name, definition);
+                card.LoadCardByCodeName(code);
+                card.SetDefinition(definition);
+            }
+            card.SetExpose(slot.expose);
+            card.SetIsTrigger(slot.trigger);
+            if ((slot.face_up || slot.expose) && card.FaceState != FaceState.FaceUp) card.FaceUp();
+        }
+
+        private void RemoveCardFromNonLineRegistries(Card3DCtrl card, string inventoryItemId)
+        {
+            this.handCardRegistry.Remove(inventoryItemId);
+            this.sourceCardRegistry.Remove(inventoryItemId);
+            this.alphaVoidCardList.Remove(card);
+            this.omegaVoidCardList.Remove(card);
+            this.alphaSourceCardQueue.Remove(card);
+            this.omegaSourceCardQueue.Remove(card);
+            this.RemoveFromOmegaHandQueue(card);
+        }
+
+        private void RemoveFromOmegaHandQueue(Card3DCtrl card)
+        {
+            if (card == null || this.omegaHandCardQueue.Count == 0) return;
+            int count = this.omegaHandCardQueue.Count;
+            for (int i = 0; i < count; i++)
+            {
+                Card3DCtrl queuedCard = this.omegaHandCardQueue.Dequeue();
+                if (queuedCard != card) this.omegaHandCardQueue.Enqueue(queuedCard);
+            }
+        }
+
         public void ClearSourceRegistry()
         {
             this.sourceCardRegistry.Clear();
