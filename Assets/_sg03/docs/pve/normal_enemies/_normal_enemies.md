@@ -5,4 +5,4 @@ Tài liệu này tổng hợp toàn bộ danh sách **Kẻ Địch Thường (No
 ## Danh sách Normal Enemies
 
 1. **[Goblin Shaman](goblin_shaman.md)** — Giấu `Totem Pulse` ở hậu tuyến, phản ứng tăng DEF và duy trì một Character úp.
-2. **[Silas](silas.md)** — Normal Enemy đang trong giai đoạn chuẩn bị chiến thuật và battle AI.
+2. **[Silas](silas.md)** — Giữ hai Goblin Shaman và Brute Call đến turn hợp lệ, sau đó kích hoạt Ability có sẵn để triệu hồi Goblin Brute từ void.

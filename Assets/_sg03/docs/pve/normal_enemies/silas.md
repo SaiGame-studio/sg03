@@ -1,8 +1,10 @@
-# Đặc tả AI Silas
+# Chiến thuật AI Silas
 
-> Trạng thái: Chuẩn bị triển khai
+> Trạng thái: Thiết kế đã xác nhận, chưa triển khai
 >
-> Phân loại: Normal Enemy
+> Phân loại tài liệu: Normal Enemy
+>
+> Entity type trong cấu hình: NPC
 >
 > Enemy key: `silas`
 >
@@ -10,186 +12,187 @@
 
 ## Tổng quan
 
-Tài liệu này là khung thiết kế và checklist tích hợp cho Normal Enemy mới **Silas**.
+Silas giữ bộ combo gồm **một `Goblin Shaman` và một `Brute Call` trên tay**, chờ đến lượt Omega hợp lệ từ turn 4 trở đi mới triển khai combo theo [Brute Call](../../cards/natureborn/goblin/abilities/brute_call.md).
 
-Repo hiện cho phép chọn `silas` trong trường Enemy của UI và đang dùng giá trị này làm mặc định. Tuy nhiên, repo chưa có card data, preset, Ability hoặc script AI riêng cho Silas.
+Việc triệu hồi bắt buộc đi qua Ability `brute_call` hiện có. AI chỉ chọn đúng source Ability và Goblin Shaman target, rồi gọi Ability pipeline; toàn bộ hiệu ứng triệu hồi do Ability xử lý.
 
-Các hành vi trong phần **Đề xuất baseline** chỉ là phương án khởi đầu để enemy có thể tham gia battle flow. Chúng không được xem là hành vi đã triển khai.
+## Cấu hình entity
 
-## Trạng thái hiện tại
+Theo cấu hình được cung cấp:
 
-| Hạng mục | Trạng thái | Ghi chú |
-| --- | --- | --- |
-| Enemy key `silas` | Đã có một phần | Đang xuất hiện trong UI chọn Enemy |
-| Phân loại Normal Enemy | Đã xác nhận | Đặt tài liệu trong danh sách Normal Enemies |
-| Card data Silas | Chưa tìm thấy | Chưa có asset Character hoặc Ability |
-| Battle deck/preset | Chưa có | Chưa có bộ bài PvE gắn với Silas |
-| `enemy_ai_silas.lua` | Chưa có | Chưa có ba handler AI |
-| Battle dispatcher | Chưa tích hợp | Hiện chỉ dispatch cho `goblin_shaman` |
-| Chiến thuật chính thức | TBD | Chưa có Ability, ưu tiên hoặc phase được duyệt |
-
-## Khung chiến thuật chính thức cần chốt
-
-Trước khi triển khai, cần xác định vai trò chiến đấu chính thức của Silas:
-
-| Nhóm quyết định | Thiết kế đã duyệt |
+| Thuộc tính | Giá trị |
 | --- | --- |
-| Vai trò chiến đấu | TBD |
-| Faction/chủng tộc | TBD |
-| Character chủ lực | TBD |
-| Ability đặc trưng | TBD |
-| Quy tắc deploy | TBD |
-| Phản ứng defend | TBD |
-| Thứ tự chọn attacker | TBD |
-| Thứ tự chọn defender | TBD |
-| Điều kiện đánh trực tiếp HP | TBD |
-| Cơ chế theo phase hoặc HP | TBD |
-| Điểm mạnh | TBD |
-| Điểm yếu/cách đối phó | TBD |
+| Name | Silas |
+| Rarity | Common |
+| Type | NPC |
+| Documentation category | Normal Enemy |
+| `choose_card_1` | `goblin_shaman` |
+| `choose_card_2` | `brute_call` |
+| `choose_card_3` | `goblin_saboteur` |
 
-Không tự suy đoán card, chỉ số hoặc Ability của Silas trước khi thiết kế gameplay được duyệt.
+Danh sách card của Silas:
 
-## Đề xuất baseline
+| Card code | Card count | Vai trò |
+| --- | ---: | --- |
+| `goblin_shaman` | 3 | Character bắt buộc cho combo |
+| `goblin_saboteur` | 3 | Character chiến đấu |
+| `skeleton` | 3 | Character chiến đấu |
+| `goblin_grunt` | 3 | Character chiến đấu |
+| `totem_pulse` | 3 | Ability hỗ trợ Goblin Shaman |
+| `brute_call` | 3 | Ability triệu hồi Goblin Brute |
+| `goblin_brute` | 3 | Character 4 sao |
+| `zombie_male` | 3 | Character chiến đấu |
+| `zombie_female` | 3 | Character chiến đấu |
+| **Tổng số card** | **27** | 9 loại card, mỗi loại 3 bản |
 
-Baseline dưới đây giúp Silas kết nối battle flow trước khi chiến thuật riêng được duyệt. Đây là đề xuất, không phải hành vi đã triển khai.
+## Quy tắc rút bài và opening hand
 
-### 1. Triển khai đội hình (`deploy`)
+Hệ thống hiện có hai khái niệm khác nhau:
 
-Đề xuất baseline:
+- `lib_battle_common.get_draw_card_count()` trả về **2**, nghĩa là số card rút thông thường mỗi lần draw là hai.
+- `init_cards.lua` hiện tạo opening hand Omega bằng ba card preset, sau đó rút thêm hai card ngẫu nhiên. Opening hand tối đa là năm card, không phải hai.
 
-- Dùng cơ chế deploy Omega dùng chung.
-- Character trong deck Silas được đưa vào `omega_front_line`.
-- Ability và các loại bài khác được đưa vào `omega_back_line`.
-- Các lá mới triển khai bắt đầu ở trạng thái úp.
-- Không ưu tiên card code cụ thể.
-- Lá không thể triển khai vì hết slot tiếp tục nằm trên tay.
+Với metadata hiện tại, ba card được bảo đảm trong opening hand là:
 
-Chữ ký handler:
+1. `goblin_shaman`
+2. `brute_call`
+3. `goblin_saboteur`
 
-```text
-deploy(state)
-  -> omega_front_line, omega_back_line, omega_hand, err
-```
+Hai card ngẫu nhiên còn lại không ảnh hưởng đến điều kiện có đủ bộ combo cơ bản.
 
-Các quyết định chiến thuật cần chốt:
+## Bộ combo phải giữ trên tay
 
-- Số Character tối đa Silas triển khai mỗi lượt.
-- Thứ tự ưu tiên Character và Ability.
-- Điều kiện lật ngửa hoặc giữ úp bài.
-- Ảnh hưởng của lượt, HP và đội hình Alpha lên deploy.
+AI phải nhận diện và reserve đúng hai card:
 
-### 2. Phản ứng phòng thủ (`defend`)
+- một `goblin_shaman`;
+- một `brute_call`.
 
-Đề xuất baseline: Silas không có phản ứng phòng thủ riêng và handler trả về `nil`.
+Trước lượt combo:
+
+- không deploy Goblin Shaman đã reserve;
+- không deploy hoặc tiêu thụ Brute Call đã reserve;
+- không dùng các card reserve làm attacker, Ability source hoặc mục đích khác;
+- luôn giữ ít nhất hai slot trống liền kề trên `omega_front_line` cho combo Brute;
+- các card không thuộc bộ reserve vẫn có thể được triển khai bằng chiến thuật thông thường.
+
+Nếu trên tay chưa đủ một `goblin_shaman` và một `brute_call`, AI tiếp tục giữ những thành phần đã có và chờ lượt sau. AI không được tạo card giả, sao chép card hoặc lấy card trực tiếp từ source để hoàn thiện combo.
+
+## Điều kiện kích hoạt combo
+
+Combo chỉ được thực hiện khi đồng thời thỏa mãn:
+
+1. Đang là lượt hành động của Omega/Silas.
+2. Turn hiện tại từ 4 trở đi.
+3. Trên tay có đủ một `goblin_shaman` và một `brute_call` đã reserve.
+4. `omega_front_line` có ít nhất hai slot trống liền kề đã được reserve: một cho Goblin Shaman được chọn và một cho Goblin Brute.
+5. `omega_back_line` có vị trí cho Brute Call.
+6. Mọi điều kiện kích hoạt của [Brute Call](../../cards/natureborn/goblin/abilities/brute_call.md) đều được thỏa mãn.
+
+Nếu chưa đủ điều kiện, AI hoãn combo.
+
+## Luồng triển khai combo
+
+### Bước 1: triển khai Goblin Shaman được chọn
+
+- Đưa một `goblin_shaman` đã reserve từ `omega_hand` vào một trong hai slot trống liền kề đã giữ.
+- Giữ slot trống liền kề còn lại cho Goblin Brute.
+- Ghi client actions bằng cơ chế deploy dùng chung.
+- Không đặt Goblin Brute trực tiếp lên bàn trong bước này.
+
+### Bước 2: triển khai Brute Call
+
+- Đưa `brute_call` đã reserve từ `omega_hand` vào một slot trống của `omega_back_line`.
+- Brute Call phải nằm ở `omega_back_line`; AI Silas không đặt Ability này ở front-line.
+
+### Bước 3: kích hoạt Brute Call
+
+AI kích hoạt `Brute Call` lên Goblin Shaman đã triển khai bằng đúng luồng kích hoạt Ability tiêu chuẩn mà người chơi sử dụng.
+
+Chi tiết điều kiện, mục tiêu, hiệu ứng, tiêu thụ Ability và kết quả triệu hồi được định nghĩa duy nhất trong [Brute Call](../../cards/natureborn/goblin/abilities/brute_call.md).
+
+AI không được thêm bất kỳ hiệu ứng hoặc thao tác triệu hồi riêng nào sau khi kích hoạt; kết quả hoàn toàn do Ability tiêu chuẩn xử lý.
+
+## Deploy ngoài combo
+
+Trước khi combo được thực hiện:
+
+- bỏ qua hai card đang reserve khi quét `omega_hand`;
+- có thể deploy các Character khác vào tiền tuyến;
+- ngay khi rút được `Totem Pulse`, ưu tiên triển khai Ability này vào back-line có slot trống;
+- khi một Character của Omega đang bị tấn công, ưu tiên kích hoạt `Totem Pulse` ngay khi có thể;
+- luôn giữ ít nhất hai slot trống liền kề trên `omega_front_line`; vì hàng có năm slot, chỉ được phép để tối đa ba slot có card trước khi combo hoàn tất;
+- hai slot reserve được dành lần lượt cho Shaman được chọn và Goblin Brute, để combo có thể chạy ngay từ turn hợp lệ;
+- không được để deploy thông thường tiêu thụ hoặc ghi đè các card reserve.
+
+Sau khi combo hoàn tất, Silas có thể quay về quy tắc deploy và plan attack dùng chung.
+
+## Phản ứng phòng thủ (`defend`)
+
+Chưa có phản ứng phòng thủ riêng được yêu cầu cho Silas. Baseline:
 
 ```text
 defend(state)
-  -> err
+  -> nil
 ```
 
-Nếu Silas có Ability phòng thủ, thiết kế phải xác định:
+## Lập kế hoạch tấn công (`plan_attack`)
 
-1. Sự kiện và điều kiện kích hoạt.
-2. Ability nguồn nằm ở vùng bài nào.
-3. Cách chọn Ability và mục tiêu.
-4. Luật phá hòa khi có nhiều lựa chọn.
-5. Card hoặc tài nguyên bị tiêu thụ.
-6. Thay đổi lên `pending_attack`, `final_def`, HP hoặc battle state.
+Ngoài lượt thực hiện combo, baseline:
 
-Không sao chép `Totem Pulse` từ Goblin Shaman nếu deck Silas không có Ability tương ứng.
+- chọn Character Omega chưa kích hoạt đầu tiên, loại trừ các card đang reserve trong hand;
+- ưu tiên Character Alpha có `final_def` thấp nhất ở tiền tuyến;
+- nếu Alpha không còn Character tiền tuyến, lập kế hoạch đánh `alpha_hp`;
+- không có attacker hợp lệ thì kết thúc lượt Omega.
 
-### 3. Lập kế hoạch tấn công (`plan_attack`)
-
-Đề xuất baseline:
-
-- Dùng luật lập kế hoạch Omega dùng chung.
-- Chọn Character Omega chưa kích hoạt đầu tiên.
-- Ưu tiên mục tiêu tiền tuyến Alpha có `final_def` thấp nhất.
-- Khi tiền tuyến Alpha không còn Character, lập kế hoạch đánh trực tiếp `alpha_hp`.
-- Không có attacker hợp lệ thì kết thúc lượt Omega.
-
-```text
-plan_attack(state)
-  -> err
-```
-
-Các quyết định tạo bản sắc cho Silas:
-
-- Silas ưu tiên mục tiêu yếu, mạnh, đã lộ hay đang úp.
-- Silas có bảo tồn thông tin của card úp không.
-- Silas có thay đổi chiến thuật theo HP hoặc số lượt không.
-- Silas tạo một hay nhiều hành động trong `state.omega_planning`.
-
-## Cây quyết định baseline
+## Cây quyết định
 
 ```mermaid
 flowchart TD
-    A[Khởi tạo Normal Enemy Silas] --> B[Khởi tạo preset và deck]
-    B --> C[Deploy bằng baseline hoặc chiến thuật riêng]
-    C --> D[Chạy defend khi có điều kiện]
-    D --> E{Có Character Omega chưa kích hoạt?}
-    E -- Không --> F[Kết thúc lượt Omega]
-    E -- Có --> G{Alpha còn Character tiền tuyến?}
-    G -- Có --> H[Chọn mục tiêu có DEF thấp nhất]
-    G -- Không --> I[Lập kế hoạch đánh alpha_hp]
-    H --> J[Ghi action vào omega_planning]
-    I --> J
+    A[Bắt đầu lượt Silas] --> B{Đủ 1 Shaman và 1 Brute Call trên tay?}
+    B -- Không --> C[Giữ các mảnh combo và chơi card khác]
+    B -- Có --> D{state.turn >= 4?}
+    D -- Không --> C
+    D -- Có --> E{Đủ điều kiện theo Brute Call?}
+    E -- Không --> F[Hoãn combo, không tiêu thụ Brute Call]
+    E -- Có --> G[Deploy Shaman vào 1 trong 2 slot reserve]
+    G --> H[Deploy Brute Call vào back line]
+    H --> I[Kích hoạt Brute Call như người chơi]
+    I --> J[Ability tự xử lý hiệu ứng]
 ```
 
-## Tích hợp battle bắt buộc
+## Blocker cần xử lý trước khi code AI
 
-### Dispatcher
+### 1. Chuẩn bị battle state cho Brute Call
 
-`lib_battle_entity_ai.lua` cần nhận `state.metadata.enemy_entity_key == "silas"` và dispatch:
+Battle state của Omega phải được chuẩn bị để thỏa toàn bộ điều kiện của [Brute Call](../../cards/natureborn/goblin/abilities/brute_call.md) trước lượt combo. AI Silas không được tự thêm logic thay thế các điều kiện này.
 
-- `enemy_ai_silas.deploy(state)`
-- `enemy_ai_silas.defend(state)`
-- `enemy_ai_silas.plan_attack(state)`
+## Tích hợp bắt buộc
 
-Không được fallback sang chiến thuật Goblin Shaman.
-
-### Runtime libraries
-
-Kiểm tra các regular script đi qua dispatcher và thêm directive đầu file khi cần:
-
-- `init_cards.lua`
-- `alpha_card_active.lua`
-- `alpha_turn_end.lua`
-- `alpha_defending_end.lua`
-
-```lua
-require "enemy_ai_silas"
-```
-
-Theo contract ss-go, không dùng `require(...)` và không đặt directive `require` trong library script.
-
-### Dữ liệu trận đấu
-
-Cần chuẩn bị:
-
-- Entity/preset dùng enemy key `silas`.
-- Deck/preset Omega thuộc về Silas.
-- Card definition cho từng Character và Ability trong deck.
-- `item_defs` đầy đủ metadata type và base stats mà AI sử dụng.
-- Script definition `enemy_ai_silas` được đăng ký là library.
+- Tạo library `enemy_ai_silas.lua` với `deploy`, `defend`, `plan_attack`.
+- Thêm nhánh `silas` vào `lib_battle_entity_ai.lua`.
+- Load `enemy_ai_silas` trong các regular battle script đi qua dispatcher.
+- Bảo đảm battle state thỏa điều kiện của [Brute Call](../../cards/natureborn/goblin/abilities/brute_call.md).
+- Kích hoạt Brute Call qua cùng luồng Ability chuẩn như người chơi; không nhân bản thuật toán Ability trong AI.
 
 ## Kịch bản kiểm thử tối thiểu
 
-1. Chọn `silas` trong UI và khởi tạo đúng Normal Enemy.
-2. Dispatcher gọi handler Silas, không gọi Goblin Shaman.
-3. Deck/preset và toàn bộ card definition của Silas được tải đầy đủ.
-4. Deploy xử lý đúng tay trống, hàng trống và hàng đầy.
-5. Baseline `defend` không thay đổi state.
-6. `plan_attack` chọn attacker và defender theo quy tắc xác định.
-7. Không có attacker thì Omega kết thúc lượt.
-8. Client actions không làm lộ card đang úp.
-9. Mọi lỗi từ Ability hoặc helper được truyền ra.
+1. Mỗi card trong danh sách entity tạo đúng ba bản trong `omega_the_source`.
+2. Mỗi draw thông thường lấy tối đa hai card.
+3. Opening hand lấy ba card preset và hai card ngẫu nhiên theo code hiện tại.
+4. Trước turn 4, Goblin Shaman và Brute Call đã reserve không bị deploy.
+5. Thiếu Goblin Shaman hoặc Brute Call thì AI chờ, không tự lấy card từ source.
+6. Chưa đủ điều kiện theo [Brute Call](../../cards/natureborn/goblin/abilities/brute_call.md) thì AI hoãn combo.
+7. Trước combo, AI duy trì hai slot trống liền kề ở tiền tuyến.
+8. Từ `state.turn >= 4`, khi đủ card và slot, AI deploy một Shaman vào slot reserve rồi đặt Brute Call.
+9. Brute Call được kích hoạt qua cùng luồng Ability chuẩn như người chơi.
+10. Kết quả combo tuân theo [Brute Call](../../cards/natureborn/goblin/abilities/brute_call.md), không có thao tác triệu hồi riêng trong AI.
 
 ## Điều kiện hoàn thành
 
-Tài liệu chỉ chuyển sang trạng thái **Đã triển khai** khi:
+Silas chỉ được chuyển sang trạng thái **Đã triển khai** khi:
 
-- vai trò chiến đấu và chiến thuật Silas đã được duyệt;
-- card data, deck/preset và Ability cần thiết đã tồn tại;
-- AI, dispatcher, runtime libraries và test đã hoàn tất;
-- tài liệu mô tả hành vi thực tế thay vì baseline đề xuất.
+- battle state đáp ứng điều kiện của Brute Call;
+- reserve logic giữ đúng một Shaman và một Brute Call;
+- combo chỉ chạy ở lượt hợp lệ từ turn 4;
+- việc triệu hồi hoàn toàn đi qua Ability `brute_call` hiện có;
+- dispatcher, runtime libraries và toàn bộ test combo đã hoàn tất.
