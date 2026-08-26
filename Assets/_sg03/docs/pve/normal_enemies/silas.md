@@ -1,6 +1,6 @@
 # Chiến thuật AI Silas
 
-> Trạng thái: Thiết kế đã xác nhận, chưa triển khai
+> Trạng thái: Đã triển khai AI
 >
 > Phân loại tài liệu: Normal Enemy
 >
