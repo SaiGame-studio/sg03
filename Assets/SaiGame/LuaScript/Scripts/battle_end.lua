@@ -16,7 +16,6 @@ local load_session       -- forward declaration
 local determine_winner -- forward declaration
 local end_session      -- forward declaration
 local open_drop_packs  -- forward declaration
-local open_win_game_pack -- forward declaration
 
 -- Add granted items to the reward list, combining matching item definitions.
 local function add_granted_items(item_list, item_map, items)
@@ -83,15 +82,8 @@ local function main()
         local drops, drop_err = open_drop_packs(session_id, state)
         if drop_err ~= nil then output.error = drop_err ; return end
 
-        -- Award the battle-win pack after entity drops. This reward API intentionally
-        -- bypasses the pack's key requirements; the winning battle session is the
-        -- server-authoritative condition, and session_id makes retries idempotent.
-        local win_pack, win_pack_err = open_win_game_pack(session_id)
-        if win_pack_err ~= nil then output.error = win_pack_err ; return end
-
-        -- Combine entity drops and the winning pack into one client reward list.
-        local flat_drops, item_map = process_drops(drops)
-        add_granted_items(flat_drops, item_map, win_pack.items)
+        -- Return only rewards declared by the defeated enemy's drop_pack_ids.
+        local flat_drops = process_drops(drops)
         output.drops = flat_drops
 
         -- Log drops/rewards
@@ -180,17 +172,6 @@ open_drop_packs = function(session_id, state)
         }
     end
     return drops, nil
-end
-
-open_win_game_pack = function(session_id)
-    local result, err = game.open_reward_gacha_pack_by_code_name(
-        "win_game_pack",
-        "battle-win-game-pack:" .. session_id
-    )
-    if err ~= nil then
-        return nil, "failed to open gacha pack 'win_game_pack': " .. tostring(err)
-    end
-    return result, nil
 end
 
 main()

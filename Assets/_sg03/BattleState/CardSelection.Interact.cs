@@ -41,8 +41,22 @@ namespace SG03
 
         private void BeginTargeting()
         {
+            this.ClearHealthPreviewTarget();
             this.targetingSource = this.selected;
             this.targeted = null;
+            if (this.IsBeginningAlphaAttack())
+            {
+                this.battleStateCtrl?.CardSpawning?.ClearCharacterHealthPreviews(Owner.omega);
+            }
+        }
+
+        private bool IsBeginningAlphaAttack()
+        {
+            if (this.targetingSource == null || !this.targetingSource.IsCharacter()) return false;
+            if (this.targetingSource.CardOwner != Owner.alpha) return false;
+
+            NextMoveType nextMove = this.battleStateCtrl?.BattleState?.NextMove ?? NextMoveType.unknown;
+            return nextMove == NextMoveType.alpha_turn || nextMove == NextMoveType.alpha_draw;
         }
 
         private void CancelTargeting()
