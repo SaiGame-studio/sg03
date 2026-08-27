@@ -398,6 +398,13 @@ namespace SG03
             this.SetHealth(this.GetTotalDamageReceived(), this.GetFinalDef());
         }
 
+        /// <summary>Refreshes the card's resolved health values without clearing its pending preview.</summary>
+        public void RefreshHealthFromBattleState()
+        {
+            if (!this.TryGetBattleCardSlot(out _)) return;
+            this.SetHealth(this.GetTotalDamageReceived(), this.GetFinalDef());
+        }
+
         // This UI is returned explicitly through ObjectPool, so it needs no Despawn component.
         protected override void LoadDespawn()
         {

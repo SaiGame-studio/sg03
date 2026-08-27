@@ -8191,35 +8191,35 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[12]'
-      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/animate_dead.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Common/zombie_female.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[13]'
-      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/king_return.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Common/zombie_male.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[14]'
-      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/skeleton_shield.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/animate_dead.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[15]'
-      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/hellscythe.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/king_return.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[16]'
-      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/skeleton.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/abilities/skeleton_shield.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[17]'
-      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/skeleton_king.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/hellscythe.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[18]'
-      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_female.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/skeleton.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[19]'
-      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_male.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/skeleton_king.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[20]'
