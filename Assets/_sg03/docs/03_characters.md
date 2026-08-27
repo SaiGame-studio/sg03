@@ -15,14 +15,14 @@ Nằm tại thư mục [`cards/darkborn/undead/`](cards/darkborn/undead/)
 
 - [Hellscythe](cards/darkborn/undead/Ria/hellscythe.md) — Số sao: 0
 - [Skeleton](cards/darkborn/undead/Ria/skeleton.md) — Số sao: 0
-- [Zombie Male](cards/darkborn/undead/common/zombie_male.md) — Số sao: 1, nhóm Common
-- [Zombie Female](cards/darkborn/undead/common/zombie_female.md) — Số sao: 1, nhóm Common
+- [Black Zombie](cards/darkborn/undead/common/zombie_male.md) — Số sao: 1
+- [Purple Zombie](cards/darkborn/undead/common/zombie_female.md) — Số sao: 1
 
 ### Demon
 
 Nằm tại thư mục [`cards/darkborn/demon/`](cards/darkborn/demon/)
 
-- [Kira](cards/darkborn/demon/common/kira.md) — Số sao: 1, nhóm Common
+- [Kira](cards/darkborn/demon/common/kira.md) — Số sao: 1
 - [Xena I](cards/darkborn/demon/xena/xena1.md) — Số sao: 1
 - [Xena II](cards/darkborn/demon/xena/xena2.md) — Số sao: 2
 - [Xena III](cards/darkborn/demon/xena/xena3.md) — Số sao: 3

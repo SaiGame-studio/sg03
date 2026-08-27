@@ -25,6 +25,7 @@ Paths above are relative to `Assets/_sg03/docs/`. Existing docs are authoritativ
 - Use lowercase `snake_case` filenames/code names unless that content family differs.
 - Put shared cards in `common/`; character-specific cards under that character.
 - Copy the nearest doc's fields, ordering, headings, and link style.
+- In `03_characters.md`, each card entry must contain only the linked name and star count; append nothing else.
 - Derive stats from `05_card_star_scaling.md`; apply requested minima/maxima literally within the star tier.
 - Keep scope narrow, links relative, and text UTF-8.
 
