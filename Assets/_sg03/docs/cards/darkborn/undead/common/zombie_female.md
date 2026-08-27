@@ -15,4 +15,4 @@
 
 Purple Zombie từng là một chiến binh trẻ chiến đấu bên cạnh anh trai. Khi trận tuyến sụp đổ, cô từ chối bỏ lại anh và tiếp tục chiến đấu cho đến khi cả hai cùng tử trận trên chiến trường.
 
-Thi thể của cô bị một phù thủy tà thuật mang đi cùng Black Zombie và biến thành một phần trong những thí nghiệm hồi sinh người chết. Dù ký ức chỉ còn là những mảnh vụn, cô vẫn nhận ra người anh của mình, luôn đi sát phía sau hắn và tìm mọi cách quay lại bên hắn khi hai người bị chia cắt.
+Thi thể của cô bị một phù thủy tà thuật mang đi cùng Silver Zombie và biến thành một phần trong những thí nghiệm hồi sinh người chết. Dù ký ức chỉ còn là những mảnh vụn, cô vẫn nhận ra người anh của mình, luôn đi sát phía sau hắn và tìm mọi cách quay lại bên hắn khi hai người bị chia cắt.

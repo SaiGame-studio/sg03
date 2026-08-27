@@ -15,7 +15,7 @@ Nằm tại thư mục [`cards/darkborn/undead/`](cards/darkborn/undead/)
 
 - [Hellscythe](cards/darkborn/undead/Ria/hellscythe.md) — Số sao: 0
 - [Skeleton](cards/darkborn/undead/Ria/skeleton.md) — Số sao: 0
-- [Black Zombie](cards/darkborn/undead/common/zombie_male.md) — Số sao: 1
+- [Silver Zombie](cards/darkborn/undead/common/zombie_male.md) — Số sao: 1
 - [Purple Zombie](cards/darkborn/undead/common/zombie_female.md) — Số sao: 1
 
 ### Demon

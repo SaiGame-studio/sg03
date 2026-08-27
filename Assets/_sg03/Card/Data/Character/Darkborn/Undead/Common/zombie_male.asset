@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f9cbdcc53c1dd447ae715e2d0f04f14, type: 3}
-  m_Name: zombie_female
+  m_Name: zombie_male
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardData
   frameTexture: {fileID: 0}
-  characterTexture: {fileID: 2800000, guid: f3da46e627f28944d8612e21b9c6cad4, type: 3}
+  characterTexture: {fileID: 2800000, guid: 990e34102ab30254695ac3b1ed941036, type: 3}
   backTexture: {fileID: 0}

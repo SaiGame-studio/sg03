@@ -81,7 +81,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3fe1da2b2c760aa4680679499fce77fd
-    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_female.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Common/zombie_female.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -196,7 +196,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d7b3a1d2f007ace4e86c6b864f3c33b7
-    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/zombie_male.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Common/zombie_male.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
