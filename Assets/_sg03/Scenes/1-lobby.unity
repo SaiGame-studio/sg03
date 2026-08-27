@@ -1653,6 +1653,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1086256998}
+    - target: {fileID: 811396000192289789, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
+      propertyPath: reviewCamera
+      value:
+      objectReference: {fileID: 650371474}
     - target: {fileID: 8055231946860678055, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

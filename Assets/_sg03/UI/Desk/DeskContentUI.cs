@@ -1,4 +1,5 @@
 using SaiGame.Services;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace SG03.UI
@@ -7,6 +8,8 @@ namespace SG03.UI
     // Manages navigation between the list panel and the detail panel.
     public class DeskContentUI
     {
+        private const float ReviewDragThreshold = 8f;
+
         private readonly VisualElement deskRoot;
         private readonly VisualElement listPanel;
         private readonly ScrollView deskListView;
@@ -21,7 +24,9 @@ namespace SG03.UI
         private readonly DeskList list;
         private readonly DeskDetailUI detailUI;
         private VisualElement dimLayer;
-        private Button dimCloseBtn;
+        private Vector2 reviewPointerDownPosition;
+        private int reviewPointerId = -1;
+        private bool isReviewPointerDragging;
 
         public event System.Action OnCardViewerShown;
         public event System.Action OnCardViewerHidden;
@@ -33,7 +38,6 @@ namespace SG03.UI
         {
             this.deskRoot         = root.Q("DeskRoot");
             this.dimLayer         = this.deskRoot?.Q("DimLayer");
-            this.dimCloseBtn      = this.deskRoot?.Q<Button>("DimCloseBtn");
             this.listPanel        = root.Q("ListPanel");
             this.deskListView     = root.Q<ScrollView>("DeskList");
             this.emptyState       = root.Q("EmptyState");
@@ -58,8 +62,12 @@ namespace SG03.UI
                 this.OnCardViewRequested?.Invoke(item);
             };
 
-            if (this.dimCloseBtn != null)
-                this.dimCloseBtn.RegisterCallback<ClickEvent>(_ => this.OnDimLayerClicked());
+            if (this.dimLayer != null)
+            {
+                this.dimLayer.RegisterCallback<PointerDownEvent>(this.OnReviewPointerDown, TrickleDown.TrickleDown);
+                this.dimLayer.RegisterCallback<PointerMoveEvent>(this.OnReviewPointerMove, TrickleDown.TrickleDown);
+                this.dimLayer.RegisterCallback<PointerUpEvent>(this.OnReviewPointerUp, TrickleDown.TrickleDown);
+            }
 
             if (this.newDeskBtn != null)
                 this.newDeskBtn.RegisterCallback<ClickEvent>(_ => this.ShowCreateForm());
@@ -101,6 +109,37 @@ namespace SG03.UI
         {
             this.HideDimLayer();
             this.OnCardViewerHidden?.Invoke();
+        }
+
+        private void OnReviewPointerDown(PointerDownEvent evt)
+        {
+            if (evt.button != 0) return;
+
+            this.reviewPointerId           = evt.pointerId;
+            this.reviewPointerDownPosition = evt.position;
+            this.isReviewPointerDragging   = false;
+        }
+
+        private void OnReviewPointerMove(PointerMoveEvent evt)
+        {
+            if (evt.pointerId != this.reviewPointerId) return;
+
+            Vector2 currentPointerPosition = evt.position;
+            Vector2 pointerDelta = currentPointerPosition - this.reviewPointerDownPosition;
+            if (pointerDelta.sqrMagnitude < ReviewDragThreshold * ReviewDragThreshold) return;
+
+            this.isReviewPointerDragging = true;
+        }
+
+        private void OnReviewPointerUp(PointerUpEvent evt)
+        {
+            if (evt.button != 0 || evt.pointerId != this.reviewPointerId) return;
+
+            bool shouldCloseReview = !this.isReviewPointerDragging;
+            this.reviewPointerId         = -1;
+            this.isReviewPointerDragging = false;
+
+            if (shouldCloseReview) this.OnDimLayerClicked();
         }
 
         public void RequestCloseViewerFromDimLayer()

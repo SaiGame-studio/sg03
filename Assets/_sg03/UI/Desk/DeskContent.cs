@@ -107,6 +107,8 @@ namespace SG03.UI
         // ─── Private state ────────────────────────────────────────────────────────
 
         private DeskContentUI ui;
+        private bool isCardViewerClosing;
+        private Action cardViewerClosedContinuation;
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
@@ -131,11 +133,7 @@ namespace SG03.UI
 
             ui = new DeskContentUI(content);
             ui.OnCardViewerShown   += () => OnCardViewerShown?.Invoke();
-            ui.OnCardViewerHidden  += () =>
-            {
-                this.cardReviewCtrl?.Hide();
-                OnCardViewerHidden?.Invoke();
-            };
+            ui.OnCardViewerHidden  += this.HandleCardViewerHidden;
             ui.OnCardViewRequested += item =>
             {
                 ItemDefinitionData definition = item?.definition;
@@ -164,6 +162,52 @@ namespace SG03.UI
             if (this.ui == null) return;
 
             this.ui.RequestCloseViewerFromDimLayer();
+        }
+
+        /// <summary>
+        /// Closes the active card review and invokes <paramref name="continuation"/>
+        /// only after the card has finished returning to its origin position.
+        /// </summary>
+        public void CloseCardViewerBefore(Action continuation)
+        {
+            if (this.isCardViewerClosing)
+            {
+                this.cardViewerClosedContinuation = continuation;
+                return;
+            }
+
+            if (this.ui == null || !this.ui.IsDimLayerVisible)
+            {
+                continuation?.Invoke();
+                return;
+            }
+
+            this.cardViewerClosedContinuation = continuation;
+            this.isCardViewerClosing = true;
+            this.ui.RequestCloseViewerFromDimLayer();
+        }
+
+        private void HandleCardViewerHidden()
+        {
+            this.isCardViewerClosing = true;
+
+            if (this.cardReviewCtrl == null)
+            {
+                this.CompleteCardViewerHide();
+                return;
+            }
+
+            this.cardReviewCtrl.Hide(this.CompleteCardViewerHide);
+        }
+
+        private void CompleteCardViewerHide()
+        {
+            this.isCardViewerClosing = false;
+            OnCardViewerHidden?.Invoke();
+
+            Action continuation = this.cardViewerClosedContinuation;
+            this.cardViewerClosedContinuation = null;
+            continuation?.Invoke();
         }
     }
 }
