@@ -1,3 +1,4 @@
+using System;
 using DG.Tweening;
 using UnityEngine;
 
@@ -38,6 +39,22 @@ namespace SG03
 
         /// <summary>Returns the card to its origin position with spin animation.</summary>
         public void Hide() => this.reviewMovement.Hide();
+
+        /// <summary>
+        /// Returns the card to its origin position, then invokes
+        /// <paramref name="onComplete"/> after the hide animation finishes.
+        /// </summary>
+        public void Hide(Action onComplete)
+        {
+            if (this.reviewMovement == null)
+            {
+                onComplete?.Invoke();
+                return;
+            }
+
+            Sequence hideSequence = this.reviewMovement.Hide();
+            if (onComplete != null) hideSequence.OnComplete(onComplete.Invoke);
+        }
 
         /// <summary>
         /// Shows the card with the given <paramref name="codeName"/>.

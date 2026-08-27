@@ -400,6 +400,11 @@ MonoBehaviour:
   duration: 0.5
   ease: 6
   rotateSpeed: 0.5
+  reviewCamera: {fileID: 0}
+  zoomStep: 1
+  minCameraDistance: 8
+  maxCameraDistance: 22
+  panSpeed: 0.01
 --- !u!114 &5472777951089986173
 MonoBehaviour:
   m_ObjectHideFlags: 0

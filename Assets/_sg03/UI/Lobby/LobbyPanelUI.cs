@@ -260,13 +260,16 @@ namespace SG03.UI
             this.homeTab    = root.Q<Button>("HomeTab");
             this.shopTab    = root.Q<Button>("ShopTab");
             this.questTab   = root.Q<Button>("QuestTab");
-            this.homeTab?.RegisterCallback<ClickEvent>(_ => this.OnTopTabClicked(this.homeTab));
-            this.shopTab?.RegisterCallback<ClickEvent>(_ => this.OnShopTabClicked());
+            this.homeTab?.RegisterCallback<ClickEvent>(_ =>
+                this.RunAfterCardViewerHidden(() => this.OnTopTabClicked(this.homeTab)));
+            this.shopTab?.RegisterCallback<ClickEvent>(_ =>
+                this.RunAfterCardViewerHidden(this.OnShopTabClicked));
 
             // Quest tab opens the panel with Main Quest selected.
             if (this.questTab != null)
             {
-                this.questTab.RegisterCallback<ClickEvent>(_ => this.OnQuestTabClicked());
+                this.questTab.RegisterCallback<ClickEvent>(_ =>
+                    this.RunAfterCardViewerHidden(this.OnQuestTabClicked));
             }
 
             // Bottom buttons
@@ -275,10 +278,14 @@ namespace SG03.UI
             this.btnInventory = root.Q<Button>("BtnInventory");
             this.btnMailbox   = root.Q<Button>("BtnMailbox");
 
-            this.btnPlay?.RegisterCallback<ClickEvent>(_ => this.OnBottomButtonClicked(this.btnPlay, this.OnPlayClicked));
-            this.btnDesk?.RegisterCallback<ClickEvent>(_ => this.OnBottomButtonClicked(this.btnDesk, this.OnDeskClicked));
-            this.btnInventory?.RegisterCallback<ClickEvent>(_ => this.OnBottomButtonClicked(this.btnInventory, this.OnInventoryClicked));
-            this.btnMailbox?.RegisterCallback<ClickEvent>(_ => this.OnBottomButtonClicked(this.btnMailbox, this.OnMailboxClicked));
+            this.btnPlay?.RegisterCallback<ClickEvent>(_ => this.RunAfterCardViewerHidden(
+                () => this.OnBottomButtonClicked(this.btnPlay, this.OnPlayClicked)));
+            this.btnDesk?.RegisterCallback<ClickEvent>(_ => this.RunAfterCardViewerHidden(
+                () => this.OnBottomButtonClicked(this.btnDesk, this.OnDeskClicked)));
+            this.btnInventory?.RegisterCallback<ClickEvent>(_ => this.RunAfterCardViewerHidden(
+                () => this.OnBottomButtonClicked(this.btnInventory, this.OnInventoryClicked)));
+            this.btnMailbox?.RegisterCallback<ClickEvent>(_ => this.RunAfterCardViewerHidden(
+                () => this.OnBottomButtonClicked(this.btnMailbox, this.OnMailboxClicked)));
 
             // Player name (top-right)
             this.playerNameLabel = root.Q<Label>("PlayerNameLabel");
@@ -287,8 +294,10 @@ namespace SG03.UI
             this.btnCancelQuit = root.Q<Button>("BtnCancelQuit");
             this.btnConfirmQuit = root.Q<Button>("BtnConfirmQuit");
             this.quitConfirmOverlay = root.Q("QuitConfirmOverlay");
-            this.btnLogout?.RegisterCallback<ClickEvent>(_ => this.OnLogoutClicked());
-            this.btnQuitGame?.RegisterCallback<ClickEvent>(_ => this.ShowQuitConfirmation());
+            this.btnLogout?.RegisterCallback<ClickEvent>(_ =>
+                this.RunAfterCardViewerHidden(this.OnLogoutClicked));
+            this.btnQuitGame?.RegisterCallback<ClickEvent>(_ =>
+                this.RunAfterCardViewerHidden(this.ShowQuitConfirmation));
             this.btnCancelQuit?.RegisterCallback<ClickEvent>(_ => this.HideQuitConfirmation());
             this.btnConfirmQuit?.RegisterCallback<ClickEvent>(_ => this.QuitGame());
             this.RefreshPlayerName();
@@ -416,6 +425,17 @@ namespace SG03.UI
                 tab?.RemoveFromClassList("lobby-tab--active");
 
             action?.Invoke();
+        }
+
+        private void RunAfterCardViewerHidden(System.Action action)
+        {
+            if (this.deskContentBehaviour == null)
+            {
+                action?.Invoke();
+                return;
+            }
+
+            this.deskContentBehaviour.CloseCardViewerBefore(action);
         }
 
         private void ClearBottomButtonSelection()

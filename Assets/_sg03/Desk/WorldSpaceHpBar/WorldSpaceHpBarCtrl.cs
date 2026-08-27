@@ -55,6 +55,7 @@ namespace SG03
         private VisualElement healthPreview;
         private VisualElement root;
         private VisualElement track;
+        private VisualElement healthLabelRow;
         private Label healthLabel;
         private Vector3 desiredWorldScale;
         private bool hasDesiredWorldScale;
@@ -473,6 +474,7 @@ namespace SG03
             this.LoadUiElement(ref this.track, uiRoot, "HealthTrack");
             this.LoadUiElement(ref this.fill, uiRoot, "HealthFill");
             this.LoadUiElement(ref this.healthPreview, uiRoot, "HealthPreview");
+            this.LoadUiElement(ref this.healthLabelRow, uiRoot, "HealthLabelRow");
             this.LoadHealthLabel(uiRoot);
         }
 
@@ -482,6 +484,7 @@ namespace SG03
             this.healthPreview = null;
             this.root = null;
             this.track = null;
+            this.healthLabelRow = null;
             this.healthLabel = null;
         }
 
@@ -581,11 +584,11 @@ namespace SG03
 
         private void RefreshHealthLabel()
         {
-            if (this.healthLabel == null) this.BindUi();
-            if (this.healthLabel == null) return;
+            if (this.healthLabelRow == null || this.healthLabel == null) this.BindUi();
+            if (this.healthLabelRow == null || this.healthLabel == null) return;
 
             // Keep the label in the UI layout when hidden so the HP bar never changes position.
-            this.healthLabel.style.visibility = this.miniMode ? Visibility.Hidden : Visibility.Visible;
+            this.healthLabelRow.style.visibility = this.miniMode ? Visibility.Hidden : Visibility.Visible;
             if (this.ShouldShowFinalDefOnly())
             {
                 this.healthLabel.text = $"{Mathf.CeilToInt(this.maxHealth)}";
@@ -615,12 +618,16 @@ namespace SG03
                 this.track.style.borderLeftWidth = this.borderThickness;
             }
 
+            if (this.healthLabelRow != null)
+            {
+                this.healthLabelRow.style.width = this.barWidth;
+                this.healthLabelRow.style.height = this.barHeight;
+                this.healthLabelRow.style.left = this.healthLabelOffset.x;
+                this.healthLabelRow.style.top = this.healthLabelOffset.y;
+            }
+
             if (this.healthLabel != null)
             {
-                this.healthLabel.style.width = this.barWidth;
-                this.healthLabel.style.height = this.barHeight;
-                this.healthLabel.style.left = this.healthLabelOffset.x;
-                this.healthLabel.style.top = this.healthLabelOffset.y;
                 this.healthLabel.style.fontSize = this.healthLabelFontSize;
             }
         }

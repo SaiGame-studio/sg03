@@ -1,4 +1,5 @@
 using DG.Tweening;
+using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,7 +11,7 @@ namespace SG03
     /// Uses DOTween for smooth movement.
     /// </summary>
     [AddComponentMenu("SG03/Card/Card Review Movement")]
-    public class CardReviewMovement : MonoBehaviour
+    public class CardReviewMovement : SaiBehaviour
     {
         [Header("Show")]
         [Tooltip("Distance (world units) to move upward along the Y axis.")]
@@ -36,19 +37,65 @@ namespace SG03
         [Tooltip("Degrees per pixel of horizontal mouse drag while the card is shown.")]
         [SerializeField] private float rotateSpeed = 0.5f;
 
+        [Header("Zoom")]
+        [Tooltip("Camera used to calculate near/far movement for the reviewed card.")]
+        [SerializeField] private Camera reviewCamera;
+
+        [Tooltip("World-space distance moved per mouse-wheel step.")]
+        [SerializeField] private float zoomStep = 1f;
+
+        [Tooltip("Closest distance the reviewed card may reach from the camera.")]
+        [SerializeField] private float minCameraDistance = 8f;
+
+        [Tooltip("Farthest distance the reviewed card may reach from the camera.")]
+        [SerializeField] private float maxCameraDistance = 22f;
+
+        [Header("Pan")]
+        [Tooltip("World-space distance moved per pixel while dragging with the middle or right mouse button.")]
+        [SerializeField] private float panSpeed = 0.01f;
+
         private Vector2 lastMousePos;
+        private Vector2 lastPanMousePos;
+        private bool isShowAnimationPlaying;
 
         // ─── Unity lifecycle ──────────────────────────────────────────────────────
 
-        private void Start()
+        protected override void LoadComponents()
         {
-            originPosition = transform.position;
-            isShown = false;
+            base.LoadComponents();
+            this.LoadReviewCamera();
         }
 
-        private void Update() => this.HandleRotation();
+        private void LoadReviewCamera()
+        {
+            if (this.reviewCamera != null) return;
+            this.reviewCamera = Camera.main;
+            Debug.LogWarning(transform.name + ": LoadReviewCamera", gameObject);
+        }
 
-        private void OnDestroy() => transform.DOKill();
+        protected override void Start()
+        {
+            base.Start();
+            this.InitializeReviewState();
+        }
+
+        private void InitializeReviewState()
+        {
+            this.originPosition = transform.position;
+            this.isShown = false;
+            this.isShowAnimationPlaying = false;
+        }
+
+        private void Update()
+        {
+            this.HandleRotation();
+            this.HandleZoom();
+            this.HandlePan();
+        }
+
+        private void OnDestroy() => this.KillMovementTweens();
+
+        private void KillMovementTweens() => this.transform.DOKill();
 
         // ─── Rotation ─────────────────────────────────────────────────────────────
 
@@ -73,6 +120,66 @@ namespace SG03
             this.transform.Rotate(Vector3.up, -deltaX * this.rotateSpeed, Space.World);
         }
 
+        private void HandleZoom()
+        {
+            if (!this.isShown || this.isShowAnimationPlaying) return;
+            if (this.reviewCamera == null) return;
+
+            Mouse mouse = Mouse.current;
+            if (mouse == null) return;
+
+            float scrollY = mouse.scroll.ReadValue().y;
+            if (Mathf.Approximately(scrollY, 0f)) return;
+
+            Vector3 cameraPosition = this.reviewCamera.transform.position;
+            Vector3 cameraToCard = this.transform.position - cameraPosition;
+            float currentDistance = cameraToCard.magnitude;
+            if (currentDistance <= Mathf.Epsilon) return;
+
+            float minimumDistance = Mathf.Max(0.1f, this.minCameraDistance);
+            float maximumDistance = Mathf.Max(minimumDistance, this.maxCameraDistance);
+            float scrollStep = Mathf.Clamp(scrollY, -1f, 1f) * this.zoomStep;
+            float targetDistance = Mathf.Clamp(
+                currentDistance - scrollStep,
+                minimumDistance,
+                maximumDistance);
+
+            this.transform.position = cameraPosition + cameraToCard.normalized * targetDistance;
+        }
+
+        private void HandlePan()
+        {
+            if (!this.isShown || this.isShowAnimationPlaying) return;
+            if (this.reviewCamera == null) return;
+
+            Mouse mouse = Mouse.current;
+            if (mouse == null) return;
+
+            bool panButtonPressed =
+                mouse.middleButton.wasPressedThisFrame ||
+                mouse.rightButton.wasPressedThisFrame;
+            if (panButtonPressed)
+            {
+                this.lastPanMousePos = mouse.position.ReadValue();
+                return;
+            }
+
+            bool panButtonHeld =
+                mouse.middleButton.isPressed ||
+                mouse.rightButton.isPressed;
+            if (!panButtonHeld) return;
+
+            Vector2 currentMousePosition = mouse.position.ReadValue();
+            Vector2 pointerDelta = currentMousePosition - this.lastPanMousePos;
+            this.lastPanMousePos = currentMousePosition;
+
+            Transform cameraTransform = this.reviewCamera.transform;
+            Vector3 panOffset =
+                cameraTransform.right * (pointerDelta.x * this.panSpeed) +
+                cameraTransform.up * (pointerDelta.y * this.panSpeed);
+            this.transform.position += panOffset;
+        }
+
         // ─── Public API ───────────────────────────────────────────────────────────
 
         /// <summary>
@@ -84,6 +191,7 @@ namespace SG03
         {
             if (isShown) return;
             isShown = true;
+            isShowAnimationPlaying = true;
 
             Vector3 moveTarget   = transform.position + new Vector3(0f, flyUpDistance, 0f);
             Vector3 rotateTarget = transform.eulerAngles + new Vector3(0f, 360f, 0f);
@@ -92,6 +200,7 @@ namespace SG03
             Sequence seq = DOTween.Sequence();
             seq.Append(transform.DOMove(moveTarget, duration).SetEase(ease));
             seq.Join(transform.DORotate(rotateTarget, duration, RotateMode.FastBeyond360).SetEase(ease));
+            seq.OnComplete(() => this.isShowAnimationPlaying = false);
         }
 
         /// <summary>
@@ -103,6 +212,7 @@ namespace SG03
         public Sequence Hide()
         {
             isShown = false;
+            isShowAnimationPlaying = false;
 
             Vector3 rotateTarget = transform.eulerAngles + new Vector3(0f, 360f, 0f);
 

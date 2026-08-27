@@ -71,6 +71,29 @@ namespace SG03
             }
         }
 
+        /// <summary>Clears stale damage previews and refreshes HP bars when Omega ends its turn.</summary>
+        public void RefreshHpBarsAfterOmegaTurnEnd()
+        {
+            Card3DCtrl[] cards = FindObjectsByType<Card3DCtrl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (Card3DCtrl card in cards)
+            {
+                if (!card.IsCharacter()) continue;
+                card.ClearHealthPreview();
+                card.RefreshHpBarAfterTurnEnd();
+            }
+        }
+
+        /// <summary>Clears pending damage previews from active character cards owned by one side.</summary>
+        public void ClearCharacterHealthPreviews(Owner owner)
+        {
+            Card3DCtrl[] cards = FindObjectsByType<Card3DCtrl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (Card3DCtrl card in cards)
+            {
+                if (!card.IsCharacter() || card.CardOwner != owner) continue;
+                card.ClearHealthPreview();
+            }
+        }
+
         public void RefreshHpBarsForTurnChange()
         {
             Card3DCtrl[] cards = FindObjectsByType<Card3DCtrl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
