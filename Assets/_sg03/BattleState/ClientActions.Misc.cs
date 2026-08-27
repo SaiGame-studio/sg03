@@ -175,7 +175,7 @@ namespace SG03
         private Coroutine ExecuteOmegaEndTurn()
         {
             this.cardSelection?.ResetCharDeployCount();
-            this.cardSpawning?.RefreshHpBarsAfterTurnEnd();
+            this.cardSpawning?.RefreshHpBarsAfterOmegaTurnEnd();
             return null;
         }
 
