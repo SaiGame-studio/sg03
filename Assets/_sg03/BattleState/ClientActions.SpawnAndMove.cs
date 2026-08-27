@@ -144,7 +144,14 @@ namespace SG03
 
         private IEnumerator AlphaVoidToFrontLineRoutine(string inventoryItemId, int slotIndex)
         {
-            Card3DCtrl card = this.cardSpawning?.MoveAlphaVoidToFrontLine(inventoryItemId, slotIndex);
+            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
+            if (card != null)
+            {
+                card.FaceDownUnknown();
+                yield return this.StartCoroutine(this.WaitForCard(card));
+            }
+
+            card = this.cardSpawning?.MoveAlphaVoidToFrontLine(inventoryItemId, slotIndex);
             if (card == null) yield break;
             yield return this.StartCoroutine(this.WaitForCard(card));
             this.cardSpawning?.SettleAlphaVoidInFrontLine(card, inventoryItemId, slotIndex);
@@ -159,7 +166,14 @@ namespace SG03
 
         private IEnumerator OmegaVoidToFrontLineRoutine(string inventoryItemId, int slotIndex)
         {
-            Card3DCtrl card = this.cardSpawning?.MoveOmegaVoidToFrontLine(inventoryItemId, slotIndex);
+            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
+            if (card != null)
+            {
+                card.FaceDownUnknown();
+                yield return this.StartCoroutine(this.WaitForCard(card));
+            }
+
+            card = this.cardSpawning?.MoveOmegaVoidToFrontLine(inventoryItemId, slotIndex);
             if (card == null) yield break;
             yield return this.StartCoroutine(this.WaitForCard(card));
             this.cardSpawning?.SettleOmegaVoidInFrontLine(card, inventoryItemId, slotIndex);
