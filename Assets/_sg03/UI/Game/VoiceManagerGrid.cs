@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using SaiGame.Services;
 using SG03;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.InputSystem;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
 
 namespace SG03.UI
@@ -10,16 +12,20 @@ namespace SG03.UI
     public class VoiceManagerGrid : SaiBehaviour
     {
         [Header("Grid Size")]
-        [SerializeField, Min(1)] private int columns = 4;
+        [SerializeField, Min(1)] private int columns = 6;
         [SerializeField, Min(1)] private int rows = 2;
 
         [Header("Card Size (9:16 Default)")]
-        [SerializeField, Min(1)] private int cardWidth = 90;
+        [SerializeField, Min(1)] private int cardWidth = 130;
         [SerializeField, Min(1)] private int cardHeight = 160;
+
+        [Header("Card Text")]
+        [SerializeField, Min(1)] private int fontSize = 9;
 
         [Header("References")]
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private BattleStateCtrl battleStateCtrl;
+        [SerializeField] private CardDataManager cardDataManager;
 
         private VisualElement overlay;
         private VisualElement content;
@@ -32,19 +38,25 @@ namespace SG03.UI
         private Button nextButton;
         private Card3DCtrl hoveredCard;
         private BattleState subscribedBattleState;
+        private readonly Dictionary<string, Texture2D> cardArtCache = new Dictionary<string, Texture2D>();
+        private readonly Dictionary<string, List<Image>> pendingCardArtImages = new Dictionary<string, List<Image>>();
+        private readonly Dictionary<string, AsyncOperationHandle<CardData>> cardArtHandles = new Dictionary<string, AsyncOperationHandle<CardData>>();
         private int currentPage;
         private bool isVisible;
+        private bool isDisposed;
 
         public int Columns => Mathf.Max(1, this.columns);
         public int Rows => Mathf.Max(1, this.rows);
         public int CardWidth => Mathf.Max(1, this.cardWidth);
         public int CardHeight => Mathf.Max(1, this.cardHeight);
+        public int FontSize => Mathf.Max(1, this.fontSize);
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
             this.LoadUIDocument();
             this.LoadBattleStateCtrl();
+            this.LoadCardDataManager();
         }
 
         private void LoadUIDocument()
@@ -63,6 +75,15 @@ namespace SG03.UI
             Debug.LogWarning(this.transform.name + ": LoadBattleStateCtrl", this.gameObject);
         }
 
+        private void LoadCardDataManager()
+        {
+            if (this.cardDataManager != null) return;
+            this.cardDataManager = CardDataManager.Instance;
+            if (this.cardDataManager == null) this.cardDataManager = FindFirstObjectByType<CardDataManager>();
+            if (this.cardDataManager == null) return;
+            Debug.LogWarning(this.transform.name + ": LoadCardDataManager", this.gameObject);
+        }
+
         protected override void Start()
         {
             base.Start();
@@ -71,6 +92,7 @@ namespace SG03.UI
 
         private void InitializeGrid()
         {
+            this.isDisposed = false;
             if (this.uiDocument == null)
             {
                 Debug.LogError(this.transform.name + ": VoiceManagerGrid requires a UIDocument reference.", this.gameObject);
@@ -81,6 +103,7 @@ namespace SG03.UI
             this.RegisterCallbacks();
             this.SubscribeToCardHoverEvents();
             this.SubscribeToBattleState();
+            this.SubscribeToCardDefinitions();
             this.Hide();
         }
 
@@ -97,6 +120,11 @@ namespace SG03.UI
             this.cardWidth = Mathf.Max(1, width);
             this.cardHeight = Mathf.Max(1, height);
             if (this.isVisible) this.Refresh();
+        }
+
+        public void RefreshUI()
+        {
+            this.Refresh();
         }
 
         private void Update()
@@ -123,10 +151,35 @@ namespace SG03.UI
 
         private void DisposeGrid()
         {
+            this.isDisposed = true;
             this.UnregisterCallbacks();
             this.UnsubscribeFromCardHoverEvents();
             this.UnsubscribeFromBattleState();
+            this.UnsubscribeFromCardDefinitions();
+            this.ReleaseCardArtHandles();
             this.hoveredCard = null;
+        }
+
+        private void SubscribeToCardDefinitions()
+        {
+            BattleCardDefinitions.OnDefinitionsLoaded += this.OnCardDefinitionsLoaded;
+        }
+
+        private void UnsubscribeFromCardDefinitions()
+        {
+            BattleCardDefinitions.OnDefinitionsLoaded -= this.OnCardDefinitionsLoaded;
+        }
+
+        private void ReleaseCardArtHandles()
+        {
+            foreach (AsyncOperationHandle<CardData> handle in this.cardArtHandles.Values)
+            {
+                if (handle.IsValid()) Addressables.Release(handle);
+            }
+
+            this.cardArtHandles.Clear();
+            this.pendingCardArtImages.Clear();
+            this.cardArtCache.Clear();
         }
 
         private void BindElements(VisualElement root)
@@ -242,6 +295,12 @@ namespace SG03.UI
         }
 
         private void OnBattleStatusChanged()
+        {
+            if (!this.isVisible) return;
+            this.Refresh();
+        }
+
+        private void OnCardDefinitionsLoaded()
         {
             if (!this.isVisible) return;
             this.Refresh();
@@ -365,26 +424,139 @@ namespace SG03.UI
             card.AddToClassList("voice-grid-card");
             this.ApplyCardSize(card);
 
-            string cardName = string.IsNullOrWhiteSpace(slot.item_definition_name)
-                ? slot.item_definition_code_name
-                : slot.item_definition_name;
-            if (string.IsNullOrWhiteSpace(cardName)) cardName = "Unknown Card";
+            VisualElement artArea = new VisualElement();
+            artArea.AddToClassList("voice-grid-card-art");
+            Image artImage = new Image { scaleMode = ScaleMode.ScaleAndCrop };
+            artImage.AddToClassList("voice-grid-card-art-image");
+            artArea.Add(artImage);
+            this.AddCardTextOverlays(artArea, slot);
+            card.Add(artArea);
+            this.LoadCardArt(artImage, slot.item_definition_code_name);
+            return card;
+        }
 
-            Label nameLabel = new Label(cardName);
-            nameLabel.AddToClassList("voice-grid-card-name");
-            card.Add(nameLabel);
+        private void AddCardTextOverlays(VisualElement artArea, BattleCardSlot slot)
+        {
+            CardDefinitionData definition = this.GetCardDefinition(slot.item_definition_code_name);
 
-            if (!string.IsNullOrWhiteSpace(slot.item_definition_code_name))
+            VisualElement topOverlay = new VisualElement();
+            topOverlay.AddToClassList("voice-grid-card-overlay");
+            topOverlay.AddToClassList("voice-grid-card-overlay--top");
+
+            Label nameLabel = new Label(this.GetCardDisplayName(slot, definition));
+            nameLabel.AddToClassList("voice-grid-card-overlay-name");
+            this.ApplyFontSize(nameLabel);
+            topOverlay.Add(nameLabel);
+
+            int starCount = Mathf.Max(0, definition?.GetBaseStatInt("star") ?? 0);
+            Label starLabel = new Label(starCount.ToString());
+            starLabel.AddToClassList("voice-grid-card-overlay-stars");
+            this.ApplyFontSize(starLabel);
+            topOverlay.Add(starLabel);
+
+            VisualElement bottomOverlay = new VisualElement();
+            bottomOverlay.AddToClassList("voice-grid-card-overlay");
+            bottomOverlay.AddToClassList("voice-grid-card-overlay--bottom");
+
+            int attack = definition?.GetBaseStatInt("atk") ?? 0;
+            Label attackLabel = new Label($"ATK {attack}");
+            attackLabel.AddToClassList("voice-grid-card-overlay-stat");
+            attackLabel.AddToClassList("voice-grid-card-overlay-stat--attack");
+            this.ApplyFontSize(attackLabel);
+            bottomOverlay.Add(attackLabel);
+
+            int defense = definition?.GetBaseStatInt("def") ?? slot.final_def;
+            Label defenseLabel = new Label($"DEF {defense}");
+            defenseLabel.AddToClassList("voice-grid-card-overlay-stat");
+            defenseLabel.AddToClassList("voice-grid-card-overlay-stat--defense");
+            this.ApplyFontSize(defenseLabel);
+            bottomOverlay.Add(defenseLabel);
+
+            artArea.Add(topOverlay);
+            artArea.Add(bottomOverlay);
+        }
+
+        private CardDefinitionData GetCardDefinition(string itemCode)
+        {
+            IReadOnlyList<CardDefinitionData> definitions = this.battleStateCtrl?.BattleCardDefinitions?.Definitions;
+            if (definitions == null || string.IsNullOrWhiteSpace(itemCode)) return null;
+
+            foreach (CardDefinitionData definition in definitions)
             {
-                Label codeLabel = new Label(slot.item_definition_code_name);
-                codeLabel.AddToClassList("voice-grid-card-code");
-                card.Add(codeLabel);
+                if (definition?.item_code == itemCode) return definition;
             }
 
-            Label statsLabel = new Label($"DEF {slot.final_def}   DMG {slot.total_damage_received}");
-            statsLabel.AddToClassList("voice-grid-card-stats");
-            card.Add(statsLabel);
-            return card;
+            return null;
+        }
+
+        private string GetCardDisplayName(BattleCardSlot slot, CardDefinitionData definition)
+        {
+            if (!string.IsNullOrWhiteSpace(definition?.name)) return definition.name;
+            if (!string.IsNullOrWhiteSpace(slot.item_definition_name)) return slot.item_definition_name;
+            return slot.item_definition_code_name ?? string.Empty;
+        }
+
+        private void ApplyFontSize(Label label)
+        {
+            label.style.fontSize = this.FontSize;
+        }
+
+        private void LoadCardArt(Image target, string itemCode)
+        {
+            if (target == null) return;
+            if (string.IsNullOrWhiteSpace(itemCode)) return;
+
+            if (this.cardArtCache.TryGetValue(itemCode, out Texture2D cachedArt))
+            {
+                target.image = cachedArt;
+                return;
+            }
+
+            if (this.pendingCardArtImages.TryGetValue(itemCode, out List<Image> pendingImages))
+            {
+                pendingImages.Add(target);
+                return;
+            }
+
+            if (this.cardDataManager == null) return;
+            if (!CardLoader.TryResolveAddressByAssetName(
+                    this.cardDataManager.CardAddresses,
+                    itemCode,
+                    out string cardAddress))
+                return;
+
+            this.pendingCardArtImages[itemCode] = new List<Image> { target };
+            AsyncOperationHandle<CardData> handle = Addressables.LoadAssetAsync<CardData>(cardAddress);
+            this.cardArtHandles[itemCode] = handle;
+            handle.Completed += operation => this.CompleteCardArtLoad(itemCode, operation);
+        }
+
+        private void CompleteCardArtLoad(string itemCode, AsyncOperationHandle<CardData> operation)
+        {
+            if (this.isDisposed) return;
+
+            this.pendingCardArtImages.TryGetValue(itemCode, out List<Image> images);
+            this.pendingCardArtImages.Remove(itemCode);
+            if (operation.Status != AsyncOperationStatus.Succeeded
+                || operation.Result?.CharacterTexture == null)
+            {
+                this.ReleaseFailedCardArtHandle(itemCode, operation);
+                return;
+            }
+
+            Texture2D artwork = operation.Result.CharacterTexture;
+            this.cardArtCache[itemCode] = artwork;
+            if (images == null) return;
+            foreach (Image image in images)
+            {
+                if (image != null) image.image = artwork;
+            }
+        }
+
+        private void ReleaseFailedCardArtHandle(string itemCode, AsyncOperationHandle<CardData> operation)
+        {
+            this.cardArtHandles.Remove(itemCode);
+            if (operation.IsValid()) Addressables.Release(operation);
         }
 
         private void ApplyCardSize(VisualElement card)
