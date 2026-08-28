@@ -11,6 +11,30 @@ namespace SG03.UI
 {
     public class VoidManagerGrid : SaiBehaviour
     {
+        private enum VoidCardSortMode
+        {
+            NewestFirst,
+            OldestFirst,
+            StarsAscending,
+            StarsDescending,
+            AttackAscending,
+            AttackDescending,
+            DefenseAscending,
+            DefenseDescending
+        }
+
+        private static readonly List<string> SortChoices = new List<string>
+        {
+            "Void time: Newest first",
+            "Void time: Oldest first",
+            "Stars: Low to high",
+            "Stars: High to low",
+            "ATK: Low to high",
+            "ATK: High to low",
+            "DEF: Low to high",
+            "DEF: High to low"
+        };
+
         [Header("Grid Size")]
         [SerializeField, Min(1)] private int columns = 6;
         [SerializeField, Min(1)] private int rows = 2;
@@ -33,6 +57,7 @@ namespace SG03.UI
         private Label alphaVoidCountLabel;
         private Label titleLabel;
         private Label pageLabel;
+        private DropdownField sortField;
         private Button closeButton;
         private Button previousButton;
         private Button nextButton;
@@ -42,6 +67,7 @@ namespace SG03.UI
         private readonly Dictionary<string, List<Image>> pendingCardArtImages = new Dictionary<string, List<Image>>();
         private readonly Dictionary<string, AsyncOperationHandle<CardData>> cardArtHandles = new Dictionary<string, AsyncOperationHandle<CardData>>();
         private int currentPage;
+        private VoidCardSortMode sortMode = VoidCardSortMode.NewestFirst;
         private bool isVisible;
         private bool isDisposed;
 
@@ -100,6 +126,7 @@ namespace SG03.UI
             }
 
             this.BindElements(this.uiDocument.rootVisualElement);
+            this.ConfigureSortField();
             this.RegisterCallbacks();
             this.SubscribeToCardHoverEvents();
             this.SubscribeToBattleState();
@@ -190,9 +217,17 @@ namespace SG03.UI
             this.alphaVoidCountLabel = root?.Q<Label>("AlphaTheVoidCountLabel");
             this.titleLabel = root?.Q<Label>("VoidGridTitle");
             this.pageLabel = root?.Q<Label>("VoidGridPageLabel");
+            this.sortField = root?.Q<DropdownField>("VoidGridSortField");
             this.closeButton = root?.Q<Button>("VoidGridCloseButton");
             this.previousButton = root?.Q<Button>("VoidGridPreviousButton");
             this.nextButton = root?.Q<Button>("VoidGridNextButton");
+        }
+
+        private void ConfigureSortField()
+        {
+            if (this.sortField == null) return;
+            this.sortField.choices = new List<string>(SortChoices);
+            this.sortField.SetValueWithoutNotify(SortChoices[(int)this.sortMode]);
         }
 
         private void RegisterCallbacks()
@@ -201,6 +236,7 @@ namespace SG03.UI
             this.closeButton?.RegisterCallback<ClickEvent>(this.OnCloseClicked);
             this.previousButton?.RegisterCallback<ClickEvent>(this.OnPreviousClicked);
             this.nextButton?.RegisterCallback<ClickEvent>(this.OnNextClicked);
+            this.sortField?.RegisterValueChangedCallback(this.OnSortChanged);
             this.overlay?.RegisterCallback<ClickEvent>(this.OnOverlayClicked);
             this.panel?.RegisterCallback<ClickEvent>(this.OnPanelClicked);
         }
@@ -211,6 +247,7 @@ namespace SG03.UI
             this.closeButton?.UnregisterCallback<ClickEvent>(this.OnCloseClicked);
             this.previousButton?.UnregisterCallback<ClickEvent>(this.OnPreviousClicked);
             this.nextButton?.UnregisterCallback<ClickEvent>(this.OnNextClicked);
+            this.sortField?.UnregisterValueChangedCallback(this.OnSortChanged);
             this.overlay?.UnregisterCallback<ClickEvent>(this.OnOverlayClicked);
             this.panel?.UnregisterCallback<ClickEvent>(this.OnPanelClicked);
         }
@@ -269,6 +306,15 @@ namespace SG03.UI
             int pageCount = this.GetPageCount(this.GetAlphaVoidCards().Count);
             if (this.currentPage >= pageCount - 1) return;
             this.currentPage++;
+            this.Refresh();
+        }
+
+        private void OnSortChanged(ChangeEvent<string> evt)
+        {
+            int sortIndex = SortChoices.IndexOf(evt.newValue);
+            if (sortIndex < 0) return;
+            this.sortMode = (VoidCardSortMode)sortIndex;
+            this.currentPage = 0;
             this.Refresh();
         }
 
@@ -356,8 +402,55 @@ namespace SG03.UI
             {
                 if (slot != null) cards.Add(slot);
             }
-            cards.Sort((left, right) => left.slot_index.CompareTo(right.slot_index));
+            this.SortCards(cards);
             return cards;
+        }
+
+        private void SortCards(List<BattleCardSlot> cards)
+        {
+            if (this.sortMode == VoidCardSortMode.OldestFirst) return;
+            if (this.sortMode == VoidCardSortMode.NewestFirst)
+            {
+                cards.Reverse();
+                return;
+            }
+
+            Dictionary<BattleCardSlot, int> voidOrder = new Dictionary<BattleCardSlot, int>();
+            for (int index = 0; index < cards.Count; index++) voidOrder[cards[index]] = index;
+            bool ascending = this.sortMode == VoidCardSortMode.StarsAscending
+                             || this.sortMode == VoidCardSortMode.AttackAscending
+                             || this.sortMode == VoidCardSortMode.DefenseAscending;
+            cards.Sort((left, right) => this.CompareCardStats(left, right, voidOrder, ascending));
+        }
+
+        private int CompareCardStats(
+            BattleCardSlot left,
+            BattleCardSlot right,
+            IReadOnlyDictionary<BattleCardSlot, int> voidOrder,
+            bool ascending)
+        {
+            int result = this.GetSortValue(left).CompareTo(this.GetSortValue(right));
+            if (!ascending) result = -result;
+            if (result != 0) return result;
+            return voidOrder[right].CompareTo(voidOrder[left]);
+        }
+
+        private int GetSortValue(BattleCardSlot slot)
+        {
+            switch (this.sortMode)
+            {
+                case VoidCardSortMode.StarsAscending:
+                case VoidCardSortMode.StarsDescending:
+                    return this.GetCardStarCount(slot);
+                case VoidCardSortMode.AttackAscending:
+                case VoidCardSortMode.AttackDescending:
+                    return this.GetCardAttack(slot);
+                case VoidCardSortMode.DefenseAscending:
+                case VoidCardSortMode.DefenseDescending:
+                    return this.GetCardDefense(slot);
+                default:
+                    return 0;
+            }
         }
 
         private int GetPageCount(int cardCount)
@@ -448,7 +541,7 @@ namespace SG03.UI
             this.ApplyFontSize(nameLabel);
             topOverlay.Add(nameLabel);
 
-            int starCount = Mathf.Max(0, definition?.GetBaseStatInt("star") ?? 0);
+            int starCount = this.GetCardStarCount(slot, definition);
             Label starLabel = new Label(starCount.ToString());
             starLabel.AddToClassList("void-grid-card-overlay-stars");
             this.ApplyFontSize(starLabel);
@@ -458,14 +551,14 @@ namespace SG03.UI
             bottomOverlay.AddToClassList("void-grid-card-overlay");
             bottomOverlay.AddToClassList("void-grid-card-overlay--bottom");
 
-            int attack = definition?.GetBaseStatInt("atk") ?? 0;
+            int attack = this.GetCardAttack(slot, definition);
             Label attackLabel = new Label($"ATK {attack}");
             attackLabel.AddToClassList("void-grid-card-overlay-stat");
             attackLabel.AddToClassList("void-grid-card-overlay-stat--attack");
             this.ApplyFontSize(attackLabel);
             bottomOverlay.Add(attackLabel);
 
-            int defense = definition?.GetBaseStatInt("def") ?? slot.final_def;
+            int defense = this.GetCardDefense(slot, definition);
             Label defenseLabel = new Label($"DEF {defense}");
             defenseLabel.AddToClassList("void-grid-card-overlay-stat");
             defenseLabel.AddToClassList("void-grid-card-overlay-stat--defense");
@@ -474,6 +567,24 @@ namespace SG03.UI
 
             artArea.Add(topOverlay);
             artArea.Add(bottomOverlay);
+        }
+
+        private int GetCardStarCount(BattleCardSlot slot, CardDefinitionData definition = null)
+        {
+            definition ??= this.GetCardDefinition(slot.item_definition_code_name);
+            return Mathf.Max(0, definition?.GetBaseStatInt("star") ?? 0);
+        }
+
+        private int GetCardAttack(BattleCardSlot slot, CardDefinitionData definition = null)
+        {
+            definition ??= this.GetCardDefinition(slot.item_definition_code_name);
+            return definition?.GetBaseStatInt("atk") ?? 0;
+        }
+
+        private int GetCardDefense(BattleCardSlot slot, CardDefinitionData definition = null)
+        {
+            definition ??= this.GetCardDefinition(slot.item_definition_code_name);
+            return definition?.GetBaseStatInt("def") ?? slot.final_def;
         }
 
         private CardDefinitionData GetCardDefinition(string itemCode)

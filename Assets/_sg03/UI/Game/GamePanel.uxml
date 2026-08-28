@@ -73,6 +73,9 @@
                     <ui:Label name="VoidGridTitle" text="Alpha - The Void" class="void-grid-title" />
                     <ui:Button name="VoidGridCloseButton" text="X" tooltip="Close" class="void-grid-close-button" />
                 </ui:VisualElement>
+                <ui:VisualElement class="void-grid-toolbar">
+                    <ui:DropdownField name="VoidGridSortField" label="Sort" class="void-grid-sort-field" />
+                </ui:VisualElement>
                 <ui:VisualElement name="VoidGridContent" class="void-grid-content" />
                 <ui:VisualElement class="void-grid-footer">
                     <ui:Button name="VoidGridPreviousButton" text="Previous" class="void-grid-page-button" />
