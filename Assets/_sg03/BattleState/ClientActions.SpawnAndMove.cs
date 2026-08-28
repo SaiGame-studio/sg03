@@ -144,21 +144,8 @@ namespace SG03
 
         private IEnumerator AlphaVoidToFrontLineRoutine(string inventoryItemId, int slotIndex)
         {
-            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
-            if (card != null)
-            {
-                BattleCardSlot slot = this.battleState != null ? this.cardSpawning?.FindAlphaSlotById(inventoryItemId) : null;
-                if (slot != null && (!slot.face_up && !slot.expose))
-                {
-                    card.FaceDownUnknown();
-                    yield return this.StartCoroutine(this.WaitForCard(card));
-                }
-            }
-
-            card = this.cardSpawning?.MoveAlphaVoidToFrontLine(inventoryItemId, slotIndex);
+            Card3DCtrl card = this.cardSpawning?.MoveAlphaVoidToFrontLine(inventoryItemId, slotIndex);
             if (card == null) yield break;
-            yield return this.StartCoroutine(this.WaitForCard(card));
-            this.cardSpawning?.SettleAlphaVoidInFrontLine(card, inventoryItemId, slotIndex);
             yield return this.StartCoroutine(this.WaitForCard(card));
         }
 
@@ -170,21 +157,8 @@ namespace SG03
 
         private IEnumerator OmegaVoidToFrontLineRoutine(string inventoryItemId, int slotIndex)
         {
-            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
-            if (card != null)
-            {
-                BattleCardSlot slot = this.battleState != null ? this.cardSpawning?.FindOmegaSlotById(inventoryItemId) : null;
-                if (slot != null && (!slot.face_up && !slot.expose))
-                {
-                    card.FaceDownUnknown();
-                    yield return this.StartCoroutine(this.WaitForCard(card));
-                }
-            }
-
-            card = this.cardSpawning?.MoveOmegaVoidToFrontLine(inventoryItemId, slotIndex);
+            Card3DCtrl card = this.cardSpawning?.MoveOmegaVoidToFrontLine(inventoryItemId, slotIndex);
             if (card == null) yield break;
-            yield return this.StartCoroutine(this.WaitForCard(card));
-            this.cardSpawning?.SettleOmegaVoidInFrontLine(card, inventoryItemId, slotIndex);
             yield return this.StartCoroutine(this.WaitForCard(card));
         }
     }

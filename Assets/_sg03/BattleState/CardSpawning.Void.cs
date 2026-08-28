@@ -34,6 +34,7 @@ namespace SG03
             card.SetInventoryItemId(inventoryItemId);
 
             BattleCardSlot slot = owner == Owner.alpha ? this.FindAlphaSlotById(inventoryItemId) : this.FindOmegaSlotById(inventoryItemId);
+            bool isFaceUp = slot == null || slot.face_up || slot.expose;
             if (slot != null)
             {
                 string code = slot.item_definition_code_name;
@@ -53,49 +54,28 @@ namespace SG03
 
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
-            Vector3 abovePos = holder.transform.position + Vector3.up * this.aboveLineHeight;
-            card.MoveTo(abovePos, holder.HolderLocation);
             this.slotOccupancy[holder.transform] = card;
             holder.SetCard(card);
+
+            System.Action onComplete = () =>
+            {
+                if (owner == Owner.alpha)
+                {
+                    if (slot != null) this.ApplyAlphaFaceState(card, slot);
+                    else card.FaceUp();
+                }
+                else
+                {
+                    if (slot != null) this.ApplyFaceState(card, slot);
+                    else card.FaceUp();
+                }
+            };
+
+            card.MoveVoidToLine(holder, owner == Owner.alpha, isFaceUp, onComplete);
             return card;
         }
 
-        public void SettleAlphaVoidInFrontLine(Card3DCtrl card, string inventoryItemId, int slotIndex)
-            => this.SettleVoidInLine(card, inventoryItemId, slotIndex, this.deskPosition.AlphaFrontLine, Owner.alpha);
-
-        public void SettleOmegaVoidInFrontLine(Card3DCtrl card, string inventoryItemId, int slotIndex)
-            => this.SettleVoidInLine(card, inventoryItemId, slotIndex, this.deskPosition.OmegaFrontLine, Owner.omega);
-
-        private void SettleVoidInLine(Card3DCtrl card, string inventoryItemId, int slotIndex, CardHolderCtrl[] holders, Owner owner)
-        {
-            if (slotIndex < 0 || slotIndex >= holders.Length) return;
-            CardHolderCtrl holder = holders[slotIndex];
-            if (holder == null) return;
-            BattleCardSlot slot = owner == Owner.alpha ? this.FindAlphaSlotById(inventoryItemId) : this.FindOmegaSlotById(inventoryItemId);
-            bool isFaceUp = slot == null || slot.face_up || slot.expose;
-            if (slot != null)
-            {
-                card.SetExpose(slot.expose);
-                card.SetIsTrigger(slot.trigger);
-            }
-            else
-            {
-                card.SetExpose(true);
-                card.SetIsTrigger(true);
-            }
-            card.SetMoveDuration(this.ActionMoveDuration);
-            card.SetRotateDuration(this.ActionRotateDuration);
-            if (isFaceUp)
-            {
-                card.MoveToLineFaceUp(holder, owner == Owner.alpha);
-            }
-            else
-            {
-                if (owner == Owner.alpha)
-                    card.MoveToUnknow(holder, slot != null ? () => this.ApplyAlphaFaceState(card, slot) : () => card.FaceUp());
-                else
-                    card.MoveToUnknow(holder, slot != null ? () => this.ApplyFaceState(card, slot) : () => card.FaceUp());
-            }
-        }
+        public void SettleAlphaVoidInFrontLine(Card3DCtrl card, string inventoryItemId, int slotIndex) { }
+        public void SettleOmegaVoidInFrontLine(Card3DCtrl card, string inventoryItemId, int slotIndex) { }
     }
 }

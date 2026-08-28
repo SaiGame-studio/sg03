@@ -6,3 +6,5 @@
 - **Prioritize Event Actions**: Always prioritize using event actions over `Update()` or similar continuous loops, unless it is impossible to implement the required logic with event actions.
 - **VisualElement Identification**: All `VisualElement` instances must have a `name` or `id` to uniquely identify them.
 - **_sg03-Only Changes**: Agents assigned to _sg03-scoped UI work may only create, edit, move, or delete files under `Assets/_sg03`. They must not modify files elsewhere in the repository.
+- **Verify C# Compilation**: After writing or modifying C# code, always check and verify that the code compiles without build errors.
+

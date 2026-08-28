@@ -30,6 +30,20 @@ namespace SG03
                 }
             });
         }
+
+        /// <summary>
+        /// Moves the card from The Void to the target line <paramref name="holder"/>.
+        /// Delegates movement and face-state animation directly to <see cref="CardMovement.MoveVoidToLine"/>.
+        /// </summary>
+        public void MoveVoidToLine(CardHolderCtrl holder, bool isAlpha, bool isFaceUp = true, System.Action onReady = null)
+        {
+            if (this.movement == null) return;
+            this.movement.MoveVoidToLine(holder, isFaceUp, () =>
+            {
+                onReady?.Invoke();
+                this.SpawnHpBarAfterCardSettles(holder);
+            });
+        }
     }
 }
 
