@@ -96,7 +96,8 @@ namespace SG03
         }
 
         /// <summary>
-        /// Step 4: Rotates the card face-up maintaining current Y height and Y attack direction.
+        /// Step 4: Rotates the card face-up while maintaining its current elevation.
+        /// Alpha cards also rotate 180 degrees around world Z so their face-up artwork points toward Omega.
         /// Dedicated helper step for <see cref="MoveVoidToLine"/> sequence. Do NOT share with other movement paths.
         /// </summary>
         private void FaceUpKeepY(bool isAlpha, System.Action onComplete = null)
@@ -105,8 +106,8 @@ namespace SG03
             this.isFlipping = true;
             this.faceTween?.Kill();
             this.faceTween = DOTween.Sequence();
-            float targetYAngle = isAlpha ? 0f : 180f;
-            Vector3 targetRotation = new Vector3(this.faceUpRotation.x, targetYAngle, this.faceUpRotation.z);
+            float targetZAngle = this.faceUpRotation.z + (isAlpha ? 180f : 0f);
+            Vector3 targetRotation = new Vector3(this.faceUpRotation.x, this.faceUpRotation.y, targetZAngle);
             this.faceTween.Append(
                 this.transform.DORotateQuaternion(Quaternion.Euler(targetRotation), this.flipDuration * 2f)
                     .SetEase(this.flipEase));
@@ -135,4 +136,3 @@ namespace SG03
         }
     }
 }
-

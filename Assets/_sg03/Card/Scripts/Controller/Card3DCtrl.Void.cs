@@ -38,7 +38,7 @@ namespace SG03
         public void MoveVoidToLine(CardHolderCtrl holder, bool isAlpha, bool isFaceUp = true, System.Action onReady = null)
         {
             if (this.movement == null) return;
-            this.movement.MoveVoidToLine(holder, isFaceUp, () =>
+            this.movement.MoveVoidToLine(holder, isAlpha, isFaceUp, () =>
             {
                 onReady?.Invoke();
                 this.SpawnHpBarAfterCardSettles(holder);
