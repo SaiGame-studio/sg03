@@ -81,7 +81,6 @@ namespace SG03
             {
                 if (!card.IsCharacter()) continue;
                 card.SetAttacker(null);
-                card.ClearHealthPreview();
                 card.RefreshHpBarAfterTurnEnd();
             }
         }

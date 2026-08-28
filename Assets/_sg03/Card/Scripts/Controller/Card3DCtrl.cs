@@ -311,6 +311,12 @@ namespace SG03
         public void RefreshPlannedDamagePreview()
         {
             this.hpBarInstance?.RefreshHealthFromBattleState();
+            if (this.attacker != null)
+            {
+                this.UpdateDamagePreviewFromAttacker();
+                return;
+            }
+
             this.hpBarInstance?.SetHealthPreview(this.healthPreviewDelta);
             this.RefreshHpBarDisplayMode();
         }
@@ -619,7 +625,29 @@ namespace SG03
         /// <summary>The Omega card currently planning an attack against this card.</summary>
         public Card3DCtrl Attacker => this.attacker;
 
-        public void SetAttacker(Card3DCtrl value) => this.attacker = value;
+        /// <summary>
+        /// Assigns the card planning an attack against this card. The damage
+        /// preview is derived from that attacker and is cleared with the link.
+        /// </summary>
+        public void SetAttacker(Card3DCtrl value)
+        {
+            this.attacker = value;
+            this.UpdateDamagePreviewFromAttacker();
+        }
+
+        private void UpdateDamagePreviewFromAttacker()
+        {
+            if (this.attacker == null)
+            {
+                this.ClearHealthPreview();
+                return;
+            }
+
+            int attack = this.attacker.IsOmegaCardHidden()
+                ? 0
+                : this.attacker.Definition?.GetBaseStatInt("atk") ?? 0;
+            this.SetHealthPreview(attack);
+        }
 
         public void SetMoveDuration(float d)  => this.movement.SetMoveDuration(d);
         public void SetRotateDuration(float d) => this.movement.SetRotateDuration(d);
@@ -628,7 +656,6 @@ namespace SG03
         {
             if (this.inventoryItemId != id)
             {
-                this.ClearHealthPreview();
                 this.SetAttacker(null);
             }
             this.inventoryItemId = id;
