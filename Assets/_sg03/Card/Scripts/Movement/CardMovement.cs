@@ -314,10 +314,33 @@ namespace SG03
             this.FaceDownUnknown();
         }
 
+        /// <summary>
+        /// Moves the card to <paramref name="holder"/>'s position while preserving face-up state.
+        /// Intended for void to line transitions where the card is face-up.
+        /// </summary>
+        public void MoveToLineFaceUp(CardHolderCtrl holder, System.Action onReady = null)
+        {
+            if (holder == null) return;
+            this.KillAllTweens();
+            this.isFlipping = false;
+            this.faceState = FaceState.FaceUp;
+            this.ctrl.AssignCardHolder(holder);
+            Location destination = holder.HolderLocation;
+            this.SetLocation(destination);
+            this.RecordHandAnchor(holder.transform, destination);
+            Vector3 lineDestination = holder.transform.position + new Vector3(0f, this.lineOffsetY, 0f);
+            this.StartMoveTween(lineDestination, this.duration, this.ease, () =>
+            {
+                this.FaceUp();
+                onReady?.Invoke();
+            });
+            this.FaceUp();
+        }
+
+
         public void MoveBackToLineHolder(CardHolderCtrl holder)
         {
             if (holder == null) return;
-            this.SetLocation(holder.HolderLocation);
             this.RecordHandAnchor(holder.transform, this.location);
             this.KillAllTweens();
             Vector3 lineDestination = holder.transform.position + new Vector3(0f, this.lineOffsetY, 0f);

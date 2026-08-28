@@ -72,6 +72,7 @@ namespace SG03
             CardHolderCtrl holder = holders[slotIndex];
             if (holder == null) return;
             BattleCardSlot slot = owner == Owner.alpha ? this.FindAlphaSlotById(inventoryItemId) : this.FindOmegaSlotById(inventoryItemId);
+            bool isFaceUp = slot == null || slot.face_up || slot.expose;
             if (slot != null)
             {
                 card.SetExpose(slot.expose);
@@ -84,10 +85,17 @@ namespace SG03
             }
             card.SetMoveDuration(this.ActionMoveDuration);
             card.SetRotateDuration(this.ActionRotateDuration);
-            if (owner == Owner.alpha)
-                card.MoveToUnknow(holder, slot != null ? () => this.ApplyAlphaFaceState(card, slot) : () => card.FaceUp());
+            if (isFaceUp)
+            {
+                card.MoveToLineFaceUp(holder, owner == Owner.alpha);
+            }
             else
-                card.MoveToUnknow(holder, slot != null ? () => this.ApplyFaceState(card, slot) : () => card.FaceUp());
+            {
+                if (owner == Owner.alpha)
+                    card.MoveToUnknow(holder, slot != null ? () => this.ApplyAlphaFaceState(card, slot) : () => card.FaceUp());
+                else
+                    card.MoveToUnknow(holder, slot != null ? () => this.ApplyFaceState(card, slot) : () => card.FaceUp());
+            }
         }
     }
 }

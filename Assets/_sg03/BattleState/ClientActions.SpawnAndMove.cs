@@ -147,8 +147,12 @@ namespace SG03
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card != null)
             {
-                card.FaceDownUnknown();
-                yield return this.StartCoroutine(this.WaitForCard(card));
+                BattleCardSlot slot = this.battleState != null ? this.cardSpawning?.FindAlphaSlotById(inventoryItemId) : null;
+                if (slot != null && (!slot.face_up && !slot.expose))
+                {
+                    card.FaceDownUnknown();
+                    yield return this.StartCoroutine(this.WaitForCard(card));
+                }
             }
 
             card = this.cardSpawning?.MoveAlphaVoidToFrontLine(inventoryItemId, slotIndex);
@@ -169,8 +173,12 @@ namespace SG03
             Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
             if (card != null)
             {
-                card.FaceDownUnknown();
-                yield return this.StartCoroutine(this.WaitForCard(card));
+                BattleCardSlot slot = this.battleState != null ? this.cardSpawning?.FindOmegaSlotById(inventoryItemId) : null;
+                if (slot != null && (!slot.face_up && !slot.expose))
+                {
+                    card.FaceDownUnknown();
+                    yield return this.StartCoroutine(this.WaitForCard(card));
+                }
             }
 
             card = this.cardSpawning?.MoveOmegaVoidToFrontLine(inventoryItemId, slotIndex);

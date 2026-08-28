@@ -157,7 +157,7 @@ namespace SG03
             this.handCardRegistry[inventoryItemId] = card;
         }
 
-        private BattleCardSlot FindAlphaSlotById(string inventoryItemId)
+        public BattleCardSlot FindAlphaSlotById(string inventoryItemId)
         {
             return this.FindSlotById(this.battleState?.AlphaHand, inventoryItemId)
                 ?? this.FindSlotById(this.battleState?.AlphaFrontLine, inventoryItemId)
@@ -166,7 +166,7 @@ namespace SG03
                 ?? this.FindSlotById(this.battleState?.AlphaTheSource, inventoryItemId);
         }
 
-        private BattleCardSlot FindOmegaSlotById(string inventoryItemId)
+        public BattleCardSlot FindOmegaSlotById(string inventoryItemId)
         {
             return this.FindSlotById(this.battleState?.OmegaHand, inventoryItemId)
                 ?? this.FindSlotById(this.battleState?.OmegaFrontLine, inventoryItemId)

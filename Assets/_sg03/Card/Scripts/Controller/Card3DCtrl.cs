@@ -15,7 +15,7 @@ namespace SG03
     [RequireComponent(typeof(Card3D))]
     [RequireComponent(typeof(CardLoader))]
     [RequireComponent(typeof(CardMovement))]
-    public class Card3DCtrl : PoolObj
+    public partial class Card3DCtrl : PoolObj
     {
         // ─── Static card events ───────────────────────────────────────────────────
 
