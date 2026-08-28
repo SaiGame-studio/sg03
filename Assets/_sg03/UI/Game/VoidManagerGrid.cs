@@ -629,6 +629,7 @@ namespace SG03.UI
                 return;
             }
 
+            if (this.cardDataManager == null) this.LoadComponents();
             if (this.cardDataManager == null) return;
             if (!CardLoader.TryResolveAddressByAssetName(
                     this.cardDataManager.CardAddresses,

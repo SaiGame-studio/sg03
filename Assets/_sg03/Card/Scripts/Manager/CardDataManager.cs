@@ -136,7 +136,12 @@ namespace SG03
 
         private void EnsureCardInstance()
         {
-            if (card3DReview != null) return;
+            if (this.card3DReview == null)
+            {
+                this.LoadCard3DReview();
+            }
+
+            if (this.card3DReview != null) return;
             Debug.LogError("[CardDataManager] Card3DReview not found in scene. " +
                            "Place a GameObject named \"Card3DReview\" with Card3D + CardLoader.", this);
         }
