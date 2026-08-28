@@ -57,7 +57,6 @@ namespace SG03
         private ClientActions clientActions;
         private BattleStateCtrl battleStateCtrl;
         private Coroutine spawnHpBarRoutine;
-        private float healthPreviewDelta;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -172,7 +171,7 @@ namespace SG03
             this.hpBarInstance.SetPosition(holder.transform.position);
             this.hpBarInstance.SetParent(this.transform, this.cardOwner);
             this.hpBarInstance.gameObject.SetActive(true);
-            this.hpBarInstance.SetHealthPreview(this.healthPreviewDelta);
+            this.UpdateDamagePreviewFromAttacker();
             this.RefreshHpBarDisplayMode();
         }
 
@@ -290,35 +289,25 @@ namespace SG03
         /// <summary>Previews a pending positive damage amount on this card's HP bar.</summary>
         public void SetHealthPreview(float positiveDelta)
         {
-            this.healthPreviewDelta = Mathf.Max(0f, positiveDelta);
-            this.hpBarInstance?.SetHealthPreview(this.healthPreviewDelta);
+            this.hpBarInstance?.SetHealthPreview(Mathf.Max(0f, positiveDelta));
             this.RefreshHpBarDisplayMode();
         }
 
         /// <summary>Clears this card's pending HP-bar preview.</summary>
         public void ClearHealthPreview()
         {
-            this.healthPreviewDelta = 0f;
             this.hpBarInstance?.ClearHealthPreview();
             this.RefreshHpBarDisplayMode();
         }
 
         /// <summary>
-        /// Rebinds a planned damage preview after an effect changes this card's
-        /// battle stats. The amount remains owned by the card, rather than the
-        /// pooled HP-bar instance, so a DEF refresh cannot discard it.
+        /// Refreshes a planned damage preview after an effect changes this
+        /// card's battle stats. The value is always recalculated from Attacker.
         /// </summary>
         public void RefreshPlannedDamagePreview()
         {
             this.hpBarInstance?.RefreshHealthFromBattleState();
-            if (this.attacker != null)
-            {
-                this.UpdateDamagePreviewFromAttacker();
-                return;
-            }
-
-            this.hpBarInstance?.SetHealthPreview(this.healthPreviewDelta);
-            this.RefreshHpBarDisplayMode();
+            this.UpdateDamagePreviewFromAttacker();
         }
 
         private void DespawnHpBar()
