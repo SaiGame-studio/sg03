@@ -326,6 +326,7 @@ end
 -- and advances next_move to "alpha_turn" so the state machine returns control to alpha.
 function omega_end_turn(state)
     lib_battle_common.dlog("[lib_battle_ai] == omega_end_turn ==")
+    lib_battle_common.append_client_action(state, "omega_no_available_attacker")
     state.alpha_defending = false
     state.turn = (state.turn or 0) + 1
     lib_battle_common.dlog("[lib_battle_ai] omega_end_turn: alpha_defending=false, turn=" ..

@@ -48,6 +48,7 @@ namespace SG03
 
         public event Action<string> OnBattleCompleted;
         public event Action<string> OnCardTakeDamageExecuted;
+        public event Action OnOmegaNoAvailableAttacker;
 
         /// <summary>Marks the next received action sequence as an explicit battle resume.</summary>
         public void BeginResume()
@@ -399,6 +400,7 @@ namespace SG03
                 case "omega_attack_alpha_hp": result = this.ExecuteOmegaAttackAlphaHp(parameters); break;
                 case "omega_card_move_back_to_holder": result = this.ExecuteOmegaCardMoveBackToHolder(parameters); break;
                 case "omega_planing_character_attack": result = this.ExecuteOmegaPlaningCharacterAttack(parameters); break;
+                case "omega_no_available_attacker": result = this.ExecuteOmegaNoAvailableAttacker(); break;
                 case "alpha_take_lamp": result = this.ExecuteLampMoveToAlpha(); break;
                 case "omega_take_lamp": result = this.ExecuteLampMoveToOmega(); break;
                 case "alpha_turn_end": result = this.ExecuteAlphaEndTurn(); break;
