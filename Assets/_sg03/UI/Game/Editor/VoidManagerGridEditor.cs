@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace SG03.UI
 {
-    [CustomEditor(typeof(VoiceManagerGrid))]
-    public class VoiceManagerGridEditor : UnityEditor.Editor
+    [CustomEditor(typeof(VoidManagerGrid))]
+    public class VoidManagerGridEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
@@ -18,7 +18,7 @@ namespace SG03.UI
             {
                 if (GUILayout.Button("Refresh UI", GUILayout.Height(30f)))
                 {
-                    VoiceManagerGrid grid = (VoiceManagerGrid)this.target;
+                    VoidManagerGrid grid = (VoidManagerGrid)this.target;
                     grid.RefreshUI();
                 }
             }

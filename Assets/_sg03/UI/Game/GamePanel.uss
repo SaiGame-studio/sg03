@@ -289,7 +289,7 @@
     color: rgb(255, 255, 255);
 }
 
-.voice-grid-overlay {
+.void-grid-overlay {
     position: absolute;
     left: 0;
     top: 0;
@@ -300,11 +300,11 @@
     background-color: rgba(5, 7, 14, 0.86);
 }
 
-.voice-grid-overlay--hidden {
+.void-grid-overlay--hidden {
     display: none;
 }
 
-.voice-grid-panel {
+.void-grid-panel {
     width: 72%;
     height: 72%;
     min-width: 520px;
@@ -316,20 +316,20 @@
     background-color: rgba(16, 20, 36, 0.98);
 }
 
-.voice-grid-header {
+.void-grid-header {
     flex-direction: row;
     align-items: center;
     margin-bottom: 14px;
 }
 
-.voice-grid-title {
+.void-grid-title {
     flex-grow: 1;
     color: rgb(225, 233, 255);
     font-size: 20px;
     -unity-font-style: bold;
 }
 
-.voice-grid-close-button {
+.void-grid-close-button {
     width: 36px;
     height: 32px;
     padding: 0;
@@ -340,16 +340,16 @@
     -unity-font-style: bold;
 }
 
-.voice-grid-close-button:hover {
+.void-grid-close-button:hover {
     background-color: rgba(220, 50, 50, 1);
 }
 
-.voice-grid-content {
+.void-grid-content {
     flex-grow: 1;
     min-height: 0;
 }
 
-.voice-grid-row {
+.void-grid-row {
     flex-grow: 1;
     min-height: 0;
     flex-direction: row;
@@ -357,14 +357,14 @@
     justify-content: center;
 }
 
-.voice-grid-card,
-.voice-grid-card-placeholder {
+.void-grid-card,
+.void-grid-card-placeholder {
     flex-shrink: 0;
     min-width: 0;
     margin: 5px;
 }
 
-.voice-grid-card {
+.void-grid-card {
     padding: 12px;
     border-width: 1px;
     border-radius: 10px;
@@ -373,7 +373,7 @@
     justify-content: center;
 }
 
-.voice-grid-card-art {
+.void-grid-card-art {
     flex-grow: 1;
     min-height: 0;
     position: relative;
@@ -382,13 +382,13 @@
     background-color: rgba(13, 17, 30, 0.9);
 }
 
-.voice-grid-card-art-image {
+.void-grid-card-art-image {
     flex-grow: 1;
     width: 100%;
     height: 100%;
 }
 
-.voice-grid-card-overlay {
+.void-grid-card-overlay {
     position: absolute;
     left: 0;
     right: 0;
@@ -403,22 +403,22 @@
     -unity-font-style: bold;
 }
 
-.voice-grid-card-overlay > .unity-label {
+.void-grid-card-overlay > .unity-label {
     margin: 0;
     padding: 0;
 }
 
-.voice-grid-card-overlay--top {
+.void-grid-card-overlay--top {
     top: 0;
     align-items: flex-start;
 }
 
-.voice-grid-card-overlay--bottom {
+.void-grid-card-overlay--bottom {
     bottom: 0;
     align-items: flex-end;
 }
 
-.voice-grid-card-overlay-name {
+.void-grid-card-overlay-name {
     flex-grow: 1;
     min-width: 0;
     overflow: hidden;
@@ -429,7 +429,7 @@
     -unity-text-outline-color: rgba(0, 0, 0, 0.9);
 }
 
-.voice-grid-card-overlay-stars {
+.void-grid-card-overlay-stars {
     flex-shrink: 0;
     color: rgb(255, 214, 72);
     -unity-text-align: upper-right;
@@ -437,7 +437,7 @@
     -unity-text-outline-color: rgba(0, 0, 0, 0.9);
 }
 
-.voice-grid-card-overlay-stat {
+.void-grid-card-overlay-stat {
     flex-grow: 1;
     width: 50%;
     color: rgb(255, 255, 255);
@@ -445,22 +445,22 @@
     -unity-text-outline-color: rgba(0, 0, 0, 0.9);
 }
 
-.voice-grid-card-overlay-stat--attack {
+.void-grid-card-overlay-stat--attack {
     -unity-text-align: lower-left;
 }
 
-.voice-grid-card-overlay-stat--defense {
+.void-grid-card-overlay-stat--defense {
     -unity-text-align: lower-right;
 }
 
-.voice-grid-empty-label {
+.void-grid-empty-label {
     flex-grow: 1;
     color: rgb(150, 160, 195);
     font-size: 16px;
     -unity-text-align: middle-center;
 }
 
-.voice-grid-footer {
+.void-grid-footer {
     height: 42px;
     min-height: 42px;
     flex-direction: row;
@@ -469,7 +469,7 @@
     margin-top: 12px;
 }
 
-.voice-grid-page-button {
+.void-grid-page-button {
     min-width: 100px;
     padding: 8px 14px;
     border-width: 0;
@@ -479,11 +479,11 @@
     -unity-font-style: bold;
 }
 
-.voice-grid-page-button:hover {
+.void-grid-page-button:hover {
     background-color: rgba(72, 105, 190, 1);
 }
 
-.voice-grid-page-label {
+.void-grid-page-label {
     min-width: 120px;
     margin: 0 16px;
     color: rgb(190, 204, 240);

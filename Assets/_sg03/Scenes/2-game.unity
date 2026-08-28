@@ -7561,7 +7561,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e04e3c09212b4b9abb8fe0881849f7cc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SG03.UI.VoiceManagerGrid
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.UI.VoidManagerGrid
   columns: 6
   rows: 2
   cardWidth: 130

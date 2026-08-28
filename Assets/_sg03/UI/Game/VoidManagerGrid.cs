@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 
 namespace SG03.UI
 {
-    public class VoiceManagerGrid : SaiBehaviour
+    public class VoidManagerGrid : SaiBehaviour
     {
         [Header("Grid Size")]
         [SerializeField, Min(1)] private int columns = 6;
@@ -95,7 +95,7 @@ namespace SG03.UI
             this.isDisposed = false;
             if (this.uiDocument == null)
             {
-                Debug.LogError(this.transform.name + ": VoiceManagerGrid requires a UIDocument reference.", this.gameObject);
+                Debug.LogError(this.transform.name + ": VoidManagerGrid requires a UIDocument reference.", this.gameObject);
                 return;
             }
 
@@ -184,15 +184,15 @@ namespace SG03.UI
 
         private void BindElements(VisualElement root)
         {
-            this.overlay = root?.Q("VoiceGridOverlay");
-            this.panel = root?.Q("VoiceGridPanel");
-            this.content = root?.Q("VoiceGridContent");
+            this.overlay = root?.Q("VoidGridOverlay");
+            this.panel = root?.Q("VoidGridPanel");
+            this.content = root?.Q("VoidGridContent");
             this.alphaVoidCountLabel = root?.Q<Label>("AlphaTheVoidCountLabel");
-            this.titleLabel = root?.Q<Label>("VoiceGridTitle");
-            this.pageLabel = root?.Q<Label>("VoiceGridPageLabel");
-            this.closeButton = root?.Q<Button>("VoiceGridCloseButton");
-            this.previousButton = root?.Q<Button>("VoiceGridPreviousButton");
-            this.nextButton = root?.Q<Button>("VoiceGridNextButton");
+            this.titleLabel = root?.Q<Label>("VoidGridTitle");
+            this.pageLabel = root?.Q<Label>("VoidGridPageLabel");
+            this.closeButton = root?.Q<Button>("VoidGridCloseButton");
+            this.previousButton = root?.Q<Button>("VoidGridPreviousButton");
+            this.nextButton = root?.Q<Button>("VoidGridNextButton");
         }
 
         private void RegisterCallbacks()
@@ -326,14 +326,14 @@ namespace SG03.UI
             if (this.overlay == null) return;
             this.isVisible = true;
             this.currentPage = 0;
-            this.overlay.RemoveFromClassList("voice-grid-overlay--hidden");
+            this.overlay.RemoveFromClassList("void-grid-overlay--hidden");
             this.Refresh();
         }
 
         private void Hide()
         {
             this.isVisible = false;
-            this.overlay?.AddToClassList("voice-grid-overlay--hidden");
+            this.overlay?.AddToClassList("void-grid-overlay--hidden");
         }
 
         private void Refresh()
@@ -385,7 +385,7 @@ namespace SG03.UI
             if (cards.Count == 0)
             {
                 Label emptyLabel = new Label("Alpha's Void is empty.");
-                emptyLabel.AddToClassList("voice-grid-empty-label");
+                emptyLabel.AddToClassList("void-grid-empty-label");
                 this.content.Add(emptyLabel);
                 return;
             }
@@ -394,7 +394,7 @@ namespace SG03.UI
             for (int rowIndex = 0; rowIndex < this.Rows; rowIndex++)
             {
                 VisualElement row = new VisualElement();
-                row.AddToClassList("voice-grid-row");
+                row.AddToClassList("void-grid-row");
                 this.content.Add(row);
                 this.BuildRow(row, cards, pageStart + rowIndex * this.Columns);
             }
@@ -412,7 +412,7 @@ namespace SG03.UI
                 }
 
                 VisualElement placeholder = new VisualElement();
-                placeholder.AddToClassList("voice-grid-card-placeholder");
+                placeholder.AddToClassList("void-grid-card-placeholder");
                 this.ApplyCardSize(placeholder);
                 row.Add(placeholder);
             }
@@ -421,13 +421,13 @@ namespace SG03.UI
         private VisualElement BuildCard(BattleCardSlot slot)
         {
             VisualElement card = new VisualElement();
-            card.AddToClassList("voice-grid-card");
+            card.AddToClassList("void-grid-card");
             this.ApplyCardSize(card);
 
             VisualElement artArea = new VisualElement();
-            artArea.AddToClassList("voice-grid-card-art");
+            artArea.AddToClassList("void-grid-card-art");
             Image artImage = new Image { scaleMode = ScaleMode.ScaleAndCrop };
-            artImage.AddToClassList("voice-grid-card-art-image");
+            artImage.AddToClassList("void-grid-card-art-image");
             artArea.Add(artImage);
             this.AddCardTextOverlays(artArea, slot);
             card.Add(artArea);
@@ -440,35 +440,35 @@ namespace SG03.UI
             CardDefinitionData definition = this.GetCardDefinition(slot.item_definition_code_name);
 
             VisualElement topOverlay = new VisualElement();
-            topOverlay.AddToClassList("voice-grid-card-overlay");
-            topOverlay.AddToClassList("voice-grid-card-overlay--top");
+            topOverlay.AddToClassList("void-grid-card-overlay");
+            topOverlay.AddToClassList("void-grid-card-overlay--top");
 
             Label nameLabel = new Label(this.GetCardDisplayName(slot, definition));
-            nameLabel.AddToClassList("voice-grid-card-overlay-name");
+            nameLabel.AddToClassList("void-grid-card-overlay-name");
             this.ApplyFontSize(nameLabel);
             topOverlay.Add(nameLabel);
 
             int starCount = Mathf.Max(0, definition?.GetBaseStatInt("star") ?? 0);
             Label starLabel = new Label(starCount.ToString());
-            starLabel.AddToClassList("voice-grid-card-overlay-stars");
+            starLabel.AddToClassList("void-grid-card-overlay-stars");
             this.ApplyFontSize(starLabel);
             topOverlay.Add(starLabel);
 
             VisualElement bottomOverlay = new VisualElement();
-            bottomOverlay.AddToClassList("voice-grid-card-overlay");
-            bottomOverlay.AddToClassList("voice-grid-card-overlay--bottom");
+            bottomOverlay.AddToClassList("void-grid-card-overlay");
+            bottomOverlay.AddToClassList("void-grid-card-overlay--bottom");
 
             int attack = definition?.GetBaseStatInt("atk") ?? 0;
             Label attackLabel = new Label($"ATK {attack}");
-            attackLabel.AddToClassList("voice-grid-card-overlay-stat");
-            attackLabel.AddToClassList("voice-grid-card-overlay-stat--attack");
+            attackLabel.AddToClassList("void-grid-card-overlay-stat");
+            attackLabel.AddToClassList("void-grid-card-overlay-stat--attack");
             this.ApplyFontSize(attackLabel);
             bottomOverlay.Add(attackLabel);
 
             int defense = definition?.GetBaseStatInt("def") ?? slot.final_def;
             Label defenseLabel = new Label($"DEF {defense}");
-            defenseLabel.AddToClassList("voice-grid-card-overlay-stat");
-            defenseLabel.AddToClassList("voice-grid-card-overlay-stat--defense");
+            defenseLabel.AddToClassList("void-grid-card-overlay-stat");
+            defenseLabel.AddToClassList("void-grid-card-overlay-stat--defense");
             this.ApplyFontSize(defenseLabel);
             bottomOverlay.Add(defenseLabel);
 

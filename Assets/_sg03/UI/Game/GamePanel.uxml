@@ -67,17 +67,17 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <ui:VisualElement name="VoiceGridOverlay" class="voice-grid-overlay voice-grid-overlay--hidden">
-            <ui:VisualElement name="VoiceGridPanel" class="voice-grid-panel">
-                <ui:VisualElement class="voice-grid-header">
-                    <ui:Label name="VoiceGridTitle" text="Alpha - The Void" class="voice-grid-title" />
-                    <ui:Button name="VoiceGridCloseButton" text="X" tooltip="Close" class="voice-grid-close-button" />
+        <ui:VisualElement name="VoidGridOverlay" class="void-grid-overlay void-grid-overlay--hidden">
+            <ui:VisualElement name="VoidGridPanel" class="void-grid-panel">
+                <ui:VisualElement class="void-grid-header">
+                    <ui:Label name="VoidGridTitle" text="Alpha - The Void" class="void-grid-title" />
+                    <ui:Button name="VoidGridCloseButton" text="X" tooltip="Close" class="void-grid-close-button" />
                 </ui:VisualElement>
-                <ui:VisualElement name="VoiceGridContent" class="voice-grid-content" />
-                <ui:VisualElement class="voice-grid-footer">
-                    <ui:Button name="VoiceGridPreviousButton" text="Previous" class="voice-grid-page-button" />
-                    <ui:Label name="VoiceGridPageLabel" text="Page 1 / 1" class="voice-grid-page-label" />
-                    <ui:Button name="VoiceGridNextButton" text="Next" class="voice-grid-page-button" />
+                <ui:VisualElement name="VoidGridContent" class="void-grid-content" />
+                <ui:VisualElement class="void-grid-footer">
+                    <ui:Button name="VoidGridPreviousButton" text="Previous" class="void-grid-page-button" />
+                    <ui:Label name="VoidGridPageLabel" text="Page 1 / 1" class="void-grid-page-label" />
+                    <ui:Button name="VoidGridNextButton" text="Next" class="void-grid-page-button" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
