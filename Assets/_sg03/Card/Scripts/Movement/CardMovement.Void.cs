@@ -83,21 +83,24 @@ namespace SG03
         }
 
         /// <summary>
-        /// Step 3: Rotates the card to face opponent direction (Omega faces Alpha, Alpha faces Omega).
+        /// Step 3: Rotates the card 90 degrees from its Void orientation to face the opponent.
         /// Dedicated helper step for <see cref="MoveVoidToLine"/> sequence. Do NOT share with other movement paths.
         /// </summary>
         private void AttackDirection(bool isAlpha, System.Action onComplete = null)
         {
-            Quaternion targetRotation = isAlpha ? Quaternion.Euler(this.transform.eulerAngles.x, 0f, 0f) : Quaternion.Euler(this.transform.eulerAngles.x, 180f, 0f);
+            float zRotation = isAlpha ? -90f : 90f;
             this.rotateTween?.Kill();
-            this.rotateTween = this.transform.DORotateQuaternion(targetRotation, this.duration * 0.5f)
+            this.rotateTween = this.transform.DORotate(
+                    new Vector3(0f, 0f, zRotation),
+                    this.duration * 0.5f,
+                    RotateMode.WorldAxisAdd)
                 .SetEase(this.ease)
                 .OnComplete(() => onComplete?.Invoke());
         }
 
         /// <summary>
         /// Step 4: Rotates the card face-up while maintaining its current elevation.
-        /// Alpha cards also rotate 180 degrees around world Z so their face-up artwork points toward Omega.
+        /// Omega cards also rotate 180 degrees around world Z so their face-up artwork points toward Alpha.
         /// Dedicated helper step for <see cref="MoveVoidToLine"/> sequence. Do NOT share with other movement paths.
         /// </summary>
         private void FaceUpKeepY(bool isAlpha, System.Action onComplete = null)
@@ -106,7 +109,7 @@ namespace SG03
             this.isFlipping = true;
             this.faceTween?.Kill();
             this.faceTween = DOTween.Sequence();
-            float targetZAngle = this.faceUpRotation.z + (isAlpha ? 180f : 0f);
+            float targetZAngle = this.faceUpRotation.z + (isAlpha ? 0f : 180f);
             Vector3 targetRotation = new Vector3(this.faceUpRotation.x, this.faceUpRotation.y, targetZAngle);
             this.faceTween.Append(
                 this.transform.DORotateQuaternion(Quaternion.Euler(targetRotation), this.flipDuration * 2f)
