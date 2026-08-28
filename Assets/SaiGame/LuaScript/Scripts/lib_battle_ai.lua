@@ -342,8 +342,8 @@ end
 
 -- ── omega_planning_to_attack ──────────────────────────────────────────────────
 -- Builds state.omega_planning for the current turn.
--- Picks ONE untriggered character from omega_front_line to attack the alpha
--- front-line card with the lowest final_def (fallback to alpha back-line).
+-- Picks ONE untriggered character from omega_front_line to attack the weakest
+-- face-up Alpha Character, then a face-down target (fallback to alpha back-line).
 -- Appends a labeled omega planning action with attacker, defender, and visible ATK.
 -- If no untriggered attacker exists, calls omega_end_turn directly.
 -- Returns err or nil.
@@ -383,27 +383,40 @@ function _find_omega_attacker(state, require_face_up)
     return nil
 end
 
--- Returns the alpha front-line card with the lowest final_def.
--- Falls back to alpha back-line if front is empty.
+-- Returns the face-up Alpha front-line Character with the least remaining DEF.
+-- If none is face-up, returns the first face-down Character in slot order.
+-- Falls back to the first real Alpha back-line card if no front target exists.
 function _pick_alpha_attack_target(state)
     local alpha_front_line = state.alpha_front_line or {}
-    local lowest_card      = nil
-    local lowest_def       = math.huge
+    local selected_face_up = nil
+    local lowest_remaining_def = math.huge
+    local first_face_down = nil
     for _, front_card in ipairs(alpha_front_line) do
-        if front_card.inventory_item_id ~= nil and front_card.inventory_item_id ~= "" then
-            local card_def = front_card.final_def or 0
-            lib_battle_common.dlog("[lib_battle_ai] _pick_alpha_attack_target: candidate id=" ..
-            front_card.inventory_item_id .. " final_def=" .. card_def)
-            if card_def < lowest_def then
-                lowest_def  = card_def
-                lowest_card = front_card
+        local has_card = front_card.inventory_item_id ~= nil and front_card.inventory_item_id ~= ""
+        if has_card and lib_battle_common.check_card_type(state.item_defs, front_card, "character") then
+            if front_card.face_up == true then
+                local remaining_def = (front_card.final_def or 0) -
+                    (front_card.total_damage_received or 0)
+                lib_battle_common.dlog("[lib_battle_ai] _pick_alpha_attack_target: face-up candidate id=" ..
+                    front_card.inventory_item_id .. " remaining_def=" .. remaining_def)
+                if remaining_def < lowest_remaining_def then
+                    lowest_remaining_def = remaining_def
+                    selected_face_up = front_card
+                end
+            elseif first_face_down == nil then
+                first_face_down = front_card
             end
         end
     end
-    if lowest_card ~= nil then
-        lib_battle_common.dlog("[lib_battle_ai] _pick_alpha_attack_target: chose front id=" ..
-        lowest_card.inventory_item_id .. " def=" .. lowest_def)
-        return lowest_card
+    if selected_face_up ~= nil then
+        lib_battle_common.dlog("[lib_battle_ai] _pick_alpha_attack_target: chose face-up id=" ..
+            selected_face_up.inventory_item_id .. " remaining_def=" .. lowest_remaining_def)
+        return selected_face_up
+    end
+    if first_face_down ~= nil then
+        lib_battle_common.dlog("[lib_battle_ai] _pick_alpha_attack_target: chose face-down id=" ..
+            first_face_down.inventory_item_id)
+        return first_face_down
     end
     local back_card = _find_first_real_card_in_line(state.alpha_back_line)
     if back_card ~= nil then

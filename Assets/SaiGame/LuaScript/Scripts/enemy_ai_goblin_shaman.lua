@@ -126,30 +126,8 @@ function goblin_shaman_find_extra_face_down_attacker(state)
     return face_down_count, first_face_down_attacker
 end
 
--- Prefer an exposed Alpha Character on the front line. Within that preferred
--- set, use the lowest DEF and preserve slot order as a deterministic tie-break.
--- If there is no exposed Character, retain the standard target-selection rules.
+-- Use the shared face-up-first target priority.
 function goblin_shaman_pick_attack_target(state)
-    local selected_card = nil
-    local lowest_def = math.huge
-    for _, candidate in ipairs(state.alpha_front_line or {}) do
-        local candidate_id = candidate.inventory_item_id or ""
-        if candidate_id ~= "" and candidate.expose == true and
-           lib_battle_common.check_card_type(state.item_defs, candidate, "character") then
-            local candidate_def = candidate.final_def or 0
-            lib_battle_common.dlog("[entity_ai] goblin_shaman target candidate: exposed character=" ..
-                candidate_id .. " final_def=" .. candidate_def)
-            if candidate_def < lowest_def then
-                selected_card = candidate
-                lowest_def = candidate_def
-            end
-        end
-    end
-    if selected_card ~= nil then
-        lib_battle_common.dlog("[entity_ai] goblin_shaman target selected: exposed character=" ..
-            selected_card.inventory_item_id .. " final_def=" .. lowest_def)
-        return selected_card
-    end
     return enemy_ai_core.pick_alpha_front_line_character_target(state)
 end
 

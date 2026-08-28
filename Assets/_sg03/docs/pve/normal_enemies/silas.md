@@ -140,7 +140,7 @@ defend(state)
 Ngoài lượt thực hiện combo, baseline:
 
 - chọn Character Omega chưa kích hoạt đầu tiên, loại trừ các card đang reserve trong hand;
-- ưu tiên Character Alpha đang face-up có `final_def` thấp nhất ở tiền tuyến; nếu không có Character face-up, chọn Character tiền tuyến có `final_def` thấp nhất;
+- ưu tiên Character Alpha đang face-up có hiệu `final_def - total_damage_received` thấp nhất ở tiền tuyến; nếu không có Character face-up, chọn Character face-down đầu tiên theo thứ tự slot;
 - nếu Alpha không còn Character tiền tuyến, lập kế hoạch đánh `alpha_hp`;
 - không có attacker hợp lệ thì kết thúc lượt Omega.
 

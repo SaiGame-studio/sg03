@@ -116,40 +116,39 @@ function defend_with_back_line_ability_when_front_line_takes_damage(state, abili
     })
 end
 
--- Returns the lowest-DEF Alpha Character on the front line. Back-line cards,
--- including Ability cards, are intentionally not valid combat targets here.
-function pick_alpha_front_line_character_target(state)
+-- Returns the face-up Alpha Character with the least remaining DEF.
+function pick_alpha_face_up_front_line_character_target(state)
     local selected_card = nil
-    local lowest_def = math.huge
+    local lowest_remaining_def = math.huge
     for _, card in ipairs(state.alpha_front_line or {}) do
         local has_card = card.inventory_item_id ~= nil and card.inventory_item_id ~= ""
-        if has_card and lib_battle_common.check_card_type(state.item_defs, card, "character") then
-            local card_def = card.final_def or 0
-            if card_def < lowest_def then
+        if has_card and card.face_up == true
+            and lib_battle_common.check_card_type(state.item_defs, card, "character") then
+            local remaining_def = (card.final_def or 0) - (card.total_damage_received or 0)
+            if remaining_def < lowest_remaining_def then
                 selected_card = card
-                lowest_def = card_def
+                lowest_remaining_def = remaining_def
             end
         end
     end
     return selected_card
 end
 
--- Returns the lowest-DEF exposed Alpha Character on the front line.
-function pick_alpha_exposed_front_line_character_target(state)
-    local selected_card = nil
-    local lowest_def = math.huge
+-- Prefers the weakest face-up Alpha Character on the front line. If none is
+-- face-up, returns the first face-down Character in slot order. Back-line cards,
+-- including Ability cards, are intentionally not valid combat targets here.
+function pick_alpha_front_line_character_target(state)
+    local face_up_target = pick_alpha_face_up_front_line_character_target(state)
+    if face_up_target ~= nil then return face_up_target end
+
     for _, card in ipairs(state.alpha_front_line or {}) do
         local has_card = card.inventory_item_id ~= nil and card.inventory_item_id ~= ""
-        if has_card and card.expose == true
+        if has_card and card.face_up ~= true
             and lib_battle_common.check_card_type(state.item_defs, card, "character") then
-            local card_def = card.final_def or 0
-            if card_def < lowest_def then
-                selected_card = card
-                lowest_def = card_def
-            end
+            return card
         end
     end
-    return selected_card
+    return nil
 end
 
 -- Plans one Omega Character attack against defender, or Alpha HP when defender is nil.
