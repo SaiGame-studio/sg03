@@ -131,6 +131,7 @@ It standardizes every raw error string into a unique `ErrorKey`, regex pattern, 
 | `ERR_XENA_INVALID_CONFIG` | `xena_awakened requires valid configuration` | Invalid awakening skill configuration. | Thức Tỉnh Xena thiếu cấu hình hợp lệ. | `lib_ability_xena.lua` |
 | `ERR_XENA_REQUIRES_TARGET` | `{0} requires a target card` | Skill {0} requires a target card. | Kỹ năng {0} yêu cầu lá bài mục tiêu. | `lib_ability_xena.lua` |
 | `ERR_XENA_TARGET_MUST_BE_CHAR` | `{0} target must be a Character` | Target must be a character card. | Mục tiêu phải là một thẻ nhân vật. | `lib_ability_xena.lua` |
+| `ERR_XENA_TARGET_MUST_BE_FORM` | `{0} target must be {1}` | The awakening skill can only target its matching Xena form. | Kỹ năng Thức Tỉnh chỉ có thể nhắm đúng hình thái Xena tương ứng. | `lib_ability_xena.lua` |
 | `ERR_XENA_TARGET_NOT_ATTACKED` | `{0} target is not being attacked` | Target is not under attack. | Mục tiêu không bị tấn công. | `lib_ability_xena.lua` |
 | `ERR_XENA_REQUIRES_SACRIFICE` | `{0} requires {1} adjacent allied card(s) to sacrifice` | Skill {0} requires {1} adjacent allied card(s) to sacrifice. | Kỹ năng {0} yêu cầu hiến tế {1} lá đồng minh. | `lib_ability_xena.lua` |
 | `ERR_XENA_REQUIRES_SUCCESSOR` | `{0} requires {1} in own the_void` | Skill {0} requires {1} in your void zone. | Kỹ năng {0} yêu cầu lá {1} trong Hư Không. | `lib_ability_xena.lua` |

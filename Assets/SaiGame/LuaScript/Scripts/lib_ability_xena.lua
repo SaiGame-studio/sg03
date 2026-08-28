@@ -3,6 +3,7 @@
 
 -- Shared execution for Xena's awakened Ability cards.
 -- config requires ability_key, successor_code, and successor_name.
+-- predecessor_code and predecessor_name optionally restrict the Character form being awakened.
 -- sacrifice_count supports 0 (default), 1, or 2 adjacent allied cards.
 -- sacrifice_stars is an optional list of allowed card stars (each 1 through 9).
 -- sacrifice_race restricts sacrifices to one card race when provided.
@@ -11,6 +12,10 @@
 local function validate_xena_config(config)
     if config == nil or type(config.ability_key) ~= "string" or
        type(config.successor_code) ~= "string" or type(config.successor_name) ~= "string" then
+        return nil, "xena_awakened requires valid configuration"
+    end
+    if (config.predecessor_code ~= nil or config.predecessor_name ~= nil) and
+       (type(config.predecessor_code) ~= "string" or type(config.predecessor_name) ~= "string") then
         return nil, "xena_awakened requires valid configuration"
     end
 
@@ -54,6 +59,8 @@ local function validate_xena_config(config)
 
     return {
         ability_key = config.ability_key,
+        predecessor_code = config.predecessor_code,
+        predecessor_name = config.predecessor_name,
         successor_code = config.successor_code,
         successor_name = config.successor_name,
         sacrifice_count = sacrifice_count,
@@ -205,6 +212,10 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
     local battle = helpers.lib_battle_common
     local target_card = target_context.target_card
     local source_side = target_context.source_side
+    if settings.predecessor_code ~= nil and
+       target_card.item_definition_code_name ~= settings.predecessor_code then
+        return {}, settings.ability_key .. " target must be " .. settings.predecessor_name
+    end
     local void_key = source_side .. "_the_void"
     local void_zone = state[void_key] or {}
     state[void_key] = void_zone
@@ -251,10 +262,12 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
 end
 
 -- ability: xena_awakened1
--- Replaces an attacked Character that will be defeated with Xena II from void.
+-- Replaces an attacked Xena I that will be defeated with Xena II from void.
 function xena_awakened1_execute(state, source_card, event_data, helpers)
     return execute_xena_awakened(state, source_card, event_data, helpers, {
         ability_key = "xena_awakened1",
+        predecessor_code = "xena1",
+        predecessor_name = "Xena I",
         successor_code = "xena2",
         successor_name = "Xena II",
         sacrifice_count = 0,
@@ -262,10 +275,12 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
 end
 
 -- ability: xena_awakened2
--- Replaces an attacked Character that will be defeated with Xena III from void.
+-- Replaces an attacked Xena II that will be defeated with Xena III from void.
 function xena_awakened2_execute(state, source_card, event_data, helpers)
     return execute_xena_awakened(state, source_card, event_data, helpers, {
         ability_key = "xena_awakened2",
+        predecessor_code = "xena2",
+        predecessor_name = "Xena II",
         successor_code = "xena3",
         successor_name = "Xena III",
         sacrifice_count = 0,
@@ -278,6 +293,8 @@ end
 function xena_awakened3_execute(state, source_card, event_data, helpers)
     return execute_xena_awakened(state, source_card, event_data, helpers, {
         ability_key = "xena_awakened3",
+        predecessor_code = "xena3",
+        predecessor_name = "Xena III",
         successor_code = "xena4",
         successor_name = "Xena IV",
         sacrifice_count = 1,
@@ -422,6 +439,8 @@ function xena_awakened4_execute(state, source_card, event_data, helpers)
 
     local awakening_config = {
         ability_key = "xena_awakened4",
+        predecessor_code = "xena4",
+        predecessor_name = "Xena IV",
         successor_code = "xena5",
         successor_name = "Xena V",
         sacrifice_count = 0,
