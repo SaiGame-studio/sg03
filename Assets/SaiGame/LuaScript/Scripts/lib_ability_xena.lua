@@ -181,7 +181,7 @@ local function replace_pending_defenders(state, target_card, successor_card)
 end
 
 local function build_xena_actions(source_side, source_card, settings, target_card, successor_card,
-    sacrificed_cards, target_line_key)
+    sacrificed_cards)
     local actions = {
         source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
             ",ability=" .. settings.ability_key .. ",target=" .. target_card.inventory_item_id ..
@@ -191,8 +191,6 @@ local function build_xena_actions(source_side, source_card, settings, target_car
         table.insert(actions, source_side .. "_card_sent_to_void:" .. sacrifice_card.inventory_item_id)
     end
     table.insert(actions, source_side .. "_card_sent_to_void:" .. target_card.inventory_item_id)
-    table.insert(actions, source_side .. "_void_to_" .. string.sub(target_line_key, 7) .. ":" ..
-        successor_card.inventory_item_id .. "," .. tostring(successor_card.slot_index))
     return actions
 end
 
@@ -254,8 +252,10 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
     replace_pending_defenders(state, target_card, successor_card)
 
     local actions = build_xena_actions(source_side, source_card, settings, target_card, successor_card,
-        sacrificed_cards, target_line_key)
+        sacrificed_cards)
     send_source_to_void(state, source_side, source_card, void_zone, battle, actions)
+    table.insert(actions, source_side .. "_void_to_" .. string.sub(target_line_key, 7) .. ":" ..
+        successor_card.inventory_item_id .. "," .. tostring(successor_card.slot_index))
     battle.dlog("[ability] " .. settings.ability_key .. ": summoned " .. settings.successor_name .. "=" ..
         successor_card.inventory_item_id .. " to " .. target_line_key .. " slot=" ..
         tostring(successor_card.slot_index) .. " with +" .. def_buff .. " DEF")
