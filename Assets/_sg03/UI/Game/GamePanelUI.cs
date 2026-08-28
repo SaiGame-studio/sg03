@@ -467,6 +467,11 @@ namespace SG03.UI
 
         protected virtual void OnDestroy()
         {
+            this.DisposePanel();
+        }
+
+        private void DisposePanel()
+        {
             this.battleStatusUI?.Dispose();
             this.deskTabsUI?.Dispose();
             this.soulEnergyUI?.Dispose();

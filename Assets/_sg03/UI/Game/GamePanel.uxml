@@ -28,7 +28,7 @@
                 <ui:Label name="AlphaHpLabel" text="HP: --" class="battle-hp-label battle-hp-label--alpha" />
                 <ui:Label name="OmeraSourceCountLabel" text="Source: --" class="battle-source-count-label battle-source-count-label--top-right" />
                 <ui:Label name="OmegaTheVoidCountLabel" text="Void: --" class="battle-source-count-label battle-source-count-label--top-right-2" />
-                <ui:Label name="AlphaTheVoidCountLabel" text="Void: --" class="battle-source-count-label battle-source-count-label--bottom-right-2" />
+                <ui:Label name="AlphaTheVoidCountLabel" text="Void: --" tooltip="Show Alpha Void cards" class="battle-source-count-label battle-source-count-label--bottom-right-2 battle-source-count-label--interactive" />
                 <ui:Label name="AlphaSourceCountLabel" text="Source: --" class="battle-source-count-label battle-source-count-label--bottom-right" />
             </ui:VisualElement>
 
@@ -64,6 +64,21 @@
             <ui:VisualElement name="SoulEnergyFullRow" class="soul-energy-popup__row">
                 <ui:Label name="SoulEnergyFullLabel" text="Full in" class="soul-energy-popup__label" />
                 <ui:Label name="SoulEnergyFullValue" text="—" class="soul-energy-popup__value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="VoiceGridOverlay" class="voice-grid-overlay voice-grid-overlay--hidden">
+            <ui:VisualElement name="VoiceGridPanel" class="voice-grid-panel">
+                <ui:VisualElement class="voice-grid-header">
+                    <ui:Label name="VoiceGridTitle" text="Alpha - The Void" class="voice-grid-title" />
+                    <ui:Button name="VoiceGridCloseButton" text="X" tooltip="Close" class="voice-grid-close-button" />
+                </ui:VisualElement>
+                <ui:VisualElement name="VoiceGridContent" class="voice-grid-content" />
+                <ui:VisualElement class="voice-grid-footer">
+                    <ui:Button name="VoiceGridPreviousButton" text="Previous" class="voice-grid-page-button" />
+                    <ui:Label name="VoiceGridPageLabel" text="Page 1 / 1" class="voice-grid-page-label" />
+                    <ui:Button name="VoiceGridNextButton" text="Next" class="voice-grid-page-button" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

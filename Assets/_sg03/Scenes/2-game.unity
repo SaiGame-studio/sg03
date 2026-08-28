@@ -7469,6 +7469,7 @@ GameObject:
   - component: {fileID: 2030001004}
   - component: {fileID: 2030001003}
   - component: {fileID: 2030001005}
+  - component: {fileID: 2030001006}
   m_Layer: 0
   m_Name: GamePanelUI
   m_TagString: Untagged
@@ -7534,6 +7535,24 @@ MonoBehaviour:
   currencyWallet: {fileID: 2030001005}
   uiDocument: {fileID: 2030001003}
   lobbySceneName: 1-lobby
+--- !u!114 &2030001006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2030001001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e04e3c09212b4b9abb8fe0881849f7cc, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.UI.VoiceManagerGrid
+  columns: 4
+  rows: 2
+  cardWidth: 90
+  cardHeight: 160
+  uiDocument: {fileID: 2030001003}
+  battleStateCtrl: {fileID: 2015755444}
 --- !u!114 &2030001005
 MonoBehaviour:
   m_ObjectHideFlags: 0
