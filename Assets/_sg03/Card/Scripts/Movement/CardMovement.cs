@@ -29,6 +29,10 @@ namespace SG03
         [Tooltip("Y offset (world units) applied when placing a card into a line slot.")]
         [SerializeField] private float lineOffsetY = 0.3f;
 
+        [Header("Debug")]
+        [Tooltip("Logs every MoveVoidToLine step with card/holder positions and distance.")]
+        [SerializeField] private bool debugMoveVoidToLine;
+
         // ─── In-Hand Hover ────────────────────────────────────────────────────────
 
         [Header("In-Hand Hover")]
@@ -147,6 +151,7 @@ namespace SG03
         [Header("State")]
         [SerializeField] private Location location;
         [SerializeField] private FaceState faceState = FaceState.Unknown;
+        [SerializeField] private bool isVoidToLineTransitionActive;
 
         private float handAnchorY;
         private Vector3 handAnchorPosition;
@@ -209,6 +214,7 @@ namespace SG03
 
         public Location Location => this.location;
         public bool IsFlipping => this.isFlipping;
+        public bool IsVoidToLineTransitionActive => this.isVoidToLineTransitionActive;
         public bool IsAnimating =>
             (this.moveTween != null && this.moveTween.IsActive()) ||
             (this.yTween != null && this.yTween.IsActive()) ||
@@ -234,6 +240,7 @@ namespace SG03
         /// </summary>
         public void MoveAndRotate(Transform target, Location destination)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping)
             {
                 Debug.LogWarning($"[CardMovement] {this.gameObject.name} MoveAndRotate SKIPPED — isFlipping=true");
@@ -248,6 +255,7 @@ namespace SG03
 
         public void MoveAndRotate(Vector3 worldPosition, Quaternion rotation, Location destination)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping)
             {
                 Debug.LogWarning($"[CardMovement] {this.gameObject.name} MoveAndRotate SKIPPED — isFlipping=true");
@@ -265,6 +273,7 @@ namespace SG03
         /// </summary>
         public void MoveTo(Transform target, Location destination)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.SetLocation(destination);
             this.RecordHandAnchor(target, destination);
@@ -274,6 +283,7 @@ namespace SG03
 
         public void MoveTo(Vector3 worldPosition, Location destination)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.SetLocation(destination);
             this.KillAllTweens();
@@ -286,6 +296,7 @@ namespace SG03
         /// </summary>
         public void MoveTo(Transform target, Location destination, System.Action onComplete)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.SetLocation(destination);
             this.RecordHandAnchor(target, destination);
@@ -299,6 +310,7 @@ namespace SG03
         /// </summary>
         public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (holder == null) return;
             // The settle phase must supersede any stale face/rotation tween;
             // otherwise the card remains at the temporary above-line position.
@@ -320,6 +332,7 @@ namespace SG03
         /// </summary>
         public void MoveToLineFaceUp(CardHolderCtrl holder, System.Action onReady = null)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (holder == null) return;
             this.KillAllTweens();
             this.isFlipping = false;
@@ -342,6 +355,7 @@ namespace SG03
 
         public void MoveBackToLineHolder(CardHolderCtrl holder)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (holder == null) return;
             this.RecordHandAnchor(holder.transform, this.location);
             this.KillAllTweens();
@@ -352,6 +366,7 @@ namespace SG03
         /// <summary>Cancels an active line transition and returns the card to a hand slot.</summary>
         public void ReturnToHand(Transform handTarget)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (handTarget == null) return;
 
             this.KillAllTweens();
@@ -366,6 +381,7 @@ namespace SG03
         /// <summary>Smoothly rotates the card to face-up using global euler angles.</summary>
         public void FaceUp()
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.faceState = FaceState.FaceUp;
             this.DoFaceFlip(this.faceUpRotation, this.flipAxisUpDown);
@@ -374,6 +390,7 @@ namespace SG03
         /// <summary>Smoothly rotates the card to face-down using global euler angles.</summary>
         public void FaceDown()
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.faceState = FaceState.FaceDown;
             this.DoFaceFlip(this.faceDownRotation, this.flipAxisUpDown);
@@ -382,6 +399,7 @@ namespace SG03
         /// <summary>Rotates the card to face-up using the Unknown axis, without rising.</summary>
         public void FaceUpUnknown()
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.faceState = FaceState.FaceUp;
             this.DoFaceFlipNoRise(this.faceUpRotation);
@@ -390,6 +408,7 @@ namespace SG03
         /// <summary>Rotates the card to face-down using the Unknown axis, without rising.</summary>
         public void FaceDownUnknown()
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.faceState = FaceState.FaceDown;
             this.DoFaceFlipNoRise(this.faceDownRotation);
@@ -398,6 +417,7 @@ namespace SG03
         /// <summary>Toggles between FaceUp and FaceDown. Defaults to FaceUp when Unknown.</summary>
         public void ToggleFace()
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.faceState == FaceState.FaceUp)
             {
                 this.FaceDown();
@@ -409,6 +429,7 @@ namespace SG03
         /// <summary>Smoothly rotates the card in-place to the target world-space rotation without any position change.</summary>
         public void RotateTo(Quaternion targetRotation)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.isFlipping = true;
             this.faceTween?.Kill();
@@ -423,6 +444,7 @@ namespace SG03
         /// <summary>Rotates the card 180 degrees around the world Y axis, then invokes <paramref name="onComplete"/>.</summary>
         public void RotateY180(System.Action onComplete = null)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.isFlipping = true;
             this.rotateY180Tween?.Kill();
@@ -487,6 +509,7 @@ namespace SG03
         /// </summary>
         public void MoveToFullDetail(Transform point)
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.preFullDetailPosition = this.transform.position;
             this.preFullDetailRotation = this.transform.rotation;
@@ -500,6 +523,7 @@ namespace SG03
         /// </summary>
         public void ReturnFromFullDetail()
         {
+            if (this.isVoidToLineTransitionActive) return;
             if (this.isFlipping) return;
             this.KillAllTweens();
             this.StartMoveTween(this.preFullDetailPosition, this.fullDetailReturnDuration, this.fullDetailReturnEase, null);
@@ -598,6 +622,11 @@ namespace SG03
         private void KillMoveTween()
         {
             if (this.moveTween == null) return;
+            if (this.isVoidToLineTransitionActive && this.moveTween.IsActive() && !this.moveTween.IsComplete())
+            {
+                CardHolderCtrl holder = this.ctrl != null ? this.ctrl.CardHolder : null;
+                this.LogMoveVoidToLine("STEP 2 INTERRUPTED MoveToHolderKeepY", holder);
+            }
             this.moveTween.Kill();
             this.moveTween = null;
         }
@@ -619,6 +648,7 @@ namespace SG03
             this.attackTween = null;
             this.abilityTween?.Kill();
             this.abilityTween = null;
+            this.isVoidToLineTransitionActive = false;
         }
     }
 }

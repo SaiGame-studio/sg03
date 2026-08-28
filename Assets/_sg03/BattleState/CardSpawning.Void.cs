@@ -12,6 +12,18 @@ namespace SG03
         public Card3DCtrl MoveOmegaVoidToFrontLine(string inventoryItemId, int slotIndex)
             => this.MoveVoidToLine(inventoryItemId, slotIndex, this.deskPosition.OmegaFrontLine, this.omegaVoidCardList, Owner.omega);
 
+        public CardHolderCtrl GetAlphaVoidToFrontLineHolder(int slotIndex)
+            => this.GetVoidToLineHolder(slotIndex, this.deskPosition.AlphaFrontLine);
+
+        public CardHolderCtrl GetOmegaVoidToFrontLineHolder(int slotIndex)
+            => this.GetVoidToLineHolder(slotIndex, this.deskPosition.OmegaFrontLine);
+
+        private CardHolderCtrl GetVoidToLineHolder(int slotIndex, CardHolderCtrl[] holders)
+        {
+            if (holders == null || slotIndex < 0 || slotIndex >= holders.Length) return null;
+            return holders[slotIndex];
+        }
+
         private Card3DCtrl MoveVoidToLine(string inventoryItemId, int slotIndex, CardHolderCtrl[] holders, List<Card3DCtrl> voidList, Owner owner)
         {
             if (slotIndex < 0 || slotIndex >= holders.Length) return null;
@@ -26,7 +38,7 @@ namespace SG03
                 card = this.SpawnCardAt(prefab, spawnPoint);
             }
             if (card == null) return null;
-            if (!this.TryPrepareVoidToLineTarget(card, holder, owner)) return null;
+            if (!this.TryPrepareVoidToLineTarget(card, holder)) return null;
 
             bool removedFromVoid = voidList.Remove(card);
             if (removedFromVoid && owner == Owner.alpha && this.alphaVoidSpawnedCount > 0) this.alphaVoidSpawnedCount--;
@@ -65,27 +77,14 @@ namespace SG03
             return card;
         }
 
-        private bool TryPrepareVoidToLineTarget(Card3DCtrl card, CardHolderCtrl holder, Owner owner)
+        private bool TryPrepareVoidToLineTarget(Card3DCtrl card, CardHolderCtrl holder)
         {
             if (!this.slotOccupancy.TryGetValue(holder.transform, out Card3DCtrl occupyingCard) ||
                 occupyingCard == null || !occupyingCard.gameObject.activeInHierarchy)
             {
                 return true;
             }
-            if (occupyingCard != card) return false;
-
-            // A live battle-status snapshot can bind the authoritative card to its
-            // destination before its queued action is dispatched. Resume starts
-            // from an empty board, so it does not hit this idempotency case.
-            // Re-stage the same card at The Void so the recorded action still
-            // performs the intended Void -> front-line animation.
-            this.RemoveFromSlotOccupancy(card);
-            Transform voidPoint = owner == Owner.alpha
-                ? this.deskPosition.AlphaTheVoid
-                : this.deskPosition.OmegaTheVoid;
-            if (voidPoint == null) return false;
-            card.transform.SetPositionAndRotation(voidPoint.position, voidPoint.rotation);
-            return true;
+            return occupyingCard == card;
         }
 
         public void SettleAlphaVoidInFrontLine(Card3DCtrl card, string inventoryItemId, int slotIndex) { }

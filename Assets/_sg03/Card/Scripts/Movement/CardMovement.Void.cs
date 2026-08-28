@@ -15,16 +15,24 @@ namespace SG03
         /// </summary>
         public void MoveVoidToLine(CardHolderCtrl holder, bool isAlpha, bool isFaceUp, System.Action onReady)
         {
-            if (holder == null) return;
+            if (holder == null)
+            {
+                this.LogMoveVoidToLine("ABORT holder=null", null);
+                return;
+            }
             this.KillAllTweens();
+            this.isVoidToLineTransitionActive = true;
             this.isFlipping = false;
             this.ctrl.AssignCardHolder(holder);
             Location destination = holder.HolderLocation;
             this.SetLocation(destination);
             this.RecordHandAnchor(holder.transform, destination);
+            this.LogMoveVoidToLine(
+                "START owner=" + (isAlpha ? "alpha" : "omega") + ",faceUp=" + isFaceUp,
+                holder);
 
             // Step 1: Rise up
-            this.RiseUp(this.flipRiseHeight, () =>
+            this.RiseUp(holder, this.flipRiseHeight, () =>
             {
                 // Step 2: Move to holder position maintaining height
                 this.MoveToHolderKeepY(holder, () =>
@@ -38,13 +46,14 @@ namespace SG03
                             this.FaceUpKeepY(isAlpha, () =>
                             {
                                 // Step 5: Descend to holder
-                                this.DescendToHolder(holder, onReady);
+                                this.DescendToHolder(holder, () => this.CompleteVoidToLine(holder, onReady));
                             });
                         }
                         else
                         {
+                            this.LogMoveVoidToLine("STEP 4 SKIPPED FaceUpKeepY", holder);
                             // Step 5: Descend to holder
-                            this.DescendToHolder(holder, onReady);
+                            this.DescendToHolder(holder, () => this.CompleteVoidToLine(holder, onReady));
                         }
                     });
                 });
@@ -57,17 +66,64 @@ namespace SG03
         public void MoveVoidToLine(CardHolderCtrl holder, Owner owner, bool isFaceUp = true, System.Action onReady = null)
             => this.MoveVoidToLine(holder, owner == Owner.alpha, isFaceUp, onReady);
 
+        private void CompleteVoidToLine(CardHolderCtrl holder, System.Action onReady)
+        {
+            holder?.RefreshHeldCardPlacement();
+            this.isVoidToLineTransitionActive = false;
+            this.LogMoveVoidToLine("COMPLETE", holder);
+            onReady?.Invoke();
+        }
+
+        private void LogMoveVoidToLine(string message, CardHolderCtrl holder)
+        {
+            if (!this.debugMoveVoidToLine) return;
+            holder?.RefreshHeldCardPlacement();
+            string holderName = holder != null ? holder.name : "null";
+            string holderPosition = holder != null ? holder.transform.position.ToString("F3") : "null";
+            string heldCardName = holder != null && holder.HeldCard != null ? holder.HeldCard.name : "null";
+            string heldCardDistance = holder != null ? holder.HeldCardDistance.ToString("F4") : "n/a";
+            string movingCardDistance = holder != null
+                ? Vector3.Distance(holder.transform.position, this.transform.position).ToString("F4")
+                : "n/a";
+            string heldCardMatches = holder != null ? (holder.HeldCard == this.ctrl).ToString() : "n/a";
+            string isOnHolder = holder != null ? holder.IsHeldCardOnHolder.ToString() : "n/a";
+            Debug.Log(
+                "[MoveVoidToLine] " + message +
+                " | card=" + this.gameObject.name +
+                " cardPos=" + this.transform.position.ToString("F3") +
+                " holder=" + holderName +
+                " holderPos=" + holderPosition +
+                " heldCard=" + heldCardName +
+                " heldCardMatches=" + heldCardMatches +
+                " heldCardDistance=" + heldCardDistance +
+                " movingCardDistance=" + movingCardDistance +
+                " isOnHolder=" + isOnHolder +
+                " isAnimating=" + this.IsAnimating,
+                this.gameObject);
+        }
+
         /// <summary>
         /// Step 1: Elevates the card by <paramref name="height"/> world units.
         /// Dedicated helper step for <see cref="MoveVoidToLine"/> sequence. Do NOT share with other movement paths.
         /// </summary>
-        private void RiseUp(float height, System.Action onComplete = null)
+        private void RiseUp(CardHolderCtrl holder, float height, System.Action onComplete = null)
         {
             float targetY = this.transform.position.y + height;
+            this.LogMoveVoidToLine("STEP 1 START RiseUp targetY=" + targetY.ToString("F3"), holder);
             this.yTween?.Kill();
+            bool completed = false;
             this.yTween = this.transform.DOMoveY(targetY, this.duration * 0.5f)
                 .SetEase(this.ease)
-                .OnComplete(() => onComplete?.Invoke());
+                .OnComplete(() =>
+                {
+                    completed = true;
+                    this.LogMoveVoidToLine("STEP 1 COMPLETE RiseUp", holder);
+                    onComplete?.Invoke();
+                })
+                .OnKill(() =>
+                {
+                    if (!completed) this.LogMoveVoidToLine("STEP 1 INTERRUPTED RiseUp", holder);
+                });
         }
 
         /// <summary>
@@ -78,8 +134,13 @@ namespace SG03
         {
             if (holder == null) return;
             Vector3 targetPos = new Vector3(holder.transform.position.x, this.transform.position.y, holder.transform.position.z);
+            this.LogMoveVoidToLine("STEP 2 START MoveToHolderKeepY target=" + targetPos.ToString("F3"), holder);
             this.KillMoveTween();
-            this.StartMoveTween(targetPos, this.duration, this.ease, onComplete);
+            this.StartMoveTween(targetPos, this.duration, this.ease, () =>
+            {
+                this.LogMoveVoidToLine("STEP 2 COMPLETE MoveToHolderKeepY", holder);
+                onComplete?.Invoke();
+            });
         }
 
         /// <summary>
@@ -89,13 +150,25 @@ namespace SG03
         private void AttackDirection(bool isAlpha, System.Action onComplete = null)
         {
             float zRotation = isAlpha ? -90f : 90f;
+            CardHolderCtrl holder = this.ctrl != null ? this.ctrl.CardHolder : null;
+            this.LogMoveVoidToLine("STEP 3 START AttackDirection z=" + zRotation.ToString("F1"), holder);
             this.rotateTween?.Kill();
+            bool completed = false;
             this.rotateTween = this.transform.DORotate(
                     new Vector3(0f, 0f, zRotation),
                     this.duration * 0.5f,
                     RotateMode.WorldAxisAdd)
                 .SetEase(this.ease)
-                .OnComplete(() => onComplete?.Invoke());
+                .OnComplete(() =>
+                {
+                    completed = true;
+                    this.LogMoveVoidToLine("STEP 3 COMPLETE AttackDirection", holder);
+                    onComplete?.Invoke();
+                })
+                .OnKill(() =>
+                {
+                    if (!completed) this.LogMoveVoidToLine("STEP 3 INTERRUPTED AttackDirection", holder);
+                });
         }
 
         /// <summary>
@@ -105,6 +178,8 @@ namespace SG03
         /// </summary>
         private void FaceUpKeepY(bool isAlpha, System.Action onComplete = null)
         {
+            CardHolderCtrl holder = this.ctrl != null ? this.ctrl.CardHolder : null;
+            this.LogMoveVoidToLine("STEP 4 START FaceUpKeepY", holder);
             this.faceState = FaceState.FaceUp;
             this.isFlipping = true;
             this.faceTween?.Kill();
@@ -117,9 +192,15 @@ namespace SG03
             this.faceTween.OnComplete(() =>
             {
                 this.isFlipping = false;
+                this.LogMoveVoidToLine("STEP 4 COMPLETE FaceUpKeepY", holder);
                 onComplete?.Invoke();
             });
-            this.faceTween.OnKill(() => this.isFlipping = false);
+            this.faceTween.OnKill(() =>
+            {
+                bool wasFlipping = this.isFlipping;
+                this.isFlipping = false;
+                if (wasFlipping) this.LogMoveVoidToLine("STEP 4 INTERRUPTED FaceUpKeepY", holder);
+            });
         }
 
         /// <summary>
@@ -132,10 +213,21 @@ namespace SG03
             this.rotateTween?.Kill();
             this.rotateTween = null;
             float finalY = holder.transform.position.y + this.lineOffsetY;
+            this.LogMoveVoidToLine("STEP 5 START DescendToHolder targetY=" + finalY.ToString("F3"), holder);
             this.yTween?.Kill();
+            bool completed = false;
             this.yTween = this.transform.DOMoveY(finalY, this.duration * 0.5f)
                 .SetEase(this.ease)
-                .OnComplete(() => onComplete?.Invoke());
+                .OnComplete(() =>
+                {
+                    completed = true;
+                    this.LogMoveVoidToLine("STEP 5 COMPLETE DescendToHolder", holder);
+                    onComplete?.Invoke();
+                })
+                .OnKill(() =>
+                {
+                    if (!completed) this.LogMoveVoidToLine("STEP 5 INTERRUPTED DescendToHolder", holder);
+                });
         }
     }
 }

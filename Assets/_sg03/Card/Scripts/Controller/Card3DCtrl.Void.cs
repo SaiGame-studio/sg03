@@ -10,6 +10,7 @@ namespace SG03
         /// </summary>
         public void MoveToLineFaceUp(CardHolderCtrl holder, bool isAlpha, System.Action onReady = null)
         {
+            if (this.IsMovingVoidToLine) return;
             if (this.movement == null) return;
             this.movement.MoveToLineFaceUp(holder, () =>
             {

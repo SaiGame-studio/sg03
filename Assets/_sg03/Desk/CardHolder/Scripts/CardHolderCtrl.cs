@@ -23,6 +23,9 @@ namespace SG03
 
         [Header("State")]
         [SerializeField] private Card3DCtrl heldCard;
+        [SerializeField, Min(0.01f)] private float heldCardArrivalDistance = 0.5f;
+        [SerializeField] private float heldCardDistance = -1f;
+        [SerializeField] private bool isHeldCardOnHolder;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -31,6 +34,8 @@ namespace SG03
             this.ParseName();
             this.SetScale();
         }
+
+        private void LateUpdate() => this.RefreshHeldCardPlacement();
 
         private void SetScale()
         {
@@ -84,9 +89,32 @@ namespace SG03
         public Location HolderLocation => this.link == Link.front ? Location.in_front : Location.in_back;
         public int   Index          => this.GetIndexFromObjectName();
         public Card3DCtrl HeldCard => this.heldCard;
+        public float HeldCardDistance => this.heldCardDistance;
+        public bool IsHeldCardOnHolder => this.isHeldCardOnHolder;
 
         /// <summary>Links a card to this holder. Pass null to clear the slot.</summary>
-        public void SetCard(Card3DCtrl card) => this.heldCard = card;
+        public void SetCard(Card3DCtrl card)
+        {
+            this.heldCard = card;
+            this.RefreshHeldCardPlacement();
+        }
+
+        /// <summary>
+        /// Recalculates whether the linked card has physically reached this holder.
+        /// Logical ownership alone is not considered sufficient.
+        /// </summary>
+        public void RefreshHeldCardPlacement()
+        {
+            if (this.heldCard == null)
+            {
+                this.heldCardDistance = -1f;
+                this.isHeldCardOnHolder = false;
+                return;
+            }
+
+            this.heldCardDistance = Vector3.Distance(this.transform.position, this.heldCard.transform.position);
+            this.isHeldCardOnHolder = this.heldCardDistance <= Mathf.Max(0.01f, this.heldCardArrivalDistance);
+        }
     }
 }
 
