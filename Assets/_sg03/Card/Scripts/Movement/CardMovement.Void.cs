@@ -119,15 +119,19 @@ namespace SG03
         }
 
         /// <summary>
-        /// Step 5: Descends the card into final <paramref name="holder"/> line position.
+        /// Step 5: Descends the card vertically into final <paramref name="holder"/> line position without any rotation.
         /// Dedicated helper step for <see cref="MoveVoidToLine"/> sequence. Do NOT share with other movement paths.
         /// </summary>
         private void DescendToHolder(CardHolderCtrl holder, System.Action onComplete = null)
         {
             if (holder == null) return;
-            Vector3 finalPos = holder.transform.position + new Vector3(0f, this.lineOffsetY, 0f);
-            this.KillMoveTween();
-            this.StartMoveTween(finalPos, this.duration * 0.5f, this.ease, onComplete);
+            this.rotateTween?.Kill();
+            this.rotateTween = null;
+            float finalY = holder.transform.position.y + this.lineOffsetY;
+            this.yTween?.Kill();
+            this.yTween = this.transform.DOMoveY(finalY, this.duration * 0.5f)
+                .SetEase(this.ease)
+                .OnComplete(() => onComplete?.Invoke());
         }
     }
 }

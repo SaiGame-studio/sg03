@@ -57,21 +57,7 @@ namespace SG03
             this.slotOccupancy[holder.transform] = card;
             holder.SetCard(card);
 
-            System.Action onComplete = () =>
-            {
-                if (owner == Owner.alpha)
-                {
-                    if (slot != null) this.ApplyAlphaFaceState(card, slot);
-                    else card.FaceUp();
-                }
-                else
-                {
-                    if (slot != null) this.ApplyFaceState(card, slot);
-                    else card.FaceUp();
-                }
-            };
-
-            card.MoveVoidToLine(holder, owner == Owner.alpha, isFaceUp, onComplete);
+            card.MoveVoidToLine(holder, owner == Owner.alpha, isFaceUp, null);
             return card;
         }
 
