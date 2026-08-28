@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Globalization;
 using UnityEngine;
 
 namespace SG03
@@ -193,8 +192,6 @@ namespace SG03
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
 
-            defender.ClearHealthPreview();
-
             return this.StartCoroutine(this.OmegaAttackRoutine(attacker, defender));
         }
 
@@ -204,6 +201,7 @@ namespace SG03
             else attacker.AbilityActive();
 
             yield return this.StartCoroutine(this.WaitForCard(attacker));
+            if (defender.Attacker == attacker) defender.SetAttacker(null);
         }
 
         private Coroutine ExecuteCardAbility(string[] parameters)
@@ -258,7 +256,6 @@ namespace SG03
 
             string attackerId = null;
             string defenderId = null;
-            float attackerAtk = 0f;
             foreach (string parameter in parameters)
             {
                 string[] keyValue = parameter.Split('=');
@@ -268,10 +265,6 @@ namespace SG03
                 string value = keyValue[1].Trim();
                 if (key == "attacker_card_id" || key == "attacker") attackerId = value;
                 else if (key == "defender_card_id" || key == "defender") defenderId = value;
-                else if (key == "atk")
-                {
-                    float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out attackerAtk);
-                }
             }
 
             // Keep replay compatibility with actions recorded before parameters were labeled.
@@ -285,7 +278,7 @@ namespace SG03
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
-            defender.SetHealthPreview(attackerAtk);
+            defender.SetAttacker(attacker);
             return this.StartCoroutine(this.OmegaPlaningCharacterAttackRoutine(attacker, defender));
         }
 

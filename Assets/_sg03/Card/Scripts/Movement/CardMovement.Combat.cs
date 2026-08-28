@@ -7,6 +7,7 @@ namespace SG03
     {
         public void RunUp()
         {
+            if (this.isVoidToLineTransitionActive) return;
             Vector3 origin = this.transform.position;
             Vector3 risen = origin + Vector3.up * this.damagedRiseHeight;
             this.damageTween?.Kill();
@@ -17,6 +18,7 @@ namespace SG03
 
         public void Damaged()
         {
+            if (this.isVoidToLineTransitionActive) return;
             this.damageTween?.Kill();
             this.damageTween = DOTween.Sequence();
             this.damageTween.Append(this.transform.DOShakePosition(this.damagedPhaseDuration * 2f, new Vector3(0, 0, 0.5f), 20, 90f, false, true));
@@ -24,6 +26,7 @@ namespace SG03
 
         public void AbilityActive()
         {
+            if (this.isVoidToLineTransitionActive) return;
             Vector3 origin = this.transform.position;
             Vector3 risen = origin + Vector3.up * this.damagedRiseHeight;
             this.damageTween?.Kill();
@@ -35,6 +38,7 @@ namespace SG03
 
         public void AttackLunge(Vector3 defenderPosition)
         {
+            if (this.isVoidToLineTransitionActive) return;
             Vector3 origin = this.transform.position;
             Vector3 returnPosition = this.GetAttackReturnPosition(origin);
             Vector3 lunged = Vector3.Lerp(origin, defenderPosition, this.attackLungeRatio);
@@ -50,6 +54,7 @@ namespace SG03
         /// </summary>
         public void AttackBackstepLunge(Vector3 defenderPosition)
         {
+            if (this.isVoidToLineTransitionActive) return;
             Vector3 origin = this.transform.position;
             Vector3 returnPosition = this.GetAttackReturnPosition(origin);
             Vector3 toDefender = defenderPosition - origin;
@@ -69,6 +74,7 @@ namespace SG03
         /// </summary>
         public void PlanningLunge(Vector3 defenderPosition)
         {
+            if (this.isVoidToLineTransitionActive) return;
             Vector3 direction = (defenderPosition - this.transform.position).normalized;
             Vector3 lunged = defenderPosition - direction * this.planningStopDistance;
             this.attackTween?.Kill();
@@ -82,6 +88,7 @@ namespace SG03
         /// </summary>
         public void PlanningLungeTo(Vector3 destination)
         {
+            if (this.isVoidToLineTransitionActive) return;
             this.faceTween?.Kill();
             this.attackTween?.Kill();
             this.attackTween = DOTween.Sequence();

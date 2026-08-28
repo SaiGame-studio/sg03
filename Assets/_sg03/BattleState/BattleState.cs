@@ -44,6 +44,7 @@ namespace SG03.UI
         [SerializeField] private BattleCardSlot[] omegaHand;
         [SerializeField] private BattleCardSlot[] omegaFrontLine;
         [SerializeField] private BattleCardSlot[] omegaBackLine;
+        [SerializeField] private BattlePlanningEntry[] omegaPlanning;
         [SerializeField] private string[] clientActions;
         [SerializeField] private string[] debugLog;
 
@@ -69,6 +70,7 @@ namespace SG03.UI
         public BattleCardSlot[] OmegaHand => this.omegaHand;
         public BattleCardSlot[] OmegaFrontLine => this.omegaFrontLine;
         public BattleCardSlot[] OmegaBackLine => this.omegaBackLine;
+        public BattlePlanningEntry[] OmegaPlanning => this.omegaPlanning;
         public string SessionId => this.sessionId;
         public string BattleDifficulty => this.battleDifficulty;
         public string BattleStatus     => this.battleStatus;
@@ -173,6 +175,7 @@ namespace SG03.UI
             this.omegaHand = null;
             this.omegaFrontLine = null;
             this.omegaBackLine = null;
+            this.omegaPlanning = null;
             this.sessionId = string.Empty;
             this.battleDifficulty = string.Empty;
             this.battleStatus = string.Empty;
@@ -289,6 +292,7 @@ namespace SG03.UI
             if (output.omega_hand != null) this.omegaHand = output.omega_hand;
             if (output.omega_front_line != null) this.omegaFrontLine = output.omega_front_line;
             if (output.omega_back_line != null) this.omegaBackLine = output.omega_back_line;
+            this.omegaPlanning = output.omega_planning;
             this.clientActions = output.client_actions;
             this.debugLog = output.debug_log;
             this.battleDifficulty = output.metadata?.battle_difficulty ?? output.battle_difficulty;

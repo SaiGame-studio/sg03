@@ -3,6 +3,7 @@
 
 -- Shared execution for Xena's awakened Ability cards.
 -- config requires ability_key, successor_code, and successor_name.
+-- predecessor_code and predecessor_name optionally restrict the Character form being awakened.
 -- sacrifice_count supports 0 (default), 1, or 2 adjacent allied cards.
 -- sacrifice_stars is an optional list of allowed card stars (each 1 through 9).
 -- sacrifice_race restricts sacrifices to one card race when provided.
@@ -11,6 +12,10 @@
 local function validate_xena_config(config)
     if config == nil or type(config.ability_key) ~= "string" or
        type(config.successor_code) ~= "string" or type(config.successor_name) ~= "string" then
+        return nil, "xena_awakened requires valid configuration"
+    end
+    if (config.predecessor_code ~= nil or config.predecessor_name ~= nil) and
+       (type(config.predecessor_code) ~= "string" or type(config.predecessor_name) ~= "string") then
         return nil, "xena_awakened requires valid configuration"
     end
 
@@ -54,6 +59,8 @@ local function validate_xena_config(config)
 
     return {
         ability_key = config.ability_key,
+        predecessor_code = config.predecessor_code,
+        predecessor_name = config.predecessor_name,
         successor_code = config.successor_code,
         successor_name = config.successor_name,
         sacrifice_count = sacrifice_count,
@@ -141,6 +148,7 @@ local function replace_xena_on_line(state, target_line, target_index, void_zone,
 
     successor_card.slot_index = target_card.slot_index
     helpers.lib_battle_common.reset_card_turn_state(state.item_defs, successor_card)
+    successor_card.trigger = true
     successor_card.face_up = true
     successor_card.expose = true
     successor_card.defeated_from_line_key = nil
@@ -173,7 +181,7 @@ local function replace_pending_defenders(state, target_card, successor_card)
 end
 
 local function build_xena_actions(source_side, source_card, settings, target_card, successor_card,
-    sacrificed_cards, target_line_key)
+    sacrificed_cards)
     local actions = {
         source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
             ",ability=" .. settings.ability_key .. ",target=" .. target_card.inventory_item_id ..
@@ -183,8 +191,6 @@ local function build_xena_actions(source_side, source_card, settings, target_car
         table.insert(actions, source_side .. "_card_sent_to_void:" .. sacrifice_card.inventory_item_id)
     end
     table.insert(actions, source_side .. "_card_sent_to_void:" .. target_card.inventory_item_id)
-    table.insert(actions, source_side .. "_void_to_" .. string.sub(target_line_key, 7) .. ":" ..
-        successor_card.inventory_item_id .. "," .. tostring(successor_card.slot_index))
     return actions
 end
 
@@ -205,6 +211,10 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
     local battle = helpers.lib_battle_common
     local target_card = target_context.target_card
     local source_side = target_context.source_side
+    if settings.predecessor_code ~= nil and
+       target_card.item_definition_code_name ~= settings.predecessor_code then
+        return {}, settings.ability_key .. " target must be " .. settings.predecessor_name
+    end
     local void_key = source_side .. "_the_void"
     local void_zone = state[void_key] or {}
     state[void_key] = void_zone
@@ -242,8 +252,10 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
     replace_pending_defenders(state, target_card, successor_card)
 
     local actions = build_xena_actions(source_side, source_card, settings, target_card, successor_card,
-        sacrificed_cards, target_line_key)
+        sacrificed_cards)
     send_source_to_void(state, source_side, source_card, void_zone, battle, actions)
+    table.insert(actions, source_side .. "_void_to_" .. string.sub(target_line_key, 7) .. ":" ..
+        successor_card.inventory_item_id .. "," .. tostring(successor_card.slot_index))
     battle.dlog("[ability] " .. settings.ability_key .. ": summoned " .. settings.successor_name .. "=" ..
         successor_card.inventory_item_id .. " to " .. target_line_key .. " slot=" ..
         tostring(successor_card.slot_index) .. " with +" .. def_buff .. " DEF")
@@ -251,10 +263,12 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
 end
 
 -- ability: xena_awakened1
--- Replaces an attacked Character that will be defeated with Xena II from void.
+-- Replaces an attacked Xena I that will be defeated with Xena II from void.
 function xena_awakened1_execute(state, source_card, event_data, helpers)
     return execute_xena_awakened(state, source_card, event_data, helpers, {
         ability_key = "xena_awakened1",
+        predecessor_code = "xena1",
+        predecessor_name = "Xena I",
         successor_code = "xena2",
         successor_name = "Xena II",
         sacrifice_count = 0,
@@ -262,10 +276,12 @@ function xena_awakened1_execute(state, source_card, event_data, helpers)
 end
 
 -- ability: xena_awakened2
--- Replaces an attacked Character that will be defeated with Xena III from void.
+-- Replaces an attacked Xena II that will be defeated with Xena III from void.
 function xena_awakened2_execute(state, source_card, event_data, helpers)
     return execute_xena_awakened(state, source_card, event_data, helpers, {
         ability_key = "xena_awakened2",
+        predecessor_code = "xena2",
+        predecessor_name = "Xena II",
         successor_code = "xena3",
         successor_name = "Xena III",
         sacrifice_count = 0,
@@ -278,6 +294,8 @@ end
 function xena_awakened3_execute(state, source_card, event_data, helpers)
     return execute_xena_awakened(state, source_card, event_data, helpers, {
         ability_key = "xena_awakened3",
+        predecessor_code = "xena3",
+        predecessor_name = "Xena III",
         successor_code = "xena4",
         successor_name = "Xena IV",
         sacrifice_count = 1,
@@ -290,8 +308,8 @@ end
 -- ability: demon_rite
 -- Conditional ability: it must be triggered by another card and is intentionally
 -- not registered in lib_ability_config for direct card activation.
--- Demon Rite only needs to exist as a backend item definition; it is not deployed
--- or exposed as a battle-line ability card, and Demon Orbs is not part of this flow.
+-- Demon Rite and Demon Orbs must both be deployed on the triggering side's back line.
+-- On success, Demon Rite sends Demon Orbs to the void and then sends itself there.
 -- Returns ritual_result, err. Ritual conditions use ritual_result.success=false,
 -- while invalid invocation or malformed target context returns err.
 function demon_rite_execute(state, source_card, event_data, helpers)
@@ -315,10 +333,14 @@ function demon_rite_execute(state, source_card, event_data, helpers)
         find_target_line(state, event_data, target_card, "demon_rite")
     if line_err ~= nil then return nil, line_err end
 
-    local demon_rite_def, demon_rite_lookup_err = game.get_item_def_by_code("demon_rite")
-    if demon_rite_lookup_err ~= nil then return nil, demon_rite_lookup_err end
-    if demon_rite_def == nil then
+    local back_line = state[source_side .. "_back_line"] or {}
+    local demon_rite_card = helpers.find_line_card_by_code(back_line, "demon_rite")
+    if demon_rite_card == nil then
         return { success = false, reason = "missing_demon_rite", actions = {} }, nil
+    end
+    local demon_orbs_card = helpers.find_line_card_by_code(back_line, "demon_orbs")
+    if demon_orbs_card == nil then
+        return { success = false, reason = "missing_demon_orbs", actions = {} }, nil
     end
 
     local actions = {}
@@ -355,17 +377,33 @@ function demon_rite_execute(state, source_card, event_data, helpers)
     if state[void_key] == nil then state[void_key] = {} end
     table.insert(state[void_key], sacrifice_card)
 
-    table.insert(actions, source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
-        ",ability=demon_rite" ..
+    demon_rite_card.trigger = true
+    local expose_rite_action = helpers.expose_ability_selected_card(state, demon_rite_card)
+    if expose_rite_action ~= nil then table.insert(actions, expose_rite_action) end
+    local expose_orbs_action = helpers.expose_ability_selected_card(state, demon_orbs_card)
+    if expose_orbs_action ~= nil then table.insert(actions, expose_orbs_action) end
+
+    table.insert(actions, source_side .. "_card_ability:source=" .. demon_rite_card.inventory_item_id ..
+        ",ability=demon_rite,triggered_by=" .. source_card.inventory_item_id ..
         ",target=" .. target_card.inventory_item_id ..
         ",sacrificed=" .. sacrifice_card.inventory_item_id)
     table.insert(actions, source_side .. "_card_sent_to_void:" .. sacrifice_card.inventory_item_id)
+    helpers.lib_battle_common.remove_card_from_line(back_line, demon_orbs_card.inventory_item_id)
+    table.insert(state[void_key], demon_orbs_card)
+    table.insert(actions, source_side .. "_card_sent_to_void:" .. demon_orbs_card.inventory_item_id)
+    helpers.lib_battle_common.remove_card_from_line(back_line, demon_rite_card.inventory_item_id)
+    table.insert(state[void_key], demon_rite_card)
+    table.insert(actions, source_side .. "_card_sent_to_void:" .. demon_rite_card.inventory_item_id)
     helpers.lib_battle_common.dlog("[ability] demon_rite: target=" .. target_card.inventory_item_id ..
-        " sacrificed=" .. sacrifice_card.inventory_item_id .. " from " .. target_line_key)
+        " sacrificed=" .. sacrifice_card.inventory_item_id .. " from " .. target_line_key ..
+        " consumed_orbs=" .. demon_orbs_card.inventory_item_id ..
+        " consumed_rite=" .. demon_rite_card.inventory_item_id)
     return {
         success = true,
         reason = nil,
         actions = actions,
+        demon_rite_card = demon_rite_card,
+        demon_orbs_card = demon_orbs_card,
         sacrifice_card = sacrifice_card,
     }, nil
 end
@@ -402,6 +440,8 @@ function xena_awakened4_execute(state, source_card, event_data, helpers)
 
     local awakening_config = {
         ability_key = "xena_awakened4",
+        predecessor_code = "xena4",
+        predecessor_name = "Xena IV",
         successor_code = "xena5",
         successor_name = "Xena V",
         sacrifice_count = 0,

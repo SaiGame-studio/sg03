@@ -144,18 +144,11 @@ namespace SG03
 
         private IEnumerator AlphaVoidToFrontLineRoutine(string inventoryItemId, int slotIndex)
         {
-            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
-            if (card != null)
-            {
-                card.FaceDownUnknown();
-                yield return this.StartCoroutine(this.WaitForCard(card));
-            }
-
-            card = this.cardSpawning?.MoveAlphaVoidToFrontLine(inventoryItemId, slotIndex);
-            if (card == null) yield break;
-            yield return this.StartCoroutine(this.WaitForCard(card));
-            this.cardSpawning?.SettleAlphaVoidInFrontLine(card, inventoryItemId, slotIndex);
-            yield return this.StartCoroutine(this.WaitForCard(card));
+            CardHolderCtrl holder = this.cardSpawning?.GetAlphaVoidToFrontLineHolder(slotIndex);
+            yield return this.StartCoroutine(this.VoidToFrontLineRoutine(
+                inventoryItemId,
+                holder,
+                () => this.cardSpawning?.MoveAlphaVoidToFrontLine(inventoryItemId, slotIndex)));
         }
 
         private Coroutine ExecuteOmegaVoidToFrontLine(string[] parameters)
@@ -166,18 +159,45 @@ namespace SG03
 
         private IEnumerator OmegaVoidToFrontLineRoutine(string inventoryItemId, int slotIndex)
         {
-            Card3DCtrl card = this.cardSpawning?.FindCardById(inventoryItemId);
-            if (card != null)
-            {
-                card.FaceDownUnknown();
-                yield return this.StartCoroutine(this.WaitForCard(card));
-            }
+            CardHolderCtrl holder = this.cardSpawning?.GetOmegaVoidToFrontLineHolder(slotIndex);
+            yield return this.StartCoroutine(this.VoidToFrontLineRoutine(
+                inventoryItemId,
+                holder,
+                () => this.cardSpawning?.MoveOmegaVoidToFrontLine(inventoryItemId, slotIndex)));
+        }
 
-            card = this.cardSpawning?.MoveOmegaVoidToFrontLine(inventoryItemId, slotIndex);
+        private IEnumerator VoidToFrontLineRoutine(
+            string inventoryItemId,
+            CardHolderCtrl holder,
+            Func<Card3DCtrl> startMove)
+        {
+            if (holder == null || startMove == null) yield break;
+
+            holder.RefreshHeldCardPlacement();
+            Card3DCtrl card = holder.HeldCard;
+            if (this.IsCardSettledOnHolder(card, inventoryItemId, holder)) yield break;
+
+            card = startMove();
             if (card == null) yield break;
-            yield return this.StartCoroutine(this.WaitForCard(card));
-            this.cardSpawning?.SettleOmegaVoidInFrontLine(card, inventoryItemId, slotIndex);
-            yield return this.StartCoroutine(this.WaitForCard(card));
+
+            while (!this.IsCardSettledOnHolder(card, inventoryItemId, holder))
+            {
+                holder.RefreshHeldCardPlacement();
+                if (!card.IsAnimating && !holder.IsHeldCardOnHolder)
+                {
+                    card = startMove();
+                    if (card == null) yield break;
+                }
+                yield return null;
+            }
+        }
+
+        private bool IsCardSettledOnHolder(Card3DCtrl card, string inventoryItemId, CardHolderCtrl holder)
+        {
+            if (card == null || holder == null || holder.HeldCard != card) return false;
+            if (!string.Equals(card.InventoryItemId, inventoryItemId, StringComparison.Ordinal)) return false;
+            holder.RefreshHeldCardPlacement();
+            return holder.IsHeldCardOnHolder && !card.IsAnimating && !card.IsMovingVoidToLine;
         }
     }
 }

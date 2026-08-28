@@ -3,6 +3,14 @@ using System;
 namespace SG03.UI
 {
     [Serializable]
+    public class BattlePlanningEntry
+    {
+        public string action;
+        public string attacker_inv_id;
+        public string defender_inv_id;
+    }
+
+    [Serializable]
     public class BattleStatusOutput
     {
         public int    turn;
@@ -23,6 +31,7 @@ namespace SG03.UI
         public int             omega_hand_count;
         public BattleCardSlot[] omega_front_line;
         public BattleCardSlot[] omega_back_line;
+        public BattlePlanningEntry[] omega_planning;
         public string              next_move;
         public string[]            client_actions;
         public string[]            debug_log;

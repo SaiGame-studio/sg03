@@ -179,6 +179,12 @@ namespace SG03
             return null;
         }
 
+        private Coroutine ExecuteOmegaNoAvailableAttacker()
+        {
+            this.OnOmegaNoAvailableAttacker?.Invoke();
+            return null;
+        }
+
         private Coroutine ExecuteAlphaEndTurn()
         {
             this.cardSpawning?.RefreshHpBarsAfterTurnEnd();

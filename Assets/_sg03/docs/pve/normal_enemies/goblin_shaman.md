@@ -70,12 +70,12 @@ Mỗi lần lập kế hoạch, AI tạo tối đa một hành động tấn cô
 
 Thứ tự ưu tiên của mục tiêu là:
 
-1. Character đã lộ (`expose = true`) ở `alpha_front_line` có `final_def` thấp nhất.
-2. Nếu không có Character đã lộ, dùng luật chung: lá bất kỳ ở `alpha_front_line` có `final_def` thấp nhất.
+1. Character face-up (`face_up = true`) ở `alpha_front_line` có hiệu `final_def - total_damage_received` thấp nhất.
+2. Nếu không có Character face-up, chọn Character face-down đầu tiên theo thứ tự slot.
 3. Nếu tiền tuyến Alpha trống, chọn lá thật đầu tiên ở `alpha_back_line`.
 4. Nếu cả hai hàng không có mục tiêu, tấn công trực tiếp `alpha_hp`.
 
-Khi nhiều mục tiêu có cùng `final_def`, AI chọn mục tiêu ở slot xuất hiện trước. Điều này làm cho cách chọn mục tiêu hoàn toàn xác định.
+Khi nhiều mục tiêu face-up có cùng hiệu số, AI chọn mục tiêu ở slot xuất hiện trước. Điều này làm cho cách chọn mục tiêu hoàn toàn xác định.
 
 ### Chọn quân tấn công
 
@@ -97,7 +97,7 @@ flowchart TD
     C -- Không --> E[Đặt Character mới ngửa]
     D --> F[Đặt mọi Totem Pulse xuống hậu tuyến ở trạng thái úp]
     E --> F
-    F --> G[Chọn mục tiêu ưu tiên Character đã lộ có DEF thấp nhất]
+    F --> G[Chọn Character face-up có DEF còn lại thấp nhất, sau đó mới đến face-down]
     G --> H{Có hơn 1 Character Omega úp hợp lệ?}
     H -- Có --> I[Dùng Character úp đầu tiên để tấn công và làm lộ nó]
     H -- Không --> J[Dùng Character ngửa đầu tiên]
@@ -115,14 +115,14 @@ flowchart TD
 
 - Duy trì thông tin ẩn thay vì lật toàn bộ đội hình ngay khi triển khai.
 - Tự động bảo vệ toàn tiền tuyến đúng thời điểm có một đòn sát thương sắp được giải quyết.
-- Tập trung tấn công Character đã lộ và có `final_def` thấp, tạo khả năng kết liễu mục tiêu yếu.
+- Tập trung tấn công Character face-up có `final_def - total_damage_received` thấp, tạo khả năng kết liễu mục tiêu yếu.
 - Quy tắc xác định giúp hành vi ổn định và dễ tái hiện khi kiểm thử.
 
 ## Điểm yếu và cách đối phó
 
 - `Totem Pulse` chỉ kích hoạt khi đòn đánh nhắm vào tiền tuyến và có `damage_dealt > 0`; các hành động không tạo pending damage hoặc không nhắm tiền tuyến không kích hoạt phản ứng này.
 - Mỗi Totem cần một Goblin Shaman chưa kích hoạt. Ép Shaman dùng lượt hoặc loại Shaman khỏi tiền tuyến sẽ khóa phản ứng Totem còn lại trong lượt đó.
-- AI ưu tiên mục tiêu đã lộ có DEF thấp nhất, nên người chơi có thể dự đoán mục tiêu và sắp xếp phòng thủ quanh lá đó.
+- AI ưu tiên mục tiêu face-up có DEF còn lại thấp nhất, nên người chơi có thể dự đoán mục tiêu và sắp xếp phòng thủ quanh lá đó.
 - AI chỉ triển khai `Totem Pulse` trong nhóm Ability. `Brute Call` và các Ability khác không được ba handler `deploy`, `defend`, `plan_attack` của AI này chủ động sử dụng.
 - Việc luôn ưu tiên slot đầu tiên khi hòa khiến hướng tấn công và thứ tự lật quân có thể bị khai thác sau khi người chơi nhận ra quy luật.
 
@@ -142,7 +142,8 @@ DEFEND
        kích hoạt một Totem Pulse và tăng DEF toàn tiền tuyến
 
 ATTACK
-  ưu tiên Character Alpha đã lộ có DEF thấp nhất
+  ưu tiên Character Alpha face-up có (final_def - total_damage_received) thấp nhất
+  nếu không có Character face-up: chọn Character face-down đầu tiên theo thứ tự slot
   nếu có hơn một Character Omega úp: tấn công bằng lá úp đầu tiên
   nếu không: tấn công bằng Character ngửa đầu tiên
   nếu không có quân hợp lệ: kết thúc lượt

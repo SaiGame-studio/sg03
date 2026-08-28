@@ -393,7 +393,42 @@ namespace SG03
             if (this.hovered != this.selected) return;
             if (!this.IsLocationFlippable(this.selected.Location)) return;
             if (this.selected.Expose && this.selected.FaceState == FaceState.FaceUp) return;
-            this.selected.ToggleFace();
+
+            if (this.selected.FaceState == FaceState.FaceUp)
+            {
+                this.selected.FaceDown();
+                return;
+            }
+
+            if (!this.IsAlphaTurn()) return;
+            if (this.selected.CardOwner != Owner.alpha) return;
+
+            BattleScripts scripts = this.battleStateCtrl?.BattleScripts;
+            if (scripts == null || scripts.IsRunning) return;
+
+            Card3DCtrl card = this.selected;
+            card.FaceUp();
+            scripts.RunAlphaCardDeploy(
+                response => this.OnFaceUpDeploySuccess(response, card),
+                error => this.OnFaceUpDeployError(error, card));
+        }
+
+        private void OnFaceUpDeploySuccess(string response, Card3DCtrl card)
+        {
+            if (!this.IsDeployResponseSuccessful(response, out string error))
+            {
+                this.OnFaceUpDeployError(error, card);
+                return;
+            }
+
+            this.battleStateCtrl?.BattleState?.UpdateFromBattleStatus(response);
+        }
+
+        private void OnFaceUpDeployError(string error, Card3DCtrl card)
+        {
+            Debug.LogError($"[CardSelection] Face-up deploy was rejected; returning card to face-down. {error}");
+            if (card == null || card.FaceState != FaceState.FaceUp) return;
+            card.FaceDown();
         }
 
         private bool IsLocationFlippable(Location location)

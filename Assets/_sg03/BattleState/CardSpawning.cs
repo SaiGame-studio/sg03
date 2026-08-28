@@ -35,6 +35,7 @@ namespace SG03
         private readonly Dictionary<string, Card3DCtrl>    sourceCardRegistry  = new Dictionary<string, Card3DCtrl>();
         private readonly Dictionary<string, Card3DCtrl>    handCardRegistry    = new Dictionary<string, Card3DCtrl>();
         private readonly Dictionary<Transform, Card3DCtrl> slotOccupancy       = new Dictionary<Transform, Card3DCtrl>();
+        private readonly Dictionary<Transform, Card3DCtrl> pendingSlotAttackers = new Dictionary<Transform, Card3DCtrl>();
         private readonly LinkedList<Card3DCtrl>             omegaSourceCardQueue = new LinkedList<Card3DCtrl>();
         private readonly Queue<Card3DCtrl>                  omegaHandCardQueue   = new Queue<Card3DCtrl>();
         private readonly LinkedList<Card3DCtrl>             alphaSourceCardQueue = new LinkedList<Card3DCtrl>();
@@ -74,11 +75,12 @@ namespace SG03
         /// <summary>Clears stale damage previews and refreshes HP bars when Omega ends its turn.</summary>
         public void RefreshHpBarsAfterOmegaTurnEnd()
         {
+            this.pendingSlotAttackers.Clear();
             Card3DCtrl[] cards = FindObjectsByType<Card3DCtrl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             foreach (Card3DCtrl card in cards)
             {
                 if (!card.IsCharacter()) continue;
-                card.ClearHealthPreview();
+                card.SetAttacker(null);
                 card.RefreshHpBarAfterTurnEnd();
             }
         }
@@ -157,7 +159,7 @@ namespace SG03
             this.handCardRegistry[inventoryItemId] = card;
         }
 
-        private BattleCardSlot FindAlphaSlotById(string inventoryItemId)
+        public BattleCardSlot FindAlphaSlotById(string inventoryItemId)
         {
             return this.FindSlotById(this.battleState?.AlphaHand, inventoryItemId)
                 ?? this.FindSlotById(this.battleState?.AlphaFrontLine, inventoryItemId)
@@ -166,7 +168,7 @@ namespace SG03
                 ?? this.FindSlotById(this.battleState?.AlphaTheSource, inventoryItemId);
         }
 
-        private BattleCardSlot FindOmegaSlotById(string inventoryItemId)
+        public BattleCardSlot FindOmegaSlotById(string inventoryItemId)
         {
             return this.FindSlotById(this.battleState?.OmegaHand, inventoryItemId)
                 ?? this.FindSlotById(this.battleState?.OmegaFrontLine, inventoryItemId)
@@ -231,6 +233,7 @@ namespace SG03
             card.MoveTo(abovePos, holder.HolderLocation);
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
+            this.ApplyPendingAttacker(holder, card);
             return card;
         }
 
@@ -292,6 +295,7 @@ namespace SG03
             card.MoveTo(abovePos, holder.HolderLocation);
             this.slotOccupancy[target] = card;
             holder.SetCard(card);
+            this.ApplyPendingAttacker(holder, card);
             return card;
         }
 
@@ -356,7 +360,37 @@ namespace SG03
                 this.deskPosition.OmegaFrontLine, this.battleState.OmegaFrontLine, Owner.omega, cardsById);
             reconciled &= this.BindSnapshotLine(
                 this.deskPosition.OmegaBackLine, this.battleState.OmegaBackLine, Owner.omega, cardsById);
+            this.SyncAttackersFromBattleState();
             return reconciled;
+        }
+
+        /// <summary>
+        /// Restores planned Omega attacker links from the authoritative battle
+        /// snapshot. This is required after Resume, where the final board may be
+        /// reconstructed without relying on a planning animation action.
+        /// </summary>
+        public void SyncAttackersFromBattleState()
+        {
+            this.pendingSlotAttackers.Clear();
+            Card3DCtrl[] cards = Object.FindObjectsByType<Card3DCtrl>(
+                FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (Card3DCtrl card in cards)
+            {
+                card.SetAttacker(null);
+            }
+
+            BattlePlanningEntry[] plans = this.battleState?.OmegaPlanning;
+            if (plans == null) return;
+            foreach (BattlePlanningEntry plan in plans)
+            {
+                if (plan == null || plan.action != "card_attack_card") continue;
+                if (string.IsNullOrEmpty(plan.attacker_inv_id) || string.IsNullOrEmpty(plan.defender_inv_id)) continue;
+
+                Card3DCtrl attacker = this.FindCardById(plan.attacker_inv_id);
+                Card3DCtrl defender = this.FindCardById(plan.defender_inv_id);
+                if (attacker == null || defender == null) continue;
+                defender.SetAttacker(attacker);
+            }
         }
 
         private Dictionary<string, Card3DCtrl> FindActiveCardsByInventoryId()
@@ -387,6 +421,7 @@ namespace SG03
                     System.StringComparison.Ordinal)) continue;
 
                 this.slotOccupancy.Remove(holder.transform);
+                this.PreserveAttackerForReplacement(heldCard, holder);
                 holder.SetCard(null);
                 if (heldCard != null && heldCard.CardHolder == holder)
                     heldCard.AssignCardHolder(null);
@@ -430,6 +465,7 @@ namespace SG03
                 holder.SetCard(card);
                 card.AssignCardHolder(holder);
                 this.slotOccupancy[holder.transform] = card;
+                this.ApplyPendingAttacker(holder, card);
                 if (holderChanged || card.Location != holder.HolderLocation)
                 {
                     card.SetMoveDuration(this.ActionMoveDuration);
@@ -578,6 +614,7 @@ namespace SG03
             }
             if (card == null) return null;
             this.handCardRegistry.Remove(inventoryItemId);
+            this.PreserveAttackerForReplacement(card, card.CardHolder);
             this.RemoveFromSlotOccupancy(card);
             float moveDuration = card.Location == Location.in_source
                 ? this.ActionMoveDuration * this.sourceToVoidMoveDurationMultiplier
@@ -597,6 +634,20 @@ namespace SG03
             }
 
             return card;
+        }
+
+        private void PreserveAttackerForReplacement(Card3DCtrl card, CardHolderCtrl holder)
+        {
+            if (card == null || holder == null || card.Attacker == null) return;
+            this.pendingSlotAttackers[holder.transform] = card.Attacker;
+            card.SetAttacker(null);
+        }
+
+        private void ApplyPendingAttacker(CardHolderCtrl holder, Card3DCtrl replacement)
+        {
+            if (holder == null || replacement == null) return;
+            if (!this.pendingSlotAttackers.Remove(holder.transform, out Card3DCtrl attacker)) return;
+            replacement.SetAttacker(attacker);
         }
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────

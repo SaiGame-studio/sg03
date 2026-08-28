@@ -357,6 +357,8 @@ namespace SG03.UI
         private void RefreshBattleSessionAvailability()
         {
             if (this.battleActionsUI == null) return;
+            this.EnsureServiceReferences();
+            if (this.saiServer == null || !this.saiServer.IsAuthenticated) return;
 
             BattleScripts scripts = this.GetCurrentBattleScripts();
             if (scripts == null)
@@ -466,6 +468,11 @@ namespace SG03.UI
         }
 
         protected virtual void OnDestroy()
+        {
+            this.DisposePanel();
+        }
+
+        private void DisposePanel()
         {
             this.battleStatusUI?.Dispose();
             this.deskTabsUI?.Dispose();

@@ -28,7 +28,7 @@
                 <ui:Label name="AlphaHpLabel" text="HP: --" class="battle-hp-label battle-hp-label--alpha" />
                 <ui:Label name="OmeraSourceCountLabel" text="Source: --" class="battle-source-count-label battle-source-count-label--top-right" />
                 <ui:Label name="OmegaTheVoidCountLabel" text="Void: --" class="battle-source-count-label battle-source-count-label--top-right-2" />
-                <ui:Label name="AlphaTheVoidCountLabel" text="Void: --" class="battle-source-count-label battle-source-count-label--bottom-right-2" />
+                <ui:Label name="AlphaTheVoidCountLabel" text="Void: --" tooltip="Show Alpha Void cards" class="battle-source-count-label battle-source-count-label--bottom-right-2 battle-source-count-label--interactive" />
                 <ui:Label name="AlphaSourceCountLabel" text="Source: --" class="battle-source-count-label battle-source-count-label--bottom-right" />
             </ui:VisualElement>
 
@@ -64,6 +64,24 @@
             <ui:VisualElement name="SoulEnergyFullRow" class="soul-energy-popup__row">
                 <ui:Label name="SoulEnergyFullLabel" text="Full in" class="soul-energy-popup__label" />
                 <ui:Label name="SoulEnergyFullValue" text="—" class="soul-energy-popup__value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="VoidGridOverlay" class="void-grid-overlay void-grid-overlay--hidden">
+            <ui:VisualElement name="VoidGridPanel" class="void-grid-panel">
+                <ui:VisualElement class="void-grid-header">
+                    <ui:Label name="VoidGridTitle" text="Alpha - The Void" class="void-grid-title" />
+                    <ui:Button name="VoidGridCloseButton" text="X" tooltip="Close" class="void-grid-close-button" />
+                </ui:VisualElement>
+                <ui:VisualElement class="void-grid-toolbar">
+                    <ui:DropdownField name="VoidGridSortField" label="Sort" class="void-grid-sort-field" />
+                </ui:VisualElement>
+                <ui:VisualElement name="VoidGridContent" class="void-grid-content" />
+                <ui:VisualElement class="void-grid-footer">
+                    <ui:Button name="VoidGridPreviousButton" text="Previous" class="void-grid-page-button" />
+                    <ui:Label name="VoidGridPageLabel" text="Page 1 / 1" class="void-grid-page-label" />
+                    <ui:Button name="VoidGridNextButton" text="Next" class="void-grid-page-button" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

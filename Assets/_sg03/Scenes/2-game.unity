@@ -7253,6 +7253,7 @@ MonoBehaviour:
   omegaHand: []
   omegaFrontLine: []
   omegaBackLine: []
+  omegaPlanning: []
   clientActions: []
   debugLog: []
   battleStatusJson: 
@@ -7469,6 +7470,7 @@ GameObject:
   - component: {fileID: 2030001004}
   - component: {fileID: 2030001003}
   - component: {fileID: 2030001005}
+  - component: {fileID: 2030001006}
   m_Layer: 0
   m_Name: GamePanelUI
   m_TagString: Untagged
@@ -7549,6 +7551,26 @@ MonoBehaviour:
   balances: []
   isLoaded: 0
   lastError: 
+--- !u!114 &2030001006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2030001001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e04e3c09212b4b9abb8fe0881849f7cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.UI.VoidManagerGrid
+  columns: 6
+  rows: 2
+  cardWidth: 130
+  cardHeight: 160
+  fontSize: 9
+  uiDocument: {fileID: 2030001003}
+  battleStateCtrl: {fileID: 2015755444}
+  cardDataManager: {fileID: 1875238347}
 --- !u!114 &2034349439 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6696618329774845696, guid: fe627048bf5461a45a67a91a04f06a07, type: 3}
@@ -8755,6 +8777,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1524242641}
+    - target: {fileID: 4719509819920680533, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: debugMoveVoidToLine
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4973814592829607053, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_LocalPosition.x
       value: -75.99

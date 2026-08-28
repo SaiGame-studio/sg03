@@ -131,11 +131,13 @@ It standardizes every raw error string into a unique `ErrorKey`, regex pattern, 
 | `ERR_XENA_INVALID_CONFIG` | `xena_awakened requires valid configuration` | Invalid awakening skill configuration. | Thức Tỉnh Xena thiếu cấu hình hợp lệ. | `lib_ability_xena.lua` |
 | `ERR_XENA_REQUIRES_TARGET` | `{0} requires a target card` | Skill {0} requires a target card. | Kỹ năng {0} yêu cầu lá bài mục tiêu. | `lib_ability_xena.lua` |
 | `ERR_XENA_TARGET_MUST_BE_CHAR` | `{0} target must be a Character` | Target must be a character card. | Mục tiêu phải là một thẻ nhân vật. | `lib_ability_xena.lua` |
+| `ERR_XENA_TARGET_MUST_BE_FORM` | `{0} target must be {1}` | The awakening skill can only target its matching Xena form. | Kỹ năng Thức Tỉnh chỉ có thể nhắm đúng hình thái Xena tương ứng. | `lib_ability_xena.lua` |
 | `ERR_XENA_TARGET_NOT_ATTACKED` | `{0} target is not being attacked` | Target is not under attack. | Mục tiêu không bị tấn công. | `lib_ability_xena.lua` |
 | `ERR_XENA_REQUIRES_SACRIFICE` | `{0} requires {1} adjacent allied card(s) to sacrifice` | Skill {0} requires {1} adjacent allied card(s) to sacrifice. | Kỹ năng {0} yêu cầu hiến tế {1} lá đồng minh. | `lib_ability_xena.lua` |
 | `ERR_XENA_REQUIRES_SUCCESSOR` | `{0} requires {1} in own the_void` | Skill {0} requires {1} in your void zone. | Kỹ năng {0} yêu cầu lá {1} trong Hư Không. | `lib_ability_xena.lua` |
 | `ERR_DEMON_RITE_NO_TRIGGER_CARD` | `demon_rite requires a triggering card` | Demon Rite must be triggered by another card. | Nghi Lễ Quỷ Dữ phải qua thẻ bài khác. | `lib_ability_xena.lua` |
 | `ERR_DEMON_RITE_DIRECT_DISABLED` | `demon_rite cannot be activated directly by Demon Rite` | Demon Rite cannot be cast directly. | Nghi Lễ Quỷ Dữ không thể tự kích hoạt. | `lib_ability_xena.lua` |
 | `ERR_DEMON_RITE_TARGET_MISMATCH` | `demon_rite target must be allied with its triggering card` | Ritual target must be an allied card. | Mục tiêu Nghi Lễ Quỷ Dữ phải là thẻ đồng minh. | `lib_ability_xena.lua` |
-| `ERR_DEMON_RITE_MISSING_RITE` | `missing_demon_rite` | The Demon Rite card definition does not exist in the backend. | Backend không có định nghĩa lá Nghi Lễ Quỷ Dữ. | `lib_ability_xena.lua` |
+| `ERR_DEMON_RITE_MISSING_RITE` | `missing_demon_rite` | Demon Rite is not deployed on your back line. | Demon Rite chưa được triển khai ở hậu tuyến của bạn. | `lib_ability_xena.lua` |
+| `ERR_DEMON_RITE_MISSING_ORBS` | `missing_demon_orbs` | Demon Orbs is not deployed on your back line. | Demon Orbs chưa được triển khai ở hậu tuyến của bạn. | `lib_ability_xena.lua` |
 | `ERR_XENA4_TARGET_MUST_BE_XENA4` | `xena_awakened4 target must be xena4` | Xena Awakened IV can only target Xena IV. | Thức Tỉnh IV chỉ áp dụng trên Xena IV. | `lib_ability_xena.lua` |

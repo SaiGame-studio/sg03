@@ -15,7 +15,7 @@ namespace SG03
     [RequireComponent(typeof(Card3D))]
     [RequireComponent(typeof(CardLoader))]
     [RequireComponent(typeof(CardMovement))]
-    public class Card3DCtrl : PoolObj
+    public partial class Card3DCtrl : PoolObj
     {
         // ─── Static card events ───────────────────────────────────────────────────
 
@@ -43,6 +43,7 @@ namespace SG03
         [SerializeField] private bool               expose;
         [SerializeField] private bool               isTrigger;
         [SerializeField] private bool               isHover;
+        [SerializeField] private Card3DCtrl         attacker;
         private bool isFullDetail;
         private bool showFinalDefOnlyOnHover;
 
@@ -56,7 +57,6 @@ namespace SG03
         private ClientActions clientActions;
         private BattleStateCtrl battleStateCtrl;
         private Coroutine spawnHpBarRoutine;
-        private float healthPreviewDelta;
 
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
@@ -96,6 +96,7 @@ namespace SG03
 
         protected virtual void OnDisable()
         {
+            this.SetAttacker(null);
             this.ReturnHpBarToPool();
         }
 
@@ -170,7 +171,7 @@ namespace SG03
             this.hpBarInstance.SetPosition(holder.transform.position);
             this.hpBarInstance.SetParent(this.transform, this.cardOwner);
             this.hpBarInstance.gameObject.SetActive(true);
-            this.hpBarInstance.SetHealthPreview(this.healthPreviewDelta);
+            this.UpdateDamagePreviewFromAttacker();
             this.RefreshHpBarDisplayMode();
         }
 
@@ -288,29 +289,25 @@ namespace SG03
         /// <summary>Previews a pending positive damage amount on this card's HP bar.</summary>
         public void SetHealthPreview(float positiveDelta)
         {
-            this.healthPreviewDelta = Mathf.Max(0f, positiveDelta);
-            this.hpBarInstance?.SetHealthPreview(this.healthPreviewDelta);
+            this.hpBarInstance?.SetHealthPreview(Mathf.Max(0f, positiveDelta));
             this.RefreshHpBarDisplayMode();
         }
 
         /// <summary>Clears this card's pending HP-bar preview.</summary>
         public void ClearHealthPreview()
         {
-            this.healthPreviewDelta = 0f;
             this.hpBarInstance?.ClearHealthPreview();
             this.RefreshHpBarDisplayMode();
         }
 
         /// <summary>
-        /// Rebinds a planned damage preview after an effect changes this card's
-        /// battle stats. The amount remains owned by the card, rather than the
-        /// pooled HP-bar instance, so a DEF refresh cannot discard it.
+        /// Refreshes a planned damage preview after an effect changes this
+        /// card's battle stats. The value is always recalculated from Attacker.
         /// </summary>
         public void RefreshPlannedDamagePreview()
         {
             this.hpBarInstance?.RefreshHealthFromBattleState();
-            this.hpBarInstance?.SetHealthPreview(this.healthPreviewDelta);
-            this.RefreshHpBarDisplayMode();
+            this.UpdateDamagePreviewFromAttacker();
         }
 
         private void DespawnHpBar()
@@ -437,6 +434,7 @@ namespace SG03
         /// <paramref name="onReady"/> is invoked after RotateZ180 completes (new card) or immediately after move starts (existing holder).</summary>
         public void SetCardHolder(CardHolderCtrl holder, System.Action onReady = null)
         {
+            if (this.IsMovingVoidToLine) return;
             if (this.movement.IsFlipping) return;
             bool isNewHolder = this.cardHolder == null;
             this.cardHolder = holder;
@@ -462,14 +460,23 @@ namespace SG03
         }
 
         /// <summary>Smoothly moves the card to the specified transform, syncing both position and rotation.</summary>
-        public void MoveAndRotate(Transform target, Location destination) => this.movement.MoveAndRotate(target, destination);
+        public void MoveAndRotate(Transform target, Location destination)
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.MoveAndRotate(target, destination);
+        }
 
         /// <summary>Smoothly moves the card to the specified world position and rotation.</summary>
-        public void MoveAndRotate(Vector3 worldPosition, Quaternion rotation, Location destination) => this.movement.MoveAndRotate(worldPosition, rotation, destination);
+        public void MoveAndRotate(Vector3 worldPosition, Quaternion rotation, Location destination)
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.MoveAndRotate(worldPosition, rotation, destination);
+        }
 
         /// <summary>Smoothly moves the card to the specified transform, position only (no rotation change).</summary>
         public void MoveTo(Transform target, Location destination)
         {
+            if (this.IsMovingVoidToLine) return;
             CardHolderCtrl holder = target != null ? target.GetComponent<CardHolderCtrl>() : null;
             if (holder == null)
             {
@@ -481,23 +488,33 @@ namespace SG03
         }
 
         /// <summary>Smoothly moves the card to the specified world position, no rotation change.</summary>
-        public void MoveTo(Vector3 worldPosition, Location destination) => this.movement.MoveTo(worldPosition, destination);
+        public void MoveTo(Vector3 worldPosition, Location destination)
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.MoveTo(worldPosition, destination);
+        }
 
         /// <summary>Cancels the current transition and immediately starts returning this card to its hand slot.</summary>
         public void ReturnToHand(Transform handTarget)
         {
+            if (this.IsMovingVoidToLine) return;
             this.cardHolder?.SetCard(null);
             this.AssignCardHolder(null);
             this.movement.ReturnToHand(handTarget);
         }
 
         /// <summary>Smoothly rotates the card in-place to the target world-space rotation.</summary>
-        public void RotateTo(Quaternion targetRotation) => this.movement.RotateTo(targetRotation);
+        public void RotateTo(Quaternion targetRotation)
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.RotateTo(targetRotation);
+        }
 
         /// <summary>Moves the card to <paramref name="holder"/>'s position and flips face-down via the Unknown axis.
         /// Intended for hand → line transitions.</summary>
         public void MoveToUnknow(CardHolderCtrl holder, System.Action onReady = null)
         {
+            if (this.IsMovingVoidToLine) return;
             this.movement.MoveToUnknow(holder, () =>
             {
                 onReady?.Invoke();
@@ -513,11 +530,16 @@ namespace SG03
         }
 
         /// <summary>Rotates the card 180 degrees around the world Z axis, then invokes <paramref name="onComplete"/>.</summary>
-        public void RotateZ180(System.Action onComplete = null) => this.movement.RotateY180(onComplete);
+        public void RotateZ180(System.Action onComplete = null)
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.RotateY180(onComplete);
+        }
 
         /// <summary>Smoothly rotates the card to face-down using the Unknown axis, without rising.</summary>
         public void FaceDownUnknown()
         {
+            if (this.IsMovingVoidToLine) return;
             this.movement.FaceDownUnknown();
             FaceStateChanged?.Invoke(this, false);
             this.RefreshHpBarAfterFaceStateChanged();
@@ -526,6 +548,7 @@ namespace SG03
         /// <summary>Smoothly rotates the card to face-up using the Unknown axis, without rising.</summary>
         public void FaceUpUnknown()
         {
+            if (this.IsMovingVoidToLine) return;
             this.movement.FaceUpUnknown();
             FaceStateChanged?.Invoke(this, true);
             this.RefreshHpBarAfterFaceStateChanged();
@@ -534,6 +557,7 @@ namespace SG03
         /// <summary>Smoothly rotates the card to face-up.</summary>
         public void FaceUp()
         {
+            if (this.IsMovingVoidToLine) return;
             this.movement.FaceUp();
             FaceStateChanged?.Invoke(this, true);
             this.RefreshHpBarAfterFaceStateChanged();
@@ -542,17 +566,23 @@ namespace SG03
         /// <summary>Smoothly rotates the card to face-down.</summary>
         public void FaceDown()
         {
+            if (this.IsMovingVoidToLine) return;
             this.movement.FaceDown();
             FaceStateChanged?.Invoke(this, false);
             this.RefreshHpBarAfterFaceStateChanged();
         }
 
         /// <summary>Moves the card to the full-detail point without changing its logical location.</summary>
-        public void MoveToFullDetail(Transform point) => this.movement.MoveToFullDetail(point);
+        public void MoveToFullDetail(Transform point)
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.MoveToFullDetail(point);
+        }
 
         /// <summary>Returns the card from full-detail back to its selected position in hand.</summary>
         public void ReturnFromFullDetail()
         {
+            if (this.IsMovingVoidToLine) return;
             this.movement.ReturnFromFullDetail();
             this.RefreshHpBarVisibility();
         }
@@ -567,32 +597,61 @@ namespace SG03
         }
 
         /// <summary>Plays the damage run-up animation: card rises then returns to its current position.</summary>
-        public void RunUp() => this.movement.RunUp();
+        public void RunUp()
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.RunUp();
+        }
 
         /// <summary>Plays the damage shake animation on the Z axis.</summary>
-        public void Damaged() => this.movement.Damaged();
+        public void Damaged()
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.Damaged();
+        }
 
         /// <summary>Plays the ability activation animation.</summary>
-        public void AbilityActive() => this.movement.AbilityActive();
+        public void AbilityActive()
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.AbilityActive();
+        }
 
         /// <summary>Plays the attack lunge animation: card charges toward the defender then returns.</summary>
-        public void AttackLunge(Vector3 defenderPosition) => this.movement.AttackLunge(defenderPosition);
+        public void AttackLunge(Vector3 defenderPosition)
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.AttackLunge(defenderPosition);
+        }
 
         /// <summary>Plays the attack animation with a small backstep before the lunge, then returns.</summary>
-        public void AttackBackstepLunge(Vector3 defenderPosition) => this.movement.AttackBackstepLunge(defenderPosition);
+        public void AttackBackstepLunge(Vector3 defenderPosition)
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.AttackBackstepLunge(defenderPosition);
+        }
 
         /// <summary>Moves the card back to its currently assigned <see cref="CardHolderCtrl"/> position (no flip).</summary>
         public void MoveBackToHolder()
         {
+            if (this.IsMovingVoidToLine) return;
             if (this.cardHolder == null) return;
             this.movement.MoveBackToLineHolder(this.cardHolder);
         }
 
         /// <summary>Moves the card forward toward the defender and stops there (no return).</summary>
-        public void PlanningLunge(Vector3 defenderPosition) => this.movement.PlanningLunge(defenderPosition);
+        public void PlanningLunge(Vector3 defenderPosition)
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.PlanningLunge(defenderPosition);
+        }
 
         /// <summary>Moves the card directly to the given destination (no stop-distance offset, no return).</summary>
-        public void PlanningLungeTo(Vector3 destination) => this.movement.PlanningLungeTo(destination);
+        public void PlanningLungeTo(Vector3 destination)
+        {
+            if (this.IsMovingVoidToLine) return;
+            this.movement.PlanningLungeTo(destination);
+        }
 
         /// <summary>Plays the ability activation animation: card rises + scales up, holds, then returns.</summary>
         public void ActivateAbility() => this.RunUp();
@@ -614,17 +673,48 @@ namespace SG03
         public bool    IsAnimating => this.movement.IsAnimating;
         public string  InventoryItemId => this.inventoryItemId;
 
+        /// <summary>The Omega card currently planning an attack against this card.</summary>
+        public Card3DCtrl Attacker => this.attacker;
+
+        /// <summary>
+        /// Assigns the card planning an attack against this card. The damage
+        /// preview is derived from that attacker and is cleared with the link.
+        /// </summary>
+        public void SetAttacker(Card3DCtrl value)
+        {
+            this.attacker = value;
+            this.UpdateDamagePreviewFromAttacker();
+        }
+
+        private void UpdateDamagePreviewFromAttacker()
+        {
+            if (this.attacker == null)
+            {
+                this.ClearHealthPreview();
+                return;
+            }
+
+            int attack = this.attacker.IsOmegaCardHidden()
+                ? 0
+                : this.attacker.Definition?.GetBaseStatInt("atk") ?? 0;
+            this.SetHealthPreview(attack);
+        }
+
         public void SetMoveDuration(float d)  => this.movement.SetMoveDuration(d);
         public void SetRotateDuration(float d) => this.movement.SetRotateDuration(d);
 
         public void SetInventoryItemId(string id)
         {
-            if (this.inventoryItemId != id) this.ClearHealthPreview();
+            if (this.inventoryItemId != id)
+            {
+                this.SetAttacker(null);
+            }
             this.inventoryItemId = id;
         }
 
         /// <summary>The holder this card is currently assigned to, or null if none.</summary>
         public CardHolderCtrl CardHolder => this.cardHolder;
+        public bool IsMovingVoidToLine => this.movement != null && this.movement.IsVoidToLineTransitionActive;
 
         /// <summary>The type of this card (character or support), derived from Definition.Metadata.type.</summary>
         public CardType CardType => Enum.TryParse(this.definition?.metadata?.type, out CardType t) ? t : default;
