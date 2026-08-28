@@ -59,6 +59,7 @@ namespace SG03
             card.SetRotateDuration(this.ActionRotateDuration);
             this.slotOccupancy[holder.transform] = card;
             holder.SetCard(card);
+            this.ApplyPendingAttacker(holder, card);
 
             card.MoveVoidToLine(holder, owner == Owner.alpha, isFaceUp, null);
             return card;

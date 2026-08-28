@@ -43,6 +43,7 @@ namespace SG03
         [SerializeField] private bool               expose;
         [SerializeField] private bool               isTrigger;
         [SerializeField] private bool               isHover;
+        [SerializeField] private Card3DCtrl         attacker;
         private bool isFullDetail;
         private bool showFinalDefOnlyOnHover;
 
@@ -96,6 +97,7 @@ namespace SG03
 
         protected virtual void OnDisable()
         {
+            this.SetAttacker(null);
             this.ReturnHpBarToPool();
         }
 
@@ -614,12 +616,21 @@ namespace SG03
         public bool    IsAnimating => this.movement.IsAnimating;
         public string  InventoryItemId => this.inventoryItemId;
 
+        /// <summary>The Omega card currently planning an attack against this card.</summary>
+        public Card3DCtrl Attacker => this.attacker;
+
+        public void SetAttacker(Card3DCtrl value) => this.attacker = value;
+
         public void SetMoveDuration(float d)  => this.movement.SetMoveDuration(d);
         public void SetRotateDuration(float d) => this.movement.SetRotateDuration(d);
 
         public void SetInventoryItemId(string id)
         {
-            if (this.inventoryItemId != id) this.ClearHealthPreview();
+            if (this.inventoryItemId != id)
+            {
+                this.ClearHealthPreview();
+                this.SetAttacker(null);
+            }
             this.inventoryItemId = id;
         }
 

@@ -193,6 +193,7 @@ namespace SG03
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
 
+            defender.SetAttacker(null);
             defender.ClearHealthPreview();
 
             return this.StartCoroutine(this.OmegaAttackRoutine(attacker, defender));
@@ -285,6 +286,7 @@ namespace SG03
             Card3DCtrl attacker = this.cardSpawning?.FindCardById(attackerId);
             Card3DCtrl defender = this.cardSpawning?.FindCardById(defenderId);
             if (attacker == null || defender == null) return null;
+            defender.SetAttacker(attacker);
             defender.SetHealthPreview(attackerAtk);
             return this.StartCoroutine(this.OmegaPlaningCharacterAttackRoutine(attacker, defender));
         }
