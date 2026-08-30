@@ -8281,19 +8281,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[29]'
-      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/lightning_strike.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/abilities/lightning_strike.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[30]'
-      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/static_bind.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/abilities/static_bind.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[31]'
-      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/volt_heart.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/azura.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[32]'
-      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/zelene.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/common/zelene.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[33]'

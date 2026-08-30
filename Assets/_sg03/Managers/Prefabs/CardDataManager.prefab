@@ -76,10 +76,10 @@ MonoBehaviour:
   - Assets/_sg03/Card/Data/Character/Human/lyra.asset
   - Assets/_sg03/Card/Data/Character/Human/titan.asset
   - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/holy_glow.asset
-  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/lightning_strike.asset
-  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/static_bind.asset
-  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/volt_heart.asset
-  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/zelene.asset
+  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/abilities/lightning_strike.asset
+  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/abilities/static_bind.asset
+  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/azura.asset
+  - Assets/_sg03/Card/Data/Character/Lightborn/LightElf/common/zelene.asset
   - Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/back_stab.asset
   - Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/goblin_shaman/brute_call.asset
   - Assets/_sg03/Card/Data/Character/Natureborn/Goblin/abilities/goblin_shaman/totem_pulse.asset
