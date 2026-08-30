@@ -1,6 +1,7 @@
 # Azura
 
 - **Tên**: Azura
+- **Mã Thẻ Bài**: `volt_heart`
 - **Số sao**: 3
 - **Tấn Công (ATK)**: 340
 - **Phòng Thủ (DEF)**: 370

@@ -66,6 +66,12 @@ function get_ability_config(ability_key)
             requires_target_card = true,
             resolves_without_attack = true,
         },
+        lightning_strike = {
+            handler_group = "lightborn",
+            target_positions = { "enemy_frontline", "enemy_backline" },
+            requires_target_card = true,
+            resolves_without_attack = true,
+        },
         skeleton_shield = {
             handler_group = "darkborn",
             target_positions = { "own_frontline" },

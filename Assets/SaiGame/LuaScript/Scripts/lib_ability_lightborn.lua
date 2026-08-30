@@ -141,7 +141,7 @@ function static_bind_execute(state, source_card, event_data, helpers)
     local azura_card = helpers.find_untriggered_card(state[source_side .. "_front_line"], function(card)
         local card_def = helpers.find_item_def(state.item_defs, card.item_definition_code_name)
         local char_code = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.char_code or nil
-        return card.item_definition_code_name == "azura" or char_code == "azura"
+        return card.item_definition_code_name == "volt_heart" or char_code == "volt_heart"
     end)
     if azura_card == nil then
         return {}, "static_bind requires an untriggered Azura in front_line"
@@ -218,6 +218,149 @@ function static_bind_execute(state, source_card, event_data, helpers)
     table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
 
     battle.dlog("[ability] static_bind: azura=" .. azura_card.inventory_item_id .. " target=" .. target_id .. " stun_damage=" .. tostring(stun_damage) .. " cancelled_plan=" .. tostring(cancelled_plan))
+    return actions, nil
+end
+
+-- ability: lightning_strike
+-- Azura strikes the selected enemy and one adjacent enemy on the same battle
+-- line. Only 1- and 2-star targets are stunned: their queued attack is
+-- cancelled and a pending lunge returns to its holder if they survive.
+function lightning_strike_execute(state, source_card, event_data, helpers)
+    local battle = helpers.lib_battle_common
+    local target_card = (event_data or {}).defender_card
+    if target_card == nil then
+        return {}, "lightning_strike requires a target character"
+    end
+    if not battle.check_card_type(state.item_defs, target_card, "character") then
+        return {}, "lightning_strike can target only a character card"
+    end
+
+    local source_side = helpers.find_card_side(state, source_card)
+    if source_side == nil or source_side == "unknown" then
+        return {}, "lightning_strike source card is not on a battle line"
+    end
+
+    local azura_card = helpers.find_untriggered_card(state[source_side .. "_front_line"], function(card)
+        local card_def = helpers.find_item_def(state.item_defs, card.item_definition_code_name)
+        local char_code = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.char_code or nil
+        return card.item_definition_code_name == "volt_heart" or char_code == "volt_heart"
+    end)
+    if azura_card == nil then
+        return {}, "lightning_strike requires an untriggered Azura in front_line"
+    end
+
+    local target_line_key = (event_data or {}).defender_line_key
+    local target_line = target_line_key ~= nil and state[target_line_key] or nil
+    if target_line == nil then
+        return {}, "lightning_strike target must be on a battle line"
+    end
+
+    local target_slot = target_card.slot_index
+    if target_slot == nil then
+        return {}, "lightning_strike target requires a slot_index"
+    end
+
+    local adjacent_target = nil
+    for _, adjacent_slot in ipairs({ target_slot - 1, target_slot + 1 }) do
+        for _, line_card in ipairs(target_line) do
+            if line_card.inventory_item_id ~= nil and line_card.inventory_item_id ~= "" and
+               line_card.inventory_item_id ~= target_card.inventory_item_id and
+               line_card.slot_index == adjacent_slot and
+               battle.check_card_type(state.item_defs, line_card, "character") then
+                adjacent_target = line_card
+                break
+            end
+        end
+        if adjacent_target ~= nil then break end
+    end
+    if adjacent_target == nil then
+        return {}, "lightning_strike requires an adjacent target character"
+    end
+
+    local ability_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
+    local ability_stats = ability_def ~= nil and ability_def.base_stats or nil
+    local stun_damage = ability_stats ~= nil and tonumber(ability_stats.stun_damage) or nil
+    if stun_damage == nil or stun_damage <= 0 then
+        return {}, "lightning_strike requires a positive base_stats.stun_damage"
+    end
+
+    local targets = { target_card, adjacent_target }
+    local target_stars = {}
+    for index, target in ipairs(targets) do
+        local target_def = helpers.find_item_def(state.item_defs, target.item_definition_code_name)
+        local stars = target_def ~= nil and target_def.base_stats ~= nil and tonumber(target_def.base_stats.star) or nil
+        if stars == nil then
+            return {}, "lightning_strike target star is missing: " .. tostring(target.item_definition_code_name)
+        end
+        target_stars[index] = stars
+    end
+
+    azura_card.trigger = true
+    azura_card.face_up = true
+    azura_card.expose = true
+
+    local target_side = target_line_key:sub(1, 5) == "alpha" and "alpha" or "omega"
+    local actions = {
+        source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+            ",ability=lightning_strike,target=" .. target_card.inventory_item_id ..
+            ",adjacent_target=" .. adjacent_target.inventory_item_id ..
+            ",stun_damage=" .. tostring(stun_damage) .. ",selected=" .. azura_card.inventory_item_id,
+        source_side .. "_card_expose:" .. azura_card.inventory_item_id,
+    }
+
+    local function cancel_target_attack(target)
+        local target_id = target.inventory_item_id
+        local cancelled_plan = false
+        for _, planning_key in ipairs({ "alpha_planning", "omega_planning" }) do
+            local planning = state[planning_key]
+            if planning ~= nil then
+                for plan_index = #planning, 1, -1 do
+                    local plan = planning[plan_index]
+                    if plan ~= nil and plan.attacker_inv_id == target_id then
+                        table.remove(planning, plan_index)
+                        cancelled_plan = true
+                    end
+                end
+            end
+        end
+        if state.pending_attack ~= nil and state.pending_attack.attacker_inventory_item_id == target_id then
+            state.pending_attack.cancelled = true
+            cancelled_plan = true
+        end
+        return cancelled_plan
+    end
+
+    for index, target in ipairs(targets) do
+        local cancelled_plan = false
+        if target_stars[index] <= 2 then
+            target.trigger = true
+            cancelled_plan = cancel_target_attack(target)
+        end
+
+        local damage_actions, damage_err = helpers.deal_damage_to_character(
+            state, source_card, target, stun_damage, target_line, target_side .. "_the_void"
+        )
+        if damage_err ~= nil then return actions, damage_err end
+        for _, action in ipairs(damage_actions) do
+            table.insert(actions, action)
+        end
+
+        if cancelled_plan and target.total_damage_received < (target.final_def or 0) then
+            table.insert(actions, "card_move_back_to_holder:" .. target.inventory_item_id)
+        end
+    end
+
+    for _, line_key in ipairs({ source_side .. "_front_line", source_side .. "_back_line", source_side .. "_hand" }) do
+        battle.remove_card_from_line(state[line_key], source_card.inventory_item_id)
+    end
+    local source_void_key = source_side .. "_the_void"
+    if state[source_void_key] == nil then state[source_void_key] = {} end
+    table.insert(state[source_void_key], source_card)
+    table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+
+    battle.dlog("[ability] lightning_strike: azura=" .. azura_card.inventory_item_id ..
+        " target=" .. target_card.inventory_item_id .. " adjacent_target=" .. adjacent_target.inventory_item_id ..
+        " stun_damage=" .. tostring(stun_damage))
     return actions, nil
 end
 

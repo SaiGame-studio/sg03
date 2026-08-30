@@ -1,9 +1,21 @@
 # Lightning Strike
 
-> **WIP** - Chưa xác định số sao, mục tiêu và cơ chế trong dữ liệu game.
-
 - **Mã Thẻ Bài**: `lightning_strike`
 - **Loại Thẻ**: [`ability`](../../../../../04_abilities.md)
 - **Chủng Tộc Chính**: **Lightborn**
 - **Tộc Nhánh**: Light Elf (định danh kỹ thuật: `light_elf`)
 - **Thẻ Nhân Vật Yêu Cầu**: [Azura](../azura.md)
+
+## Mô Tả Kỹ Năng
+Lightning Strike chỉ có thể được triển khai bởi Azura. Cô dồn linh lực sấm sét vào quyền thuật rồi đánh lan từ Character đối thủ được chọn sang một Character liền kề trên cùng battle line, gây cho mỗi mục tiêu lượng sát thương bằng `base_stats.stun_damage` của Lightning Strike.
+
+Với Character 1 hoặc 2 sao, dòng điện còn khiến mục tiêu bị `trigger`: mọi planning attack đang chờ của mục tiêu bị hủy và, nếu đang trong một đòn tấn công chờ xử lý, mục tiêu trở về holder của nó. Character từ 3 sao trở lên chỉ nhận sát thương `base_stats.stun_damage`; chúng không bị `trigger`, không bị hủy planning attack và không bị đưa về holder bởi Lightning Strike.
+
+## Điều Kiện Sử Dụng
+- Azura phải là Character triển khai Lightning Strike.
+- Chọn một Character đối thủ có một Character khác đứng liền kề trên cùng battle line; kỹ năng tấn công cả hai.
+
+## Hiệu Quả
+- Mỗi mục tiêu nhận sát thương bằng `base_stats.stun_damage` của Lightning Strike.
+- Mục tiêu 1 hoặc 2 sao bị `trigger`, hủy planning attack và trở về holder nếu đang trong đòn tấn công chờ xử lý.
+- Mục tiêu từ 3 sao trở lên chỉ nhận sát thương.
