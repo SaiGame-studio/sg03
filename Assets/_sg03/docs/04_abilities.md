@@ -22,7 +22,7 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 - [Demon Rite](cards/darkborn/demon/xena/abilities/demon_rite.md): 3 sao
 
 ### Lightborn
-- [Holy Glow](cards/lightborn/light_elf/abilities/holy_glow.md): 0 sao
+- [Holy Glow](cards/lightborn/light_elf/abilities/holy_glow.md): 1 sao
 - [Lightning Strike](cards/lightborn/light_elf/azura/abilities/lightning_strike.md): WIP
 - [Static Bind](cards/lightborn/light_elf/azura/abilities/static_bind.md): WIP
 

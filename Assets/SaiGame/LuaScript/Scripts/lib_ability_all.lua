@@ -460,18 +460,23 @@ function holy_glow_execute(state, source_card, event_data, helpers)
 
     local frontline_key = caster_side .. "_front_line"
     local front_line = state[frontline_key] or {}
-    local elf_card = helpers.find_untriggered_card(front_line, function(c)
+    local lightborn_female_card = helpers.find_untriggered_card(front_line, function(c)
         local def = helpers.find_item_def(state.item_defs, c.item_definition_code_name)
-        return def ~= nil and def.metadata ~= nil and def.metadata.race == "light_elf"
+        local is_lightborn = def ~= nil and def.metadata ~= nil and
+            (def.metadata.race == "lightborn" or def.metadata.race == "light_elf")
+        return def ~= nil and def.metadata ~= nil and
+            def.metadata.type == "character" and
+            is_lightborn and
+            def.metadata.gender == "female"
     end)
 
-    if elf_card == nil then
-        battle.dlog("[ability] holy_glow: error - no untriggered light_elf character in " .. frontline_key)
-        return {}, "holy_glow requires an untriggered light_elf character in front_line"
+    if lightborn_female_card == nil then
+        battle.dlog("[ability] holy_glow: error - no untriggered female Lightborn character in " .. frontline_key)
+        return {}, "holy_glow requires an untriggered female Lightborn character in front_line"
     end
 
-    elf_card.trigger = true
-    local expose_action = helpers.expose_ability_selected_card(state, elf_card)
+    lightborn_female_card.trigger = true
+    local expose_action = helpers.expose_ability_selected_card(state, lightborn_female_card)
 
     local hp_key = caster_side .. "_hp"
     local max_hp_key = caster_side .. "_max_hp"
@@ -511,7 +516,7 @@ function holy_glow_execute(state, source_card, event_data, helpers)
         end
     end
 
-    battle.dlog("[ability] holy_glow: caster=" .. source_card.inventory_item_id .. " side=" .. caster_side .. " light_elf=" .. elf_card.inventory_item_id .. " restore=" .. hp_restore .. " actual_restored=" .. actual_restored .. " new_hp=" .. new_hp .. "/" .. max_hp .. " will_system_send_to_void=" .. tostring(will_system_send_to_void))
+    battle.dlog("[ability] holy_glow: caster=" .. source_card.inventory_item_id .. " side=" .. caster_side .. " lightborn_female=" .. lightborn_female_card.inventory_item_id .. " restore=" .. hp_restore .. " actual_restored=" .. actual_restored .. " new_hp=" .. new_hp .. "/" .. max_hp .. " will_system_send_to_void=" .. tostring(will_system_send_to_void))
 
     if not will_system_send_to_void then
         -- Move source card to the void
@@ -537,7 +542,7 @@ function holy_glow_execute(state, source_card, event_data, helpers)
     if expose_action ~= nil then
         table.insert(ability_actions, expose_action)
     end
-    table.insert(ability_actions, caster_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=holy_glow,hp_restore=" .. hp_restore .. ",actual_restored=" .. actual_restored .. "," .. hp_key .. "=" .. state[hp_key] .. ",selected=" .. elf_card.inventory_item_id)
+    table.insert(ability_actions, caster_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=holy_glow,hp_restore=" .. hp_restore .. ",actual_restored=" .. actual_restored .. "," .. hp_key .. "=" .. state[hp_key] .. ",selected=" .. lightborn_female_card.inventory_item_id)
     
     if not will_system_send_to_void then
         table.insert(ability_actions, caster_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
