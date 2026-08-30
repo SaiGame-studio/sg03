@@ -17,6 +17,6 @@ Titan phải đang có mặt trên chiến trường của phe bạn và chưa h
 
 ## Hiệu Quả
 
-- Titan gây **160 damage** cho mọi thẻ `character` ở hàng trước của phe đối thủ.
-- Dư chấn của đòn quét gây **160 damage** cho một `character` đồng minh đứng cạnh Titan. Ren sẽ né được dư chấn do cô đã quen với đòn tấn công của Titan.
+- Titan gây **260 damage** cho mọi thẻ `character` ở hàng trước của phe đối thủ.
+- Dư chấn của đòn quét gây cố định **100 damage** cho một `character` đồng minh đứng cạnh Titan. Ren sẽ né được dư chấn do cô đã quen với đòn tấn công của Titan.
 - Sau khi dùng skill, Titan được tính là đã hành động và thẻ Ability được đưa vào `the_void` của phe sử dụng.

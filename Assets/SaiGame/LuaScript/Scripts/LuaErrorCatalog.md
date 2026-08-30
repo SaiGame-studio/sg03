@@ -121,6 +121,8 @@ It standardizes every raw error string into a unique `ErrorKey`, regex pattern, 
 | `ERR_ABILITY_TITAN_FALL_NO_TITAN_VOID` | `titan_fall requires titan in the_void` | Titan Fall requires Titan in the void. | Titan Giáng Thế yêu cầu Titan trong Hư Không. | `lib_ability_mid_game.lua` |
 | `ERR_ABILITY_TITAN_SPEAR_NO_TITAN` | `titan_spear_sweep requires Titan on the battlefield` | Titan Spear Sweep requires Titan on the battlefield. | Quét Giáo Titan yêu cầu Titan trên bàn đấu. | `lib_ability_mid_game.lua` |
 | `ERR_ABILITY_TITAN_SPEAR_NOT_READY` | `titan_spear_sweep requires Titan to be ready` | Titan Spear Sweep requires Titan to be untriggered. | Quét Giáo Titan yêu cầu Titan chưa kích hoạt. | `lib_ability_mid_game.lua` |
+| `ERR_ABILITY_TITAN_SPEAR_SWEEP_ATK_INVALID` | `titan_spear_sweep requires a positive base_stats.sweep_atk` | Titan Spear Sweep requires a positive sweep attack value. | Quét Giáo Titan yêu cầu chỉ số quét giáo dương. | `lib_ability_mid_game.lua` |
+| `ERR_ABILITY_TITAN_SPEAR_SHOCKWAVE_ATK_INVALID` | `titan_spear_sweep requires a positive base_stats.shockwave_atk` | Titan Spear Sweep requires a positive shockwave attack value. | Quét Giáo Titan yêu cầu chỉ số dư chấn dương. | `lib_ability_mid_game.lua` |
 
 ---
 
