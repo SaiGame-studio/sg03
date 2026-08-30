@@ -138,6 +138,18 @@ function static_bind_execute(state, source_card, event_data, helpers)
         return {}, "static_bind source card is not on a battle line"
     end
 
+    local azura_card = helpers.find_untriggered_card(state[source_side .. "_front_line"], function(card)
+        local card_def = helpers.find_item_def(state.item_defs, card.item_definition_code_name)
+        local char_code = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.char_code or nil
+        return card.item_definition_code_name == "azura" or char_code == "azura"
+    end)
+    if azura_card == nil then
+        return {}, "static_bind requires an untriggered Azura in front_line"
+    end
+    azura_card.trigger = true
+    azura_card.face_up = true
+    azura_card.expose = true
+
     local target_line_key = (event_data or {}).defender_line_key
     local target_line = target_line_key ~= nil and state[target_line_key] or nil
     if target_line == nil then
@@ -179,7 +191,8 @@ function static_bind_execute(state, source_card, event_data, helpers)
     local actions = {
         source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
             ",ability=static_bind,target=" .. target_id .. ",stun_damage=" .. tostring(stun_damage) ..
-            ",cancelled_plan=" .. tostring(cancelled_plan),
+            ",cancelled_plan=" .. tostring(cancelled_plan) .. ",selected=" .. azura_card.inventory_item_id,
+        source_side .. "_card_expose:" .. azura_card.inventory_item_id,
         target_side .. "_card_expose:" .. target_id,
     }
 
@@ -204,7 +217,7 @@ function static_bind_execute(state, source_card, event_data, helpers)
     table.insert(state[source_void_key], source_card)
     table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
 
-    battle.dlog("[ability] static_bind: target=" .. target_id .. " stun_damage=" .. tostring(stun_damage) .. " cancelled_plan=" .. tostring(cancelled_plan))
+    battle.dlog("[ability] static_bind: azura=" .. azura_card.inventory_item_id .. " target=" .. target_id .. " stun_damage=" .. tostring(stun_damage) .. " cancelled_plan=" .. tostring(cancelled_plan))
     return actions, nil
 end
 
