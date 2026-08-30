@@ -330,7 +330,10 @@ function deal_damage_to_character(state, attacker_card, target_card, damage, tar
 end
 
 local function _get_ability_library(handler_group)
-    if handler_group == "all" then return lib_ability_all end
+    if handler_group == "human" then return lib_ability_human end
+    if handler_group == "darkborn" then return lib_ability_darkborn end
+    if handler_group == "lightborn" then return lib_ability_lightborn end
+    if handler_group == "natureborn" then return lib_ability_natureborn end
     if handler_group == "advanced" then return lib_ability_advanced end
     if handler_group == "mid_game" then return lib_ability_mid_game end
     if handler_group == "xena" then return lib_ability_xena end
