@@ -38,7 +38,7 @@ Tộc nhánh hiện có: Light Elf. Định danh `elf` / `light_elf` là tên k�
 
 ### Thẻ Nhân Vật (Character)
 - [Zelena](cards/lightborn/light_elf/common/zelena.md) — Số sao: 2
-- [Azura](cards/lightborn/light_elf/azura/azura.md) — WIP
+- [Azura](cards/lightborn/light_elf/azura/azura.md) — Số sao: 3
 
 ---
 
