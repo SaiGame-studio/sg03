@@ -116,6 +116,11 @@ namespace SG03
 
         private Coroutine ExecuteOmegaCardMoveBackToHolder(string[] parameters)
         {
+            return this.ExecuteCardMoveBackToHolder(parameters);
+        }
+
+        private Coroutine ExecuteCardMoveBackToHolder(string[] parameters)
+        {
             if (parameters == null || parameters.Length == 0) return null;
             string inventoryItemId = parameters[0].Trim();
             if (string.IsNullOrEmpty(inventoryItemId)) return null;

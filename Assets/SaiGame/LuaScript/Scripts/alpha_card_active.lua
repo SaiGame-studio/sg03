@@ -285,6 +285,11 @@ local function resolve_alpha_attack(state,
     defender_card, defender_def, defender_line_key, defender_side_void)
     lib_battle_common.dlog("[alpha_card_active] == phase 3: resolving action ==")
     local pending_atk  = state.pending_attack
+    if pending_atk ~= nil and pending_atk.cancelled == true then
+        lib_battle_common.dlog("[alpha_card_active] pending attack cancelled before resolve: " .. tostring(pending_atk.attacker_inventory_item_id))
+        state.pending_attack = nil
+        return nil
+    end
     local final_damage = pending_atk ~= nil and pending_atk.damage_dealt or 0
     local live_defender_card, live_defender_line_key, live_defender_side_void = resolve_pending_defender(state, pending_atk)
     if live_defender_card == nil then

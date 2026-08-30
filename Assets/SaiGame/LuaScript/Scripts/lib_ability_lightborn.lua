@@ -119,4 +119,93 @@ function holy_glow_execute(state, source_card, event_data, helpers)
     return ability_actions, nil
 end
 
+-- ability: static_bind
+-- Stuns an enemy Character. A stunned Character cannot execute a queued attack;
+-- every queued plan it owns is removed and its planning lunge is returned to
+-- its holder. Damage comes only from the ability definition's stun_damage stat.
+function static_bind_execute(state, source_card, event_data, helpers)
+    local battle = helpers.lib_battle_common
+    local target_card = (event_data or {}).defender_card
+    if target_card == nil then
+        return {}, "static_bind requires a target character"
+    end
+    if not battle.check_card_type(state.item_defs, target_card, "character") then
+        return {}, "static_bind can target only a character card"
+    end
+
+    local source_side = helpers.find_card_side(state, source_card)
+    if source_side == nil or source_side == "unknown" then
+        return {}, "static_bind source card is not on a battle line"
+    end
+
+    local target_line_key = (event_data or {}).defender_line_key
+    local target_line = target_line_key ~= nil and state[target_line_key] or nil
+    if target_line == nil then
+        return {}, "static_bind target must be on a battle line"
+    end
+
+    local ability_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
+    local ability_stats = ability_def ~= nil and ability_def.base_stats or nil
+    local stun_damage = ability_stats ~= nil and tonumber(ability_stats.stun_damage) or nil
+    if stun_damage == nil or stun_damage <= 0 then
+        return {}, "static_bind requires a positive base_stats.stun_damage"
+    end
+
+    target_card.trigger = true
+    target_card.face_up = true
+    target_card.expose = true
+
+    local target_id = target_card.inventory_item_id
+    local cancelled_plan = false
+    for _, planning_key in ipairs({ "alpha_planning", "omega_planning" }) do
+        local planning = state[planning_key]
+        if planning ~= nil then
+            for index = #planning, 1, -1 do
+                local plan = planning[index]
+                if plan ~= nil and plan.attacker_inv_id == target_id then
+                    table.remove(planning, index)
+                    cancelled_plan = true
+                end
+            end
+        end
+    end
+
+    if state.pending_attack ~= nil and state.pending_attack.attacker_inventory_item_id == target_id then
+        state.pending_attack.cancelled = true
+        cancelled_plan = true
+    end
+
+    local target_side = target_line_key:sub(1, 5) == "alpha" and "alpha" or "omega"
+    local actions = {
+        source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+            ",ability=static_bind,target=" .. target_id .. ",stun_damage=" .. tostring(stun_damage) ..
+            ",cancelled_plan=" .. tostring(cancelled_plan),
+        target_side .. "_card_expose:" .. target_id,
+    }
+
+    local damage_actions, damage_err = helpers.deal_damage_to_character(
+        state, source_card, target_card, stun_damage, target_line, target_side .. "_the_void"
+    )
+    if damage_err ~= nil then return actions, damage_err end
+    for _, action in ipairs(damage_actions) do
+        table.insert(actions, action)
+    end
+
+    if cancelled_plan and target_card.total_damage_received < (target_card.final_def or 0) then
+        table.insert(actions, "card_move_back_to_holder:" .. target_id)
+    end
+
+    -- Static Bind is an ability card, so consume it after its effect resolves.
+    for _, line_key in ipairs({ source_side .. "_front_line", source_side .. "_back_line", source_side .. "_hand" }) do
+        battle.remove_card_from_line(state[line_key], source_card.inventory_item_id)
+    end
+    local source_void_key = source_side .. "_the_void"
+    if state[source_void_key] == nil then state[source_void_key] = {} end
+    table.insert(state[source_void_key], source_card)
+    table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+
+    battle.dlog("[ability] static_bind: target=" .. target_id .. " stun_damage=" .. tostring(stun_damage) .. " cancelled_plan=" .. tostring(cancelled_plan))
+    return actions, nil
+end
+
 -- ability: skeleton_shield

@@ -128,6 +128,11 @@ end
 
 -- Phase 3: apply the (possibly modified) pending_attack damage.
 local function resolve_omega_attack(state, resolved)
+    if state.pending_attack ~= nil and state.pending_attack.cancelled == true then
+        lib_battle_common.dlog("[alpha_defending_end] pending attack cancelled before resolve: " .. tostring(resolved.attacker_card.inventory_item_id))
+        state.pending_attack = nil
+        return nil
+    end
     local final_damage = state.pending_attack ~= nil and state.pending_attack.damage_dealt or 0
     lib_battle_common.dlog("[alpha_defending_end] resolve_omega_attack final_damage=" .. final_damage)
     local attack_err = lib_battle_common.card_attack_card(
