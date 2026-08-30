@@ -121,7 +121,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c9191ef9875b3e4eae0e4a6123c74cc
-    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/holy_glow.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/common/abilities/holy_glow.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
