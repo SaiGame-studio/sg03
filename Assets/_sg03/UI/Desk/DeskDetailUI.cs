@@ -588,12 +588,13 @@ namespace SG03.UI
                 {
                     if (!string.IsNullOrEmpty(slot.inventory_item_id)
                         && itemsById.TryGetValue(slot.inventory_item_id, out InventoryItemData item)
+                        && this.IsCharacterCard(item)
                         && this.GetCardStarCount(item) >= 4)
                         highStarCardCount++;
                 }
             }
 
-            this.highStarCardCountLabel.text = $"4+ Stars: {highStarCardCount}";
+            this.highStarCardCountLabel.text = $"4+ Characters: {highStarCardCount}";
         }
 
         private void UpdateVoidCount()
@@ -1059,6 +1060,15 @@ namespace SG03.UI
             string baseStatsJson = item?.definition?.base_stats;
             if (string.IsNullOrEmpty(baseStatsJson)) return 0;
             return JsonUtility.FromJson<DeskCardBaseStats>(baseStatsJson)?.star ?? 0;
+        }
+
+        private bool IsCharacterCard(InventoryItemData item)
+        {
+            string metadataJson = item?.definition?.metadata;
+            if (string.IsNullOrEmpty(metadataJson)) return false;
+
+            CardDefinitionMetadata metadata = JsonUtility.FromJson<CardDefinitionMetadata>(metadataJson);
+            return string.Equals(metadata?.type, "character", StringComparison.OrdinalIgnoreCase);
         }
 
         [Serializable]
