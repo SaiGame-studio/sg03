@@ -23,6 +23,8 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 
 ### Lightborn
 - [Holy Glow](cards/lightborn/light_elf/abilities/holy_glow.md): 0 sao
+- [Lightning Strike](cards/lightborn/light_elf/azura/abilities/lightning_strike.md): WIP
+- [Static Bind](cards/lightborn/light_elf/azura/abilities/static_bind.md): WIP
 
 ### Natureborn
 - [Totem Pulse](cards/natureborn/goblin/abilities/totem_pulse.md): 0 sao

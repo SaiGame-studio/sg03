@@ -5,17 +5,17 @@
 - **Chủng Tộc Chính**: **Lightborn**
 - **Tộc Nhánh**: Light Elf (định danh kỹ thuật: `elf` / `light_elf`)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline`, `own_backline`, `own_source`, `own_void`
-- **Thẻ Nhân Vật Yêu Cầu**: [Light Elf](../light_elf.md)
+- **Thẻ Nhân Vật Yêu Cầu**: [Zelena](../light_elf.md)
 
 ---
 
 ## ✨ Cơ Chế & Luồng Thực Thi Kỹ Năng
 
 - **Cấu Hình**: `target_positions = { "own_frontline", "own_backline", "own_source", "own_void" }`
-- **Điều Kiện**: Yêu cầu 1 thẻ nhân vật [Light Elf](../light_elf.md) chưa kích hoạt trên `own_frontline`.
+- **Điều Kiện**: Yêu cầu 1 thẻ nhân vật [Zelena](../light_elf.md) chưa kích hoạt trên `own_frontline`.
 
 ### Các Bước Thực Thi
-1. Tìm `light_elf` chưa kích hoạt trên `own_frontline`.
+1. Tìm [Zelena](../light_elf.md) chưa kích hoạt trên `own_frontline`.
 2. Đánh dấu `elf.trigger = true` và lật ngửa bài.
 3. Đọc giá trị `hp_restore` từ định nghĩa lá bài `holy_glow`.
 4. Hồi phục máu cho người chơi (không vượt quá `max_hp`):

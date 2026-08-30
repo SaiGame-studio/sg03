@@ -1,4 +1,4 @@
-# Light Elf
+# Zelena
 
 - **Loại Thẻ**: [`character`](../../../03_characters.md)
 - **Chủng Tộc Chính**: **Lightborn**
