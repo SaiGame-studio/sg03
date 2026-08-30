@@ -104,11 +104,7 @@ namespace SG03.UI
         private void LoadCardDataManager()
         {
             if (this.cardDataManager != null) return;
-            if (ManagersCtrl.Instance != null && ManagersCtrl.Instance.CardDataManager != null)
-            {
-                this.cardDataManager = ManagersCtrl.Instance.CardDataManager;
-            }
-            if (this.cardDataManager == null) this.cardDataManager = CardDataManager.Instance;
+            this.cardDataManager = CardDataManager.Instance;
             if (this.cardDataManager == null) this.cardDataManager = FindFirstObjectByType<CardDataManager>();
             if (this.cardDataManager == null) return;
             Debug.LogWarning(this.transform.name + ": LoadCardDataManager", this.gameObject);
