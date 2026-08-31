@@ -248,10 +248,28 @@ namespace SG03
 
             if (sourceCard != null) sourceCard.RunUp();
             if (selectedCard != null && targetCard != null) selectedCard.AttackLunge(targetCard.transform.position);
+            else if (selectedCard != null && this.TryGetAbilityTargetSourcePosition(targetId, out Vector3 targetPosition)) selectedCard.AttackLunge(targetPosition);
             else if (selectedCard != null) selectedCard.AbilityActive();
 
             if (sourceCard != null) yield return this.StartCoroutine(this.WaitForCard(sourceCard));
             if (selectedCard != null) yield return this.StartCoroutine(this.WaitForCard(selectedCard));
+        }
+
+        private bool TryGetAbilityTargetSourcePosition(string targetId, out Vector3 targetPosition)
+        {
+            targetPosition = default;
+            if (this.deskPosition == null || string.IsNullOrEmpty(targetId)) return false;
+
+            string targetSide = targetId.Trim().ToLowerInvariant();
+            Transform targetSource = targetSide == "alpha"
+                ? this.deskPosition.AlphaTheSource
+                : targetSide == "omega"
+                    ? this.deskPosition.OmegaTheSource
+                    : null;
+            if (targetSource == null) return false;
+
+            targetPosition = targetSource.position;
+            return true;
         }
 
         private Coroutine ExecuteOmegaPlaningCharacterAttack(string[] parameters)
