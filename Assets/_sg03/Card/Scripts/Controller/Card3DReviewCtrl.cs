@@ -17,6 +17,18 @@ namespace SG03
         [Header("Review Components")]
         [SerializeField] private CardReviewMovement reviewMovement;
 
+        public event Func<bool> PreviewCancelRequested
+        {
+            add
+            {
+                if (this.reviewMovement != null) this.reviewMovement.PreviewCancelRequested += value;
+            }
+            remove
+            {
+                if (this.reviewMovement != null) this.reviewMovement.PreviewCancelRequested -= value;
+            }
+        }
+
         // ─── SaiBehaviour overrides ───────────────────────────────────────────────
 
         protected override void LoadComponents()

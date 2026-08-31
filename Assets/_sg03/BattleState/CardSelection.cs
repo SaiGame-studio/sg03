@@ -237,9 +237,9 @@ namespace SG03
 
         private void HandleFullDetailClick()
         {
-            // Middle/right drag pans the inspected card, matching the lobby preview.
-            // Left click and Escape remain the deliberate ways to leave full detail.
-            if (!this.IsMouseClickedThisFrame()) return;
+            // Middle click cancels the preview. Right drag and mouse-wheel input
+            // are consumed by CardFullDetailManipulator.
+            if (!this.IsMouseClickedThisFrame() && !this.IsMouseMiddleClickedThisFrame()) return;
             this.ExitFullDetail();
         }
 

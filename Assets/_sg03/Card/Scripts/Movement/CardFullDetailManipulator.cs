@@ -6,8 +6,8 @@ namespace SG03
 {
     /// <summary>
     /// Lets the single card currently displayed in full-detail mode be inspected
-    /// with the same mouse-wheel zoom and middle/right-button pan as the lobby
-    /// card preview.
+    /// with mouse-wheel zoom and right-button pan, matching the lobby card
+    /// preview.
     /// </summary>
     [AddComponentMenu("SG03/Card/Card Full Detail Manipulator")]
     public class CardFullDetailManipulator : SaiBehaviour
@@ -75,15 +75,14 @@ namespace SG03
 
         private void HandlePan(Mouse mouse)
         {
-            bool panButtonPressed = mouse.middleButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame;
-            if (panButtonPressed)
+            if (mouse.rightButton.wasPressedThisFrame)
             {
                 this.CaptureFullDetailPosition();
                 this.lastPanMousePosition = mouse.position.ReadValue();
                 return;
             }
 
-            if (!mouse.middleButton.isPressed && !mouse.rightButton.isPressed) return;
+            if (!mouse.rightButton.isPressed) return;
 
             Vector2 mousePosition = mouse.position.ReadValue();
             Vector2 pointerDelta = mousePosition - this.lastPanMousePosition;
