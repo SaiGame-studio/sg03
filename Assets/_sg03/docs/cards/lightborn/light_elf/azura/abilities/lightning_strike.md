@@ -2,6 +2,7 @@
 
 - **Mã Thẻ Bài**: `lightning_strike`
 - **Loại Thẻ**: [`ability`](../../../../../04_abilities.md)
+- **Số sao**: 3
 - **Chủng Tộc Chính**: **Lightborn**
 - **Tộc Nhánh**: Light Elf (định danh kỹ thuật: `light_elf`)
 - **Thẻ Nhân Vật Yêu Cầu**: [Azura](../azura.md)
