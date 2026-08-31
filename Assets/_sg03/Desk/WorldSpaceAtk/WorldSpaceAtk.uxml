@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="WorldSpaceAtk.uss" />
+    <ui:VisualElement name="AtkUI" class="attack-root">
+        <ui:VisualElement name="AttackStatRow" class="attack-stat-row">
+            <ui:Label name="AttackLabel" text="0" class="attack-label" />
+            <ui:VisualElement name="AttackSwordIcon" class="attack-sword-icon">
+                <ui:VisualElement class="attack-sword-icon__blade attack-sword-icon__blade--outline" />
+                <ui:VisualElement class="attack-sword-icon__tip attack-sword-icon__tip--outline" />
+                <ui:VisualElement class="attack-sword-icon__guard attack-sword-icon__guard--outline" />
+                <ui:VisualElement class="attack-sword-icon__handle attack-sword-icon__handle--outline" />
+                <ui:VisualElement class="attack-sword-icon__blade" />
+                <ui:VisualElement class="attack-sword-icon__tip" />
+                <ui:VisualElement class="attack-sword-icon__guard" />
+                <ui:VisualElement class="attack-sword-icon__handle" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,12 @@
+.attack-root { width: 640px; height: 100px; position: absolute; left: 50%; top: 50%; translate: -50% -50%; justify-content: center; align-items: center; }
+.attack-stat-row { flex-direction: row; justify-content: center; align-items: center; }
+.attack-label { color: rgb(255, 255, 255); font-size: 60px; -unity-font-style: bold; -unity-text-align: middle-center; -unity-text-outline-width: 3px; -unity-text-outline-color: rgb(0, 0, 0); }
+.attack-sword-icon { width: 46px; height: 46px; margin-left: 10px; position: relative; }
+.attack-sword-icon__blade { position: absolute; left: 21px; top: 3px; width: 10px; height: 30px; rotate: -45deg; background-color: rgb(255, 255, 255); }
+.attack-sword-icon__tip { position: absolute; left: 29px; top: 0; width: 12px; height: 12px; rotate: 45deg; background-color: rgb(255, 255, 255); }
+.attack-sword-icon__guard { position: absolute; left: 12px; top: 27px; width: 26px; height: 8px; rotate: 45deg; background-color: rgb(255, 255, 255); border-radius: 3px; }
+.attack-sword-icon__handle { position: absolute; left: 6px; top: 32px; width: 11px; height: 19px; rotate: -45deg; background-color: rgb(255, 255, 255); border-radius: 3px; }
+.attack-sword-icon__blade--outline { left: 19px; top: 1px; width: 14px; height: 34px; background-color: rgb(0, 0, 0); }
+.attack-sword-icon__tip--outline { left: 27px; top: -2px; width: 16px; height: 16px; background-color: rgb(0, 0, 0); }
+.attack-sword-icon__guard--outline { left: 10px; top: 25px; width: 30px; height: 12px; background-color: rgb(0, 0, 0); border-radius: 5px; }
+.attack-sword-icon__handle--outline { left: 4px; top: 30px; width: 15px; height: 23px; background-color: rgb(0, 0, 0); border-radius: 5px; }

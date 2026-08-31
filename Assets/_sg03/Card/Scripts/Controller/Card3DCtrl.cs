@@ -55,6 +55,8 @@ namespace SG03
         [SerializeField] private ObjectPool objectPool;
         [SerializeField] private WorldSpaceHpBarCtrl hpBarPrefab;
         [SerializeField] private WorldSpaceHpBarCtrl hpBarInstance;
+        [SerializeField] private WorldSpaceAtkCtrl atkUiPrefab;
+        [SerializeField] private WorldSpaceAtkCtrl atkUiInstance;
         private ClientActions clientActions;
         private BattleStateCtrl battleStateCtrl;
         private Coroutine spawnHpBarRoutine;
@@ -151,6 +153,8 @@ namespace SG03
                 return;
             }
 
+            this.SpawnAtkUiAt(holder);
+
             this.EnsureSingleHpBarInstance();
             this.LoadObjectPool();
             if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
@@ -182,6 +186,42 @@ namespace SG03
             this.hpBarInstance.gameObject.SetActive(true);
             this.UpdateDamagePreviewFromAttacker();
             this.RefreshHpBarDisplayMode();
+        }
+
+        private void SpawnAtkUiAt(CardHolderCtrl holder)
+        {
+            if (holder == null || holder != this.cardHolder) return;
+
+            this.EnsureSingleAtkUiInstance();
+            this.LoadObjectPool();
+            if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
+            {
+                Debug.LogWarning($"{this.name}: ObjectPool is not ready for the ATK UI.", this);
+                return;
+            }
+
+            if (this.atkUiPrefab == null)
+            {
+                this.atkUiPrefab = this.objectPool.PoolPrefabs.GetByName("AtkUI") as WorldSpaceAtkCtrl;
+            }
+
+            if (this.atkUiPrefab == null)
+            {
+                Debug.LogWarning($"{this.name}: AtkUI is missing from ObjectPoolPrefabs.", this);
+                return;
+            }
+
+            if (this.atkUiInstance == null)
+            {
+                this.atkUiInstance = this.objectPool.SpawnInactive(this.atkUiPrefab, Vector3.zero);
+            }
+
+            if (this.atkUiInstance == null) return;
+
+            this.atkUiInstance.SetPosition(holder.transform.position);
+            this.atkUiInstance.SetParent(this.transform);
+            this.atkUiInstance.SetAttack(this.definition?.GetBaseStatInt("atk") ?? 0);
+            this.atkUiInstance.gameObject.SetActive(true);
         }
 
         private bool ShouldShowHpBar(CardHolderCtrl holder)
@@ -322,10 +362,22 @@ namespace SG03
         private void DespawnHpBar()
         {
             this.EnsureSingleHpBarInstance();
-            if (this.hpBarInstance == null) return;
+            if (this.hpBarInstance != null)
+            {
+                this.ReturnHpBarToPool(this.hpBarInstance);
+                this.hpBarInstance = null;
+            }
 
-            this.ReturnHpBarToPool(this.hpBarInstance);
-            this.hpBarInstance = null;
+            this.DespawnAtkUi();
+        }
+
+        private void DespawnAtkUi()
+        {
+            this.EnsureSingleAtkUiInstance();
+            if (this.atkUiInstance == null) return;
+
+            this.ReturnAtkUiToPool(this.atkUiInstance);
+            this.atkUiInstance = null;
         }
 
         private void RefreshHpBarDisplayMode()
@@ -371,6 +423,31 @@ namespace SG03
             this.LoadObjectPool();
             if (this.objectPool != null) this.objectPool.Despawn(hpBar);
             else hpBar.gameObject.SetActive(false);
+        }
+
+        private void EnsureSingleAtkUiInstance()
+        {
+            WorldSpaceAtkCtrl[] atkUis = this.GetComponentsInChildren<WorldSpaceAtkCtrl>(true);
+            foreach (WorldSpaceAtkCtrl atkUi in atkUis)
+            {
+                if (atkUi == this.atkUiInstance) continue;
+                if (this.atkUiInstance == null)
+                {
+                    this.atkUiInstance = atkUi;
+                    continue;
+                }
+
+                this.ReturnAtkUiToPool(atkUi);
+            }
+        }
+
+        private void ReturnAtkUiToPool(WorldSpaceAtkCtrl atkUi)
+        {
+            if (atkUi == null) return;
+
+            this.LoadObjectPool();
+            if (this.objectPool != null) this.objectPool.Despawn(atkUi);
+            else atkUi.gameObject.SetActive(false);
         }
 
         private void ReturnHpBarToPool()

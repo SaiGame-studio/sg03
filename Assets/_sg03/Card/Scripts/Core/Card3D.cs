@@ -85,6 +85,19 @@ namespace SG03
             return false;
         }
 
+        /// <summary>Gets the world-space position of the top edge of this card.</summary>
+        public bool TryGetTopEdgeWorldPosition(out Vector3 position)
+        {
+            if (this.cardHeightPixels <= 0 || this.pixelsPerUnit <= 0f)
+            {
+                position = this.transform.position;
+                return false;
+            }
+
+            position = this.transform.TransformPoint(Vector3.up * (this.CardHeight * 0.5f));
+            return true;
+        }
+
         [Header("Card Size")]
         [Tooltip("Card width in pixels (converted to world units via Pixels Per Unit).")]
         [SerializeField] private int cardWidthPixels = 750;
