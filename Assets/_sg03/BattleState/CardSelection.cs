@@ -318,7 +318,13 @@ namespace SG03
             if (this.IsLocationNonSelectable(this.hovered.Location)) { if (this.debugMouseEvents) Debug.LogWarning($"[CardSelection] Cannot click: Location {this.hovered.Location} non-selectable"); return; }
             
             if (this.IsClickOnSelected()) 
-            { 
+            {
+                if (this.IsTargeting && this.targetingSource == this.selected)
+                {
+                    this.CancelTargeting();
+                    return;
+                }
+
                 if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Re-selecting already selected card"); 
             }
             else
