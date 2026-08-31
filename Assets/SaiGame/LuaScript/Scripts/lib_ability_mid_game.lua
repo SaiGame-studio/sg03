@@ -226,10 +226,10 @@ function titan_spear_sweep_execute(state, source_card, event_data, helpers)
                ally_card.slot_index == adjacent_slot and
                battle.check_card_type(state.item_defs, ally_card, "character") then
                 local ally_def = helpers.find_item_def(state.item_defs, ally_card.item_definition_code_name)
-                local ally_char_code = ally_def ~= nil and ally_def.metadata ~= nil
-                    and ally_def.metadata.char_code or nil
+                local ally_char_code_required = ally_def ~= nil and ally_def.metadata ~= nil
+                    and ally_def.metadata.char_code_required or nil
                 if ally_card.item_definition_code_name ~= "azure_blade" and
-                   ally_char_code ~= "azure_blade" then
+                   ally_char_code_required ~= "azure_blade" then
                     adjacent_ally = ally_card
                 else
                     battle.dlog("[ability] titan_spear_sweep: adjacent Ren is immune")

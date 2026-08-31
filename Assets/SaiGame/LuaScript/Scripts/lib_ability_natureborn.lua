@@ -136,9 +136,9 @@ function brute_call_execute(state, source_card, event_data, helpers)
 
     local shaman_def = helpers.find_item_def(state.item_defs, shaman_card.item_definition_code_name)
     local shaman_type = shaman_def ~= nil and shaman_def.metadata ~= nil and shaman_def.metadata.type or nil
-    local shaman_code = shaman_def ~= nil and shaman_def.metadata ~= nil and shaman_def.metadata.char_code or nil
+    local shaman_code_required = shaman_def ~= nil and shaman_def.metadata ~= nil and shaman_def.metadata.char_code_required or nil
     if shaman_type ~= "character" or
-       (shaman_card.item_definition_code_name ~= "goblin_shaman" and shaman_code ~= "goblin_shaman") then
+       (shaman_card.item_definition_code_name ~= "goblin_shaman" and shaman_code_required ~= "goblin_shaman") then
         return {}, "brute_call target must be Goblin Shaman"
     end
 

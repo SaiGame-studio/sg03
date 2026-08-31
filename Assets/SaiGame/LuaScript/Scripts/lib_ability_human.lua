@@ -31,8 +31,8 @@ function eagle_eye_execute(state, source_card, event_data, helpers)
         if has_id then
             local line_def = helpers.find_item_def(state.item_defs, line_card.item_definition_code_name)
             local line_type = line_def ~= nil and line_def.metadata ~= nil and line_def.metadata.type or nil
-            local char_code = line_def ~= nil and line_def.metadata ~= nil and line_def.metadata.char_code or nil
-            if line_type == "character" and (line_card.item_definition_code_name == "lyra" or char_code == "lyra") then
+            local char_code_required = line_def ~= nil and line_def.metadata ~= nil and line_def.metadata.char_code_required or nil
+            if line_type == "character" and (line_card.item_definition_code_name == "lyra" or char_code_required == "lyra") then
                 lyra_card = line_card
                 break
             end
@@ -167,4 +167,3 @@ function cross_guard_execute(state, source_card, event_data, helpers)
     return guard_actions, nil
 end
 -- ability: totem_pulse
-

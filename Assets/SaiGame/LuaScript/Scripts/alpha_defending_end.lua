@@ -106,14 +106,8 @@ local function resolve_attack_plan(state, plan_entry)
     return resolved, nil
 end
 
-local function compute_attack_damage(attacker_def)
-    local base_atk = 0
-    if attacker_def.base_stats ~= nil and attacker_def.base_stats.atk then
-        base_atk = attacker_def.base_stats.atk
-    elseif attacker_def.metadata ~= nil and attacker_def.metadata.atk then
-        base_atk = attacker_def.metadata.atk
-    end
-    return base_atk
+local function compute_attack_damage(state, resolved)
+    return lib_battle_common.get_attack_damage(state, resolved.attacker_def, resolved.attacker_line_key)
 end
 
 -- Phase 1: store pending_attack so future alpha-defend reactions can read/modify it.
@@ -184,7 +178,7 @@ local function execute_card_attack_plan(state, plan_entry)
     end
 
     -- Phase 1: plan (stores pending_attack for potential alpha defend reactions).
-    local damage_dealt = compute_attack_damage(resolved.attacker_def)
+    local damage_dealt = compute_attack_damage(state, resolved)
     plan_omega_attack(state, resolved, damage_dealt)
 
     -- Phase 2: (reserved for future alpha defend reactions).
@@ -232,7 +226,7 @@ local function execute_omega_attack_alpha_hp_plan(state, plan_entry)
     -- reveal-before-damage ordering used for card-vs-card combat.
     lib_battle_common.append_client_action(state, "omega_card_expose:" .. attacker_card.inventory_item_id)
 
-    local damage = compute_attack_damage(attacker_def)
+    local damage = lib_battle_common.get_attack_damage(state, attacker_def, attacker_line_key)
     lib_battle_common.dlog("[alpha_defending_end] omega attacking alpha_hp directly: damage=" .. damage)
 
     state.alpha_hp = (state.alpha_hp or 0) - damage

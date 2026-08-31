@@ -116,16 +116,10 @@ local function log_card_info(attacker_card, defender_card, attacker_def, defende
     lib_battle_common.dlog("defender_line=" .. defender_line_key .. " side_void=" .. defender_side_void)
 end
 
--- Computes final damage dealt by the attacker
-local function compute_damage(attacker_def)
-    local base_atk = 0
-    if attacker_def.base_stats ~= nil and attacker_def.base_stats.atk then
-        base_atk = attacker_def.base_stats.atk
-    elseif attacker_def.metadata ~= nil and attacker_def.metadata.atk then
-        base_atk = attacker_def.metadata.atk
-    end
-    local damage_dealt = base_atk
-    lib_battle_common.dlog("[alpha_card_active] compute_damage: base_atk=" .. base_atk .. " damage_dealt(debug override)=" .. damage_dealt)
+-- Computes final damage dealt by the attacker.
+local function compute_damage(state, attacker_def, attacker_line_key)
+    local damage_dealt = lib_battle_common.get_attack_damage(state, attacker_def, attacker_line_key)
+    lib_battle_common.dlog("[alpha_card_active] compute_damage: damage_dealt=" .. damage_dealt)
     return damage_dealt
 end
 
@@ -271,7 +265,7 @@ local function plan_alpha_attack(state,
     defender_card, defender_def, defender_line_key, defender_side_void)
     lib_battle_common.dlog("[alpha_card_active] == phase 1: planning action ==")
     log_card_info(attacker_card, defender_card, attacker_def, defender_def, defender_line_key, defender_side_void)
-    local damage_dealt = compute_damage(attacker_def)
+    local damage_dealt = compute_damage(state, attacker_def, attacker_line_key)
     lib_battle_common.dlog("[alpha_card_active] planned damage_dealt=" .. damage_dealt)
     local pending_atk = {}
     pending_atk.attacker_inventory_item_id = attacker_card.inventory_item_id
@@ -351,7 +345,7 @@ end
 
 -- Applies attacker damage directly to omega_hp.
 -- Returns err or nil.
-local function attack_omega_hp(session_id, state, attacker_card, attacker_def, is_development)
+local function attack_omega_hp(session_id, state, attacker_card, attacker_line_key, attacker_def, is_development)
     if not lib_battle_common.check_card_type(state.item_defs, attacker_card, "character") then
         return "attacker is not a character"
     end
@@ -367,7 +361,7 @@ local function attack_omega_hp(session_id, state, attacker_card, attacker_def, i
     -- reveal-before-damage ordering used for card-vs-card combat.
     lib_battle_common.append_client_action(state, "alpha_card_expose:" .. attacker_card.inventory_item_id)
 
-    local damage = compute_damage(attacker_def)
+    local damage = compute_damage(state, attacker_def, attacker_line_key)
     lib_battle_common.dlog("[alpha_card_active] attacking omega_hp directly: damage=" .. damage)
     state.omega_hp = (state.omega_hp or 0) - damage
     lib_battle_common.dlog("[alpha_card_active] omega_hp after attack=" .. state.omega_hp)
@@ -467,7 +461,7 @@ local function main()
                 return
             end
 
-            local attack_err = attack_omega_hp(session_id, state, attacker_card, attacker_def, is_development)
+            local attack_err = attack_omega_hp(session_id, state, attacker_card, attacker_line_key, attacker_def, is_development)
             if attack_err ~= nil then output.error = attack_err ; return end
             return
         end

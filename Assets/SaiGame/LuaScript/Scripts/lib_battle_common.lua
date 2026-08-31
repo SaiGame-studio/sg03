@@ -57,6 +57,52 @@ function reset_card_turn_state(item_defs, reset_card)
     reset_card.total_damage_received = 0
 end
 
+-- Returns an attacker's planned damage. An ability with base_stats.atk_added
+-- borrows the ATK of metadata.char_code_required only when that character is
+-- present in the same side's Front Line.
+function get_attack_damage(state, attacker_def, attacker_line_key)
+    if attacker_def == nil then return 0 end
+
+    local base_stats = attacker_def.base_stats or {}
+    local base_atk = tonumber(base_stats.atk)
+        or tonumber(attacker_def.metadata ~= nil and attacker_def.metadata.atk or nil)
+        or 0
+    if base_stats.atk_added == nil then return base_atk end
+
+    local required_character_code = attacker_def.metadata ~= nil and attacker_def.metadata.char_code_required
+    local added_atk = tonumber(base_stats.atk_added) or 0
+    if required_character_code == nil or required_character_code == "" then return 0 end
+
+    local attacker_side = string.sub(attacker_line_key or "", 1, 5) == "alpha"
+        and "alpha"
+        or "omega"
+    local front_line = attacker_side == "alpha"
+        and (state.alpha_front_line or {})
+        or (state.omega_front_line or {})
+    for _, card in ipairs(front_line) do
+        local character_def = nil
+        for _, item_def in ipairs(state.item_defs or {}) do
+            if item_def.item_code == card.item_definition_code_name then
+                character_def = item_def
+                break
+            end
+        end
+        local character_code_required = character_def ~= nil and character_def.metadata ~= nil
+            and character_def.metadata.char_code_required or nil
+        if character_def ~= nil and character_def.metadata ~= nil
+            and character_def.metadata.type == "character"
+            and (character_def.item_code == required_character_code or character_code_required == required_character_code) then
+            local character_stats = character_def.base_stats or {}
+            local character_atk = tonumber(character_stats.atk)
+                or tonumber(character_def.metadata.atk)
+                or 0
+            return character_atk + added_atk
+        end
+    end
+
+    return 0
+end
+
 -- Returns an error when a 4-star-or-higher card is summoned before turn 4.
 -- Cards with 1-3 stars are not turn-restricted.
 function validate_summon_card_turn(state, item_defs, summon_card)

@@ -144,8 +144,8 @@ function static_bind_execute(state, source_card, event_data, helpers)
 
     local azura_card = helpers.find_untriggered_card(state[source_side .. "_front_line"], function(card)
         local card_def = helpers.find_item_def(state.item_defs, card.item_definition_code_name)
-        local char_code = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.char_code or nil
-        return card.item_definition_code_name == "volt_heart" or char_code == "volt_heart"
+        local char_code_required = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.char_code_required or nil
+        return card.item_definition_code_name == "volt_heart" or char_code_required == "volt_heart"
     end)
     if azura_card == nil then
         return {}, "static_bind requires an untriggered Azura in front_line"
@@ -246,8 +246,8 @@ function lightning_strike_execute(state, source_card, event_data, helpers)
 
     local azura_card = helpers.find_untriggered_card(state[source_side .. "_front_line"], function(card)
         local card_def = helpers.find_item_def(state.item_defs, card.item_definition_code_name)
-        local char_code = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.char_code or nil
-        return card.item_definition_code_name == "volt_heart" or char_code == "volt_heart"
+        local char_code_required = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.char_code_required or nil
+        return card.item_definition_code_name == "volt_heart" or char_code_required == "volt_heart"
     end)
     if azura_card == nil then
         return {}, "lightning_strike requires an untriggered Azura in front_line"

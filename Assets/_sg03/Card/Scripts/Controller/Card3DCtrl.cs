@@ -712,8 +712,8 @@ namespace SG03
 
         /// <summary>
         /// Gets the damage amount used for a pending attack preview. An ability
-        /// with <c>atk_added</c> derives its base attack from the character
-        /// named by its <c>char_code_required</c> stat.
+        /// with <c>atk_added</c> uses the attack of the required character only
+        /// while that character is in the attacker's Front Line.
         /// </summary>
         public int GetDamagePreviewAttack()
         {
@@ -723,13 +723,38 @@ namespace SG03
             if (!this.definition.TryGetBaseStat("atk_added", out _))
                 return Mathf.Max(0, this.definition.GetBaseStatInt("atk"));
 
-            if (!this.definition.TryGetBaseStat("char_code_required", out string requiredCharacterCode)
-                || string.IsNullOrWhiteSpace(requiredCharacterCode)) return 0;
+            string requiredCharacterCode = this.definition.metadata?.char_code_required;
+            if (string.IsNullOrWhiteSpace(requiredCharacterCode)) return 0;
 
-            CardDefinitionData requiredCharacter = this.battleStateCtrl?.BattleCardDefinitions
-                ?.GetDefinitionByCode(requiredCharacterCode);
-            int requiredCharacterAttack = requiredCharacter?.GetBaseStatInt("atk") ?? 0;
+            BattleCardSlot[] frontLine = this.cardOwner == Owner.alpha
+                ? this.battleStateCtrl?.BattleState?.AlphaFrontLine
+                : this.battleStateCtrl?.BattleState?.OmegaFrontLine;
+            CardDefinitionData requiredCharacter = FindRequiredCharacterInFrontLine(
+                frontLine,
+                this.battleStateCtrl?.BattleCardDefinitions,
+                requiredCharacterCode);
+            if (requiredCharacter == null) return 0;
+
+            int requiredCharacterAttack = requiredCharacter.GetBaseStatInt("atk");
             return Mathf.Max(0, requiredCharacterAttack + addedAttack);
+        }
+
+        private static CardDefinitionData FindRequiredCharacterInFrontLine(
+            BattleCardSlot[] frontLine,
+            BattleCardDefinitions definitions,
+            string requiredCharacterCode)
+        {
+            if (frontLine == null || definitions == null || string.IsNullOrWhiteSpace(requiredCharacterCode)) return null;
+
+            foreach (BattleCardSlot slot in frontLine)
+            {
+                CardDefinitionData character = definitions.GetDefinitionByCode(slot?.item_definition_code_name);
+                if (character?.metadata?.type != "character") continue;
+                if (character.item_code == requiredCharacterCode
+                    || character.metadata.char_code_required == requiredCharacterCode) return character;
+            }
+
+            return null;
         }
 
         public void SetMoveDuration(float d)  => this.movement.SetMoveDuration(d);
