@@ -40,8 +40,10 @@
             <ui:VisualElement class="desk-header">
                 <ui:Button name="BackBtn" text="&lt; Back" class="desk-header__back-btn" />
                 <ui:Label name="DetailTitle" text="Desk" class="desk-header__title" />
+                <ui:TextField name="DeskNameInput" label="" placeholder-text="Desk name" class="desk-header__rename-input desk-header__rename-input--hidden" />
+                <ui:Button name="RenameDeskBtn" text="Rename" class="desk-header__rename-btn" />
+                <ui:Button name="SaveDeskNameBtn" text="Save" class="desk-header__save-name-btn desk-header__save-name-btn--hidden" />
                 <ui:Label name="DuplicateCardWarning" text="" class="desk-header__duplicate-warning desk-header__duplicate-warning--hidden" />
-                <ui:Label name="SoftCardStatusLabel" text="" class="desk-header__soft-card-status" />
                 <ui:Button name="SoftCardBtn" text="Soft Card" tooltip="Sort cards by stars, then card type" class="desk-header__soft-card-btn" />
             </ui:VisualElement>
 
