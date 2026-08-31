@@ -182,7 +182,7 @@ namespace SG03
             if (this.hpBarInstance == null) return;
 
             this.hpBarInstance.SetPosition(holder.transform.position);
-            this.hpBarInstance.SetParent(this.transform, this.cardOwner);
+            this.hpBarInstance.SetParent(this.transform);
             this.hpBarInstance.gameObject.SetActive(true);
             this.UpdateDamagePreviewFromAttacker();
             this.RefreshHpBarDisplayMode();

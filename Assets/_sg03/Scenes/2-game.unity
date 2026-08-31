@@ -831,20 +831,20 @@ PrefabInstance:
     m_TransformParent: {fileID: 694843606}
     m_Modifications:
     - target: {fileID: 910907888340075026, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
-      propertyPath: aboveCardOffset
+      propertyPath: cardZOffset
+      value: -1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 910907888340075026, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: aboveCardYOffset
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 3193441457980298630, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
       propertyPath: m_Name
       value: AtkUI
       objectReference: {fileID: 0}
-    - target: {fileID: 3193441457980298630, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 12.92796
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
       propertyPath: m_LocalPosition.y
@@ -852,7 +852,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 20.30154
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
       propertyPath: m_LocalRotation.w

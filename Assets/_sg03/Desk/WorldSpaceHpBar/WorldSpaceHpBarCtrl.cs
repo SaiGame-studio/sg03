@@ -42,14 +42,8 @@ namespace SG03
 
         [Header("Parenting")]
         [SerializeField] private Transform parent;
-        [Tooltip("Local offset used for Alpha cards before it is cached in world space.")]
-        [InspectorName("Alpha Parent Offset")]
-        [SerializeField] private Vector3 alphaParentOffset = new Vector3(0f, -4.5f, 0.2f);
-        [Tooltip("Local offset used for Omega cards before it is cached in world space.")]
-        [InspectorName("Omega Parent Offset")]
-        [SerializeField] private Vector3 omegaParentOffset = new Vector3(0f, -4.5f, -0.2f);
         [Tooltip("World-space height above the card. This is unaffected by card flips.")]
-        [SerializeField, Min(0f)] private float aboveCardOffset = 0.2f;
+        [SerializeField, Min(0f)] private float aboveCardYOffset = 0.2f;
 
         private VisualElement fill;
         private VisualElement healthPreview;
@@ -63,10 +57,6 @@ namespace SG03
         private bool hasDesiredWorldScale;
         private Vector3 baseWorldRotation;
         private bool hasBaseWorldRotation;
-        private Vector3 worldParentOffset;
-        private bool hasWorldParentOffset;
-        private Owner parentOwner;
-
         private ClientActions subscribedClientActions;
         private Coroutine deferredUiRefreshRoutine;
         private float previewColorAnimationTime;
@@ -273,7 +263,7 @@ namespace SG03
         }
 
         /// <summary>Assigns the card this bar follows without inheriting its transform.</summary>
-        public void SetParent(Transform newParent, Owner owner)
+        public void SetParent(Transform newParent)
         {
             if (newParent == null) return;
 
@@ -281,27 +271,13 @@ namespace SG03
             this.desiredWorldScale = this.transform.lossyScale;
             this.hasDesiredWorldScale = true;
             this.parent = newParent;
-            this.parentOwner = owner;
             if (isNewCard) this.ResetCurrentHealthForNewCard();
             this.transform.SetParent(null, true);
-            this.SetWorldParentOffset();
             this.UpdateWorldPositionFromParent();
             this.baseWorldRotation = this.transform.eulerAngles;
             this.hasBaseWorldRotation = true;
             this.BindClientActionEvents();
             this.RefreshMaxHealthFromBattleState();
-        }
-
-        private Vector3 GetParentOffset(Owner owner)
-        {
-            return owner == Owner.omega ? this.omegaParentOffset : this.alphaParentOffset;
-        }
-
-        private void SetWorldParentOffset()
-        {
-            this.worldParentOffset = this.GetParentOffset(this.parentOwner);
-            this.worldParentOffset.y = this.aboveCardOffset;
-            this.hasWorldParentOffset = true;
         }
 
         /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>
@@ -337,7 +313,6 @@ namespace SG03
             this.desiredWorldScale = this.transform.lossyScale;
             this.hasDesiredWorldScale = true;
             this.transform.SetParent(null, true);
-            this.SetWorldParentOffset();
             this.UpdateWorldPositionFromParent();
         }
 
@@ -422,16 +397,16 @@ namespace SG03
 
         private void UpdateWorldPositionFromParent()
         {
-            if (!this.hasWorldParentOffset || this.parent == null) return;
+            if (this.parent == null) return;
 
             Card3D card = this.parent.GetComponent<Card3D>();
             if (card != null && card.TryGetStatsCenterWorldPosition(out Vector3 statsCenter))
             {
-                this.transform.position = statsCenter + Vector3.up * this.aboveCardOffset;
+                this.transform.position = statsCenter + Vector3.up * this.aboveCardYOffset;
                 return;
             }
 
-            this.transform.position = this.parent.position + this.worldParentOffset;
+            this.transform.position = this.parent.position + Vector3.up * this.aboveCardYOffset;
         }
 
         private void CompensateParentScale()

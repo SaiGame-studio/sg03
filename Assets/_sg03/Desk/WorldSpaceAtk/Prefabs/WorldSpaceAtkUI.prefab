@@ -49,7 +49,8 @@ MonoBehaviour:
   despawn: {fileID: 0}
   uiDocument: {fileID: 8356789373894643313}
   faceMainCamera: 1
-  aboveCardOffset: 0.5
+  aboveCardYOffset: 0.5
+  cardZOffset: -1.5
 --- !u!114 &8356789373894643313
 MonoBehaviour:
   m_ObjectHideFlags: 0

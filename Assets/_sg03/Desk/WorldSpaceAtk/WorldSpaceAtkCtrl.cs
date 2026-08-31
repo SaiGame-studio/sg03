@@ -14,7 +14,9 @@ namespace SG03
         [Header("Display")]
         [SerializeField] private bool faceMainCamera = true;
         [Tooltip("Distance beyond the card's top edge where the ATK UI is displayed.")]
-        [SerializeField, Min(0f)] private float aboveCardOffset = 0.2f;
+        [SerializeField, Min(0f)] private float aboveCardYOffset = 0.5f;
+        [Tooltip("Global Z-axis offset relative to the card's top edge.")]
+        [SerializeField] private float cardZOffset = -1.5f;
 
         private Transform parent;
         private Label attackLabel;
@@ -113,14 +115,16 @@ namespace SG03
         {
             if (this.parent == null) return;
 
+            Vector3 offset = new Vector3(0f, this.aboveCardYOffset, this.cardZOffset);
+
             Card3D card = this.parent.GetComponent<Card3D>();
             if (card != null && card.TryGetTopEdgeWorldPosition(out Vector3 topEdge))
             {
-                this.transform.position = topEdge + card.transform.up * this.aboveCardOffset;
+                this.transform.position = topEdge + offset;
                 return;
             }
 
-            this.transform.position = this.parent.position + this.parent.up * this.aboveCardOffset;
+            this.transform.position = this.parent.position + offset;
         }
 
         private void FaceMainCamera()
