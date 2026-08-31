@@ -163,7 +163,7 @@ function static_bind_execute(state, source_card, event_data, helpers)
         return {}, "static_bind requires a positive base_stats.stun_damage"
     end
 
-    target_card.trigger = true
+    battle.mark_card_skip_next_turn(target_card)
     target_card.face_up = true
     target_card.expose = true
 
@@ -191,7 +191,7 @@ function static_bind_execute(state, source_card, event_data, helpers)
     local actions = {
         source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
             ",ability=static_bind,target=" .. target_id .. ",stun_damage=" .. tostring(stun_damage) ..
-            ",cancelled_plan=" .. tostring(cancelled_plan) .. ",selected=" .. azura_card.inventory_item_id,
+            ",cancelled_plan=" .. tostring(cancelled_plan) .. ",skip_next_turn=true,selected=" .. azura_card.inventory_item_id,
         source_side .. "_card_expose:" .. azura_card.inventory_item_id,
         target_side .. "_card_expose:" .. target_id,
     }
@@ -333,7 +333,7 @@ function lightning_strike_execute(state, source_card, event_data, helpers)
     for index, target in ipairs(targets) do
         local cancelled_plan = false
         if target_stars[index] <= 2 then
-            target.trigger = true
+            battle.mark_card_skip_next_turn(target)
             cancelled_plan = cancel_target_attack(target)
         end
 

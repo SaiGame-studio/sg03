@@ -10,7 +10,7 @@
 - **Mã Nhân Vật Yêu Cầu**: `volt_heart`
 
 ## Mô Tả Kỹ Năng
-Azura giải phóng điện quang từ quyền thuật để trói một Character đối thủ bằng dòng điện tĩnh. Mục tiêu bị lộ diện, chịu lượng sát thương `stun_damage` được cấu hình trên chính lá Static Bind, và không thể thực hiện đòn tấn công đã được xếp hàng: toàn bộ kế hoạch tấn công của mục tiêu bị hủy. Nếu mục tiêu đang lao tới trong một đòn tấn công chờ xử lý và vẫn còn trên sân sau sát thương, nó trở về vị trí giữ thẻ của mình.
+Azura giải phóng điện quang từ quyền thuật để trói một Character đối thủ bằng dòng điện tĩnh. Mục tiêu bị lộ diện, chịu lượng sát thương `stun_damage` được cấu hình trên chính lá Static Bind, và mất đúng lượt kế tiếp của phe mình: toàn bộ kế hoạch tấn công của mục tiêu bị hủy. Nếu mục tiêu đang lao tới trong một đòn tấn công chờ xử lý và vẫn còn trên sân sau sát thương, nó trở về vị trí giữ thẻ của mình.
 
 ## Điều Kiện Sử Dụng
 - Lá Static Bind phải đang ở trên một battle line của phe bạn.
@@ -20,5 +20,5 @@ Azura giải phóng điện quang từ quyền thuật để trói một Charact
 
 ## Hiệu Quả
 - Azura được tính là đã hành động và được lộ diện.
-- Character mục tiêu được lộ diện, nhận sát thương `stun_damage`, và mọi kế hoạch tấn công đang chờ của nó bị xóa.
+- Character mục tiêu được lộ diện, nhận sát thương `stun_damage`, mọi kế hoạch tấn công đang chờ của nó bị xóa, và bị bỏ đúng lượt kế tiếp của phe mình.
 - Sau khi hiệu ứng hoàn tất, Static Bind được đưa vào `the_void` của phe bạn.

@@ -96,20 +96,35 @@ function append_client_action(state, action)
 end
 
 -- ─── reset_turn_cards ───────────────────────────────────────────────────────
--- Resets per-turn state on every card in all four battle lines.
-function reset_turn_cards(state)
-    dlog("== reset_turn_cards done ==")
+-- Marks a Character to be unavailable for its next turn. The flag is kept
+-- separately from trigger because trigger is normally reset at every handoff.
+function mark_card_skip_next_turn(card)
+    if card == nil then return end
+    card.skip_next_turn = true
+    card.trigger = true
+end
+
+-- Resets per-turn state on every card in all four battle lines. A card marked
+-- skip_next_turn remains triggered only when its owner's next turn begins;
+-- the marker is then consumed, so the following handoff readies it normally.
+function reset_turn_cards(state, next_active_side)
+    dlog("== reset_turn_cards next_active_side=" .. tostring(next_active_side) .. " ==")
 
     local lines = {
-        state.alpha_front_line or {},
-        state.alpha_back_line  or {},
-        state.omega_front_line or {},
-        state.omega_back_line  or {},
+        { side = "alpha", line = state.alpha_front_line or {} },
+        { side = "alpha", line = state.alpha_back_line  or {} },
+        { side = "omega", line = state.omega_front_line or {} },
+        { side = "omega", line = state.omega_back_line  or {} },
     }
-    for _, line in ipairs(lines) do
-        for _, reset_card in ipairs(line) do
+    for _, line_data in ipairs(lines) do
+        for _, reset_card in ipairs(line_data.line) do
             reset_card_turn_state(state.item_defs, reset_card)
-            reset_card.trigger = false
+            if reset_card.skip_next_turn == true and line_data.side == next_active_side then
+                reset_card.trigger = true
+                reset_card.skip_next_turn = nil
+            else
+                reset_card.trigger = false
+            end
         end
     end
 end
