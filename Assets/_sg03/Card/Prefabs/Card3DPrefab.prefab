@@ -1278,6 +1278,7 @@ GameObject:
   - component: {fileID: 7980353759426569992}
   - component: {fileID: 724914520211398535}
   - component: {fileID: 4719509819920680533}
+  - component: {fileID: 8760000000000000001}
   - component: {fileID: 2260832097321709496}
   - component: {fileID: 5622624506275298169}
   m_Layer: 0
@@ -1364,6 +1365,7 @@ MonoBehaviour:
   card: {fileID: 1279015152172670498}
   loader: {fileID: 7980353759426569992}
   movement: {fileID: 4719509819920680533}
+  fullDetailManipulator: {fileID: 8760000000000000001}
   cardOwner: 0
   codeName: 
   inventoryItemId: 
@@ -1455,6 +1457,23 @@ MonoBehaviour:
   attackBackstepEase: 6
   location: 0
   faceState: 0
+--- !u!114 &8760000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8660204716586372184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d1e7be987994ba6b50fbbf2761dce41, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.CardFullDetailManipulator
+  reviewCamera: {fileID: 0}
+  zoomStep: 1
+  minCameraDistance: 8
+  maxCameraDistance: 22
+  panSpeed: 0.01
 --- !u!65 &2260832097321709496
 BoxCollider:
   m_ObjectHideFlags: 0

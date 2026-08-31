@@ -32,6 +32,7 @@ namespace SG03
         [SerializeField] private Card3D card;
         [SerializeField] private CardLoader loader;
         [SerializeField] private CardMovement movement;
+        [SerializeField] private CardFullDetailManipulator fullDetailManipulator;
 
         // ─── Identity ─────────────────────────────────────────────────────────────
 
@@ -91,6 +92,7 @@ namespace SG03
             this.LoadCard3D();
             this.LoadCardLoader();
             this.LoadCardMovement();
+            this.LoadFullDetailManipulator();
             this.LoadObjectPool();
         }
 
@@ -119,6 +121,12 @@ namespace SG03
             if (this.movement != null) return;
             this.movement = this.GetComponent<CardMovement>();
             Debug.LogWarning(transform.name + "LoadCardMovement", gameObject);
+        }
+
+        protected virtual void LoadFullDetailManipulator()
+        {
+            if (this.fullDetailManipulator != null) return;
+            this.fullDetailManipulator = this.GetComponent<CardFullDetailManipulator>();
         }
 
         protected virtual void LoadObjectPool()
@@ -593,6 +601,7 @@ namespace SG03
             if (this.isFullDetail == enabled) return;
 
             this.isFullDetail = enabled;
+            this.fullDetailManipulator?.SetInteractionActive(enabled);
             if (enabled) this.DespawnHpBar();
         }
 
