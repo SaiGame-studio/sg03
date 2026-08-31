@@ -57,7 +57,7 @@ Khi có thể kích hoạt, AI chọn `Totem Pulse` theo thứ tự:
 `Totem Pulse` sau đó:
 
 - tự lật ngửa; Goblin Shaman được chọn cũng lật ngửa và bị đánh dấu đã kích hoạt;
-- cộng `def_add` của Totem vào `final_def` của mọi lá thật đang nằm trên `omega_front_line`;
+- cộng `def_added` của Totem vào `final_def` của mọi lá thật đang nằm trên `omega_front_line`;
 - rời hậu tuyến và được đưa vào `omega_the_void`.
 
 Phản ứng xảy ra sau khi Alpha đã lập `pending_attack` nhưng trước khi đòn đánh được giải quyết. Vì vậy, Totem không giảm trực tiếp `damage_dealt`; nó nâng ngưỡng phòng thủ `final_def` trước lúc hệ thống cộng sát thương và kiểm tra lá bị hạ.

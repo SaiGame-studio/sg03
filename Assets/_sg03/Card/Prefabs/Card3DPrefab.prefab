@@ -1397,7 +1397,7 @@ MonoBehaviour:
       race: 
       type: 
       gender: 
-      char_code: 
+      char_code_required:
       abilities: 
       summon: 
   expose: 0

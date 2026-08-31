@@ -24,7 +24,7 @@ Luồng linh lực bao bọc các đồng minh như một lớp vỏ tự nhiên
 ### Các Bước Thực Thi
 1. Tìm `goblin_shaman` chưa kích hoạt trên `own_frontline`.
 2. Đánh dấu `shaman.trigger = true` và lật ngửa bài.
-3. Đọc chỉ số `def_add` từ định nghĩa lá bài Totem.
-4. Lặp qua **tất cả thẻ bài** trên `own_frontline` và cộng `def_add` vào `final_def` của từng đơn vị.
+3. Đọc chỉ số `def_added` từ định nghĩa lá bài Totem.
+4. Lặp qua **tất cả thẻ bài** trên `own_frontline` và cộng `def_added` vào `final_def` của từng đơn vị.
 5. Tiêu thụ lá bài Totem: loại khỏi `back_line` và chuyển vào mộ `the_void`.
 6. Phát Client Action `[side]_card_ability` kèm hiệu ứng buff giáp và `[side]_card_sent_to_void:[totem_id]`.

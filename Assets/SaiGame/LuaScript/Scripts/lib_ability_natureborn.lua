@@ -6,8 +6,8 @@ function totem_pulse_execute(state, source_card, event_data, helpers)
     local front_line_key = source_side .. "_front_line"
     local front_line = state[front_line_key] or {}
     local totem_item_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
-    local def_add = (totem_item_def ~= nil and totem_item_def.base_stats ~= nil and totem_item_def.base_stats.def_add) or 0
-    battle.dlog("[ability] totem_pulse: source=" .. source_card.inventory_item_id .. " side=" .. source_side .. " def_add=" .. def_add)
+    local def_added = (totem_item_def ~= nil and totem_item_def.base_stats ~= nil and totem_item_def.base_stats.def_added) or 0
+    battle.dlog("[ability] totem_pulse: source=" .. source_card.inventory_item_id .. " side=" .. source_side .. " def_added=" .. def_added)
 
     local shaman_card = helpers.find_untriggered_card(front_line, function(c) return c.item_definition_code_name == "goblin_shaman" end)
     if shaman_card == nil then
@@ -24,7 +24,7 @@ function totem_pulse_execute(state, source_card, event_data, helpers)
         local has_id = front_card.inventory_item_id ~= nil and front_card.inventory_item_id ~= ""
         if has_id then
             local prev_def = front_card.final_def or 0
-            front_card.final_def = prev_def + def_add
+            front_card.final_def = prev_def + def_added
             battle.dlog("[ability] totem_pulse: buffed card=" .. front_card.inventory_item_id .. " final_def " .. prev_def .. " -> " .. front_card.final_def)
             local buff_action = source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=totem_pulse,target=" .. front_card.inventory_item_id .. ",selected=" .. shaman_card.inventory_item_id
             table.insert(ability_actions, buff_action)
@@ -76,18 +76,18 @@ function back_stab_execute(state, source_card, event_data, helpers)
     local defender_line = line_key ~= nil and state[line_key] or nil
 
     local source_item_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
-    local atk_add = 0
+    local atk_added = 0
     if source_item_def ~= nil then
-        if source_item_def.base_stats ~= nil and source_item_def.base_stats.atk_add then
-            atk_add = source_item_def.base_stats.atk_add
-        elseif source_item_def.metadata ~= nil and source_item_def.metadata.atk_add then
-            atk_add = source_item_def.metadata.atk_add
+        if source_item_def.base_stats ~= nil and source_item_def.base_stats.atk_added then
+            atk_added = source_item_def.base_stats.atk_added
+        elseif source_item_def.metadata ~= nil and source_item_def.metadata.atk_added then
+            atk_added = source_item_def.metadata.atk_added
         end
     end
 
     local grunt_item_def = helpers.find_item_def(state.item_defs, grunt_card.item_definition_code_name)
     local char_atk = (grunt_item_def ~= nil and grunt_item_def.base_stats ~= nil and grunt_item_def.base_stats.atk) or 1
-    local damage = atk_add + char_atk
+    local damage = atk_added + char_atk
     battle.dlog("[ability] back_stab: goblin_grunt=" .. grunt_card.inventory_item_id .. " target=" .. defender.inventory_item_id .. " damage=" .. damage)
 
     local expose_action = helpers.expose_ability_selected_card(state, grunt_card)
