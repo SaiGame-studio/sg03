@@ -36,4 +36,4 @@ Before completing a UI change, inspect every affected scene/prefab serialization
 
 ### WebGL Icon Compatibility
 
-Do not use emoji or non-ASCII Unicode characters as UI icons. UI Toolkit's player fonts, especially in WebGL, may not include their glyphs even when they display in the Unity Editor. Use serialized sprite/vector assets or UI Toolkit geometry styled in USS; these assets must follow the runtime-reference rule above. Plain ASCII text is acceptable for a textual fallback.
+Do not use emoji or non-ASCII Unicode characters as UI icons. UI Toolkit's player fonts, especially in WebGL, may not include their glyphs even when they display in the Unity Editor. Do not custom-build icons by assembling UI Toolkit raw geometry elements in UXML/USS. Prioritize using `.svg` vector icons from FontAwesome or actual serialized sprite or vector image assets (e.g. Sprite/Texture2D/VectorImage) imported from valid asset sources supported in WebGL; these assets must follow the runtime-reference rule above. Plain ASCII text is acceptable for a textual fallback.

@@ -13,6 +13,10 @@ namespace SG03
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private BattleStateCtrl battleStateCtrl;
 
+        [Header("Icon Settings")]
+        [Tooltip("Width and height of the defense shield icon.")]
+        [SerializeField] private Vector2 iconSize = new Vector2(52f, 56f);
+
         [Header("Preview health")]
         [SerializeField, Min(0f)] private float currentHealth = 0f;
         [SerializeField, Min(1f)] private float maxHealth = 100f;
@@ -492,6 +496,16 @@ namespace SG03
             {
                 Debug.LogWarning($"{this.name}: one or more health-label UI elements are missing.", this.gameObject);
             }
+
+            Image shieldImage = uiRoot.Q<Image>("DefShieldIcon");
+            if (shieldImage != null)
+            {
+                if (this.iconSize.x > 0f && this.iconSize.y > 0f)
+                {
+                    shieldImage.style.width = this.iconSize.x;
+                    shieldImage.style.height = this.iconSize.y;
+                }
+            }
         }
 
         public void RefreshUi()
@@ -505,6 +519,13 @@ namespace SG03
             this.RefreshTrackVisibility();
             this.RefreshHealthLabel();
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            this.RefreshUi();
+        }
+#endif
 
         private void RefreshHealthPreview()
         {

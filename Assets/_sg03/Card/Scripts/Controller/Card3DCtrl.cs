@@ -153,8 +153,6 @@ namespace SG03
                 return;
             }
 
-            this.SpawnAtkUiAt(holder);
-
             this.EnsureSingleHpBarInstance();
             this.LoadObjectPool();
             if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
@@ -191,7 +189,12 @@ namespace SG03
         private void SpawnAtkUiAt(CardHolderCtrl holder)
         {
             if (holder == null || holder != this.cardHolder) return;
+            this.SpawnAtkUi();
+        }
 
+        /// <summary>Spawns and displays the world-space ATK UI for this card.</summary>
+        public void SpawnAtkUi()
+        {
             this.EnsureSingleAtkUiInstance();
             this.LoadObjectPool();
             if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
@@ -218,7 +221,8 @@ namespace SG03
 
             if (this.atkUiInstance == null) return;
 
-            this.atkUiInstance.SetPosition(holder.transform.position);
+            Vector3 pos = this.cardHolder != null ? this.cardHolder.transform.position : this.transform.position;
+            this.atkUiInstance.SetPosition(pos);
             this.atkUiInstance.SetParent(this.transform);
             this.atkUiInstance.SetAttack(this.definition?.GetBaseStatInt("atk") ?? 0);
             this.atkUiInstance.gameObject.SetActive(true);
@@ -241,6 +245,24 @@ namespace SG03
         {
             this.LoadClientActions();
             return this.clientActions != null && this.clientActions.HpBarHiddenOwner == this.cardOwner;
+        }
+
+        private bool ShouldShowAtkUi(CardHolderCtrl holder)
+        {
+            if (this.isFullDetail) return false;
+            if (!this.IsCharacter()) return false;
+            if (this.Location == Location.in_hand) return false;
+            if (this.isHover) return true;
+            if (this.ShouldHideAtkUiForCurrentTurn()) return false;
+            if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
+            return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;
+        }
+
+        private bool ShouldHideAtkUiForCurrentTurn()
+        {
+            this.LoadClientActions();
+            if (this.clientActions == null || !this.clientActions.HpBarHiddenOwner.HasValue) return false;
+            return this.clientActions.HpBarHiddenOwner.Value != this.cardOwner;
         }
 
         private bool HasAccumulatedDamage()
@@ -277,9 +299,16 @@ namespace SG03
             if (this.IsBattleResuming())
             {
                 this.DespawnHpBar();
+                this.DespawnAtkUi();
                 return;
             }
 
+            this.RefreshHpBarOnlyVisibility();
+            this.RefreshAtkUiVisibility();
+        }
+
+        private void RefreshHpBarOnlyVisibility()
+        {
             if (!this.ShouldShowHpBar(this.cardHolder))
             {
                 this.DespawnHpBar();
@@ -294,6 +323,24 @@ namespace SG03
             }
 
             this.SpawnHpBarAt(this.cardHolder);
+        }
+
+        /// <summary>Refreshes ATK UI visibility according to turn and placement rules.</summary>
+        public void RefreshAtkUiVisibility()
+        {
+            if (this.IsBattleResuming())
+            {
+                this.DespawnAtkUi();
+                return;
+            }
+
+            if (!this.ShouldShowAtkUi(this.cardHolder))
+            {
+                this.DespawnAtkUi();
+                return;
+            }
+
+            this.SpawnAtkUi();
         }
 
         private bool IsBattleResuming()
@@ -367,11 +414,10 @@ namespace SG03
                 this.ReturnHpBarToPool(this.hpBarInstance);
                 this.hpBarInstance = null;
             }
-
-            this.DespawnAtkUi();
         }
 
-        private void DespawnAtkUi()
+        /// <summary>Despawns the world-space ATK UI for this card.</summary>
+        public void DespawnAtkUi()
         {
             this.EnsureSingleAtkUiInstance();
             if (this.atkUiInstance == null) return;
@@ -662,6 +708,8 @@ namespace SG03
         public void MoveToFullDetail(Transform point)
         {
             if (this.IsMovingVoidToLine) return;
+            this.DespawnHpBar();
+            this.DespawnAtkUi();
             this.movement.MoveToFullDetail(point);
         }
 
@@ -680,7 +728,11 @@ namespace SG03
 
             this.isFullDetail = enabled;
             this.fullDetailManipulator?.SetInteractionActive(enabled);
-            if (enabled) this.DespawnHpBar();
+            if (enabled)
+            {
+                this.DespawnHpBar();
+                this.DespawnAtkUi();
+            }
         }
 
         /// <summary>Plays the damage run-up animation: card rises then returns to its current position.</summary>

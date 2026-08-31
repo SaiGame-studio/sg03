@@ -7,4 +7,5 @@
 - **VisualElement Identification**: All `VisualElement` instances must have a `name` or `id` to uniquely identify them.
 - **_sg03-Only Changes**: Agents assigned to _sg03-scoped UI work may only create, edit, move, or delete files under `Assets/_sg03`. They must not modify files elsewhere in the repository.
 - **Verify C# Compilation**: After writing or modifying C# code, always check and verify that the code compiles without build errors.
+- **WebGL Icon Assets**: Do not use emoji or custom USS geometry elements to build UI icons. Prioritize using `.svg` vector icons from FontAwesome or WebGL-compatible serialized sprite/vector image assets from valid project asset sources.
 

@@ -11,6 +11,10 @@ namespace SG03
         [Header("Required runtime references")]
         [SerializeField] private UIDocument uiDocument;
 
+        [Header("Icon Settings")]
+        [Tooltip("Width and height of the icon.")]
+        [SerializeField] private Vector2 iconSize = new Vector2(56f, 56f);
+
         [Header("Display")]
         [SerializeField] private bool faceMainCamera = true;
         [Tooltip("Distance beyond the card's top edge where the ATK UI is displayed.")]
@@ -115,7 +119,29 @@ namespace SG03
         {
             if (this.parent == null) return;
 
-            Vector3 offset = new Vector3(0f, this.aboveCardYOffset, this.cardZOffset);
+            float zOffset = this.cardZOffset;
+            Card3DCtrl cardCtrl = this.parent.GetComponent<Card3DCtrl>();
+            if (cardCtrl == null) cardCtrl = this.parent.GetComponentInParent<Card3DCtrl>();
+
+            if (cardCtrl != null)
+            {
+                if (cardCtrl.CardOwner == Owner.omega)
+                {
+                    zOffset = -this.cardZOffset;
+                }
+            }
+            else
+            {
+                CardHolderCtrl holderCtrl = this.parent.GetComponent<CardHolderCtrl>();
+                if (holderCtrl == null) holderCtrl = this.parent.GetComponentInParent<CardHolderCtrl>();
+
+                if (holderCtrl != null && holderCtrl.HolderOwner == Owner.omega)
+                {
+                    zOffset = -this.cardZOffset;
+                }
+            }
+
+            Vector3 offset = new Vector3(0f, this.aboveCardYOffset, zOffset);
 
             Card3D card = this.parent.GetComponent<Card3D>();
             if (card != null && card.TryGetTopEdgeWorldPosition(out Vector3 topEdge))
@@ -169,6 +195,16 @@ namespace SG03
             this.attackLabel = root.Q<Label>("AttackLabel");
             if (this.attackLabel == null)
                 Debug.LogWarning($"{this.name}: UI element 'AttackLabel' is missing.", this.gameObject);
+
+            Image iconImage = root.Q<Image>("AttackSwordIcon");
+            if (iconImage != null)
+            {
+                if (this.iconSize.x > 0f && this.iconSize.y > 0f)
+                {
+                    iconImage.style.width = this.iconSize.x;
+                    iconImage.style.height = this.iconSize.y;
+                }
+            }
         }
 
         public void RefreshUi()
@@ -176,6 +212,13 @@ namespace SG03
             this.BindUi();
             if (this.attackLabel != null) this.attackLabel.text = this.attack.ToString();
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            this.RefreshUi();
+        }
+#endif
 
         // This UI is returned explicitly through ObjectPool, so it needs no Despawn component.
         protected override void LoadDespawn()

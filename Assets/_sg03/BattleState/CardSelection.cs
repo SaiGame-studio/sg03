@@ -686,11 +686,13 @@ namespace SG03
         {
             this.ClearHealthPreviewTarget();
             this.fullDetail = false;
+            Card3DCtrl prevSource = this.targetingSource;
             this.selected = null;
             this.targeted = null;
             this.targetingSource = null;
             this.holderSelected = null;
             this.arrowIndicator?.Hide();
+            prevSource?.RefreshAtkUiVisibility();
             Card3DCtrl.NotifyDeselected();
         }
 
