@@ -16,14 +16,14 @@ Nếu không có Goblin 1 hoặc 2 sao hợp lệ đứng cạnh Goblin Shaman n
 
 ## Điều Kiện Sử Dụng
 
-- Có ít nhất một Goblin Shaman trên `own_frontline`.
+- Có một Goblin Shaman chưa kích hoạt (`trigger ~= true`) trên `own_frontline`; phải chọn chính Shaman đó làm mục tiêu.
 - Có Goblin Brute trong `the_void`.
 - Goblin 1 hoặc 2 sao đứng liền kề Goblin Shaman **không phải** là điều kiện bắt buộc để kích hoạt kỹ năng.
 - Vị trí hợp lệ bên cạnh Goblin Shaman **không phải** là điều kiện bắt buộc để dùng thẻ; nếu không có vị trí hợp lệ, lần triệu gọi thất bại nhưng Brute Call vẫn bị tiêu thụ.
 
 ## Cơ Chế & Luồng Thực Thi
 
-1. Chọn Goblin Shaman dùng Brute Call trên `own_frontline`.
+1. Chọn Goblin Shaman chưa kích hoạt dùng Brute Call trên `own_frontline`; nếu Shaman đã kích hoạt, Ability không được resolve.
 2. Kiểm tra hai vị trí liền kề bên trái và bên phải Goblin Shaman.
 3. Chọn vị trí Goblin Brute sẽ xuất hiện theo thứ tự ưu tiên:
    - Nếu một hoặc cả hai vị trí đang có thẻ Character thuộc tộc `goblin` từ 1 đến 2 sao, ưu tiên chọn một trong các vị trí đó. Chọn Goblin có số sao thấp nhất; nếu bằng sao, ưu tiên vị trí bên trái.
@@ -31,7 +31,7 @@ Nếu không có Goblin 1 hoặc 2 sao hợp lệ đứng cạnh Goblin Shaman n
 4. Nếu không tìm được vị trí hợp lệ, đánh dấu lần triệu gọi thất bại, giữ nguyên Goblin Brute trong `the_void`, bỏ qua bước 5–7 và tiếp tục xử lý bước 8.
 5. Nếu vị trí được chọn đang có Goblin 1 hoặc 2 sao, đưa thẻ đó vào `the_void` vì bị Goblin Brute giẫm chết.
 6. Triệu gọi Goblin Brute từ `the_void` vào đúng vị trí liền kề vừa được chọn.
-7. Goblin Brute vào sân ở trạng thái đã kích hoạt (`trigger = true`).
+7. Goblin Shaman đã gọi và Goblin Brute vừa vào sân đều ở trạng thái đã kích hoạt (`trigger = true`), nên không thể tấn công thêm trong lượt đó.
 8. Trong cả trường hợp triệu gọi thành công hoặc thất bại, đưa Brute Call vào `the_void` sau khi xử lý hiệu ứng.
 
 ## Ngoại Lệ Cân Bằng

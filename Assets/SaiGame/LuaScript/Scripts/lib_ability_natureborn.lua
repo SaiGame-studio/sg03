@@ -143,6 +143,11 @@ function brute_call_execute(state, source_card, event_data, helpers)
         return {}, "brute_call target must be Goblin Shaman"
     end
 
+    local live_shaman_card = front_line[shaman_index]
+    if live_shaman_card.trigger == true then
+        return {}, "brute_call requires an untriggered Goblin Shaman in own front_line"
+    end
+
     local void_key = source_side .. "_the_void"
     local void_zone = state[void_key] or {}
     local brute_card = nil
@@ -205,10 +210,12 @@ function brute_call_execute(state, source_card, event_data, helpers)
         end
     end
 
+    -- event_data may carry a detached target snapshot. Mutate the card stored
+    -- in the battle line so the consumed Shaman state is persisted.
     local ability_actions = {}
-    local expose_action = helpers.expose_ability_selected_card(state, shaman_card)
+    local expose_action = helpers.expose_ability_selected_card(state, live_shaman_card)
     if expose_action ~= nil then table.insert(ability_actions, expose_action) end
-    shaman_card.trigger = true
+    live_shaman_card.trigger = true
 
     if chosen_index ~= nil then
         if chosen_sacrifice ~= nil then
@@ -224,6 +231,9 @@ function brute_call_execute(state, source_card, event_data, helpers)
         brute_card.trigger = true
         brute_card.defeated_from_line_key = nil
         front_line[chosen_index] = brute_card
+        -- Write through the line slot as well, matching the persisted state
+        -- consumed by the attack validator.
+        front_line[chosen_index].trigger = true
 
         local success_action = source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
             ",ability=brute_call,target=" .. shaman_card.inventory_item_id ..
