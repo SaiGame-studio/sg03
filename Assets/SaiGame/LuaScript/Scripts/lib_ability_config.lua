@@ -59,6 +59,7 @@ function get_ability_config(ability_key)
         holy_glow = {
             handler_group = "lightborn",
             target_positions = { "own_frontline", "own_backline", "own_source", "own_void" },
+            can_target_player_hp = true,
         },
         static_bind = {
             handler_group = "lightborn",

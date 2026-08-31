@@ -95,6 +95,7 @@ It standardizes every raw error string into a unique `ErrorKey`, regex pattern, 
 | Error Key | Original Pattern / Server Text | English Default Text | Vietnamese Reference | Source Files |
 | :--- | :--- | :--- | :--- | :--- |
 | `ERR_ABILITY_REQUIRES_CARD_TARGET` | `{0} requires a specific card target` | Ability {0} requires a targeted card. | Kỹ năng {0} yêu cầu chọn lá bài mục tiêu. | `alpha_card_active.lua` |
+| `ERR_ABILITY_CANNOT_TARGET_PLAYER_HP` | `{0} cannot target player hp` | Ability {0} cannot target player HP. | Kỹ năng {0} không thể nhắm HP người chơi. | `alpha_card_active.lua` |
 | `ERR_ABILITY_ANIMATE_DEAD_NO_HELLSCYTHE` | `animate_dead requires untriggered hellscythe in front_line` | Animate Dead requires an active Hellscythe on the front line. | Gọi Hồn yêu cầu Hellscythe ở hàng trước. | `lib_ability_advanced.lua` |
 | `ERR_ABILITY_EAGLE_EYE_NO_TARGET` | `eagle_eye requires a target card` | Eagle Eye requires a target card. | Mắt Đại Bàng yêu cầu chọn lá bài mục tiêu. | `lib_ability_human.lua` |
 | `ERR_ABILITY_EAGLE_EYE_NOT_ON_LINE` | `eagle_eye source card is not on a battle line` | Source card for Eagle Eye is not on the battle line. | Mắt Đại Bàng phải ở trên hàng đấu. | `lib_ability_human.lua` |

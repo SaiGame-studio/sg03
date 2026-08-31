@@ -94,6 +94,7 @@ namespace SG03
             this.LoadCardMovement();
             this.LoadFullDetailManipulator();
             this.LoadObjectPool();
+            this.LoadBattleStateCtrl();
         }
 
         protected virtual void OnDisable()
@@ -705,8 +706,30 @@ namespace SG03
 
             int attack = this.attacker.IsOmegaCardHidden()
                 ? 0
-                : this.attacker.Definition?.GetBaseStatInt("atk") ?? 0;
+                : this.attacker.GetDamagePreviewAttack();
             this.SetHealthPreview(attack);
+        }
+
+        /// <summary>
+        /// Gets the damage amount used for a pending attack preview. An ability
+        /// with <c>atk_added</c> derives its base attack from the character
+        /// named by its <c>char_code_required</c> stat.
+        /// </summary>
+        public int GetDamagePreviewAttack()
+        {
+            if (this.definition == null) return 0;
+
+            int addedAttack = this.definition?.GetBaseStatInt("atk_added") ?? 0;
+            if (!this.definition.TryGetBaseStat("atk_added", out _))
+                return Mathf.Max(0, this.definition.GetBaseStatInt("atk"));
+
+            if (!this.definition.TryGetBaseStat("char_code_required", out string requiredCharacterCode)
+                || string.IsNullOrWhiteSpace(requiredCharacterCode)) return 0;
+
+            CardDefinitionData requiredCharacter = this.battleStateCtrl?.BattleCardDefinitions
+                ?.GetDefinitionByCode(requiredCharacterCode);
+            int requiredCharacterAttack = requiredCharacter?.GetBaseStatInt("atk") ?? 0;
+            return Mathf.Max(0, requiredCharacterAttack + addedAttack);
         }
 
         public void SetMoveDuration(float d)  => this.movement.SetMoveDuration(d);

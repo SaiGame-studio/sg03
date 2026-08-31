@@ -183,7 +183,7 @@ end
 
 local function activate_attack_ability(state,
     attacker_card, attacker_line_key, attacker_def,
-    defender_card, defender_def, defender_line_key, defender_side_void)
+    defender_card, defender_def, defender_line_key, defender_side_void, target_player_side)
     local attacker_type = attacker_def.metadata ~= nil and attacker_def.metadata.type or nil
     local allowed_ability_keys = {}
     if attacker_type == "ability" then
@@ -197,23 +197,25 @@ local function activate_attack_ability(state,
         return "defender card is outside battle lines and attacker has no attack ability"
     end
 
-    local can_target = false
-    local target_position = nil
-    for _, ability_key in ipairs(allowed_ability_keys) do
-        local allowed, allowed_info = lib_ability_core.can_ability_target_position(
-            state,
-            attacker_card,
-            ability_key,
-            defender_line_key
-        )
-        if allowed then
-            can_target = true
-            break
+    if target_player_side == nil then
+        local can_target = false
+        local target_position = nil
+        for _, ability_key in ipairs(allowed_ability_keys) do
+            local allowed, allowed_info = lib_ability_core.can_ability_target_position(
+                state,
+                attacker_card,
+                ability_key,
+                defender_line_key
+            )
+            if allowed then
+                can_target = true
+                break
+            end
+            target_position = allowed_info
         end
-        target_position = allowed_info
-    end
-    if not can_target then
-        return "target position is not allowed for this ability: " .. tostring(target_position)
+        if not can_target then
+            return "target position is not allowed for this ability: " .. tostring(target_position)
+        end
     end
 
     lib_battle_common.dlog("[alpha_card_active] == phase 2: ability-only target ==")
@@ -224,6 +226,7 @@ local function activate_attack_ability(state,
     event_data.defender_def       = defender_def
     event_data.defender_line_key  = defender_line_key
     event_data.defender_side_void = defender_side_void
+    event_data.target_player_side = target_player_side
 
     local ability_actions
     local ability_err
@@ -410,6 +413,12 @@ local function main()
                 output.error = ability_key .. " requires a specific card target"
                 return
             end
+            if ability_def == nil or ability_def.can_target_player_hp ~= true then
+                output.error = ability_key .. " cannot target player hp"
+                return
+            end
+
+            local target_player_side = payload.defender_inventory_item_id == "alpha" and "alpha" or "omega"
 
             local possible_lines
             if payload.defender_inventory_item_id == "alpha" then
@@ -446,7 +455,7 @@ local function main()
             local ability_err = activate_attack_ability(
                 state,
                 attacker_card, attacker_line_key, attacker_def,
-                nil, nil, resolved_line_key, nil
+                nil, nil, resolved_line_key, nil, target_player_side
             )
             if ability_err ~= nil then output.error = ability_err ; return end
             local commit_err = commit_attack_result(session_id, state, is_development)

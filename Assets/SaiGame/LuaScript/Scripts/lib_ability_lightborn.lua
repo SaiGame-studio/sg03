@@ -46,8 +46,12 @@ function holy_glow_execute(state, source_card, event_data, helpers)
     lightborn_female_card.trigger = true
     local expose_action = helpers.expose_ability_selected_card(state, lightborn_female_card)
 
-    local hp_key = caster_side .. "_hp"
-    local max_hp_key = caster_side .. "_max_hp"
+    local target_side = event_data ~= nil and event_data.target_player_side or caster_side
+    if target_side ~= "alpha" and target_side ~= "omega" then
+        target_side = caster_side
+    end
+    local hp_key = target_side .. "_hp"
+    local max_hp_key = target_side .. "_max_hp"
 
     -- Ensure max HP is declared for the battle
     if state.alpha_max_hp == nil then
@@ -84,7 +88,7 @@ function holy_glow_execute(state, source_card, event_data, helpers)
         end
     end
 
-    battle.dlog("[ability] holy_glow: caster=" .. source_card.inventory_item_id .. " side=" .. caster_side .. " lightborn_female=" .. lightborn_female_card.inventory_item_id .. " restore=" .. hp_restore .. " actual_restored=" .. actual_restored .. " new_hp=" .. new_hp .. "/" .. max_hp .. " will_system_send_to_void=" .. tostring(will_system_send_to_void))
+    battle.dlog("[ability] holy_glow: caster=" .. source_card.inventory_item_id .. " side=" .. caster_side .. " target_side=" .. target_side .. " lightborn_female=" .. lightborn_female_card.inventory_item_id .. " restore=" .. hp_restore .. " actual_restored=" .. actual_restored .. " new_hp=" .. new_hp .. "/" .. max_hp .. " will_system_send_to_void=" .. tostring(will_system_send_to_void))
 
     if not will_system_send_to_void then
         -- Move source card to the void
@@ -110,7 +114,7 @@ function holy_glow_execute(state, source_card, event_data, helpers)
     if expose_action ~= nil then
         table.insert(ability_actions, expose_action)
     end
-    table.insert(ability_actions, caster_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=holy_glow,hp_restore=" .. hp_restore .. ",actual_restored=" .. actual_restored .. "," .. hp_key .. "=" .. state[hp_key] .. ",selected=" .. lightborn_female_card.inventory_item_id)
+    table.insert(ability_actions, caster_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=holy_glow,target=" .. target_side .. ",hp_restore=" .. hp_restore .. ",actual_restored=" .. actual_restored .. "," .. hp_key .. "=" .. state[hp_key] .. ",selected=" .. lightborn_female_card.inventory_item_id)
     
     if not will_system_send_to_void then
         table.insert(ability_actions, caster_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
