@@ -122,7 +122,7 @@ end
 -- ability: static_bind
 -- Stuns an enemy Character. A stunned Character cannot execute a queued attack;
 -- every queued plan it owns is removed and its planning lunge is returned to
--- its holder. Damage comes only from the ability definition's stun_damage stat.
+-- its holder. Damage comes only from the ability definition's atk stat.
 function static_bind_execute(state, source_card, event_data, helpers)
     local battle = helpers.lib_battle_common
     local target_card = (event_data or {}).defender_card
@@ -158,9 +158,9 @@ function static_bind_execute(state, source_card, event_data, helpers)
 
     local ability_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
     local ability_stats = ability_def ~= nil and ability_def.base_stats or nil
-    local stun_damage = ability_stats ~= nil and tonumber(ability_stats.stun_damage) or nil
-    if stun_damage == nil or stun_damage <= 0 then
-        return {}, "static_bind requires a positive base_stats.stun_damage"
+    local damage = ability_stats ~= nil and tonumber(ability_stats.atk) or nil
+    if damage == nil or damage <= 0 then
+        return {}, "static_bind requires a positive base_stats.atk"
     end
 
     battle.mark_card_skip_next_turn(target_card)
@@ -190,14 +190,14 @@ function static_bind_execute(state, source_card, event_data, helpers)
     local target_side = target_line_key:sub(1, 5) == "alpha" and "alpha" or "omega"
     local actions = {
         source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
-            ",ability=static_bind,target=" .. target_id .. ",stun_damage=" .. tostring(stun_damage) ..
+            ",ability=static_bind,target=" .. target_id .. ",damage=" .. tostring(damage) ..
             ",cancelled_plan=" .. tostring(cancelled_plan) .. ",skip_next_turn=true,selected=" .. azura_card.inventory_item_id,
         source_side .. "_card_expose:" .. azura_card.inventory_item_id,
         target_side .. "_card_expose:" .. target_id,
     }
 
     local damage_actions, damage_err = helpers.deal_damage_to_character(
-        state, source_card, target_card, stun_damage, target_line, target_side .. "_the_void"
+        state, source_card, target_card, damage, target_line, target_side .. "_the_void"
     )
     if damage_err ~= nil then return actions, damage_err end
     for _, action in ipairs(damage_actions) do
@@ -217,13 +217,13 @@ function static_bind_execute(state, source_card, event_data, helpers)
     table.insert(state[source_void_key], source_card)
     table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
 
-    battle.dlog("[ability] static_bind: azura=" .. azura_card.inventory_item_id .. " target=" .. target_id .. " stun_damage=" .. tostring(stun_damage) .. " cancelled_plan=" .. tostring(cancelled_plan))
+    battle.dlog("[ability] static_bind: azura=" .. azura_card.inventory_item_id .. " target=" .. target_id .. " damage=" .. tostring(damage) .. " cancelled_plan=" .. tostring(cancelled_plan))
     return actions, nil
 end
 
 -- ability: lightning_strike
--- Azura strikes the selected enemy and one adjacent enemy on the same battle
--- line. Only 1- and 2-star targets are stunned: their queued attack is
+-- Azura strikes the selected enemy and, when available, one adjacent enemy on
+-- the same battle line. Only 1- and 2-star targets are stunned: their queued attack is
 -- cancelled and a pending lunge returns to its holder if they survive.
 function lightning_strike_execute(state, source_card, event_data, helpers)
     local battle = helpers.lib_battle_common
@@ -273,18 +273,17 @@ function lightning_strike_execute(state, source_card, event_data, helpers)
         end
         if adjacent_target ~= nil then break end
     end
-    if adjacent_target == nil then
-        return {}, "lightning_strike requires an adjacent target character"
-    end
-
     local ability_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
     local ability_stats = ability_def ~= nil and ability_def.base_stats or nil
-    local stun_damage = ability_stats ~= nil and tonumber(ability_stats.stun_damage) or nil
-    if stun_damage == nil or stun_damage <= 0 then
-        return {}, "lightning_strike requires a positive base_stats.stun_damage"
+    local damage = ability_stats ~= nil and tonumber(ability_stats.atk) or nil
+    if damage == nil or damage <= 0 then
+        return {}, "lightning_strike requires a positive base_stats.atk"
     end
 
-    local targets = { target_card, adjacent_target }
+    local targets = { target_card }
+    if adjacent_target ~= nil then
+        table.insert(targets, adjacent_target)
+    end
     local target_stars = {}
     for index, target in ipairs(targets) do
         local target_def = helpers.find_item_def(state.item_defs, target.item_definition_code_name)
@@ -300,11 +299,14 @@ function lightning_strike_execute(state, source_card, event_data, helpers)
     azura_card.expose = true
 
     local target_side = target_line_key:sub(1, 5) == "alpha" and "alpha" or "omega"
+    local ability_action = source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
+        ",ability=lightning_strike,target=" .. target_card.inventory_item_id
+    if adjacent_target ~= nil then
+        ability_action = ability_action .. ",adjacent_target=" .. adjacent_target.inventory_item_id
+    end
+    ability_action = ability_action .. ",damage=" .. tostring(damage) .. ",selected=" .. azura_card.inventory_item_id
     local actions = {
-        source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
-            ",ability=lightning_strike,target=" .. target_card.inventory_item_id ..
-            ",adjacent_target=" .. adjacent_target.inventory_item_id ..
-            ",stun_damage=" .. tostring(stun_damage) .. ",selected=" .. azura_card.inventory_item_id,
+        ability_action,
         source_side .. "_card_expose:" .. azura_card.inventory_item_id,
     }
 
@@ -338,7 +340,7 @@ function lightning_strike_execute(state, source_card, event_data, helpers)
         end
 
         local damage_actions, damage_err = helpers.deal_damage_to_character(
-            state, source_card, target, stun_damage, target_line, target_side .. "_the_void"
+            state, source_card, target, damage, target_line, target_side .. "_the_void"
         )
         if damage_err ~= nil then return actions, damage_err end
         for _, action in ipairs(damage_actions) do
@@ -359,8 +361,9 @@ function lightning_strike_execute(state, source_card, event_data, helpers)
     table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
 
     battle.dlog("[ability] lightning_strike: azura=" .. azura_card.inventory_item_id ..
-        " target=" .. target_card.inventory_item_id .. " adjacent_target=" .. adjacent_target.inventory_item_id ..
-        " stun_damage=" .. tostring(stun_damage))
+        " target=" .. target_card.inventory_item_id ..
+        " adjacent_target=" .. (adjacent_target ~= nil and adjacent_target.inventory_item_id or "none") ..
+        " damage=" .. tostring(damage))
     return actions, nil
 end
 
