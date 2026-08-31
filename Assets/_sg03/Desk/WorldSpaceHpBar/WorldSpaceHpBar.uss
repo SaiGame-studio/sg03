@@ -3,5 +3,5 @@
 .health-bar-fill { height: 100%; width: 65%; background-color: rgb(223, 60, 61); border-radius: 0; }
 .health-bar-preview { position: absolute; left: 0; top: 0; height: 100%; width: 0; display: none; border-radius: 0; }
 .health-stat-row { position: absolute; width: 640px; height: 58px; flex-direction: row; justify-content: center; align-items: center; }
-.health-bar-label { color: rgb(255, 255, 255); font-size: 34px; -unity-font-style: bold; -unity-text-align: middle-center; -unity-text-outline-width: 3px; -unity-text-outline-color: rgb(0, 0, 0); }
+.health-bar-label { color: rgb(255, 255, 255); font-size: 34px; -unity-font-style: bold; -unity-text-align: middle-center; -unity-text-outline-width: 6px; -unity-text-outline-color: rgb(0, 0, 0); }
 .def-shield-icon { width: 42px; height: 46px; margin-left: 10px; background-image: url("project://database/Assets/_sg03/UI/Images/shield.svg"); -unity-background-scale-mode: scale-to-fit; }

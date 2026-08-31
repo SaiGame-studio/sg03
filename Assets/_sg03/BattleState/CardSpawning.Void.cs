@@ -84,7 +84,15 @@ namespace SG03
             {
                 return true;
             }
-            return occupyingCard == card;
+            if (occupyingCard == card) return true;
+
+            if (occupyingCard.CardHolder != holder || occupyingCard.Location == Location.in_void)
+            {
+                this.slotOccupancy.Remove(holder.transform);
+                return true;
+            }
+
+            return false;
         }
 
         public void SettleAlphaVoidInFrontLine(Card3DCtrl card, string inventoryItemId, int slotIndex) { }
