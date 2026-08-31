@@ -138,7 +138,7 @@ function titan_fall_execute(state, source_card, event_data, helpers)
 end
 
 -- ability: titan_spear_sweep
--- Titan deals base_stats.sweep_atk to every opposing Character, then
+-- Titan deals base_stats.atk to every opposing Character, then
 -- base_stats.shockwave_atk to one adjacent ally unless that ally is Ren.
 function titan_spear_sweep_execute(state, source_card, event_data, helpers)
     local battle = helpers.lib_battle_common
@@ -169,9 +169,9 @@ function titan_spear_sweep_execute(state, source_card, event_data, helpers)
 
     local ability_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
     local ability_stats = ability_def ~= nil and ability_def.base_stats or nil
-    local enemy_damage = ability_stats ~= nil and tonumber(ability_stats.sweep_atk) or nil
+    local enemy_damage = ability_stats ~= nil and tonumber(ability_stats.atk) or nil
     if enemy_damage == nil or enemy_damage <= 0 then
-        return {}, "titan_spear_sweep requires a positive base_stats.sweep_atk"
+        return {}, "titan_spear_sweep requires a positive base_stats.atk"
     end
     local ally_damage = ability_stats ~= nil and tonumber(ability_stats.shockwave_atk) or nil
     if ally_damage == nil or ally_damage <= 0 then
