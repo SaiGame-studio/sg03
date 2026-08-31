@@ -114,7 +114,7 @@ function holy_glow_execute(state, source_card, event_data, helpers)
     if expose_action ~= nil then
         table.insert(ability_actions, expose_action)
     end
-    table.insert(ability_actions, caster_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=holy_glow,target=" .. target_side .. ",hp_restore=" .. hp_restore .. ",actual_restored=" .. actual_restored .. "," .. hp_key .. "=" .. state[hp_key] .. ",selected=" .. lightborn_female_card.inventory_item_id)
+    table.insert(ability_actions, caster_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=holy_glow,target=" .. target_side .. ",hp_restore=" .. hp_restore .. ",actual_restored=" .. actual_restored .. "," .. hp_key .. "=" .. state[hp_key] .. ",caster=" .. lightborn_female_card.inventory_item_id .. ",selected=" .. lightborn_female_card.inventory_item_id)
     
     if not will_system_send_to_void then
         table.insert(ability_actions, caster_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)

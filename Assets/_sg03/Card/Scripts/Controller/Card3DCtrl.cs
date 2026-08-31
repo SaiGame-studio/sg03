@@ -712,8 +712,8 @@ namespace SG03
 
         /// <summary>
         /// Gets the damage amount used for a pending attack preview. An ability
-        /// with <c>atk_added</c> uses the attack of the required character only
-        /// while that character is in the attacker's Front Line.
+        /// with <c>atk_added</c> combines that bonus with the attack of the
+        /// required character while that character is in the attacker's Front Line.
         /// </summary>
         public int GetDamagePreviewAttack()
         {

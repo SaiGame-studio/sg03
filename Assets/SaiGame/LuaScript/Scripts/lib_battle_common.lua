@@ -150,9 +150,11 @@ function mark_card_skip_next_turn(card)
     card.trigger = true
 end
 
--- Resets per-turn state on every card in all four battle lines. A card marked
--- skip_next_turn remains triggered only when its owner's next turn begins;
--- the marker is then consumed, so the following handoff readies it normally.
+-- Resets per-turn state only for the side whose turn is about to begin. A card
+-- used during the previous side's turn therefore remains triggered throughout
+-- the opponent's turn. A card marked skip_next_turn remains triggered when its
+-- owner's next turn begins; the marker is then consumed, so the following
+-- handoff readies it normally.
 function reset_turn_cards(state, next_active_side)
     dlog("== reset_turn_cards next_active_side=" .. tostring(next_active_side) .. " ==")
 
@@ -163,13 +165,15 @@ function reset_turn_cards(state, next_active_side)
         { side = "omega", line = state.omega_back_line  or {} },
     }
     for _, line_data in ipairs(lines) do
-        for _, reset_card in ipairs(line_data.line) do
-            reset_card_turn_state(state.item_defs, reset_card)
-            if reset_card.skip_next_turn == true and line_data.side == next_active_side then
-                reset_card.trigger = true
-                reset_card.skip_next_turn = nil
-            else
-                reset_card.trigger = false
+        if line_data.side == next_active_side then
+            for _, reset_card in ipairs(line_data.line) do
+                reset_card_turn_state(state.item_defs, reset_card)
+                if reset_card.skip_next_turn == true then
+                    reset_card.trigger = true
+                    reset_card.skip_next_turn = nil
+                else
+                    reset_card.trigger = false
+                end
             end
         end
     end
