@@ -251,8 +251,7 @@ namespace SG03
         {
             if (this.isFullDetail) return false;
             if (!this.IsCharacter()) return false;
-            if (this.Location == Location.in_hand) return false;
-            if (this.isHover) return true;
+            if (this.Location == Location.in_hand || this.Location == Location.in_void) return false;
             if (this.ShouldHideAtkUiForCurrentTurn()) return false;
             if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
             return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;

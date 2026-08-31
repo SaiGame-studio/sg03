@@ -830,6 +830,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 694843606}
     m_Modifications:
+    - target: {fileID: 910907888340075026, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: iconSize.x
+      value: 56
+      objectReference: {fileID: 0}
+    - target: {fileID: 910907888340075026, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: iconSize.y
+      value: 56
+      objectReference: {fileID: 0}
     - target: {fileID: 3193441457980298630, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
       propertyPath: m_Name
       value: AtkUI
