@@ -57,19 +57,18 @@ function back_stab_execute(state, source_card, event_data, helpers)
     local source_side = helpers.find_card_side(state, source_card)
     local front_line_key = source_side .. "_front_line"
     local front_line = state[front_line_key] or {}
-    local goblin_card = helpers.find_untriggered_card(front_line, function(c)
-        local def = helpers.find_item_def(state.item_defs, c.item_definition_code_name)
-        return def ~= nil and def.metadata ~= nil and def.metadata.race == "goblin"
+    local grunt_card = helpers.find_untriggered_card(front_line, function(c)
+        return c.item_definition_code_name == "goblin_grunt"
     end)
-    if goblin_card == nil then
-        battle.dlog("[ability] back_stab: error - no untriggered goblin character in " .. front_line_key)
-        return {}, "back_stab requires untriggered goblin character in front_line"
+    if grunt_card == nil then
+        battle.dlog("[ability] back_stab: error - no untriggered goblin_grunt in " .. front_line_key)
+        return {}, "back_stab requires untriggered goblin_grunt in front_line"
     end
-    goblin_card.trigger = true
+    grunt_card.trigger = true
 
-    if defender.inventory_item_id == goblin_card.inventory_item_id then
-        battle.dlog("[ability] back_stab: error - defender matches selected goblin id=" .. tostring(goblin_card.inventory_item_id))
-        return {}, "back_stab cannot target the selected goblin"
+    if defender.inventory_item_id == grunt_card.inventory_item_id then
+        battle.dlog("[ability] back_stab: error - defender matches selected goblin_grunt id=" .. tostring(grunt_card.inventory_item_id))
+        return {}, "back_stab cannot target the selected goblin_grunt"
     end
 
     local line_key = (event_data or {}).defender_line_key
@@ -86,17 +85,17 @@ function back_stab_execute(state, source_card, event_data, helpers)
         end
     end
 
-    local goblin_item_def = helpers.find_item_def(state.item_defs, goblin_card.item_definition_code_name)
-    local char_atk = (goblin_item_def ~= nil and goblin_item_def.base_stats ~= nil and goblin_item_def.base_stats.atk) or 1
+    local grunt_item_def = helpers.find_item_def(state.item_defs, grunt_card.item_definition_code_name)
+    local char_atk = (grunt_item_def ~= nil and grunt_item_def.base_stats ~= nil and grunt_item_def.base_stats.atk) or 1
     local damage = atk_add + char_atk
-    battle.dlog("[ability] back_stab: goblin=" .. goblin_card.inventory_item_id .. " target=" .. defender.inventory_item_id .. " damage=" .. damage)
+    battle.dlog("[ability] back_stab: goblin_grunt=" .. grunt_card.inventory_item_id .. " target=" .. defender.inventory_item_id .. " damage=" .. damage)
 
-    local expose_action = helpers.expose_ability_selected_card(state, goblin_card)
+    local expose_action = helpers.expose_ability_selected_card(state, grunt_card)
     local ability_actions = {
         expose_action,
-        source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=back_stab,target=" .. defender.inventory_item_id .. ",selected=" .. goblin_card.inventory_item_id
+        source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=back_stab,target=" .. defender.inventory_item_id .. ",selected=" .. grunt_card.inventory_item_id
     }
-    local damage_actions, dmg_err = helpers.deal_damage_to_character(state, goblin_card, defender, damage, defender_line, void_key)
+    local damage_actions, dmg_err = helpers.deal_damage_to_character(state, grunt_card, defender, damage, defender_line, void_key)
     if dmg_err ~= nil then return ability_actions, dmg_err end
     for _, action in ipairs(damage_actions) do
         table.insert(ability_actions, action)

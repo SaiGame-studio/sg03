@@ -27,8 +27,8 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 - [Static Bind](cards/lightborn/light_elf/azura/abilities/static_bind.md): 4 sao
 
 ### Natureborn
-- [Totem Pulse](cards/natureborn/goblin/abilities/totem_pulse.md): 0 sao
-- [Back Stab](cards/natureborn/goblin/abilities/back_stab.md): 0 sao
+- [Totem Pulse](cards/natureborn/goblin/abilities/totem_pulse.md): 2 sao
+- [Back Stab](cards/natureborn/goblin/abilities/back_stab.md): 2 sao
 - [Brute Call](cards/natureborn/goblin/abilities/brute_call.md): 3 sao
 
 ### Humans

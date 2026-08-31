@@ -21,5 +21,4 @@ Sức mạnh thật sự của Goblin Shaman không nằm ở khả năng đối
 
 ## Kỹ Năng Liên Kết
 - [Totem Pulse](abilities/totem_pulse.md) — Kích hoạt sóng Totem tăng giáp cho toàn bộ sới tiền tuyến.
-- [Back Stab](abilities/back_stab.md) — Chiêu thức đánh lén gây sát thương lớn.
 - [Brute Call](abilities/brute_call.md) — Triệu gọi Goblin Brute xông ra bảo vệ Goblin Shaman.

@@ -19,4 +19,4 @@ Goblin Grunt tuyệt đối trung thành với Goblin Shaman. Đối với họ,
 
 ## Kỹ Năng Liên Kết
 
-- [Back Stab](abilities/back_stab.md) — Kỹ năng đánh lén dành cho các đơn vị Goblin có khả năng sử dụng.
+- [Back Stab](abilities/back_stab.md) — Kỹ năng đánh lén chỉ dành cho Goblin Grunt.

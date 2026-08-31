@@ -2,6 +2,7 @@
 
 - **Mã Thẻ Bài**: `totem_pulse`
 - **Loại Thẻ**: [`ability`](../../../../04_abilities.md)
+- **Số sao**: 2
 - **Chủng Tộc Chính**: **Natureborn**
 - **Tộc Nhánh**: Goblin (định danh kỹ thuật: `goblin`)
 - **Vị Trí Nhắm Mục Tiêu**: `own_frontline`
