@@ -77,6 +77,12 @@ function get_ability_config(ability_key)
             handler_group = "advanced",
             target_positions = { "own_frontline", "own_backline", "own_source", "own_void" },
         },
+        king_return = {
+            handler_group = "advanced",
+            target_positions = { "own_frontline" },
+            requires_target_card = true,
+            resolves_without_attack = true,
+        },
         titan_fall = {
             handler_group = "mid_game",
             target_positions = { "own_frontline" },
