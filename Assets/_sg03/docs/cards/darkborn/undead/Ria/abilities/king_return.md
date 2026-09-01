@@ -20,10 +20,12 @@ Ria gọi Skeleton King trở lại chiến trường bằng cách hiến tế b
 - Có một [Ria](../ria.md) trên `own_frontline`.
 - Có ít nhất ba [Skeleton](../skeleton.md) trên `own_frontline` để hiến tế.
 - Có [Skeleton King](../skeleton_king.md) trong `the_void`.
+- King Return có `stats.atk` dương để Ria nhận sát thương khi kỹ năng resolve.
 
 ## Cơ Chế & Luồng Thực Thi
 
 1. Chọn Ria trên `own_frontline` làm nhân vật thực hiện kỹ năng.
 2. Đưa ba Skeleton đầu tiên theo thứ tự slot từ `own_frontline` vào `the_void`.
 3. Nếu còn vị trí trống liền kề bên trái hoặc bên phải Ria, King Return tự chọn ô bên trái trước, rồi đến ô bên phải, để đưa Skeleton King từ `the_void` vào `own_frontline`.
-4. Nếu sau khi hiến tế ba Skeleton không có vị trí trống liền kề Ria, đưa `king_return` vào `the_void`; không triệu hồi Skeleton King và không tạo thêm hiệu ứng nào khác.
+4. Sau hiệu ứng triệu hồi hoặc nhánh thất bại, Ria nhận sát thương bằng `stats.atk` của King Return.
+5. Nếu sau khi hiến tế ba Skeleton không có vị trí trống liền kề Ria, đưa `king_return` vào `the_void`; không triệu hồi Skeleton King và không tạo thêm hiệu ứng nào khác ngoài sát thương trên Ria.

@@ -14,6 +14,7 @@
 
 - **Cấu Hình**: `target_positions = { "own_frontline", "own_backline", "own_source", "own_void" }`
 - **Điều Kiện**: Yêu cầu 1 thẻ [Ria](../ria.md) chưa kích hoạt ở `own_frontline`.
+- **Sát thương lên Ria**: Sau khi resolve, Ria nhận lượng sát thương bằng `stats.atk` của Animate Dead.
 
 ### Các Bước Thực Thi
 1. Tìm `ria` chưa kích hoạt ở `own_frontline`. Đánh dấu `ria.trigger = true`.
@@ -24,4 +25,5 @@
    - Reset chỉ số bài (`reset_card_turn_state`), gán `trigger = false`, `face_up = true`, `expose = true`.
    - Đặt skeleton vào slot trống đã chọn trên `own_frontline`.
    - Phát Client Action `[side]_void_to_front_line:[skeleton_id],[slot_index]`.
-4. Tiêu thụ lá bài kỹ năng `animate_dead` và chuyển vào `the_void`.
+4. Ria nhận sát thương bằng `stats.atk` của Animate Dead.
+5. Tiêu thụ lá bài kỹ năng `animate_dead` và chuyển vào `the_void`.
