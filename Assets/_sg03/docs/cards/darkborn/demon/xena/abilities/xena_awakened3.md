@@ -1,7 +1,7 @@
 # Xena Awakened III
 
 - **Mã Thẻ Bài**: `xena_awakened3`
-- **Số sao**: 3
+- **Số sao**: 4
 - **Loại Thẻ**: [`ability`](../../../../../04_abilities.md)
 - **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
 - **Tộc Nhánh**: **Demon**
@@ -34,6 +34,6 @@ Hiến tế 1 thẻ bài đồng minh thuộc chủng tộc `darkborn` từ 1 đ
 
 ## Kỹ Năng Liên Kết
 
-- [Xena Awakened I](xena_awakened1.md) — 1 sao
-- [Xena Awakened II](xena_awakened2.md) — 2 sao
-- [Xena Awakened IV](xena_awakened4.md) — 4 sao
+- [Xena Awakened I](xena_awakened1.md) — 2 sao
+- [Xena Awakened II](xena_awakened2.md) — 3 sao
+- [Xena Awakened IV](xena_awakened4.md) — 5 sao
