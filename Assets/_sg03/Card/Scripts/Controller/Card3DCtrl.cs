@@ -639,6 +639,20 @@ namespace SG03
             this.movement.MoveTo(worldPosition, destination);
         }
 
+        /// <summary>Moves to the target horizontally while retaining the card's current world-space Y position.</summary>
+        public void MoveToKeepY(Transform target, Location destination)
+        {
+            if (this.IsMovingVoidToLine) return;
+            CardHolderCtrl holder = target != null ? target.GetComponent<CardHolderCtrl>() : null;
+            if (holder == null)
+            {
+                this.movement.MoveToKeepY(target, destination, null);
+                return;
+            }
+
+            this.movement.MoveToKeepY(target, destination, () => this.SpawnHpBarAt(holder));
+        }
+
         /// <summary>Cancels the current transition and immediately starts returning this card to its hand slot.</summary>
         public void ReturnToHand(Transform handTarget)
         {

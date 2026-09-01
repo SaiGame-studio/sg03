@@ -305,6 +305,22 @@ namespace SG03
         }
 
         /// <summary>
+        /// Smoothly moves the card horizontally to the target while retaining its current world-space Y position.
+        /// </summary>
+        public void MoveToKeepY(Transform target, Location destination, System.Action onComplete)
+        {
+            if (this.isVoidToLineTransitionActive) return;
+            if (this.isFlipping) return;
+            this.SetLocation(destination);
+            this.RecordHandAnchor(target, destination);
+            this.KillAllTweens();
+
+            Vector3 targetPosition = target.position;
+            targetPosition.y = this.transform.position.y;
+            this.StartMoveTween(targetPosition, this.duration, this.ease, onComplete);
+        }
+
+        /// <summary>
         /// Moves the card to <paramref name="holder"/>'s position and simultaneously flips
         /// face-down using the Unknown axis. Intended for hand → line transitions.
         /// </summary>

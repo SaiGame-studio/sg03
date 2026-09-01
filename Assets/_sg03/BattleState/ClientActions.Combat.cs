@@ -374,8 +374,8 @@ namespace SG03
                 card1.AssignCardHolder(holder2);
                 card2.AssignCardHolder(holder1);
 
-                card1.MoveTo(holder2.transform, holder2.HolderLocation);
-                card2.MoveTo(holder1.transform, holder1.HolderLocation);
+                card1.MoveToKeepY(holder2.transform, holder2.HolderLocation);
+                card2.MoveToKeepY(holder1.transform, holder1.HolderLocation);
 
                 yield return this.StartCoroutine(this.WaitForCard(card1));
                 yield return this.StartCoroutine(this.WaitForCard(card2));
