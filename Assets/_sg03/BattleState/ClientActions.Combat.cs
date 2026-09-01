@@ -212,6 +212,7 @@ namespace SG03
             string abilityName = null;
             string targetId = null;
             string selectedId = null;
+            string casterId = null;
 
             foreach (string p in parameters)
             {
@@ -224,6 +225,7 @@ namespace SG03
                     else if (key == "ability") abilityName = value;
                     else if (key == "target") targetId = value;
                     else if (key == "selected") selectedId = value;
+                    else if (key == "caster") casterId = value;
                 }
             }
 
@@ -234,6 +236,7 @@ namespace SG03
             }
 
             if (string.IsNullOrEmpty(sourceId)) return null;
+            if (!string.IsNullOrEmpty(casterId)) selectedId = casterId;
             return this.StartCoroutine(this.CardAbilityRoutine(sourceId, targetId, selectedId));
         }
 
@@ -245,9 +248,28 @@ namespace SG03
 
             if (sourceCard != null) sourceCard.RunUp();
             if (selectedCard != null && targetCard != null) selectedCard.AttackLunge(targetCard.transform.position);
+            else if (selectedCard != null && this.TryGetAbilityTargetSourcePosition(targetId, out Vector3 targetPosition)) selectedCard.AttackLunge(targetPosition);
+            else if (selectedCard != null) selectedCard.AbilityActive();
 
             if (sourceCard != null) yield return this.StartCoroutine(this.WaitForCard(sourceCard));
             if (selectedCard != null) yield return this.StartCoroutine(this.WaitForCard(selectedCard));
+        }
+
+        private bool TryGetAbilityTargetSourcePosition(string targetId, out Vector3 targetPosition)
+        {
+            targetPosition = default;
+            if (this.deskPosition == null || string.IsNullOrEmpty(targetId)) return false;
+
+            string targetSide = targetId.Trim().ToLowerInvariant();
+            Transform targetSource = targetSide == "alpha"
+                ? this.deskPosition.AlphaTheSource
+                : targetSide == "omega"
+                    ? this.deskPosition.OmegaTheSource
+                    : null;
+            if (targetSource == null) return false;
+
+            targetPosition = targetSource.position;
+            return true;
         }
 
         private Coroutine ExecuteOmegaPlaningCharacterAttack(string[] parameters)

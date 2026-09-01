@@ -237,7 +237,9 @@ namespace SG03
 
         private void HandleFullDetailClick()
         {
-            if (!this.IsMouseClickedThisFrame() && !this.IsMouseRightClickedThisFrame() && !this.IsMouseMiddleClickedThisFrame()) return;
+            // Middle click cancels the preview. Right drag and mouse-wheel input
+            // are consumed by CardFullDetailManipulator.
+            if (!this.IsMouseClickedThisFrame() && !this.IsMouseMiddleClickedThisFrame()) return;
             this.ExitFullDetail();
         }
 
@@ -316,7 +318,13 @@ namespace SG03
             if (this.IsLocationNonSelectable(this.hovered.Location)) { if (this.debugMouseEvents) Debug.LogWarning($"[CardSelection] Cannot click: Location {this.hovered.Location} non-selectable"); return; }
             
             if (this.IsClickOnSelected()) 
-            { 
+            {
+                if (this.IsTargeting && this.targetingSource == this.selected)
+                {
+                    this.CancelTargeting();
+                    return;
+                }
+
                 if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Re-selecting already selected card"); 
             }
             else
@@ -505,7 +513,7 @@ namespace SG03
             this.ClearHealthPreviewTarget();
             if (!this.CanPreviewAlphaAttackOn(card)) return;
 
-            int attack = this.targetingSource.Definition?.GetBaseStatInt("atk") ?? 0;
+            int attack = this.targetingSource.GetDamagePreviewAttack();
             if (attack <= 0) return;
 
             this.healthPreviewTarget = card;
@@ -515,7 +523,7 @@ namespace SG03
         private bool CanPreviewAlphaAttackOn(Card3DCtrl card)
         {
             if (!this.IsTargeting || card == null || card == this.targetingSource) return false;
-            if (!this.targetingSource.IsCharacter() || this.targetingSource.CardOwner != Owner.alpha) return false;
+            if (this.targetingSource.CardOwner != Owner.alpha) return false;
             return card.IsCharacter() && card.CardOwner == Owner.omega;
         }
 
@@ -678,11 +686,13 @@ namespace SG03
         {
             this.ClearHealthPreviewTarget();
             this.fullDetail = false;
+            Card3DCtrl prevSource = this.targetingSource;
             this.selected = null;
             this.targeted = null;
             this.targetingSource = null;
             this.holderSelected = null;
             this.arrowIndicator?.Hide();
+            prevSource?.RefreshAtkUiVisibility();
             Card3DCtrl.NotifyDeselected();
         }
 

@@ -732,7 +732,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: scriptFiles.Array.size
-      value: 22
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: scriptFiles.Array.data[0].fileName
@@ -840,7 +840,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: scriptFiles.Array.data[13].fileName
-      value: lib_ability_all.lua
+      value: lib_ability_human.lua
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: scriptFiles.Array.data[13].isActive
@@ -911,6 +911,30 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[22].fileName
+      value: lib_ability_darkborn.lua
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[22].isActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[23].fileName
+      value: lib_ability_lightborn.lua
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[23].isActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[24].fileName
+      value: lib_ability_natureborn.lua
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[24].isActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: scriptFiles.Array.data[0].scriptName
       value: alpha_card_active
       objectReference: {fileID: 0}
@@ -964,7 +988,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: scriptFiles.Array.data[13].scriptName
-      value: lib_ability_all
+      value: lib_ability_human
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: scriptFiles.Array.data[14].scriptName
@@ -997,6 +1021,18 @@ PrefabInstance:
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: scriptFiles.Array.data[21].scriptName
       value: lib_battle_entity_ai
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[22].scriptName
+      value: lib_ability_darkborn
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[23].scriptName
+      value: lib_ability_lightborn
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[24].scriptName
+      value: lib_ability_natureborn
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: scriptFiles.Array.data[0].hasLocalFile
@@ -1084,6 +1120,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
       propertyPath: scriptFiles.Array.data[21].hasLocalFile
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[22].hasLocalFile
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[23].hasLocalFile
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3731728121393147189, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}
+      propertyPath: scriptFiles.Array.data[24].hasLocalFile
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6971719431293405431, guid: 3cd71439f244afb48a8cc771f5246221, type: 3}

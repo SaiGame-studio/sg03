@@ -13,13 +13,17 @@ namespace SG03
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private BattleStateCtrl battleStateCtrl;
 
+        [Header("Icon Settings")]
+        [Tooltip("Width and height of the defense shield icon.")]
+        [SerializeField] private Vector2 iconSize = new Vector2(52f, 56f);
+
         [Header("Preview health")]
         [SerializeField, Min(0f)] private float currentHealth = 0f;
         [SerializeField, Min(1f)] private float maxHealth = 100f;
         [SerializeField] private bool faceMainCamera = true;
 
         [Header("Health change preview")]
-        [Tooltip("Signed preview amount. Positive previews healing; negative previews damage. Zero hides the preview.")]
+        [Tooltip("Signed preview amount added temporarily to current damage. Zero hides the preview.")]
         [SerializeField] private float healthPreviewDelta;
         [SerializeField, Range(0f, 1f)] private float previewOpacity = 1f;
         [Tooltip("Number of full gradient traversals per second. Zero pauses the color animation.")]
@@ -42,29 +46,21 @@ namespace SG03
 
         [Header("Parenting")]
         [SerializeField] private Transform parent;
-        [Tooltip("Local offset used for Alpha cards before it is cached in world space.")]
-        [InspectorName("Alpha Parent Offset")]
-        [SerializeField] private Vector3 alphaParentOffset = new Vector3(0f, -4.5f, 0.2f);
-        [Tooltip("Local offset used for Omega cards before it is cached in world space.")]
-        [InspectorName("Omega Parent Offset")]
-        [SerializeField] private Vector3 omegaParentOffset = new Vector3(0f, -4.5f, -0.2f);
         [Tooltip("World-space height above the card. This is unaffected by card flips.")]
-        [SerializeField, Min(0f)] private float aboveCardOffset = 0.2f;
+        [SerializeField, Min(0f)] private float aboveCardYOffset = 0.2f;
 
         private VisualElement fill;
         private VisualElement healthPreview;
         private VisualElement root;
         private VisualElement track;
         private VisualElement healthLabelRow;
-        private Label healthLabel;
+        private Label currentHealthLabel;
+        private Label healthLabelSeparator;
+        private Label maxHealthLabel;
         private Vector3 desiredWorldScale;
         private bool hasDesiredWorldScale;
         private Vector3 baseWorldRotation;
         private bool hasBaseWorldRotation;
-        private Vector3 worldParentOffset;
-        private bool hasWorldParentOffset;
-        private Owner parentOwner;
-
         private ClientActions subscribedClientActions;
         private Coroutine deferredUiRefreshRoutine;
         private float previewColorAnimationTime;
@@ -236,12 +232,12 @@ namespace SG03
             this.RefreshUi();
         }
 
-        /// <summary>Previews a signed health change without modifying the current health value.</summary>
+        /// <summary>Previews a signed damage change without modifying the resolved battle-state value.</summary>
         public void SetHealthPreview(float signedDelta)
         {
             this.healthPreviewDelta = signedDelta;
             this.previewColorAnimationTime = 0f;
-            this.RefreshHealthPreview();
+            this.RefreshUi();
         }
 
         /// <summary>Hides the pending health-change preview.</summary>
@@ -271,7 +267,7 @@ namespace SG03
         }
 
         /// <summary>Assigns the card this bar follows without inheriting its transform.</summary>
-        public void SetParent(Transform newParent, Owner owner)
+        public void SetParent(Transform newParent)
         {
             if (newParent == null) return;
 
@@ -279,27 +275,13 @@ namespace SG03
             this.desiredWorldScale = this.transform.lossyScale;
             this.hasDesiredWorldScale = true;
             this.parent = newParent;
-            this.parentOwner = owner;
             if (isNewCard) this.ResetCurrentHealthForNewCard();
             this.transform.SetParent(null, true);
-            this.SetWorldParentOffset();
             this.UpdateWorldPositionFromParent();
             this.baseWorldRotation = this.transform.eulerAngles;
             this.hasBaseWorldRotation = true;
             this.BindClientActionEvents();
             this.RefreshMaxHealthFromBattleState();
-        }
-
-        private Vector3 GetParentOffset(Owner owner)
-        {
-            return owner == Owner.omega ? this.omegaParentOffset : this.alphaParentOffset;
-        }
-
-        private void SetWorldParentOffset()
-        {
-            this.worldParentOffset = this.GetParentOffset(this.parentOwner);
-            this.worldParentOffset.y = this.aboveCardOffset;
-            this.hasWorldParentOffset = true;
         }
 
         /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>
@@ -335,7 +317,6 @@ namespace SG03
             this.desiredWorldScale = this.transform.lossyScale;
             this.hasDesiredWorldScale = true;
             this.transform.SetParent(null, true);
-            this.SetWorldParentOffset();
             this.UpdateWorldPositionFromParent();
         }
 
@@ -420,16 +401,16 @@ namespace SG03
 
         private void UpdateWorldPositionFromParent()
         {
-            if (!this.hasWorldParentOffset || this.parent == null) return;
+            if (this.parent == null) return;
 
             Card3D card = this.parent.GetComponent<Card3D>();
             if (card != null && card.TryGetStatsCenterWorldPosition(out Vector3 statsCenter))
             {
-                this.transform.position = statsCenter + Vector3.up * this.aboveCardOffset;
+                this.transform.position = statsCenter + Vector3.up * this.aboveCardYOffset;
                 return;
             }
 
-            this.transform.position = this.parent.position + this.worldParentOffset;
+            this.transform.position = this.parent.position + Vector3.up * this.aboveCardYOffset;
         }
 
         private void CompensateParentScale()
@@ -475,7 +456,7 @@ namespace SG03
             this.LoadUiElement(ref this.fill, uiRoot, "HealthFill");
             this.LoadUiElement(ref this.healthPreview, uiRoot, "HealthPreview");
             this.LoadUiElement(ref this.healthLabelRow, uiRoot, "HealthLabelRow");
-            this.LoadHealthLabel(uiRoot);
+            this.LoadHealthLabels(uiRoot);
         }
 
         private void ClearUiElementReferences()
@@ -485,7 +466,9 @@ namespace SG03
             this.root = null;
             this.track = null;
             this.healthLabelRow = null;
-            this.healthLabel = null;
+            this.currentHealthLabel = null;
+            this.healthLabelSeparator = null;
+            this.maxHealthLabel = null;
         }
 
         private void LoadUiElement(ref VisualElement element, VisualElement uiRoot, string elementName)
@@ -498,13 +481,30 @@ namespace SG03
             }
         }
 
-        private void LoadHealthLabel(VisualElement uiRoot)
+        private void LoadHealthLabels(VisualElement uiRoot)
         {
-            if (this.healthLabel != null) return;
-            this.healthLabel = uiRoot.Q<Label>("HealthLabel");
-            if (this.healthLabel == null)
+            if (this.currentHealthLabel != null
+                && this.healthLabelSeparator != null
+                && this.maxHealthLabel != null) return;
+
+            this.currentHealthLabel = uiRoot.Q<Label>("CurrentHealthLabel");
+            this.healthLabelSeparator = uiRoot.Q<Label>("HealthLabelSeparator");
+            this.maxHealthLabel = uiRoot.Q<Label>("MaxHealthLabel");
+            if (this.currentHealthLabel == null
+                || this.healthLabelSeparator == null
+                || this.maxHealthLabel == null)
             {
-                Debug.LogWarning($"{this.name}: UI element 'HealthLabel' is missing.", this.gameObject);
+                Debug.LogWarning($"{this.name}: one or more health-label UI elements are missing.", this.gameObject);
+            }
+
+            Image shieldImage = uiRoot.Q<Image>("DefShieldIcon");
+            if (shieldImage != null)
+            {
+                if (this.iconSize.x > 0f && this.iconSize.y > 0f)
+                {
+                    shieldImage.style.width = this.iconSize.x;
+                    shieldImage.style.height = this.iconSize.y;
+                }
             }
         }
 
@@ -519,6 +519,13 @@ namespace SG03
             this.RefreshTrackVisibility();
             this.RefreshHealthLabel();
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            this.RefreshUi();
+        }
+#endif
 
         private void RefreshHealthPreview()
         {
@@ -537,13 +544,15 @@ namespace SG03
                 return;
             }
 
-            bool isHealing = previewRatio > currentRatio;
+            bool isDamagePreview = previewRatio > currentRatio;
             float segmentStart = Mathf.Min(currentRatio, previewRatio);
             float segmentWidth = Mathf.Abs(previewRatio - currentRatio);
-            this.fill.style.width = Length.Percent((isHealing ? currentRatio : previewRatio) * 100f);
+            this.fill.style.width = Length.Percent((isDamagePreview ? previewRatio : currentRatio) * 100f);
+            this.fill.style.backgroundColor = this.healthColorGradient.Evaluate(
+                isDamagePreview ? previewRatio : currentRatio);
             this.healthPreview.style.left = Length.Percent(segmentStart * 100f);
             this.healthPreview.style.width = Length.Percent(segmentWidth * 100f);
-            this.healthPreview.style.backgroundColor = this.GetHealthPreviewColor(isHealing);
+            this.healthPreview.style.backgroundColor = this.GetHealthPreviewColor(!isDamagePreview);
             this.healthPreview.style.opacity = this.previewOpacity;
         }
 
@@ -561,9 +570,12 @@ namespace SG03
             if (this.healthPreview == null || this.healthPreview.resolvedStyle.display == DisplayStyle.None) return;
 
             this.previewColorAnimationTime += Time.deltaTime;
-            bool isHealing = this.healthPreviewDelta > 0f;
-            this.healthPreview.style.backgroundColor = this.GetHealthPreviewColor(isHealing);
+            bool isHealingPreview = this.healthPreviewDelta < 0f;
+            Color previewColor = this.GetHealthPreviewColor(isHealingPreview);
+            this.healthPreview.style.backgroundColor = previewColor;
             this.healthPreview.style.opacity = this.previewOpacity;
+            if (this.currentHealthLabel != null)
+                this.currentHealthLabel.style.color = previewColor;
         }
 
         private void RefreshTrackVisibility()
@@ -584,18 +596,38 @@ namespace SG03
 
         private void RefreshHealthLabel()
         {
-            if (this.healthLabelRow == null || this.healthLabel == null) this.BindUi();
-            if (this.healthLabelRow == null || this.healthLabel == null) return;
+            if (this.healthLabelRow == null
+                || this.currentHealthLabel == null
+                || this.healthLabelSeparator == null
+                || this.maxHealthLabel == null) this.BindUi();
+            if (this.healthLabelRow == null
+                || this.currentHealthLabel == null
+                || this.healthLabelSeparator == null
+                || this.maxHealthLabel == null) return;
 
             // Keep the label in the UI layout when hidden so the HP bar never changes position.
             this.healthLabelRow.style.visibility = this.miniMode ? Visibility.Hidden : Visibility.Visible;
             if (this.ShouldShowFinalDefOnly())
             {
-                this.healthLabel.text = $"{Mathf.CeilToInt(this.maxHealth)}";
+                this.currentHealthLabel.text = $"{Mathf.CeilToInt(this.maxHealth)}";
+                this.currentHealthLabel.style.color = StyleKeyword.Null;
+                this.healthLabelSeparator.style.display = DisplayStyle.None;
+                this.maxHealthLabel.style.display = DisplayStyle.None;
                 return;
             }
 
-            this.healthLabel.text = $"{Mathf.CeilToInt(this.currentHealth)} / {Mathf.CeilToInt(this.maxHealth)}";
+            this.healthLabelSeparator.style.display = DisplayStyle.Flex;
+            this.maxHealthLabel.style.display = DisplayStyle.Flex;
+            float displayedCurrentHealth = Mathf.Clamp(
+                this.currentHealth + this.healthPreviewDelta,
+                0f,
+                this.maxHealth);
+            this.currentHealthLabel.text = $"{Mathf.CeilToInt(displayedCurrentHealth)}";
+            this.maxHealthLabel.text = $"{Mathf.CeilToInt(this.maxHealth)}";
+            bool hasPreview = !Mathf.Approximately(displayedCurrentHealth, this.currentHealth);
+            this.currentHealthLabel.style.color = hasPreview
+                ? this.GetHealthPreviewColor(this.healthPreviewDelta < 0f)
+                : StyleKeyword.Null;
         }
 
         private void ApplyBarAppearance(float healthRatio)
@@ -626,9 +658,19 @@ namespace SG03
                 this.healthLabelRow.style.top = this.healthLabelOffset.y;
             }
 
-            if (this.healthLabel != null)
+            if (this.currentHealthLabel != null)
             {
-                this.healthLabel.style.fontSize = this.healthLabelFontSize;
+                this.currentHealthLabel.style.fontSize = this.healthLabelFontSize;
+            }
+
+            if (this.healthLabelSeparator != null)
+            {
+                this.healthLabelSeparator.style.fontSize = this.healthLabelFontSize;
+            }
+
+            if (this.maxHealthLabel != null)
+            {
+                this.maxHealthLabel.style.fontSize = this.healthLabelFontSize;
             }
         }
 

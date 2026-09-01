@@ -32,6 +32,7 @@ namespace SG03
         [SerializeField] private Card3D card;
         [SerializeField] private CardLoader loader;
         [SerializeField] private CardMovement movement;
+        [SerializeField] private CardFullDetailManipulator fullDetailManipulator;
 
         // ─── Identity ─────────────────────────────────────────────────────────────
 
@@ -54,6 +55,8 @@ namespace SG03
         [SerializeField] private ObjectPool objectPool;
         [SerializeField] private WorldSpaceHpBarCtrl hpBarPrefab;
         [SerializeField] private WorldSpaceHpBarCtrl hpBarInstance;
+        [SerializeField] private WorldSpaceAtkCtrl atkUiPrefab;
+        [SerializeField] private WorldSpaceAtkCtrl atkUiInstance;
         private ClientActions clientActions;
         private BattleStateCtrl battleStateCtrl;
         private Coroutine spawnHpBarRoutine;
@@ -91,7 +94,9 @@ namespace SG03
             this.LoadCard3D();
             this.LoadCardLoader();
             this.LoadCardMovement();
+            this.LoadFullDetailManipulator();
             this.LoadObjectPool();
+            this.LoadBattleStateCtrl();
         }
 
         protected virtual void OnDisable()
@@ -119,6 +124,12 @@ namespace SG03
             if (this.movement != null) return;
             this.movement = this.GetComponent<CardMovement>();
             Debug.LogWarning(transform.name + "LoadCardMovement", gameObject);
+        }
+
+        protected virtual void LoadFullDetailManipulator()
+        {
+            if (this.fullDetailManipulator != null) return;
+            this.fullDetailManipulator = this.GetComponent<CardFullDetailManipulator>();
         }
 
         protected virtual void LoadObjectPool()
@@ -169,10 +180,52 @@ namespace SG03
             if (this.hpBarInstance == null) return;
 
             this.hpBarInstance.SetPosition(holder.transform.position);
-            this.hpBarInstance.SetParent(this.transform, this.cardOwner);
+            this.hpBarInstance.SetParent(this.transform);
             this.hpBarInstance.gameObject.SetActive(true);
             this.UpdateDamagePreviewFromAttacker();
             this.RefreshHpBarDisplayMode();
+        }
+
+        private void SpawnAtkUiAt(CardHolderCtrl holder)
+        {
+            if (holder == null || holder != this.cardHolder) return;
+            this.SpawnAtkUi();
+        }
+
+        /// <summary>Spawns and displays the world-space ATK UI for this card.</summary>
+        public void SpawnAtkUi()
+        {
+            this.EnsureSingleAtkUiInstance();
+            this.LoadObjectPool();
+            if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
+            {
+                Debug.LogWarning($"{this.name}: ObjectPool is not ready for the ATK UI.", this);
+                return;
+            }
+
+            if (this.atkUiPrefab == null)
+            {
+                this.atkUiPrefab = this.objectPool.PoolPrefabs.GetByName("AtkUI") as WorldSpaceAtkCtrl;
+            }
+
+            if (this.atkUiPrefab == null)
+            {
+                Debug.LogWarning($"{this.name}: AtkUI is missing from ObjectPoolPrefabs.", this);
+                return;
+            }
+
+            if (this.atkUiInstance == null)
+            {
+                this.atkUiInstance = this.objectPool.SpawnInactive(this.atkUiPrefab, Vector3.zero);
+            }
+
+            if (this.atkUiInstance == null) return;
+
+            Vector3 pos = this.cardHolder != null ? this.cardHolder.transform.position : this.transform.position;
+            this.atkUiInstance.SetPosition(pos);
+            this.atkUiInstance.SetParent(this.transform);
+            this.atkUiInstance.SetAttack(this.definition?.GetBaseStatInt("atk") ?? 0);
+            this.atkUiInstance.gameObject.SetActive(true);
         }
 
         private bool ShouldShowHpBar(CardHolderCtrl holder)
@@ -192,6 +245,23 @@ namespace SG03
         {
             this.LoadClientActions();
             return this.clientActions != null && this.clientActions.HpBarHiddenOwner == this.cardOwner;
+        }
+
+        private bool ShouldShowAtkUi(CardHolderCtrl holder)
+        {
+            if (this.isFullDetail) return false;
+            if (!this.IsCharacter()) return false;
+            if (this.Location == Location.in_hand || this.Location == Location.in_void) return false;
+            if (this.ShouldHideAtkUiForCurrentTurn()) return false;
+            if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
+            return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;
+        }
+
+        private bool ShouldHideAtkUiForCurrentTurn()
+        {
+            this.LoadClientActions();
+            if (this.clientActions == null || !this.clientActions.HpBarHiddenOwner.HasValue) return false;
+            return this.clientActions.HpBarHiddenOwner.Value != this.cardOwner;
         }
 
         private bool HasAccumulatedDamage()
@@ -228,9 +298,16 @@ namespace SG03
             if (this.IsBattleResuming())
             {
                 this.DespawnHpBar();
+                this.DespawnAtkUi();
                 return;
             }
 
+            this.RefreshHpBarOnlyVisibility();
+            this.RefreshAtkUiVisibility();
+        }
+
+        private void RefreshHpBarOnlyVisibility()
+        {
             if (!this.ShouldShowHpBar(this.cardHolder))
             {
                 this.DespawnHpBar();
@@ -245,6 +322,24 @@ namespace SG03
             }
 
             this.SpawnHpBarAt(this.cardHolder);
+        }
+
+        /// <summary>Refreshes ATK UI visibility according to turn and placement rules.</summary>
+        public void RefreshAtkUiVisibility()
+        {
+            if (this.IsBattleResuming())
+            {
+                this.DespawnAtkUi();
+                return;
+            }
+
+            if (!this.ShouldShowAtkUi(this.cardHolder))
+            {
+                this.DespawnAtkUi();
+                return;
+            }
+
+            this.SpawnAtkUi();
         }
 
         private bool IsBattleResuming()
@@ -313,10 +408,21 @@ namespace SG03
         private void DespawnHpBar()
         {
             this.EnsureSingleHpBarInstance();
-            if (this.hpBarInstance == null) return;
+            if (this.hpBarInstance != null)
+            {
+                this.ReturnHpBarToPool(this.hpBarInstance);
+                this.hpBarInstance = null;
+            }
+        }
 
-            this.ReturnHpBarToPool(this.hpBarInstance);
-            this.hpBarInstance = null;
+        /// <summary>Despawns the world-space ATK UI for this card.</summary>
+        public void DespawnAtkUi()
+        {
+            this.EnsureSingleAtkUiInstance();
+            if (this.atkUiInstance == null) return;
+
+            this.ReturnAtkUiToPool(this.atkUiInstance);
+            this.atkUiInstance = null;
         }
 
         private void RefreshHpBarDisplayMode()
@@ -362,6 +468,31 @@ namespace SG03
             this.LoadObjectPool();
             if (this.objectPool != null) this.objectPool.Despawn(hpBar);
             else hpBar.gameObject.SetActive(false);
+        }
+
+        private void EnsureSingleAtkUiInstance()
+        {
+            WorldSpaceAtkCtrl[] atkUis = this.GetComponentsInChildren<WorldSpaceAtkCtrl>(true);
+            foreach (WorldSpaceAtkCtrl atkUi in atkUis)
+            {
+                if (atkUi == this.atkUiInstance) continue;
+                if (this.atkUiInstance == null)
+                {
+                    this.atkUiInstance = atkUi;
+                    continue;
+                }
+
+                this.ReturnAtkUiToPool(atkUi);
+            }
+        }
+
+        private void ReturnAtkUiToPool(WorldSpaceAtkCtrl atkUi)
+        {
+            if (atkUi == null) return;
+
+            this.LoadObjectPool();
+            if (this.objectPool != null) this.objectPool.Despawn(atkUi);
+            else atkUi.gameObject.SetActive(false);
         }
 
         private void ReturnHpBarToPool()
@@ -576,6 +707,8 @@ namespace SG03
         public void MoveToFullDetail(Transform point)
         {
             if (this.IsMovingVoidToLine) return;
+            this.DespawnHpBar();
+            this.DespawnAtkUi();
             this.movement.MoveToFullDetail(point);
         }
 
@@ -593,7 +726,12 @@ namespace SG03
             if (this.isFullDetail == enabled) return;
 
             this.isFullDetail = enabled;
-            if (enabled) this.DespawnHpBar();
+            this.fullDetailManipulator?.SetInteractionActive(enabled);
+            if (enabled)
+            {
+                this.DespawnHpBar();
+                this.DespawnAtkUi();
+            }
         }
 
         /// <summary>Plays the damage run-up animation: card rises then returns to its current position.</summary>
@@ -696,8 +834,55 @@ namespace SG03
 
             int attack = this.attacker.IsOmegaCardHidden()
                 ? 0
-                : this.attacker.Definition?.GetBaseStatInt("atk") ?? 0;
+                : this.attacker.GetDamagePreviewAttack();
             this.SetHealthPreview(attack);
+        }
+
+        /// <summary>
+        /// Gets the damage amount used for a pending attack preview. An ability
+        /// with <c>atk_added</c> combines that bonus with the attack of the
+        /// required character while that character is in the attacker's Front Line.
+        /// </summary>
+        public int GetDamagePreviewAttack()
+        {
+            if (this.definition == null) return 0;
+
+            int addedAttack = this.definition?.GetBaseStatInt("atk_added") ?? 0;
+            if (!this.definition.TryGetBaseStat("atk_added", out _))
+                return Mathf.Max(0, this.definition.GetBaseStatInt("atk"));
+
+            string requiredCharacterCode = this.definition.metadata?.char_code_required;
+            if (string.IsNullOrWhiteSpace(requiredCharacterCode)) return 0;
+
+            BattleCardSlot[] frontLine = this.cardOwner == Owner.alpha
+                ? this.battleStateCtrl?.BattleState?.AlphaFrontLine
+                : this.battleStateCtrl?.BattleState?.OmegaFrontLine;
+            CardDefinitionData requiredCharacter = FindRequiredCharacterInFrontLine(
+                frontLine,
+                this.battleStateCtrl?.BattleCardDefinitions,
+                requiredCharacterCode);
+            if (requiredCharacter == null) return 0;
+
+            int requiredCharacterAttack = requiredCharacter.GetBaseStatInt("atk");
+            return Mathf.Max(0, requiredCharacterAttack + addedAttack);
+        }
+
+        private static CardDefinitionData FindRequiredCharacterInFrontLine(
+            BattleCardSlot[] frontLine,
+            BattleCardDefinitions definitions,
+            string requiredCharacterCode)
+        {
+            if (frontLine == null || definitions == null || string.IsNullOrWhiteSpace(requiredCharacterCode)) return null;
+
+            foreach (BattleCardSlot slot in frontLine)
+            {
+                CardDefinitionData character = definitions.GetDefinitionByCode(slot?.item_definition_code_name);
+                if (character?.metadata?.type != "character") continue;
+                if (character.item_code == requiredCharacterCode
+                    || character.metadata.char_code_required == requiredCharacterCode) return character;
+            }
+
+            return null;
         }
 
         public void SetMoveDuration(float d)  => this.movement.SetMoveDuration(d);

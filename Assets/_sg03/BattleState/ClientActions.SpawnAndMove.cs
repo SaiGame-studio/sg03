@@ -183,7 +183,7 @@ namespace SG03
             while (!this.IsCardSettledOnHolder(card, inventoryItemId, holder))
             {
                 holder.RefreshHeldCardPlacement();
-                if (!card.IsAnimating && !holder.IsHeldCardOnHolder)
+                if (!card.IsAnimating && !card.IsMovingVoidToLine && !holder.IsHeldCardOnHolder)
                 {
                     card = startMove();
                     if (card == null) yield break;

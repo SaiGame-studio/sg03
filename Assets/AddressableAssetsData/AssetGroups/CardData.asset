@@ -26,7 +26,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 19813d66ce1892f47bc3d58d7e0dfd7e
-    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/volt_heart.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/volt_heart.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -46,7 +46,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 282a862c3062e2f4bb6094fe43bb2f47
-    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/static_bind.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/abilities/static_bind.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -121,7 +121,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c9191ef9875b3e4eae0e4a6123c74cc
-    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/holy_glow.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/abilities/holy_glow.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -186,7 +186,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c47dbeb3327fdd64aaf74f8835c734b9
-    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/zelene.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/common/zelene.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -221,7 +221,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fb951131c1f83df4596191934e87c025
-    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/lightning_strike.asset
+    m_Address: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/abilities/lightning_strike.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

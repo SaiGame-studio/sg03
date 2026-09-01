@@ -157,6 +157,17 @@ namespace SG03.UI
                 onError:   onError);
         }
 
+        public void UpdateDeskName(string presetId, string name, Action<PresetData> onSuccess, Action<string> onError)
+        {
+            if (this.itemPreset == null)
+            {
+                onError?.Invoke("ItemPreset service not available.");
+                return;
+            }
+
+            this.itemPreset.UpdatePreset(presetId, name, null, onSuccess, onError);
+        }
+
         public bool IsDefaultDesk(PresetData desk)
         {
             return HasDefaultDeskMetadata(desk);

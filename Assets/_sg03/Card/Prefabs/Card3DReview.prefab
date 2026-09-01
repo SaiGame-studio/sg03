@@ -444,9 +444,9 @@ MonoBehaviour:
       atk: 0
       def: 0
       star: 0
-      atk_add: 0
+      atk_added: 0
       atk_deduct: 0
-      def_add: 0
+      def_added: 0
       def_deduct: 0
       summon_count: 0
       hp_restore: 0
@@ -456,7 +456,7 @@ MonoBehaviour:
       race: 
       type: 
       gender: 
-      char_code: 
+      char_code_required:
       abilities: 
       summon: 
   expose: 0

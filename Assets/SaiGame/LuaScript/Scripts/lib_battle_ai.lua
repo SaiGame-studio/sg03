@@ -327,6 +327,7 @@ end
 function omega_end_turn(state)
     lib_battle_common.dlog("[lib_battle_ai] == omega_end_turn ==")
     lib_battle_common.append_client_action(state, "omega_no_available_attacker")
+    lib_battle_common.reset_turn_cards(state, "alpha")
     state.alpha_defending = false
     state.turn = (state.turn or 0) + 1
     lib_battle_common.dlog("[lib_battle_ai] omega_end_turn: alpha_defending=false, turn=" ..
@@ -335,12 +336,11 @@ function omega_end_turn(state)
     alpha_draw_random(state)
     state.metadata.next_move = "alpha_turn"
     lib_battle_common.append_client_action(state, "next_move:alpha_turn")
+    lib_battle_common.append_client_action(state, "alpha_take_lamp")
     state.omega_defending = true
     lib_battle_common.append_client_action(state, "omega_defending")
     lib_battle_common.dlog("[lib_battle_ai] omega_end_turn: next_move=alpha_turn, omega_defending=true")
 end
-
--- ── omega_planning_to_attack ──────────────────────────────────────────────────
 -- Builds state.omega_planning for the current turn.
 -- Picks ONE untriggered character from omega_front_line to attack the weakest
 -- face-up Alpha Character, then a face-down target (fallback to alpha back-line).

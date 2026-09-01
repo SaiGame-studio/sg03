@@ -13,4 +13,4 @@ Ren bắt chéo cặp katana lưỡi dài thành một thế thủ vững chãi,
 Ren phải đang ở hàng trước của phe bạn và chưa hành động trong lượt.
 
 ## Hiệu Quả
-Chọn một thẻ nhân vật đồng minh ở hàng trước, bao gồm chính Ren. Thẻ đó nhận `def_add` **+100** trong đợt giao chiến hiện tại. Mức tăng này nâng ngưỡng phòng thủ thêm một bậc sao, nên một mục tiêu 3-sao thường cần một đòn công 5-sao để bị tiêu diệt. Sau khi sử dụng, Ren được tính là đã hành động trong lượt đó.
+Chọn một thẻ nhân vật đồng minh ở hàng trước, bao gồm chính Ren. Thẻ đó nhận `def_added` **+100** trong đợt giao chiến hiện tại. Mức tăng này nâng ngưỡng phòng thủ thêm một bậc sao, nên một mục tiêu 3-sao thường cần một đòn công 5-sao để bị tiêu diệt. Sau khi sử dụng, Ren được tính là đã hành động trong lượt đó.

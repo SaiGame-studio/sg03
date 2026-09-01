@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="WorldSpaceAtk.uss" />
+    <ui:VisualElement name="AtkUI" class="attack-root">
+        <ui:VisualElement name="AttackStatRow" class="attack-stat-row">
+            <ui:Label name="AttackLabel" text="0" class="attack-label" />
+            <ui:Image name="AttackSwordIcon" class="attack-sword-icon" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

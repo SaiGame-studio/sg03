@@ -15,6 +15,9 @@ namespace SG03.UI
     {
         private readonly VisualElement detailPanel;
         private readonly Label detailTitle;
+        private readonly TextField deskNameInput;
+        private readonly Button renameDeskBtn;
+        private readonly Button saveDeskNameBtn;
         private readonly Label slotCountLabel;
         private readonly Label starCountLabel;
         private readonly Label highStarCardCountLabel;
@@ -22,7 +25,6 @@ namespace SG03.UI
         private readonly Label duplicateCardWarning;
         private readonly Button backBtn;
         private readonly Button softCardBtn;
-        private readonly Label softCardStatusLabel;
         private readonly ScrollView slotGrid;
         private readonly TextField inventorySearch;
         private readonly ScrollView inventoryList;
@@ -45,6 +47,7 @@ namespace SG03.UI
         private readonly Dictionary<string, AsyncOperationHandle<CardData>> cardArtHandles = new();
 
         public event Action OnBackRequested;
+        public event Action OnDeskRenamed;
         public event Action OnCardViewerShown;
         public event Action OnCardViewerHidden;
         public event Action<InventoryItemData> OnCardViewRequested;
@@ -54,6 +57,9 @@ namespace SG03.UI
             this.deskList        = deskList;
             this.detailPanel     = deskRoot.Q("DetailPanel");
             this.detailTitle     = deskRoot.Q<Label>("DetailTitle");
+            this.deskNameInput   = deskRoot.Q<TextField>("DeskNameInput");
+            this.renameDeskBtn   = deskRoot.Q<Button>("RenameDeskBtn");
+            this.saveDeskNameBtn = deskRoot.Q<Button>("SaveDeskNameBtn");
             this.slotCountLabel  = deskRoot.Q<Label>("SlotCountLabel");
             this.starCountLabel  = deskRoot.Q<Label>("StarCountLabel");
             this.highStarCardCountLabel = deskRoot.Q<Label>("HighStarCardCountLabel");
@@ -62,7 +68,6 @@ namespace SG03.UI
             this.slotGrid        = deskRoot.Q<ScrollView>("SlotGrid");
             this.backBtn         = deskRoot.Q<Button>("BackBtn");
             this.softCardBtn     = deskRoot.Q<Button>("SoftCardBtn");
-            this.softCardStatusLabel = deskRoot.Q<Label>("SoftCardStatusLabel");
             this.inventorySearch = deskRoot.Q<TextField>("InventorySearch");
             this.inventoryList   = deskRoot.Q<ScrollView>("InventoryList");
             this.flyLayer        = deskRoot.Q("FlyLayer");
@@ -77,6 +82,12 @@ namespace SG03.UI
 
             if (this.backBtn != null)
                 this.backBtn.RegisterCallback<ClickEvent>(_ => this.OnBackRequested?.Invoke());
+
+            if (this.renameDeskBtn != null)
+                this.renameDeskBtn.RegisterCallback<ClickEvent>(_ => this.BeginDeskNameEdit());
+
+            if (this.saveDeskNameBtn != null)
+                this.saveDeskNameBtn.RegisterCallback<ClickEvent>(_ => this.SaveDeskName());
 
             if (this.softCardBtn != null)
                 this.softCardBtn.RegisterCallback<ClickEvent>(_ => this.OnSoftCardClicked());
@@ -107,6 +118,9 @@ namespace SG03.UI
 
             string name = string.IsNullOrEmpty(desk.name) ? "Unnamed Desk" : desk.name;
             if (this.detailTitle != null) this.detailTitle.text = name;
+            if (this.deskNameInput != null) this.deskNameInput.SetValueWithoutNotify(desk.name ?? string.Empty);
+            this.SetDeskNameSaveEnabled(true);
+            this.SetDeskNameEditing(false);
 
             this.detailPanel?.RemoveFromClassList("desk-panel--hidden");
             this.ShowLoadingSlots();
@@ -141,7 +155,75 @@ namespace SG03.UI
 
         public void Hide()
         {
+            this.SetDeskNameSaveEnabled(true);
+            this.SetDeskNameEditing(false);
             this.detailPanel?.AddToClassList("desk-panel--hidden");
+        }
+
+        private void BeginDeskNameEdit()
+        {
+            if (this.currentDesk == null) return;
+
+            if (this.deskNameInput != null)
+            {
+                this.deskNameInput.SetValueWithoutNotify(this.currentDesk.name ?? string.Empty);
+                this.deskNameInput.Focus();
+            }
+
+            this.SetDeskNameEditing(true);
+        }
+
+        private void SaveDeskName()
+        {
+            if (this.currentDesk == null || this.deskNameInput == null) return;
+
+            string name = this.deskNameInput.value?.Trim();
+            if (string.IsNullOrEmpty(name))
+            {
+                this.deskNameInput.Focus();
+                return;
+            }
+
+            if (string.Equals(name, this.currentDesk.name, StringComparison.Ordinal))
+            {
+                this.SetDeskNameEditing(false);
+                return;
+            }
+
+            string deskId = this.currentDesk.id;
+            this.SetDeskNameSaveEnabled(false);
+            this.deskList.UpdateDeskName(
+                deskId,
+                name,
+                updatedDesk =>
+                {
+                    this.SetDeskNameSaveEnabled(true);
+                    if (this.currentDesk == null || this.currentDesk.id != deskId) return;
+
+                    this.currentDesk.name = updatedDesk?.name ?? name;
+                    if (this.detailTitle != null) this.detailTitle.text = this.currentDesk.name;
+                    if (this.deskNameInput != null) this.deskNameInput.SetValueWithoutNotify(this.currentDesk.name);
+                    this.SetDeskNameEditing(false);
+                    this.OnDeskRenamed?.Invoke();
+                },
+                error =>
+                {
+                    this.SetDeskNameSaveEnabled(true);
+                });
+        }
+
+        private void SetDeskNameEditing(bool isEditing)
+        {
+            if (this.detailTitle != null) this.detailTitle.EnableInClassList("desk-header__title--hidden", isEditing);
+            if (this.deskNameInput != null) this.deskNameInput.EnableInClassList("desk-header__rename-input--hidden", !isEditing);
+            if (this.renameDeskBtn != null) this.renameDeskBtn.EnableInClassList("desk-header__rename-btn--hidden", isEditing);
+            if (this.saveDeskNameBtn != null) this.saveDeskNameBtn.EnableInClassList("desk-header__save-name-btn--hidden", !isEditing);
+        }
+
+        private void SetDeskNameSaveEnabled(bool enabled)
+        {
+            if (this.deskNameInput != null) this.deskNameInput.SetEnabled(enabled);
+            if (this.saveDeskNameBtn != null) this.saveDeskNameBtn.SetEnabled(enabled);
         }
 
         // ── Slot grid ─────────────────────────────────────────────────────────
@@ -588,12 +670,13 @@ namespace SG03.UI
                 {
                     if (!string.IsNullOrEmpty(slot.inventory_item_id)
                         && itemsById.TryGetValue(slot.inventory_item_id, out InventoryItemData item)
+                        && this.IsCharacterCard(item)
                         && this.GetCardStarCount(item) >= 4)
                         highStarCardCount++;
                 }
             }
 
-            this.highStarCardCountLabel.text = $"4+ Stars: {highStarCardCount}";
+            this.highStarCardCountLabel.text = $"4+ Characters: {highStarCardCount}";
         }
 
         private void UpdateVoidCount()
@@ -749,7 +832,6 @@ namespace SG03.UI
             {
                 this.isSoftCardSortStopRequested = true;
                 this.softCardBtn?.SetEnabled(false);
-                this.SetSoftCardStatus("Stopping after the current swap...");
                 return;
             }
 
@@ -758,7 +840,6 @@ namespace SG03.UI
             List<DeskCardSortEntry> cards = this.BuildSortedDeckCards();
             if (cards.Count < 2 || this.IsAlreadySorted(cards))
             {
-                this.SetSoftCardStatus("Cards are already sorted");
                 return;
             }
 
@@ -767,7 +848,6 @@ namespace SG03.UI
             this.isSoftCardSortInProgress = true;
             this.isSoftCardSortStopRequested = false;
             if (this.softCardBtn != null) this.softCardBtn.text = "Stop";
-            this.SetSoftCardStatus($"Sorting: 0/{cards.Count} swaps");
             this.SortNextCard(cards, 0, starredItemIds, voidedItemIds);
         }
 
@@ -877,7 +957,6 @@ namespace SG03.UI
                         _ =>
                         {
                             this.AddCardToSortUi(index, itemId);
-                            this.SetSoftCardStatus($"Sorting: {index + 1}/{cards.Count} swaps");
                             this.SortNextCard(cards, index + 1, starredItemIds, voidedItemIds);
                         },
                         _ => this.ReloadDeskAfterSortFailure());
@@ -914,7 +993,6 @@ namespace SG03.UI
                                         _ =>
                                         {
                                             this.AddCardToSortUi(sourceSlot, displacedItemId);
-                                            this.SetSoftCardStatus($"Sorting: {index + 1}/{cards.Count} swaps");
                                             this.SortNextCard(cards, index + 1, starredItemIds, voidedItemIds);
                                         },
                                         _ => this.ReloadDeskAfterSortFailure());
@@ -953,7 +1031,6 @@ namespace SG03.UI
             this.SaveMetadata();
             this.isSoftCardSortInProgress = false;
             this.isSoftCardSortStopRequested = false;
-            this.SetSoftCardStatus("Cards sorted");
             if (this.softCardBtn != null)
             {
                 this.softCardBtn.text = "Soft Card";
@@ -988,7 +1065,6 @@ namespace SG03.UI
                     this.RenderInventory();
                     this.isSoftCardSortInProgress = false;
                     this.isSoftCardSortStopRequested = false;
-                    this.SetSoftCardStatus(statusMessage);
                     if (this.softCardBtn != null)
                     {
                         this.softCardBtn.text = "Soft Card";
@@ -999,7 +1075,6 @@ namespace SG03.UI
                 {
                     this.isSoftCardSortInProgress = false;
                     this.isSoftCardSortStopRequested = false;
-                    this.SetSoftCardStatus("Sort failed; reload the deck");
                     if (this.softCardBtn != null)
                     {
                         this.softCardBtn.text = "Soft Card";
@@ -1028,11 +1103,6 @@ namespace SG03.UI
             this.RenderInventory();
         }
 
-        private void SetSoftCardStatus(string message)
-        {
-            if (this.softCardStatusLabel != null) this.softCardStatusLabel.text = message;
-        }
-
         private HashSet<string> GetItemIdsInSlots(HashSet<int> slotIndices)
         {
             HashSet<string> itemIds = new HashSet<string>();
@@ -1059,6 +1129,15 @@ namespace SG03.UI
             string baseStatsJson = item?.definition?.base_stats;
             if (string.IsNullOrEmpty(baseStatsJson)) return 0;
             return JsonUtility.FromJson<DeskCardBaseStats>(baseStatsJson)?.star ?? 0;
+        }
+
+        private bool IsCharacterCard(InventoryItemData item)
+        {
+            string metadataJson = item?.definition?.metadata;
+            if (string.IsNullOrEmpty(metadataJson)) return false;
+
+            CardDefinitionMetadata metadata = JsonUtility.FromJson<CardDefinitionMetadata>(metadataJson);
+            return string.Equals(metadata?.type, "character", StringComparison.OrdinalIgnoreCase);
         }
 
         [Serializable]

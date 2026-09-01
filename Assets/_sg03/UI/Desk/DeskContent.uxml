@@ -40,8 +40,10 @@
             <ui:VisualElement class="desk-header">
                 <ui:Button name="BackBtn" text="&lt; Back" class="desk-header__back-btn" />
                 <ui:Label name="DetailTitle" text="Desk" class="desk-header__title" />
+                <ui:TextField name="DeskNameInput" label="" placeholder-text="Desk name" class="desk-header__rename-input desk-header__rename-input--hidden" />
+                <ui:Button name="RenameDeskBtn" text="Rename" class="desk-header__rename-btn" />
+                <ui:Button name="SaveDeskNameBtn" text="Save" class="desk-header__save-name-btn desk-header__save-name-btn--hidden" />
                 <ui:Label name="DuplicateCardWarning" text="" class="desk-header__duplicate-warning desk-header__duplicate-warning--hidden" />
-                <ui:Label name="SoftCardStatusLabel" text="" class="desk-header__soft-card-status" />
                 <ui:Button name="SoftCardBtn" text="Soft Card" tooltip="Sort cards by stars, then card type" class="desk-header__soft-card-btn" />
             </ui:VisualElement>
 
@@ -52,7 +54,7 @@
                         <ui:Label text="Slots" class="desk-detail-section-title" />
                         <ui:Label name="VoidCountLabel" text="Void 0 / 7" class="desk-detail-void-count" />
                         <ui:Label name="StarCountLabel" text="Stars 0 / 3" class="desk-detail-star-count" />
-                        <ui:Label name="HighStarCardCountLabel" text="4+ Stars: 0" class="desk-detail-high-star-card-count" />
+                        <ui:Label name="HighStarCardCountLabel" text="4+ Characters: 0" class="desk-detail-high-star-card-count" />
                         <ui:Label name="SlotCountLabel" text="" class="desk-detail-slot-count" />
                     </ui:VisualElement>
                     <ui:ScrollView name="SlotGrid" class="desk-slot-grid" />

@@ -22,11 +22,13 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 - [Demon Rite](cards/darkborn/demon/xena/abilities/demon_rite.md): 3 sao
 
 ### Lightborn
-- [Holy Glow](cards/lightborn/light_elf/abilities/holy_glow.md): 0 sao
+- [Holy Glow](cards/lightborn/light_elf/abilities/holy_glow.md): 1 sao
+- [Lightning Strike](cards/lightborn/light_elf/azura/abilities/lightning_strike.md): 3 sao
+- [Static Bind](cards/lightborn/light_elf/azura/abilities/static_bind.md): 4 sao
 
 ### Natureborn
-- [Totem Pulse](cards/natureborn/goblin/abilities/totem_pulse.md): 0 sao
-- [Back Stab](cards/natureborn/goblin/abilities/back_stab.md): 0 sao
+- [Totem Pulse](cards/natureborn/goblin/abilities/totem_pulse.md): 2 sao
+- [Back Stab](cards/natureborn/goblin/abilities/back_stab.md): 2 sao
 - [Brute Call](cards/natureborn/goblin/abilities/brute_call.md): 3 sao
 
 ### Humans

@@ -330,7 +330,10 @@ function deal_damage_to_character(state, attacker_card, target_card, damage, tar
 end
 
 local function _get_ability_library(handler_group)
-    if handler_group == "all" then return lib_ability_all end
+    if handler_group == "human" then return lib_ability_human end
+    if handler_group == "darkborn" then return lib_ability_darkborn end
+    if handler_group == "lightborn" then return lib_ability_lightborn end
+    if handler_group == "natureborn" then return lib_ability_natureborn end
     if handler_group == "advanced" then return lib_ability_advanced end
     if handler_group == "mid_game" then return lib_ability_mid_game end
     if handler_group == "xena" then return lib_ability_xena end
@@ -370,15 +373,15 @@ local function _find_line_character_by_race(line, item_defs, race)
     return fallback
 end
 
-local function _find_line_card_by_type_and_char_code(line, item_defs, card_type_req, char_code_req)
+local function _find_line_card_by_type_and_char_code_required(line, item_defs, card_type_req, char_code_required)
     local fallback = nil
     for _, line_card in ipairs(line or {}) do
         local has_id = line_card.inventory_item_id ~= nil and line_card.inventory_item_id ~= ""
         if has_id then
             local item_def = _find_item_def(item_defs, line_card.item_definition_code_name)
             local card_type = item_def ~= nil and item_def.metadata ~= nil and item_def.metadata.type or nil
-            local card_char_code = item_def ~= nil and item_def.metadata ~= nil and item_def.metadata.char_code or nil
-            if card_type == card_type_req and card_char_code == char_code_req then
+            local card_char_code_required = item_def ~= nil and item_def.metadata ~= nil and item_def.metadata.char_code_required or nil
+            if card_type == card_type_req and card_char_code_required == char_code_required then
                 if line_card.expose then
                     return line_card
                 else
@@ -426,7 +429,7 @@ local function _build_ability_helpers()
         get_card_stat = _get_card_stat,
         find_line_card_by_code = _find_line_card_by_code,
         find_line_character_by_race = _find_line_character_by_race,
-        find_line_card_by_type_and_char_code = _find_line_card_by_type_and_char_code,
+        find_line_card_by_type_and_char_code_required = _find_line_card_by_type_and_char_code_required,
         find_untriggered_card = _find_untriggered_card,
         expose_ability_selected_card = _expose_ability_selected_card,
     }

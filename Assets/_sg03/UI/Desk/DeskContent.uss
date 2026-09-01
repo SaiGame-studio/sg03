@@ -81,6 +81,63 @@
     letter-spacing: 1px;
 }
 
+.desk-header__title--hidden,
+.desk-header__rename-input--hidden,
+.desk-header__rename-btn--hidden,
+.desk-header__save-name-btn--hidden {
+    display: none;
+}
+
+.desk-header__rename-input {
+    flex: 1;
+    margin-right: 8px;
+    padding: 5px 9px;
+    border-width: 1px;
+    border-color: rgba(100, 150, 240, 0.6);
+    border-radius: 6px;
+    background-color: rgba(28, 34, 58, 1);
+    color: rgb(220, 230, 255);
+    font-size: 13px;
+}
+
+.desk-header__rename-input > .unity-text-field__input {
+    padding: 0;
+    border-width: 0;
+    background-color: transparent;
+    color: rgb(220, 230, 255);
+}
+
+.desk-header__rename-btn,
+.desk-header__save-name-btn {
+    padding: 6px 12px;
+    border-width: 1px;
+    border-radius: 8px;
+    font-size: 12px;
+    transition-duration: 0.1s;
+}
+
+.desk-header__rename-btn {
+    border-color: rgba(100, 150, 240, 0.5);
+    background-color: rgba(35, 55, 105, 0.7);
+    color: rgb(165, 200, 255);
+}
+
+.desk-header__rename-btn:hover {
+    background-color: rgba(55, 85, 150, 0.8);
+    color: rgb(210, 225, 255);
+}
+
+.desk-header__save-name-btn {
+    border-color: rgba(100, 200, 120, 0.5);
+    background-color: rgba(30, 80, 40, 0.8);
+    color: rgb(140, 220, 150);
+}
+
+.desk-header__save-name-btn:hover {
+    background-color: rgba(40, 110, 55, 0.9);
+    color: rgb(180, 245, 185);
+}
+
 .desk-header__new-btn {
     padding: 6px 16px;
     margin-right: 8px;
@@ -350,13 +407,6 @@
 .desk-header__soft-card-btn:hover {
     background-color: rgba(135, 90, 30, 0.82);
     color: rgb(255, 238, 190);
-}
-
-.desk-header__soft-card-status {
-    margin-right: 10px;
-    color: rgb(190, 205, 235);
-    font-size: 11px;
-    white-space: nowrap;
 }
 
 /* ============================================================

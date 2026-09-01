@@ -822,6 +822,87 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c832dcdd38554f84f8a63e7ef94c7a8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardHolderCtrl
+--- !u!1001 &192681714
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 694843606}
+    m_Modifications:
+    - target: {fileID: 910907888340075026, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: iconSize.x
+      value: 56
+      objectReference: {fileID: 0}
+    - target: {fileID: 910907888340075026, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: iconSize.y
+      value: 56
+      objectReference: {fileID: 0}
+    - target: {fileID: 3193441457980298630, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_Name
+      value: AtkUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+--- !u!114 &192681715 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 910907888340075026, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+  m_PrefabInstance: {fileID: 192681714}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9504e43a894a44bf96a4bd6655cf5d8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.WorldSpaceAtkCtrl
+--- !u!4 &192681716 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3482978470714320713, guid: 917b4d66aec445778a06db8cf04a58a6, type: 3}
+  m_PrefabInstance: {fileID: 192681714}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &207496586
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1982,11 +2063,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 948749803}
   m_LocalEulerAnglesHint: {x: 55, y: 0, z: 0}
---- !u!23 &617683291 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 4481470967788255310, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-  m_PrefabInstance: {fileID: 8380321798757510902}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &632999077
 GameObject:
   m_ObjectHideFlags: 0
@@ -2275,6 +2351,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2104000012}
+  - {fileID: 192681716}
   m_Father: {fileID: 2127346364}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &694843607
@@ -2291,6 +2368,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ObjectPoolPrefabs
   prefabs:
   - {fileID: 2104000014}
+  - {fileID: 192681715}
 --- !u!1001 &706587908
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8277,23 +8355,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[28]'
-      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/holy_glow.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/abilities/holy_glow.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[29]'
-      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/lightning_strike.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/abilities/lightning_strike.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[30]'
-      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/abilities/volt_heart/static_bind.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/abilities/static_bind.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[31]'
-      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/volt_heart.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/azura/volt_heart.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[32]'
-      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/zelene.asset
+      value: Assets/_sg03/Card/Data/Character/Lightborn/LightElf/common/zelene.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[33]'
@@ -8555,28 +8633,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 694843606}
     m_Modifications:
     - target: {fileID: 910907888340075026, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
-      propertyPath: currentHealth
-      value: 70
-      objectReference: {fileID: 0}
-    - target: {fileID: 910907888340075026, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
-      propertyPath: healthPreviewDelta
-      value: -10
-      objectReference: {fileID: 0}
-    - target: {fileID: 910907888340075026, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
-      propertyPath: healingPreviewColor.b
-      value: 0.07843137
-      objectReference: {fileID: 0}
-    - target: {fileID: 910907888340075026, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
-      propertyPath: healingPreviewColor.g
-      value: 0.08849053
-      objectReference: {fileID: 0}
+      propertyPath: battleStateCtrl
+      value: 
+      objectReference: {fileID: 2015755444}
     - target: {fileID: 3193441457980298630, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
       propertyPath: m_Name
       value: HpBarUI
-      objectReference: {fileID: 0}
-    - target: {fileID: 3193441457980298630, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3482978470714320713, guid: 488a6fdccfc2d854a80182c52b72d279, type: 3}
       propertyPath: m_LocalPosition.x
@@ -8761,10 +8823,6 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1926114376}
-    - target: {fileID: 2955687961266307114, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     - target: {fileID: 3724972524044309510, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontMaterial
       value: 
@@ -8777,10 +8835,6 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1524242641}
-    - target: {fileID: 4719509819920680533, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: debugMoveVoidToLine
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4973814592829607053, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_LocalPosition.x
       value: -75.99
@@ -8821,14 +8875,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5360970333242679767, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: _cardCtrl
-      value: 
-      objectReference: {fileID: 1789002520}
-    - target: {fileID: 5360970333242679767, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: _renderer
-      value: 
-      objectReference: {fileID: 617683291}
     - target: {fileID: 5430974725798921348, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -8838,37 +8884,13 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1927238916}
     - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontStyle
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontColor.b
-      value: 0.14117648
-      objectReference: {fileID: 0}
-    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontColor.g
-      value: 0.24705884
-      objectReference: {fileID: 0}
-    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontColor.r
-      value: 0.3803922
-      objectReference: {fileID: 0}
-    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontMaterial
       value: 
       objectReference: {fileID: 1325852951}
     - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_overflowMode
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_sharedMaterial
       value: 
       objectReference: {fileID: 1325852951}
-    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4280565601
-      objectReference: {fileID: 0}
     - target: {fileID: 5749703991534581947, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -8886,68 +8908,13 @@ PrefabInstance:
       value: Card3D
       objectReference: {fileID: 0}
     - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_text
-      value: 'Lyra must be on your field. Choose 1 face-down enemy Character and
-        Expose it.
-
-        Ability cards cannot be targeted.'
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontSize
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontStyle
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontColor.b
-      value: 0.09803922
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontColor.g
-      value: 0.16862746
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontColor.r
-      value: 0.25490198
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_lineSpacing
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontMaterial
       value: 
       objectReference: {fileID: 399528766}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontSizeBase
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_sharedMaterial
+    - target: {fileID: 8760000000000000001, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: reviewCamera
       value: 
-      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4279839553
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_VerticalAlignment
-      value: 256
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_hasFontAssetChanged
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
-      propertyPath: m_characterHorizontalScale
-      value: 1
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 330585545}
     - target: {fileID: 9181609221170815586, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontMaterial
       value: 

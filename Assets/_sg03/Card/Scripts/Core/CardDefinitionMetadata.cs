@@ -15,7 +15,7 @@ namespace SG03
         public string race;
         public string type;
         public string gender;
-        public string char_code;
+        public string char_code_required;
         public string abilities;
         public string summon;
     }

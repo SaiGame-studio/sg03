@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using SaiGame.Services;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -26,6 +27,13 @@ namespace SG03
         /// <summary>Returns true if the card is currently in the shown (fly-up) state.</summary>
         public bool IsShown => isShown;
 
+        /// <summary>
+        /// Raised when middle-click requests that the preview close. A handler
+        /// returns true when it owns the close flow; otherwise this component
+        /// returns the card itself.
+        /// </summary>
+        public event Func<bool> PreviewCancelRequested;
+
         [Header("Animation")]
         [Tooltip("Duration of the fly animation in seconds.")]
         [SerializeField] private float duration = 0.5f;
@@ -51,7 +59,7 @@ namespace SG03
         [SerializeField] private float maxCameraDistance = 22f;
 
         [Header("Pan")]
-        [Tooltip("World-space distance moved per pixel while dragging with the middle or right mouse button.")]
+        [Tooltip("World-space distance moved per pixel while dragging with the right mouse button.")]
         [SerializeField] private float panSpeed = 0.01f;
 
         private Vector2 lastMousePos;
@@ -88,6 +96,7 @@ namespace SG03
 
         private void Update()
         {
+            this.HandlePreviewCancel();
             this.HandleRotation();
             this.HandleZoom();
             this.HandlePan();
@@ -96,6 +105,27 @@ namespace SG03
         private void OnDestroy() => this.KillMovementTweens();
 
         private void KillMovementTweens() => this.transform.DOKill();
+
+        private void HandlePreviewCancel()
+        {
+            if (!this.isShown || this.isShowAnimationPlaying) return;
+            if (Mouse.current?.middleButton.wasPressedThisFrame != true) return;
+
+            if (this.TryHandlePreviewCancel()) return;
+            this.Hide();
+        }
+
+        private bool TryHandlePreviewCancel()
+        {
+            if (this.PreviewCancelRequested == null) return false;
+
+            foreach (Delegate callback in this.PreviewCancelRequested.GetInvocationList())
+            {
+                if (((Func<bool>)callback).Invoke()) return true;
+            }
+
+            return false;
+        }
 
         // ─── Rotation ─────────────────────────────────────────────────────────────
 
@@ -155,19 +185,13 @@ namespace SG03
             Mouse mouse = Mouse.current;
             if (mouse == null) return;
 
-            bool panButtonPressed =
-                mouse.middleButton.wasPressedThisFrame ||
-                mouse.rightButton.wasPressedThisFrame;
-            if (panButtonPressed)
+            if (mouse.rightButton.wasPressedThisFrame)
             {
                 this.lastPanMousePos = mouse.position.ReadValue();
                 return;
             }
 
-            bool panButtonHeld =
-                mouse.middleButton.isPressed ||
-                mouse.rightButton.isPressed;
-            if (!panButtonHeld) return;
+            if (!mouse.rightButton.isPressed) return;
 
             Vector2 currentMousePosition = mouse.position.ReadValue();
             Vector2 pointerDelta = currentMousePosition - this.lastPanMousePos;

@@ -6,13 +6,10 @@
             <ui:VisualElement name="HealthPreview" class="health-bar-preview" />
         </ui:VisualElement>
         <ui:VisualElement name="HealthLabelRow" class="health-stat-row">
-            <ui:Label name="HealthLabel" text="65 / 100" class="health-bar-label" />
-            <ui:VisualElement name="DefShieldIcon" class="def-shield-icon">
-                <ui:VisualElement class="def-shield-icon__body def-shield-icon__body--outline" />
-                <ui:VisualElement class="def-shield-icon__tip def-shield-icon__tip--outline" />
-                <ui:VisualElement class="def-shield-icon__body" />
-                <ui:VisualElement class="def-shield-icon__tip" />
-            </ui:VisualElement>
+            <ui:Label name="CurrentHealthLabel" text="65" class="health-bar-label health-bar-label--current" />
+            <ui:Label name="HealthLabelSeparator" text=" / " class="health-bar-label" />
+            <ui:Label name="MaxHealthLabel" text="100" class="health-bar-label" />
+            <ui:Image name="DefShieldIcon" class="def-shield-icon" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

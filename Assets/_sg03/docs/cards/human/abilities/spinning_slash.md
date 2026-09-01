@@ -13,4 +13,4 @@ Ren xoay người, dẫn cặp katana lưỡi dài tạo thành một vòng ché
 Ren phải đang ở hàng trước của phe bạn và chưa hành động trong lượt.
 
 ## Hiệu Quả
-Chọn một mục tiêu ở hàng trước đối thủ để gây sát thương. Đòn đánh nhận `atk_add` **+260**. Sau khi sử dụng, Ren được tính là đã hành động trong lượt đó.
+Chọn một mục tiêu ở hàng trước đối thủ để gây sát thương. Đòn đánh nhận `atk_added` **+260**. Sau khi sử dụng, Ren được tính là đã hành động trong lượt đó.

@@ -158,17 +158,13 @@ namespace SG03
         /// </summary>
         public bool ApplyAddressByPrefix()
         {
-            CardDataManager manager = ManagersCtrl.Instance != null && ManagersCtrl.Instance.CardDataManager != null
-                ? ManagersCtrl.Instance.CardDataManager
-                : CardDataManager.Instance;
-
-            if (manager == null)
+            if (CardDataManager.Instance == null)
             {
                 Debug.LogWarning($"[CardLoader] CardDataManager not found on '{this.name}'.", this);
                 return false;
             }
 
-            if (TryResolveAddressByAssetName(manager.CardAddresses, this.cardNamePrefix, out string addr))
+            if (TryResolveAddressByAssetName(CardDataManager.Instance.CardAddresses, this.cardNamePrefix, out string addr))
             {
                 this.cardAddress = addr;
                 return true;

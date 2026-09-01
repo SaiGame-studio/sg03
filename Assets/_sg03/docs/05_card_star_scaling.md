@@ -71,19 +71,19 @@
 
 ---
 
-## 2. Nhóm Thẻ Kỹ Năng Tăng ATK & DEF (`atk_add` & `def_add`)
+## 2. Nhóm Thẻ Kỹ Năng Tăng ATK & DEF (`atk_added` & `def_added`)
 
-| Nhóm Game | Cấp Độ Sao ($S$) | Khung Tăng Sát Thương `atk_add` (Độ Nhảy 10) | Khung Tăng Giáp `def_add` (Độ Nhảy 10) | Ví Dụ Kỹ Năng Mẫu (Giả Định) |
+| Nhóm Game | Cấp Độ Sao ($S$) | Khung Tăng Sát Thương `atk_added` (Độ Nhảy 10) | Khung Tăng Giáp `def_added` (Độ Nhảy 10) | Ví Dụ Kỹ Năng Mẫu (Giả Định) |
 |---|---|---|---|---|
-| **Early Game** | **1 Sao** | **50 – 150** *(50, 60... 150)* | **50 – 150** *(50, 60... 150)* | • `Kỹ Năng Trảm Đòn 1`: `atk_add` 100<br>• `Kỹ Năng Khiên 1`: `def_add` 100 |
-| | **2 Sao** | **150 – 250** *(150, 160... 250)* | **150 – 250** *(150, 160... 250)* | • `Kỹ Năng Trảm Đòn 2`: `atk_add` 150<br>• `Kỹ Năng Khiên 2`: `def_add` 200 |
-| | **3 Sao** | **250 – 350** *(250, 260... 350)* | **250 – 350** *(250, 260... 350)* | • `Kỹ Năng Trảm Đòn 3`: `atk_add` 270<br>• `Kỹ Năng Khiên 3`: `def_add` 300 |
-| **Mid Game** | **4 Sao** | **350 – 450** *(350, 360... 450)* | **350 – 450** *(350, 360... 450)* | • `Kỹ Năng Trảm Đòn 4`: `atk_add` 400 |
-| | **5 Sao** | **450 – 550** *(450, 460... 550)* | **450 – 550** *(450, 460... 550)* | • `Kỹ Năng Khiên 5`: `def_add` 500 |
-| | **6 Sao** | **550 – 650** *(550, 560... 650)* | **550 – 650** *(550, 560... 650)* | • `Kỹ Năng Trảm Đòn 6`: `atk_add` 600 |
-| **Late Game** | **7 Sao** | **750 – 850** *(750, 760... 850)* | **750 – 850** *(750, 760... 850)* | • `Kỹ Năng Trảm Đòn 7`: `atk_add` 800 |
-| | **8 Sao** | **850 – 950** *(850, 860... 950)* | **850 – 950** *(850, 860... 950)* | • `Kỹ Năng Khiên 8`: `def_add` 900 |
-| | **9 Sao** | **950 – 1050** *(950, 960... 1050)* | **950 – 1050** *(950, 960... 1050)* | • `Kỹ Năng Khiên 9`: `def_add` 1000 |
+| **Early Game** | **1 Sao** | **50 – 150** *(50, 60... 150)* | **50 – 150** *(50, 60... 150)* | • `Kỹ Năng Trảm Đòn 1`: `atk_added` 100<br>• `Kỹ Năng Khiên 1`: `def_added` 100 |
+| | **2 Sao** | **150 – 250** *(150, 160... 250)* | **150 – 250** *(150, 160... 250)* | • `Kỹ Năng Trảm Đòn 2`: `atk_added` 150<br>• `Kỹ Năng Khiên 2`: `def_added` 200 |
+| | **3 Sao** | **250 – 350** *(250, 260... 350)* | **250 – 350** *(250, 260... 350)* | • `Kỹ Năng Trảm Đòn 3`: `atk_added` 270<br>• `Kỹ Năng Khiên 3`: `def_added` 300 |
+| **Mid Game** | **4 Sao** | **350 – 450** *(350, 360... 450)* | **350 – 450** *(350, 360... 450)* | • `Kỹ Năng Trảm Đòn 4`: `atk_added` 400 |
+| | **5 Sao** | **450 – 550** *(450, 460... 550)* | **450 – 550** *(450, 460... 550)* | • `Kỹ Năng Khiên 5`: `def_added` 500 |
+| | **6 Sao** | **550 – 650** *(550, 560... 650)* | **550 – 650** *(550, 560... 650)* | • `Kỹ Năng Trảm Đòn 6`: `atk_added` 600 |
+| **Late Game** | **7 Sao** | **750 – 850** *(750, 760... 850)* | **750 – 850** *(750, 760... 850)* | • `Kỹ Năng Trảm Đòn 7`: `atk_added` 800 |
+| | **8 Sao** | **850 – 950** *(850, 860... 950)* | **850 – 950** *(850, 860... 950)* | • `Kỹ Năng Khiên 8`: `def_added` 900 |
+| | **9 Sao** | **950 – 1050** *(950, 960... 1050)* | **950 – 1050** *(950, 960... 1050)* | • `Kỹ Năng Khiên 9`: `def_added` 1000 |
 
 ---
 
@@ -151,9 +151,9 @@
 
 ## 5. Ví Dụ Minh Họa Phối Hợp Thẻ Kỹ Năng
 
-### ⚔️ Ví Dụ 1: Bài Nhân Vật 1-Sao + Bài Ability 1-Sao Tấn Công (`atk_add`)
+### ⚔️ Ví Dụ 1: Bài Nhân Vật 1-Sao + Bài Ability 1-Sao Tấn Công (`atk_added`)
 - Thẻ công: `Tân Binh A` (1 Sao: ATK = 140).
-- Thẻ Kỹ năng bổ trợ: `Kỹ Năng Trảm Đòn 1` (1 Sao Ability: `atk_add` = 150).
+- Thẻ Kỹ năng bổ trợ: `Kỹ Năng Trảm Đòn 1` (1 Sao Ability: `atk_added` = 150).
 - **Tổng Sát Thương Tấn Công**: $\text{ATK} + \text{atk\_add} = 140 + 150 = \mathbf{290}$ (Tương đương đòn đánh 2-sao công).
 - Thẻ thủ đối thủ: `Học Việc Mẫu A` (2 Sao: DEF = 280).
 - **Diễn biến & Kết quả**: $290 \ge 280 \implies$ **TIÊU DIỆT THÀNH CÔNG THẺ 2-SAO!**

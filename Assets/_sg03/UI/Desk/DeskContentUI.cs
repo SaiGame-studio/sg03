@@ -54,6 +54,7 @@ namespace SG03.UI
 
             this.detailUI = new DeskDetailUI(root, this.list);
             this.detailUI.OnBackRequested      += this.ShowListPanel;
+            this.detailUI.OnDeskRenamed         += this.DoRefresh;
             this.detailUI.OnCardViewerShown  += this.OnDetailCardViewerShown;
             this.detailUI.OnCardViewerHidden += this.OnDetailCardViewerHidden;
             this.detailUI.OnCardViewRequested += item =>

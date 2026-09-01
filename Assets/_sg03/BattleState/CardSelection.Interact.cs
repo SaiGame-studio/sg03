@@ -44,6 +44,7 @@ namespace SG03
             this.ClearHealthPreviewTarget();
             this.targetingSource = this.selected;
             this.targeted = null;
+            this.targetingSource?.SpawnAtkUi();
             if (this.IsBeginningAlphaAttack())
             {
                 this.battleStateCtrl?.CardSpawning?.ClearCharacterHealthPreviews(Owner.omega);
@@ -62,9 +63,11 @@ namespace SG03
         private void CancelTargeting()
         {
             this.ClearHealthPreviewTarget();
+            Card3DCtrl prevSource = this.targetingSource;
             this.targetingSource = null;
             this.targeted = null;
             this.arrowIndicator?.Hide();
+            prevSource?.RefreshAtkUiVisibility();
         }
 
         private void ConfirmTargeting()
@@ -212,6 +215,7 @@ namespace SG03
             Vector3 from = this.targetingSource.transform.position;
             Vector3 to = this.GetArrowTarget();
             this.arrowIndicator.Show(from, to);
+            this.targetingSource?.SpawnAtkUi();
         }
 
         private bool HasArrowTarget()

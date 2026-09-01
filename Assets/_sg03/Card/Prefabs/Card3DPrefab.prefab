@@ -286,8 +286,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Description Text Description Text Description Text Description Text Description
-    Text Description Text '
+  m_text: 'Lyra must be on your field. Choose 1 face-down enemy Character and Expose
+    it.
+
+    Ability cards cannot be targeted.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -296,8 +298,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4279839553
+  m_fontColor: {r: 0.25490198, g: 0.16862746, b: 0.09803922, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -320,7 +322,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 0
   m_fontSizeMax: 0
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
@@ -610,7 +612,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -657,7 +659,7 @@ MonoBehaviour:
   m_text: AtkText
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 0}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -870,6 +872,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5a2d4dd02a474c43bd0a2f104e056a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardOutlineIndicator
+  _cardCtrl: {fileID: 724914520211398535}
+  _renderer: {fileID: 4481470967788255310}
+  _isHover: 0
 --- !u!1 &5329768263995966416
 GameObject:
   m_ObjectHideFlags: 0
@@ -932,7 +937,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -979,14 +984,14 @@ MonoBehaviour:
   m_text: CardNameText
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 0}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4280565601
+  m_fontColor: {r: 0.3803922, g: 0.24705884, b: 0.14117648, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1009,7 +1014,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 0
   m_fontSizeMax: 0
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -1022,7 +1027,7 @@ MonoBehaviour:
   m_charWidthMaxAdj: 0
   m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 1
+  m_overflowMode: 3
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
@@ -1113,7 +1118,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1160,7 +1165,7 @@ MonoBehaviour:
   m_text: DefText
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 0}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1278,6 +1283,7 @@ GameObject:
   - component: {fileID: 7980353759426569992}
   - component: {fileID: 724914520211398535}
   - component: {fileID: 4719509819920680533}
+  - component: {fileID: 8760000000000000001}
   - component: {fileID: 2260832097321709496}
   - component: {fileID: 5622624506275298169}
   m_Layer: 0
@@ -1364,6 +1370,7 @@ MonoBehaviour:
   card: {fileID: 1279015152172670498}
   loader: {fileID: 7980353759426569992}
   movement: {fileID: 4719509819920680533}
+  fullDetailManipulator: {fileID: 8760000000000000001}
   cardOwner: 0
   codeName: 
   inventoryItemId: 
@@ -1371,6 +1378,7 @@ MonoBehaviour:
     id: 
     item_code: 
     name: 
+    description: 
     category: 
     rarity: 
     grid_width: 0
@@ -1383,29 +1391,23 @@ MonoBehaviour:
     created_by: 
     updated_at: 
     updated_by: 
-    base_stats:
-      atk: 0
-      def: 0
-      star: 0
-      atk_add: 0
-      atk_deduct: 0
-      def_add: 0
-      def_deduct: 0
-      stun_count: 0
-      summon_count: 0
-      hp_restore: 0
     metadata:
       behavior: 
       description: 
       race: 
       type: 
       gender: 
-      char_code: 
+      char_code_required:
       abilities: 
       summon: 
   expose: 0
   isTrigger: 0
+  isHover: 0
+  attacker: {fileID: 0}
   cardHolder: {fileID: 0}
+  objectPool: {fileID: 0}
+  hpBarPrefab: {fileID: 0}
+  hpBarInstance: {fileID: 0}
 --- !u!114 &4719509819920680533
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1422,7 +1424,7 @@ MonoBehaviour:
   duration: 1
   ease: 6
   lineOffsetY: 0.3
-  hoverOffsetY: 0.3
+  debugMoveVoidToLine: 1
   hoverDuration: 0.15
   hoverEase: 6
   selectedOffsetY: 1.5
@@ -1455,6 +1457,24 @@ MonoBehaviour:
   attackBackstepEase: 6
   location: 0
   faceState: 0
+  isVoidToLineTransitionActive: 0
+--- !u!114 &8760000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8660204716586372184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d1e7be987994ba6b50fbbf2761dce41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SG03.CardFullDetailManipulator
+  reviewCamera: {fileID: 0}
+  zoomStep: 1
+  minCameraDistance: 8
+  maxCameraDistance: 22
+  panSpeed: 0.01
 --- !u!65 &2260832097321709496
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1641,7 +1661,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1688,7 +1708,7 @@ MonoBehaviour:
   m_text: StarsText
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 0}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

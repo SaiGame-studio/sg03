@@ -12,7 +12,7 @@ namespace SG03
     ///
     /// Current groups are <c>stats</c> (CardDefinitionData.base_stats),
     /// <c>metadata</c> (CardDefinitionData.metadata), <c>card</c>
-    /// (CardDefinitionData), and <c>char_code</c>. Add a group in
+    /// (CardDefinitionData), and <c>char_code_required</c>. Add a group in
     /// <see cref="TryResolve"/> when a new kind of description value is introduced.
     /// Unknown tokens deliberately remain visible instead of silently becoming an
     /// incorrect value.
@@ -51,10 +51,10 @@ namespace SG03
         {
             if (group == "stats") return definition.TryGetBaseStat(key, out value);
 
-            if (group == "char_code")
+            if (group == "char_code_required")
             {
                 // A character code is supplied by the template itself, e.g.
-                // [char_code:skeleton]. Keep this as a dedicated group so it
+                // [char_code_required:skeleton]. Keep this as a dedicated group so it
                 // can later be replaced with a localized character-name lookup.
                 value = ToDisplayName(key);
                 return true;

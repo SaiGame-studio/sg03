@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3482978470714320713
 Transform:
   m_ObjectHideFlags: 0
@@ -48,12 +48,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SG03.WorldSpaceHpBarCtrl
   despawn: {fileID: 0}
   uiDocument: {fileID: 8356789373894643313}
+  battleStateCtrl: {fileID: 0}
+  iconSize: {x: 52, y: 56}
   currentHealth: 0
   maxHealth: 100
   faceMainCamera: 1
   healthPreviewDelta: 0
   previewOpacity: 1
-  previewColorAnimationSpeed: 0.5
+  previewColorAnimationSpeed: 1.5
   barWidth: 350
   barHeight: 20
   borderThickness: 4
@@ -91,9 +93,7 @@ MonoBehaviour:
   healthLabelFontSize: 60
   miniMode: 1
   parent: {fileID: 0}
-  alphaParentOffset: {x: 0, y: -4.5, z: 0.2}
-  omegaParentOffset: {x: 0, y: -4.5, z: -0.2}
-  aboveCardOffset: 0.2
+  aboveCardYOffset: 0.2
 --- !u!114 &8356789373894643313
 MonoBehaviour:
   m_ObjectHideFlags: 0

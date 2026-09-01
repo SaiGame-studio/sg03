@@ -138,8 +138,8 @@ function titan_fall_execute(state, source_card, event_data, helpers)
 end
 
 -- ability: titan_spear_sweep
--- Titan deals 160 damage to every opposing Character, then to one adjacent ally
--- unless that ally is Ren.
+-- Titan deals base_stats.atk to every opposing Character, then
+-- base_stats.shockwave_atk to one adjacent ally unless that ally is Ren.
 function titan_spear_sweep_execute(state, source_card, event_data, helpers)
     local battle = helpers.lib_battle_common
     local source_side = helpers.find_card_side(state, source_card)
@@ -167,6 +167,17 @@ function titan_spear_sweep_execute(state, source_card, event_data, helpers)
         return {}, "titan_spear_sweep requires Titan to be ready"
     end
 
+    local ability_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
+    local ability_stats = ability_def ~= nil and ability_def.base_stats or nil
+    local enemy_damage = ability_stats ~= nil and tonumber(ability_stats.atk) or nil
+    if enemy_damage == nil or enemy_damage <= 0 then
+        return {}, "titan_spear_sweep requires a positive base_stats.atk"
+    end
+    local ally_damage = ability_stats ~= nil and tonumber(ability_stats.shockwave_atk) or nil
+    if ally_damage == nil or ally_damage <= 0 then
+        return {}, "titan_spear_sweep requires a positive base_stats.shockwave_atk"
+    end
+
     titan_card.trigger = true
     titan_card.face_up = true
     titan_card.expose = true
@@ -180,9 +191,7 @@ function titan_spear_sweep_execute(state, source_card, event_data, helpers)
     local target_lines = {
         { side = target_side, line = state[target_side .. "_front_line"] or {} },
     }
-    local damage = 160
-
-    local function deal_sweep_damage(target_card, target_line, target_void_key)
+    local function deal_sweep_damage(target_card, target_line, target_void_key, damage)
         table.insert(ability_actions, source_side .. "_attack:" ..
             titan_card.inventory_item_id .. "," .. target_card.inventory_item_id)
         local damage_actions, damage_err = helpers.deal_damage_to_character(
@@ -202,7 +211,7 @@ function titan_spear_sweep_execute(state, source_card, event_data, helpers)
         for _, target_card in ipairs(target_entry.line) do
             if target_card.inventory_item_id ~= nil and target_card.inventory_item_id ~= "" and
                battle.check_card_type(state.item_defs, target_card, "character") then
-                local damage_err = deal_sweep_damage(target_card, target_entry.line, void_key)
+                local damage_err = deal_sweep_damage(target_card, target_entry.line, void_key, enemy_damage)
                 if damage_err ~= nil then return ability_actions, damage_err end
             end
         end
@@ -217,10 +226,10 @@ function titan_spear_sweep_execute(state, source_card, event_data, helpers)
                ally_card.slot_index == adjacent_slot and
                battle.check_card_type(state.item_defs, ally_card, "character") then
                 local ally_def = helpers.find_item_def(state.item_defs, ally_card.item_definition_code_name)
-                local ally_char_code = ally_def ~= nil and ally_def.metadata ~= nil
-                    and ally_def.metadata.char_code or nil
+                local ally_char_code_required = ally_def ~= nil and ally_def.metadata ~= nil
+                    and ally_def.metadata.char_code_required or nil
                 if ally_card.item_definition_code_name ~= "azure_blade" and
-                   ally_char_code ~= "azure_blade" then
+                   ally_char_code_required ~= "azure_blade" then
                     adjacent_ally = ally_card
                 else
                     battle.dlog("[ability] titan_spear_sweep: adjacent Ren is immune")
@@ -233,7 +242,7 @@ function titan_spear_sweep_execute(state, source_card, event_data, helpers)
 
     if adjacent_ally ~= nil then
         local damage_err = deal_sweep_damage(
-            adjacent_ally, titan_line, source_side .. "_the_void"
+            adjacent_ally, titan_line, source_side .. "_the_void", ally_damage
         )
         if damage_err ~= nil then return ability_actions, damage_err end
     end

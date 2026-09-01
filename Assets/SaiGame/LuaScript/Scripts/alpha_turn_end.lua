@@ -6,7 +6,10 @@ require "lib_battle_entity_ai"
 require "enemy_ai_core"
 require "enemy_ai_goblin_shaman"
 require "enemy_ai_silas"
-require "lib_ability_all"
+require "lib_ability_human"
+require "lib_ability_darkborn"
+require "lib_ability_lightborn"
+require "lib_ability_natureborn"
 
 -- alpha_turn_end.lua
 -- End-of-turn cleanup for Alpha's turn.
@@ -70,9 +73,17 @@ end
 local function run_omega_attack_planning(state)
     local enemy_key = state.metadata ~= nil and state.metadata.enemy_entity_key or nil
     lib_battle_common.dlog("[alpha_turn_end] run_omega_attack_planning enemy_key=" .. tostring(enemy_key))
+    if state.metadata == nil then state.metadata = {} end
+    -- Establish the pending Omega turn before planning. omega_end_turn changes
+    -- this to alpha_turn only when it actually consumes that turn.
+    state.metadata.next_move = "omega_turn"
     local plan_err = lib_battle_entity_ai.run_plan_attack(state)
     if plan_err ~= nil then return plan_err end
-    state.alpha_defending = true
+    -- A planner with no eligible attacker ends Omega's turn itself. Preserve
+    -- that handoff instead of restoring Alpha's defending state afterward.
+    if state.metadata == nil or state.metadata.next_move ~= "alpha_turn" then
+        state.alpha_defending = true
+    end
     return nil
 end
 
@@ -113,7 +124,7 @@ local function main()
     if state.status == "completed" then output.error = "battle is already completed" ; return end
     lib_battle_common.dlog("[alpha_turn_end] session loaded: " .. session_id)
 
-    lib_battle_common.reset_turn_cards(state)
+    lib_battle_common.reset_turn_cards(state, "omega")
     handoff_lamp_to_omega(state)
 
     local draw_err = run_omega_draw(state)
@@ -131,7 +142,13 @@ local function main()
         output.error = plan_err; return
     end
 
-    advance_turn_to_omega(state)
+    -- omega_end_turn may already have handed control back to Alpha when every
+    -- Omega Character is triggered (for example immediately after Brute Call).
+    -- Do not overwrite that transition, or those cards become ready while the
+    -- state still claims Omega has the lamp.
+    if state.metadata == nil or state.metadata.next_move ~= "alpha_turn" then
+        advance_turn_to_omega(state)
+    end
 
     local save_err = persist_battle_state(session_id, state)
     if save_err ~= nil then

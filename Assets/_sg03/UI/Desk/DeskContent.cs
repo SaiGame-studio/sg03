@@ -108,7 +108,10 @@ namespace SG03.UI
 
         private DeskContentUI ui;
         private bool isCardViewerClosing;
+        private bool isCardReviewCancelSubscribed;
         private Action cardViewerClosedContinuation;
+
+        private void OnDestroy() => this.UnsubscribeCardReviewCancel();
 
         // ─── Public API ───────────────────────────────────────────────────────────
 
@@ -132,6 +135,7 @@ namespace SG03.UI
             container.Add(content);
 
             ui = new DeskContentUI(content);
+            this.SubscribeCardReviewCancel();
             ui.OnCardViewerShown   += () => OnCardViewerShown?.Invoke();
             ui.OnCardViewerHidden  += this.HandleCardViewerHidden;
             ui.OnCardViewRequested += item =>
@@ -162,6 +166,30 @@ namespace SG03.UI
             if (this.ui == null) return;
 
             this.ui.RequestCloseViewerFromDimLayer();
+        }
+
+        private void SubscribeCardReviewCancel()
+        {
+            if (this.isCardReviewCancelSubscribed || this.cardReviewCtrl == null) return;
+
+            this.cardReviewCtrl.PreviewCancelRequested += this.HandleCardReviewCancelRequested;
+            this.isCardReviewCancelSubscribed = true;
+        }
+
+        private void UnsubscribeCardReviewCancel()
+        {
+            if (!this.isCardReviewCancelSubscribed || this.cardReviewCtrl == null) return;
+
+            this.cardReviewCtrl.PreviewCancelRequested -= this.HandleCardReviewCancelRequested;
+            this.isCardReviewCancelSubscribed = false;
+        }
+
+        private bool HandleCardReviewCancelRequested()
+        {
+            if (this.ui == null || !this.ui.IsDimLayerVisible) return false;
+
+            this.ui.RequestCloseViewerFromDimLayer();
+            return true;
         }
 
         /// <summary>

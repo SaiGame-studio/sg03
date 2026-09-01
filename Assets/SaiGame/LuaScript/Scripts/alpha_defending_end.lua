@@ -6,7 +6,10 @@ require "lib_battle_entity_ai"
 require "enemy_ai_core"
 require "enemy_ai_goblin_shaman"
 require "enemy_ai_silas"
-require "lib_ability_all"
+require "lib_ability_human"
+require "lib_ability_darkborn"
+require "lib_ability_lightborn"
+require "lib_ability_natureborn"
 require "lib_ability_xena"
 require "lib_ability_mid_game"
 require "lib_ability_advanced"
@@ -103,14 +106,8 @@ local function resolve_attack_plan(state, plan_entry)
     return resolved, nil
 end
 
-local function compute_attack_damage(attacker_def)
-    local base_atk = 0
-    if attacker_def.base_stats ~= nil and attacker_def.base_stats.atk then
-        base_atk = attacker_def.base_stats.atk
-    elseif attacker_def.metadata ~= nil and attacker_def.metadata.atk then
-        base_atk = attacker_def.metadata.atk
-    end
-    return base_atk
+local function compute_attack_damage(state, resolved)
+    return lib_battle_common.get_attack_damage(state, resolved.attacker_def, resolved.attacker_line_key)
 end
 
 -- Phase 1: store pending_attack so future alpha-defend reactions can read/modify it.
@@ -125,6 +122,11 @@ end
 
 -- Phase 3: apply the (possibly modified) pending_attack damage.
 local function resolve_omega_attack(state, resolved)
+    if state.pending_attack ~= nil and state.pending_attack.cancelled == true then
+        lib_battle_common.dlog("[alpha_defending_end] pending attack cancelled before resolve: " .. tostring(resolved.attacker_card.inventory_item_id))
+        state.pending_attack = nil
+        return nil
+    end
     local final_damage = state.pending_attack ~= nil and state.pending_attack.damage_dealt or 0
     lib_battle_common.dlog("[alpha_defending_end] resolve_omega_attack final_damage=" .. final_damage)
     local attack_err = lib_battle_common.card_attack_card(
@@ -176,7 +178,7 @@ local function execute_card_attack_plan(state, plan_entry)
     end
 
     -- Phase 1: plan (stores pending_attack for potential alpha defend reactions).
-    local damage_dealt = compute_attack_damage(resolved.attacker_def)
+    local damage_dealt = compute_attack_damage(state, resolved)
     plan_omega_attack(state, resolved, damage_dealt)
 
     -- Phase 2: (reserved for future alpha defend reactions).
@@ -224,7 +226,7 @@ local function execute_omega_attack_alpha_hp_plan(state, plan_entry)
     -- reveal-before-damage ordering used for card-vs-card combat.
     lib_battle_common.append_client_action(state, "omega_card_expose:" .. attacker_card.inventory_item_id)
 
-    local damage = compute_attack_damage(attacker_def)
+    local damage = lib_battle_common.get_attack_damage(state, attacker_def, attacker_line_key)
     lib_battle_common.dlog("[alpha_defending_end] omega attacking alpha_hp directly: damage=" .. damage)
 
     state.alpha_hp = (state.alpha_hp or 0) - damage

@@ -116,5 +116,5 @@ Server duy trì đối tượng JSON session trận đấu gồm:
 
 1. **Trích Xuất**: `_get_ability_keys` đọc danh sách kỹ năng từ `card.metadata.abilities`.
 2. **Xác Minh Vị Trí**: `can_ability_target_position` kiểm tra vị trí nhắm mục tiêu xem có hợp lệ không (`own_frontline`, `enemy_frontline`, v.v.).
-3. **Điều Hướng**: `_dispatch_one_ability` gọi hàm thực thi tương ứng trong `lib_ability_all.lua`.
+3. **Điều Hướng**: `_dispatch_one_ability` chọn library theo `handler_group` của Ability: `lib_ability_human.lua`, `lib_ability_darkborn.lua`, `lib_ability_lightborn.lua` hoặc `lib_ability_natureborn.lua`.
 4. **Ghi Log Hành Động**: Các Client Action sinh ra được đưa vào danh sách `client_actions` để gửi về client.
