@@ -103,7 +103,6 @@ MonoBehaviour:
   aboveCardYOffset: 0.5
   cardZOffset: -1.5
   cardCtrl: {fileID: 0}
-  parent: {fileID: 0}
 --- !u!114 &8356789373894643313
 MonoBehaviour:
   m_ObjectHideFlags: 0

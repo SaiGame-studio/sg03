@@ -93,7 +93,7 @@ MonoBehaviour:
   healthLabelOffset: {x: 0, y: -45}
   healthLabelFontSize: 60
   miniMode: 1
-  parent: {fileID: 0}
+  cardCtrl: {fileID: 0}
   aboveCardYOffset: 0.2
 --- !u!114 &8356789373894643313
 MonoBehaviour:

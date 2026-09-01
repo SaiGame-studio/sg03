@@ -24,7 +24,6 @@ namespace SG03
 
         [Header("Parenting")]
         [SerializeField] private Card3DCtrl cardCtrl;
-        [SerializeField] private Transform parent;
         private Label attackLabel;
         private Vector3 baseWorldRotation;
         private bool hasBaseWorldRotation;
@@ -93,14 +92,13 @@ namespace SG03
         }
 
         /// <summary>Assigns the card this UI follows without inheriting its transform.</summary>
-        public void SetParent(Card3DCtrl newCard)
+        public void SetCard(Card3DCtrl newCard)
         {
             if (newCard == null) return;
 
             this.cardCtrl = newCard;
-            this.parent = newCard.transform;
             this.transform.SetParent(null, true);
-            this.UpdateWorldPositionFromParent();
+            this.UpdateWorldPositionFromCard();
             this.baseWorldRotation = this.transform.eulerAngles;
             this.hasBaseWorldRotation = true;
         }
@@ -109,7 +107,6 @@ namespace SG03
         public void ClearCard()
         {
             this.cardCtrl = null;
-            this.parent = null;
         }
 
         /// <summary>Sets the ATK value currently shown by this UI.</summary>
@@ -121,13 +118,13 @@ namespace SG03
 
         private void UpdateWorldSpacePresentation()
         {
-            this.UpdateWorldPositionFromParent();
+            this.UpdateWorldPositionFromCard();
             this.FaceMainCamera();
         }
 
-        private void UpdateWorldPositionFromParent()
+        private void UpdateWorldPositionFromCard()
         {
-            if (this.parent == null) return;
+            if (this.cardCtrl == null) return;
 
             float zOffset = this.cardZOffset;
             if (this.cardCtrl != null)
@@ -137,27 +134,16 @@ namespace SG03
                     zOffset = -this.cardZOffset;
                 }
             }
-            else
-            {
-                CardHolderCtrl holderCtrl = this.parent.GetComponent<CardHolderCtrl>();
-                if (holderCtrl == null) holderCtrl = this.parent.GetComponentInParent<CardHolderCtrl>();
-
-                if (holderCtrl != null && holderCtrl.HolderOwner == Owner.omega)
-                {
-                    zOffset = -this.cardZOffset;
-                }
-            }
-
             Vector3 offset = new Vector3(0f, this.aboveCardYOffset, zOffset);
 
-            Card3D card = this.parent.GetComponent<Card3D>();
+            Card3D card = this.cardCtrl.GetComponent<Card3D>();
             if (card != null && card.TryGetTopEdgeWorldPosition(out Vector3 topEdge))
             {
                 this.transform.position = topEdge + offset;
                 return;
             }
 
-            this.transform.position = this.parent.position + offset;
+            this.transform.position = this.cardCtrl.transform.position + offset;
         }
 
         private void FaceMainCamera()

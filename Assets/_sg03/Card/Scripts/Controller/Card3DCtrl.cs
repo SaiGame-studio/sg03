@@ -184,7 +184,7 @@ namespace SG03
             if (this.hpBarInstance == null) return;
 
             this.hpBarInstance.SetPosition(holder.transform.position);
-            this.hpBarInstance.SetParent(this);
+            this.hpBarInstance.SetCard(this);
             this.hpBarInstance.gameObject.SetActive(true);
             this.UpdateDamagePreviewFromAttacker();
             this.RefreshHpBarDisplayMode();
@@ -234,7 +234,7 @@ namespace SG03
 
             Vector3 pos = this.cardHolder != null ? this.cardHolder.transform.position : this.transform.position;
             this.atkUiInstance.SetPosition(pos);
-            this.atkUiInstance.SetParent(this);
+            this.atkUiInstance.SetCard(this);
             this.atkUiInstance.SetAttack(attack);
             this.atkUiInstance.gameObject.SetActive(true);
         }
