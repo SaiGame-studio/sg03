@@ -19,14 +19,22 @@ local function advanced_find_card_by_code(cards, code)
     return nil, nil
 end
 
-local function advanced_find_card_indexes_by_code(line, code, count)
+local function advanced_find_nearest_card_indexes_by_code(line, code, center_index, count)
     local indexes = {}
     for index, card in ipairs(line or {}) do
         if card.inventory_item_id ~= nil and card.inventory_item_id ~= "" and
            card.item_definition_code_name == code then
             table.insert(indexes, index)
-            if #indexes == count then break end
         end
+    end
+    table.sort(indexes, function(left, right)
+        local left_distance = math.abs(left - center_index)
+        local right_distance = math.abs(right - center_index)
+        if left_distance ~= right_distance then return left_distance < right_distance end
+        return left < right
+    end)
+    while #indexes > count do
+        table.remove(indexes)
     end
     return indexes
 end
@@ -205,9 +213,9 @@ function king_return_execute(state, source_card, event_data, helpers)
     local summon_turn_err = battle.validate_summon_card_turn(state, state.item_defs, king_card)
     if summon_turn_err ~= nil then return {}, summon_turn_err end
 
-    local sacrifice_indexes = advanced_find_card_indexes_by_code(front_line, "skeleton", 3)
-    if #sacrifice_indexes < 3 then
-        return {}, "king_return requires 3 Skeleton in own front_line"
+    local sacrifice_indexes = advanced_find_nearest_card_indexes_by_code(front_line, "skeleton", ria_index, 3)
+    if #sacrifice_indexes < 2 then
+        return {}, "king_return requires at least 2 Skeleton in own front_line"
     end
 
     local actions = {}
