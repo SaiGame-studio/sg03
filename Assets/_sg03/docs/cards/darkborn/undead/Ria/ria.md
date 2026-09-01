@@ -2,8 +2,8 @@
 
 - **Code Name**: `ria`
 - **Số sao**: 3
-- **Tấn Công (ATK)**: 340
-- **Phòng Thủ (DEF)**: 420
+- **Tấn Công (ATK)**: 250
+- **Phòng Thủ (DEF)**: 370
 - **Loại Thẻ**: [`character`](../../../../03_characters.md)
 - **Chủng Tộc Chính**: **Darkborn**
 - **Tộc Nhánh**: Undead (định danh kỹ thuật: `darkborn` / `undead`)
