@@ -15,3 +15,4 @@ Ria được gọi là Mẹ Rồng vì từng nuôi nấng một con rồng. M�
 ## Kỹ Năng Liên Kết
 - [Skeleton Shield](abilities/skeleton_shield.md) — Tráo đổi lính xương gánh đòn thay.
 - [Animate Dead](abilities/animate_dead.md) — Triệu gọi nhiều Skeleton từ `the_void`.
+- [King Return](abilities/king_return.md) — Hiến tế ba Skeleton để gọi Skeleton King cạnh Ria.

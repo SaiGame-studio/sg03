@@ -10,6 +10,7 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 
 - [Skeleton Shield](cards/darkborn/undead/Ria/abilities/skeleton_shield.md): 2 sao
 - [Animate Dead](cards/darkborn/undead/Ria/abilities/animate_dead.md): 3 sao
+- [King Return](cards/darkborn/undead/Ria/abilities/king_return.md): 4 sao
 
 #### Demon
 
