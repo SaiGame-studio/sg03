@@ -32,19 +32,19 @@ function animate_dead_execute(state, source_card, event_data, helpers)
 
     local front_line_key = caster_side .. "_front_line"
     local front_line = state[front_line_key] or {}
-    local hellscythe_card = helpers.find_untriggered_card(front_line, function(c)
-        return c.item_definition_code_name == "hellscythe"
+    local ria_card = helpers.find_untriggered_card(front_line, function(c)
+        return c.item_definition_code_name == "ria"
     end)
-    if hellscythe_card == nil then
-        battle.dlog("[ability] animate_dead: error - no untriggered hellscythe in " .. front_line_key)
-        return {}, "animate_dead requires untriggered hellscythe in front_line"
+    if ria_card == nil then
+        battle.dlog("[ability] animate_dead: error - no untriggered ria in " .. front_line_key)
+        return {}, "animate_dead requires untriggered ria in front_line"
     end
 
-    hellscythe_card.trigger = true
-    local expose_action = helpers.expose_ability_selected_card(state, hellscythe_card)
+    ria_card.trigger = true
+    local expose_action = helpers.expose_ability_selected_card(state, ria_card)
     local ability_actions = {}
     if expose_action ~= nil then table.insert(ability_actions, expose_action) end
-    table.insert(ability_actions, caster_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=animate_dead,selected=" .. hellscythe_card.inventory_item_id)
+    table.insert(ability_actions, caster_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=animate_dead,selected=" .. ria_card.inventory_item_id)
 
     local void_key = caster_side .. "_the_void"
     local void_zone = state[void_key] or {}

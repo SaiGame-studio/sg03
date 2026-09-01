@@ -8,7 +8,6 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 
 #### Undead
 
-- [Twin Reaper](cards/darkborn/undead/Ria/abilities/twin_reaper.md): 0 sao
 - [Skeleton Shield](cards/darkborn/undead/Ria/abilities/skeleton_shield.md): 0 sao
 - [Animate Dead](cards/darkborn/undead/Ria/abilities/animate_dead.md): 0 sao
 

@@ -13,9 +13,6 @@ Ren, được biết đến với danh hiệu Azure Blade, là hiệp sĩ tiền
 
 Trong giao tranh, Ren giữ vai trò mũi nhọn kiêm điểm tựa. Cô có thể chớp thời cơ áp sát nhiều mục tiêu, bảo vệ đồng đội trước áp lực ở hàng trước và duy trì thế chủ động khi thế trận trở nên hỗn loạn. Sự hiện diện của Azure Blade trên sới đấu là điều kiện để Humans triển khai những chiến thuật liên kết mạnh mẽ, biến một hàng tiền tuyến vững chắc thành đợt phản công quyết đoán.
 
-## Kỹ Năng Nội Tại
-- **Twin Reaper**: Có thể tấn công đồng thời 2 mục tiêu.
-
 ## Kỹ Năng Liên Kết
 - [Spinning Slash](abilities/spinning_slash.md) — Chiêu thức chém xoay gây sát thương tổng.
 - [Cross Guard](abilities/cross_guard.md) — Chiêu thức đỡ kiếm giúp củng cố phòng tuyến cho đồng minh.

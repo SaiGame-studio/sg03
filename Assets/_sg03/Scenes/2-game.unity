@@ -8386,7 +8386,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[17]'
-      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/hellscythe.asset
+      value: Assets/_sg03/Card/Data/Character/Darkborn/Undead/Ria/ria.asset
       objectReference: {fileID: 0}
     - target: {fileID: 3471930897440109911, guid: 2c8366195287d504bb5b3a0d8cb4b153, type: 3}
       propertyPath: 'cardAddresses.Array.data[18]'

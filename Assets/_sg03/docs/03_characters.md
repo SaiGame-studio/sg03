@@ -13,7 +13,7 @@ Các tộc nhánh hiện có gồm Undead và Demon.
 
 Nằm tại thư mục [`cards/darkborn/undead/`](cards/darkborn/undead/)
 
-- [Hellscythe](cards/darkborn/undead/Ria/hellscythe.md) — Số sao: 0
+- [Ria](cards/darkborn/undead/Ria/ria.md) — Số sao: 3
 - [Skeleton](cards/darkborn/undead/Ria/skeleton.md) — Số sao: 1
 - [Skeleton King](cards/darkborn/undead/Ria/skeleton_king.md) — Số sao: 4
 - [Black Zombie](cards/darkborn/undead/common/zombie_male.md) — Số sao: 1
@@ -37,7 +37,6 @@ Nằm tại thư mục [`cards/lightborn/light_elf/`](cards/lightborn/light_elf/
 
 Tộc nhánh hiện có: Light Elf. Định danh `elf` / `light_elf` là tên kỹ thuật hiện hành.
 
-### Thẻ Nhân Vật (Character)
 - [Zelena](cards/lightborn/light_elf/common/zelena.md) — Số sao: 2
 - [Azura](cards/lightborn/light_elf/azura/azura.md) — Số sao: 3
 
@@ -48,7 +47,6 @@ Nằm tại thư mục [`cards/natureborn/goblin/`](cards/natureborn/goblin/)
 
 Tộc nhánh hiện có: Goblin. Định danh `goblin` là tên kỹ thuật hiện hành.
 
-### Thẻ Nhân Vật (Character)
 - [Goblin Grunt](cards/natureborn/goblin/goblin_grunt.md) — Số sao: 1
 - [Goblin Saboteur](cards/natureborn/goblin/goblin_saboteur.md) — Số sao: 2
 - [Goblin Shaman](cards/natureborn/goblin/goblin_shaman.md) — Số sao: 3
@@ -59,7 +57,6 @@ Tộc nhánh hiện có: Goblin. Định danh `goblin` là tên kỹ thuật hi�
 ## Humans
 Nằm tại thư mục [`cards/human/`](cards/human/)
 
-### Thẻ Nhân Vật (Character)
 - [Ren](cards/human/azure_blade.md): 3 sao
 - [Lyra](cards/human/lyra.md): 2 sao
 - [Titan](cards/human/titan.md): 5 sao
