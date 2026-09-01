@@ -156,7 +156,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.088, y: -3.594}
+  m_AnchoredPosition: {x: 0.096, y: -3.49}
   m_SizeDelta: {x: 6, y: 2.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &9099398903202236047
@@ -421,6 +421,7 @@ MonoBehaviour:
   card: {fileID: 6448500482708191787}
   loader: {fileID: 9041437042871058224}
   movement: {fileID: 4051116045650226938}
+  fullDetailManipulator: {fileID: 0}
   cardOwner: 0
   codeName: 
   inventoryItemId: 
@@ -428,6 +429,7 @@ MonoBehaviour:
     id: 
     item_code: 
     name: 
+    description: 
     category: 
     rarity: 
     grid_width: 0
@@ -440,29 +442,25 @@ MonoBehaviour:
     created_by: 
     updated_at: 
     updated_by: 
-    base_stats:
-      atk: 0
-      def: 0
-      star: 0
-      atk_added: 0
-      atk_deduct: 0
-      def_added: 0
-      def_deduct: 0
-      summon_count: 0
-      hp_restore: 0
     metadata:
       behavior: 
       description: 
       race: 
       type: 
       gender: 
-      char_code_required:
+      char_code_required: 
       abilities: 
       summon: 
   expose: 0
   isTrigger: 0
   isHover: 0
+  attacker: {fileID: 0}
   cardHolder: {fileID: 0}
+  objectPool: {fileID: 0}
+  hpBarPrefab: {fileID: 0}
+  hpBarInstance: {fileID: 0}
+  atkUiPrefab: {fileID: 0}
+  atkUiInstance: {fileID: 0}
   reviewMovement: {fileID: 811396000192289789}
 --- !u!114 &4051116045650226938
 MonoBehaviour:
@@ -480,6 +478,7 @@ MonoBehaviour:
   duration: 1
   ease: 6
   lineOffsetY: 0.2
+  debugMoveVoidToLine: 0
   hoverDuration: 0.15
   hoverEase: 6
   selectedOffsetY: 1.5
@@ -512,6 +511,7 @@ MonoBehaviour:
   attackBackstepEase: 6
   location: 0
   faceState: 0
+  isVoidToLineTransitionActive: 0
 --- !u!1 &2634467069902684173
 GameObject:
   m_ObjectHideFlags: 0
@@ -628,7 +628,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3803166408387198035}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.003}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -990,7 +990,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5708026271542781842}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.003}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []

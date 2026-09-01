@@ -8898,6 +8898,14 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1926114376}
+    - target: {fileID: 2906211568743924252, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0.013
+      objectReference: {fileID: 0}
+    - target: {fileID: 2906211568743924252, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -3.38
+      objectReference: {fileID: 0}
     - target: {fileID: 3724972524044309510, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontMaterial
       value: 
