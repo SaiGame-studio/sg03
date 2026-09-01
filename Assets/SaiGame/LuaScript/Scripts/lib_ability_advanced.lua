@@ -149,7 +149,7 @@ end
 
 -- ability: king_return
 -- Sacrifices the first three Skeletons in front-line slot order to summon
--- Skeleton King beside the selected, untriggered Ria. The left adjacent slot
+-- Skeleton King beside the selected Ria. The left adjacent slot
 -- is preferred. If neither adjacent slot is free after the sacrifices, the
 -- ability is still consumed but Skeleton King remains in the void.
 function king_return_execute(state, source_card, event_data, helpers)
@@ -176,9 +176,6 @@ function king_return_execute(state, source_card, event_data, helpers)
     local ria_card = front_line[ria_index]
     if ria_card.item_definition_code_name ~= "ria" then
         return {}, "king_return target must be Ria"
-    end
-    if ria_card.trigger == true then
-        return {}, "king_return requires an untriggered Ria in own front_line"
     end
 
     local void_key = source_side .. "_the_void"
