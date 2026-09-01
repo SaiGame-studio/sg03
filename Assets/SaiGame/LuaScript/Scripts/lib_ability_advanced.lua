@@ -101,12 +101,17 @@ function animate_dead_execute(state, source_card, event_data, helpers)
 
     local front_line_key = caster_side .. "_front_line"
     local front_line = state[front_line_key] or {}
-    local ria_card = helpers.find_untriggered_card(front_line, function(c)
-        return c.item_definition_code_name == "ria"
-    end)
+    local ria_card = nil
+    for _, card in ipairs(front_line) do
+        if card.inventory_item_id ~= nil and card.inventory_item_id ~= ""
+            and card.item_definition_code_name == "ria" then
+            ria_card = card
+            break
+        end
+    end
     if ria_card == nil then
-        battle.dlog("[ability] animate_dead: error - no untriggered ria in " .. front_line_key)
-        return {}, "animate_dead requires untriggered ria in front_line"
+        battle.dlog("[ability] animate_dead: error - no ria in " .. front_line_key)
+        return {}, "animate_dead requires ria in front_line"
     end
     local ability_atk, ability_atk_err = advanced_get_ability_atk(state, source_card, helpers, "animate_dead")
     if ability_atk_err ~= nil then return {}, ability_atk_err end

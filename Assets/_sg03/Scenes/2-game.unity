@@ -5194,7 +5194,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: ec2ae1dc1663ea447a9ee70331443624, type: 3}
+        m_Texture: {fileID: 2800000, guid: 1e3d0f0371373b74a86e36f3aa110917, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -8731,6 +8731,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3724972524044309510, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_text
+      value: ???
+      objectReference: {fileID: 0}
+    - target: {fileID: 3724972524044309510, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontMaterial
       value: 
       objectReference: {fileID: 1927238916}
@@ -8791,6 +8795,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1927238916}
     - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_text
+      value: ???
+      objectReference: {fileID: 0}
+    - target: {fileID: 5571234346840938346, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontMaterial
       value: 
       objectReference: {fileID: 1325852951}
@@ -8802,6 +8810,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1325852951}
+    - target: {fileID: 6288588338998864053, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_text
+      value: '?'
+      objectReference: {fileID: 0}
     - target: {fileID: 6288588338998864053, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontMaterial
       value: 
@@ -8815,6 +8827,10 @@ PrefabInstance:
       value: Card3D
       objectReference: {fileID: 0}
     - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_text
+      value: ??? ???
+      objectReference: {fileID: 0}
+    - target: {fileID: 8752282058966526777, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontMaterial
       value: 
       objectReference: {fileID: 399528766}
@@ -8822,6 +8838,10 @@ PrefabInstance:
       propertyPath: reviewCamera
       value: 
       objectReference: {fileID: 330585545}
+    - target: {fileID: 9181609221170815586, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
+      propertyPath: m_text
+      value: ???
+      objectReference: {fileID: 0}
     - target: {fileID: 9181609221170815586, guid: 2cdb7a8738b0092429faf20dce591cda, type: 3}
       propertyPath: m_fontMaterial
       value: 
