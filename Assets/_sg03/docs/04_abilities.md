@@ -32,8 +32,8 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 - [Brute Call](cards/natureborn/goblin/abilities/brute_call.md): 3 sao
 
 ### Humans
-- [Spinning Slash](cards/human/abilities/spinning_slash.md): 3 sao
-- [Cross Guard](cards/human/abilities/cross_guard.md): 1 sao
+- [Spinning Slash](cards/human/abilities/spinning_slash.md): 4 sao
+- [Cross Guard](cards/human/abilities/cross_guard.md): 2 sao
 - [Eagle Eye](cards/human/abilities/eagle_eye.md): 2 sao
 - [Titan Fall](cards/human/abilities/titan_fall.md): 5 sao
 - [Spear Sweep](cards/human/abilities/titan_spear_sweep.md): 1 sao
