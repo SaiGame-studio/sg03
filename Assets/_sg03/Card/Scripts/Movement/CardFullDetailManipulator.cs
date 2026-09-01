@@ -1,4 +1,5 @@
 using SaiGame.Services;
+using SG03.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -41,7 +42,13 @@ namespace SG03
             Debug.LogWarning(this.transform.name + ": LoadReviewCamera", this.gameObject);
         }
 
-        private void Update() => this.HandleInput();
+        private void Update() => this.HandleFrameInput();
+
+        private void HandleFrameInput()
+        {
+            if (ModalDimLayer.IsInputBlocked) return;
+            this.HandleInput();
+        }
 
         private void HandleInput()
         {

@@ -45,7 +45,7 @@ namespace SG03
         private bool finalDefOnlyMode;
 
         [Header("Parenting")]
-        [SerializeField] private Transform parent;
+        [SerializeField] private Card3DCtrl cardCtrl;
         [Tooltip("World-space height above the card. This is unaffected by card flips.")]
         [SerializeField, Min(0f)] private float aboveCardYOffset = 0.2f;
 
@@ -57,8 +57,6 @@ namespace SG03
         private Label currentHealthLabel;
         private Label healthLabelSeparator;
         private Label maxHealthLabel;
-        private Vector3 desiredWorldScale;
-        private bool hasDesiredWorldScale;
         private Vector3 baseWorldRotation;
         private bool hasBaseWorldRotation;
         private ClientActions subscribedClientActions;
@@ -112,7 +110,7 @@ namespace SG03
             this.RefreshUiWhenEnabled();
             this.RefreshUiWhenDocumentIsReady();
             this.BindClientActionEvents();
-            this.RefreshMaxHealthFromBattleState();
+            this.RefreshHealthFromBattleState();
         }
 
         private void HandleDisabled()
@@ -143,9 +141,8 @@ namespace SG03
 
         private void UpdateWorldSpacePresentation()
         {
-            this.UpdateWorldPositionFromParent();
+            this.UpdateWorldPositionFromCard();
             this.FaceMainCamera();
-            this.CompensateParentScale();
             this.UpdateHealthPreviewAnimation();
         }
 
@@ -193,12 +190,11 @@ namespace SG03
         private bool TryGetBattleCardSlot(out BattleCardSlot result)
         {
             result = null;
-            // Pool activation occurs before Card3DCtrl assigns the tracked card through SetParent.
+            // Pool activation occurs before Card3DCtrl assigns the tracked card through SetCard.
             // Use Unity's null check explicitly; ?. does not handle destroyed/unassigned Unity objects.
-            if (this.parent == null) return false;
+            if (this.cardCtrl == null) return false;
 
-            Card3DCtrl card = this.parent.GetComponent<Card3DCtrl>();
-            string inventoryItemId = card?.InventoryItemId;
+            string inventoryItemId = this.cardCtrl?.InventoryItemId;
             BattleState state = this.battleStateCtrl?.BattleState;
             if (state == null || string.IsNullOrEmpty(inventoryItemId)) return false;
 
@@ -267,21 +263,25 @@ namespace SG03
         }
 
         /// <summary>Assigns the card this bar follows without inheriting its transform.</summary>
-        public void SetParent(Transform newParent)
+        public void SetCard(Card3DCtrl newCard)
         {
-            if (newParent == null) return;
+            if (newCard == null) return;
 
-            bool isNewCard = this.parent != newParent;
-            this.desiredWorldScale = this.transform.lossyScale;
-            this.hasDesiredWorldScale = true;
-            this.parent = newParent;
+            bool isNewCard = this.cardCtrl != newCard;
+            this.cardCtrl = newCard;
             if (isNewCard) this.ResetCurrentHealthForNewCard();
             this.transform.SetParent(null, true);
-            this.UpdateWorldPositionFromParent();
+            this.UpdateWorldPositionFromCard();
             this.baseWorldRotation = this.transform.eulerAngles;
             this.hasBaseWorldRotation = true;
             this.BindClientActionEvents();
             this.RefreshMaxHealthFromBattleState();
+        }
+
+        /// <summary>Clears the card currently shown in this pooled bar's Inspector.</summary>
+        public void ClearCard()
+        {
+            this.cardCtrl = null;
         }
 
         /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>
@@ -305,25 +305,22 @@ namespace SG03
             this.SetMiniMode(!this.miniMode);
         }
 
-        /// <summary>Reapplies the world-space follow offset for the assigned parent.</summary>
+        /// <summary>Reapplies the world-space follow offset for the assigned card.</summary>
         public void UpdateParent()
         {
-            if (this.parent == null)
+            if (this.cardCtrl == null)
             {
-                Debug.LogWarning($"{this.name}: Parent is not assigned.", this);
+                Debug.LogWarning($"{this.name}: CardCtrl is not assigned.", this);
                 return;
             }
 
-            this.desiredWorldScale = this.transform.lossyScale;
-            this.hasDesiredWorldScale = true;
             this.transform.SetParent(null, true);
-            this.UpdateWorldPositionFromParent();
+            this.UpdateWorldPositionFromCard();
         }
 
         protected override void LoadComponents()
         {
             base.LoadComponents();
-            this.CacheDesiredWorldScale();
             this.BindUi();
             this.LoadBattleStateCtrl();
         }
@@ -357,9 +354,9 @@ namespace SG03
 
         private void OnCardTakeDamageExecuted(string targetCardId)
         {
-            if (this.parent == null) return;
+            if (this.cardCtrl == null) return;
 
-            string cardId = this.parent.GetComponent<Card3DCtrl>()?.InventoryItemId;
+            string cardId = this.cardCtrl.InventoryItemId;
             if (string.IsNullOrEmpty(cardId) || cardId != targetCardId) return;
             this.RefreshHealthFromDamageAction();
         }
@@ -387,46 +384,18 @@ namespace SG03
             this.SetHealth(this.GetTotalDamageReceived(), this.GetFinalDef());
         }
 
-        // This UI is returned explicitly through ObjectPool, so it needs no Despawn component.
-        protected override void LoadDespawn()
+        private void UpdateWorldPositionFromCard()
         {
-        }
+            if (this.cardCtrl == null) return;
 
-        private void CacheDesiredWorldScale()
-        {
-            if (this.hasDesiredWorldScale) return;
-            this.desiredWorldScale = this.transform.lossyScale;
-            this.hasDesiredWorldScale = true;
-        }
-
-        private void UpdateWorldPositionFromParent()
-        {
-            if (this.parent == null) return;
-
-            Card3D card = this.parent.GetComponent<Card3D>();
+            Card3D card = this.cardCtrl.GetComponent<Card3D>();
             if (card != null && card.TryGetStatsCenterWorldPosition(out Vector3 statsCenter))
             {
                 this.transform.position = statsCenter + Vector3.up * this.aboveCardYOffset;
                 return;
             }
 
-            this.transform.position = this.parent.position + Vector3.up * this.aboveCardYOffset;
-        }
-
-        private void CompensateParentScale()
-        {
-            if (this.parent == null || this.transform.parent != this.parent) return;
-            this.CacheDesiredWorldScale();
-
-            Vector3 parentScale = this.parent.lossyScale;
-            if (Mathf.Approximately(parentScale.x, 0f)
-                || Mathf.Approximately(parentScale.y, 0f)
-                || Mathf.Approximately(parentScale.z, 0f)) return;
-
-            this.transform.localScale = new Vector3(
-                this.desiredWorldScale.x / parentScale.x,
-                this.desiredWorldScale.y / parentScale.y,
-                this.desiredWorldScale.z / parentScale.z);
+            this.transform.position = this.cardCtrl.transform.position + Vector3.up * this.aboveCardYOffset;
         }
 
         private void BindUi(bool forceRebind = false)

@@ -181,23 +181,23 @@ local function replace_pending_defenders(state, target_card, successor_card)
 end
 
 local function build_xena_actions(source_side, source_card, settings, target_card, successor_card,
-    sacrificed_cards)
+    sacrificed_cards, battle)
     local actions = {
         source_side .. "_card_ability:source=" .. source_card.inventory_item_id ..
             ",ability=" .. settings.ability_key .. ",target=" .. target_card.inventory_item_id ..
             ",summoned=" .. successor_card.inventory_item_id,
     }
     for _, sacrifice_card in ipairs(sacrificed_cards) do
-        table.insert(actions, source_side .. "_card_sent_to_void:" .. sacrifice_card.inventory_item_id)
+        battle.append_card_sent_to_void_action(actions, source_side, sacrifice_card)
     end
-    table.insert(actions, source_side .. "_card_sent_to_void:" .. target_card.inventory_item_id)
+    battle.append_card_sent_to_void_action(actions, source_side, target_card)
     return actions
 end
 
 local function send_source_to_void(state, source_side, source_card, void_zone, battle, actions)
     battle.remove_card_from_line(state[source_side .. "_back_line"], source_card.inventory_item_id)
     table.insert(void_zone, source_card)
-    table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+    battle.append_card_sent_to_void_action(actions, source_side, source_card)
 end
 
 local function execute_xena_awakened(state, source_card, event_data, helpers, config)
@@ -229,7 +229,7 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
         return actions, nil
     end
 
-    local def_buff = tonumber(helpers.get_card_stat(state, source_card, "add_def"))
+    local def_buff = tonumber(helpers.get_card_stat(state, source_card, "def_added"))
     if def_buff == nil then def_buff = 0 end
 
     local target_line_key, target_line, target_index, line_err =
@@ -252,7 +252,7 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
     replace_pending_defenders(state, target_card, successor_card)
 
     local actions = build_xena_actions(source_side, source_card, settings, target_card, successor_card,
-        sacrificed_cards)
+        sacrificed_cards, battle)
     send_source_to_void(state, source_side, source_card, void_zone, battle, actions)
     table.insert(actions, source_side .. "_void_to_" .. string.sub(target_line_key, 7) .. ":" ..
         successor_card.inventory_item_id .. "," .. tostring(successor_card.slot_index))
@@ -387,13 +387,13 @@ function demon_rite_execute(state, source_card, event_data, helpers)
         ",ability=demon_rite,triggered_by=" .. source_card.inventory_item_id ..
         ",target=" .. target_card.inventory_item_id ..
         ",sacrificed=" .. sacrifice_card.inventory_item_id)
-    table.insert(actions, source_side .. "_card_sent_to_void:" .. sacrifice_card.inventory_item_id)
+    helpers.lib_battle_common.append_card_sent_to_void_action(actions, source_side, sacrifice_card)
     helpers.lib_battle_common.remove_card_from_line(back_line, demon_orbs_card.inventory_item_id)
     table.insert(state[void_key], demon_orbs_card)
-    table.insert(actions, source_side .. "_card_sent_to_void:" .. demon_orbs_card.inventory_item_id)
+    helpers.lib_battle_common.append_card_sent_to_void_action(actions, source_side, demon_orbs_card)
     helpers.lib_battle_common.remove_card_from_line(back_line, demon_rite_card.inventory_item_id)
     table.insert(state[void_key], demon_rite_card)
-    table.insert(actions, source_side .. "_card_sent_to_void:" .. demon_rite_card.inventory_item_id)
+    helpers.lib_battle_common.append_card_sent_to_void_action(actions, source_side, demon_rite_card)
     helpers.lib_battle_common.dlog("[ability] demon_rite: target=" .. target_card.inventory_item_id ..
         " sacrificed=" .. sacrifice_card.inventory_item_id .. " from " .. target_line_key ..
         " consumed_orbs=" .. demon_orbs_card.inventory_item_id ..

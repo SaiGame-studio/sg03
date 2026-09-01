@@ -214,7 +214,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.016, y: -3.486}
+  m_AnchoredPosition: {x: 0.013, y: -3.38}
   m_SizeDelta: {x: 6, y: 2.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &2955687961266307114
@@ -1397,7 +1397,7 @@ MonoBehaviour:
       race: 
       type: 
       gender: 
-      char_code_required:
+      char_code_required: 
       abilities: 
       summon: 
   expose: 0
@@ -1408,6 +1408,8 @@ MonoBehaviour:
   objectPool: {fileID: 0}
   hpBarPrefab: {fileID: 0}
   hpBarInstance: {fileID: 0}
+  atkUiPrefab: {fileID: 0}
+  atkUiInstance: {fileID: 0}
 --- !u!114 &4719509819920680533
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1424,7 +1426,7 @@ MonoBehaviour:
   duration: 1
   ease: 6
   lineOffsetY: 0.3
-  debugMoveVoidToLine: 1
+  debugMoveVoidToLine: 0
   hoverDuration: 0.15
   hoverEase: 6
   selectedOffsetY: 1.5

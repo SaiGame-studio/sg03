@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System;
 using SaiGame.Services;
+using SG03.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -96,6 +97,12 @@ namespace SG03
 
         private void Update()
         {
+            this.HandleFrameInput();
+        }
+
+        private void HandleFrameInput()
+        {
+            if (ModalDimLayer.IsInputBlocked) return;
             this.HandlePreviewCancel();
             this.HandleRotation();
             this.HandleZoom();

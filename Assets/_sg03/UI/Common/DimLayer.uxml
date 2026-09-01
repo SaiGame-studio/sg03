@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="DimLayer.uss" />
+
+    <ui:VisualElement name="DimLayerOverlay" class="dim-layer-overlay">
+        <ui:VisualElement name="DimLayerContent" class="dim-layer-content" />
+    </ui:VisualElement>
+
+</ui:UXML>

@@ -1641,10 +1641,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 638439398466596651, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -0.003
-      objectReference: {fileID: 0}
+    - target: {fileID: 811396000192289789, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
+      propertyPath: reviewCamera
+      value: 
+      objectReference: {fileID: 650371474}
     - target: {fileID: 2513543958764469397, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
       propertyPath: m_Name
       value: Card3DReview
@@ -1693,22 +1693,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 41251400}
-    - target: {fileID: 6783132589117423438, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -0.003
-      objectReference: {fileID: 0}
     - target: {fileID: 6923964180551665996, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1086256998}
-    - target: {fileID: 811396000192289789, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
-      propertyPath: reviewCamera
-      value:
-      objectReference: {fileID: 650371474}
-    - target: {fileID: 8055231946860678055, guid: c82510582685dbe4b976eaab14ab606b, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: 4da40248bb624961b356914f1f00cde3, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

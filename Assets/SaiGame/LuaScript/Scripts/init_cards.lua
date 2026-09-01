@@ -260,7 +260,7 @@ local function alpha_init_void(state)
 
     local function move_to_void(card, reason)
         table.insert(state.alpha_the_void, card)
-        lib_battle_common.append_client_action(state, "alpha_card_sent_to_void:" .. card.inventory_item_id)
+        lib_battle_common.append_card_sent_to_void_client_action(state, "alpha", card)
         lib_battle_common.dlog("[init_cards] Moved alpha card to void (" .. reason .. "): " .. card.inventory_item_id)
     end
 

@@ -31,7 +31,7 @@ namespace SG03
 
         [Header("Debug")]
         [Tooltip("Logs every MoveVoidToLine step with card/holder positions and distance.")]
-        [SerializeField] private bool debugMoveVoidToLine;
+        [SerializeField] private bool debugMoveVoidToLine = false;
 
         // ─── In-Hand Hover ────────────────────────────────────────────────────────
 
@@ -302,6 +302,22 @@ namespace SG03
             this.RecordHandAnchor(target, destination);
             this.KillAllTweens();
             this.StartMoveTween(target.position, this.duration, this.ease, onComplete);
+        }
+
+        /// <summary>
+        /// Smoothly moves the card horizontally to the target while retaining its current world-space Y position.
+        /// </summary>
+        public void MoveToKeepY(Transform target, Location destination, System.Action onComplete)
+        {
+            if (this.isVoidToLineTransitionActive) return;
+            if (this.isFlipping) return;
+            this.SetLocation(destination);
+            this.RecordHandAnchor(target, destination);
+            this.KillAllTweens();
+
+            Vector3 targetPosition = target.position;
+            targetPosition.y = this.transform.position.y;
+            this.StartMoveTween(targetPosition, this.duration, this.ease, onComplete);
         }
 
         /// <summary>

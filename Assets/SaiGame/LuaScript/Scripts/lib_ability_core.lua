@@ -82,7 +82,7 @@ local function _find_item_def(item_defs, code)
 end
 
 -- Returns one base stat from a card's item definition, for example
--- _get_card_stat(state, card, "add_def").
+-- _get_card_stat(state, card, "def_added").
 local function _get_card_stat(state, card, stat_key)
     if state == nil or card == nil or stat_key == nil or stat_key == "" then return nil end
     local item_def = _find_item_def(state.item_defs, card.item_definition_code_name)
@@ -324,7 +324,7 @@ function deal_damage_to_character(state, attacker_card, target_card, damage, tar
             if state[void_key] == nil then state[void_key] = {} end
             table.insert(state[void_key], target_card)
         end
-        table.insert(damage_actions, target_side .. "_card_sent_to_void:" .. target_card.inventory_item_id)
+        lib_battle_common.append_card_sent_to_void_action(damage_actions, target_side, target_card)
     end
     return damage_actions, nil
 end

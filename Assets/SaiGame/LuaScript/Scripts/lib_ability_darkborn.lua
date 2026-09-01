@@ -12,13 +12,18 @@ function skeleton_shield_execute(state, source_card, event_data, helpers)
     local front_line_key = source_side .. "_front_line"
     local front_line = state[front_line_key] or {}
 
-    -- Requirement 1: Must select 1 untriggered hellscythe card in front_line
-    local hellscythe_card = helpers.find_untriggered_card(front_line, function(c)
-        return c.item_definition_code_name == "hellscythe"
-    end)
-    if hellscythe_card == nil then
-        battle.dlog("[ability] skeleton_shield: error - no untriggered hellscythe in " .. front_line_key)
-        return {}, "skeleton_shield requires untriggered hellscythe in front_line"
+    -- Requirement 1: Ria must be present in front_line, even if triggered.
+    local ria_card = nil
+    for _, card in ipairs(front_line) do
+        local has_id = card.inventory_item_id ~= nil and card.inventory_item_id ~= ""
+        if has_id and card.item_definition_code_name == "ria" then
+            ria_card = card
+            break
+        end
+    end
+    if ria_card == nil then
+        battle.dlog("[ability] skeleton_shield: error - no ria in " .. front_line_key)
+        return {}, "skeleton_shield requires ria in front_line"
     end
 
     -- Requirement 2: Must have a skeleton card in front_line (different from target_card)
@@ -105,17 +110,17 @@ function skeleton_shield_execute(state, source_card, event_data, helpers)
     -- Redirect the opponent's planned attack to the skeleton card (as a substitute shield)
     target_plan_entry.defender_inv_id = skeleton_card.inventory_item_id
 
-    hellscythe_card.trigger = true
+    ria_card.trigger = true
 
 
-    local expose_action = helpers.expose_ability_selected_card(state, hellscythe_card)
+    local expose_action = helpers.expose_ability_selected_card(state, ria_card)
     battle.dlog("[ability] skeleton_shield: swapped skeleton=" .. skeleton_card.inventory_item_id .. " and target=" .. target_card.inventory_item_id)
 
     local shield_actions = {}
     if expose_action ~= nil then
         table.insert(shield_actions, expose_action)
     end
-    table.insert(shield_actions, source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=skeleton_shield,target=" .. target_card.inventory_item_id .. ",selected=" .. hellscythe_card.inventory_item_id .. ",swapped=" .. skeleton_card.inventory_item_id)
+    table.insert(shield_actions, source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=skeleton_shield,target=" .. target_card.inventory_item_id .. ",selected=" .. ria_card.inventory_item_id .. ",swapped=" .. skeleton_card.inventory_item_id)
     table.insert(shield_actions, source_side .. "_card_swapped:card1=" .. skeleton_card.inventory_item_id .. ",card2=" .. target_card.inventory_item_id)
     table.insert(shield_actions, source_side .. "_card_guarded:" .. target_card.inventory_item_id)
 

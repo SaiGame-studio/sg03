@@ -290,21 +290,6 @@
     color: rgb(255, 255, 255);
 }
 
-.void-grid-overlay {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(5, 7, 14, 0.86);
-}
-
-.void-grid-overlay--hidden {
-    display: none;
-}
-
 .void-grid-panel {
     width: 72%;
     height: 72%;

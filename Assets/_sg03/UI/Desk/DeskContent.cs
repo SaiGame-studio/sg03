@@ -148,7 +148,6 @@ namespace SG03.UI
                     previewDefinition?.description,
                     previewDefinition);
                 string        cardType    = previewDefinition?.metadata?.type;
-                Debug.Log($"[DeskContent] base_stats={definition?.base_stats} | metadata={rawMetadata} | description={description}");
                 cardReviewCtrl?.RequestShow(
                     definition?.item_code,
                     definition?.name,

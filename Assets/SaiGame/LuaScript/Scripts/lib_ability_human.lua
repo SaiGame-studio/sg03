@@ -64,7 +64,7 @@ function eagle_eye_execute(state, source_card, event_data, helpers)
     local void_key = source_side .. "_the_void"
     if state[void_key] == nil then state[void_key] = {} end
     table.insert(state[void_key], source_card)
-    table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+    battle.append_card_sent_to_void_action(ability_actions, source_side, source_card)
 
     battle.dlog("[ability] eagle_eye: exposed Lyra=" .. lyra_card.inventory_item_id .. " and target=" .. target_card.inventory_item_id)
     return ability_actions, nil

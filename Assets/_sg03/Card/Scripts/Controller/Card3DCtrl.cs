@@ -86,7 +86,11 @@ namespace SG03
         }
         public void NotifySelected()     => CardSelected?.Invoke(this);
         public static void NotifyDeselected() => CardSelected?.Invoke(null);
-        public void NotifyLocationChanged(Location newLocation) => LocationChanged?.Invoke(this, newLocation);
+        public void NotifyLocationChanged(Location newLocation)
+        {
+            if (newLocation == Location.in_void) this.DespawnStatUis();
+            LocationChanged?.Invoke(this, newLocation);
+        }
 
         protected override void LoadComponents()
         {
@@ -102,7 +106,7 @@ namespace SG03
         protected virtual void OnDisable()
         {
             this.SetAttacker(null);
-            this.ReturnHpBarToPool();
+            this.DespawnStatUis();
         }
 
         protected virtual void LoadCard3D()
@@ -180,7 +184,7 @@ namespace SG03
             if (this.hpBarInstance == null) return;
 
             this.hpBarInstance.SetPosition(holder.transform.position);
-            this.hpBarInstance.SetParent(this.transform);
+            this.hpBarInstance.SetCard(this);
             this.hpBarInstance.gameObject.SetActive(true);
             this.UpdateDamagePreviewFromAttacker();
             this.RefreshHpBarDisplayMode();
@@ -195,6 +199,13 @@ namespace SG03
         /// <summary>Spawns and displays the world-space ATK UI for this card.</summary>
         public void SpawnAtkUi()
         {
+            int attack = this.GetDamagePreviewAttack();
+            if (attack == 0)
+            {
+                this.DespawnAtkUi();
+                return;
+            }
+
             this.EnsureSingleAtkUiInstance();
             this.LoadObjectPool();
             if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
@@ -223,8 +234,8 @@ namespace SG03
 
             Vector3 pos = this.cardHolder != null ? this.cardHolder.transform.position : this.transform.position;
             this.atkUiInstance.SetPosition(pos);
-            this.atkUiInstance.SetParent(this.transform);
-            this.atkUiInstance.SetAttack(this.definition?.GetBaseStatInt("atk") ?? 0);
+            this.atkUiInstance.SetCard(this);
+            this.atkUiInstance.SetAttack(attack);
             this.atkUiInstance.gameObject.SetActive(true);
         }
 
@@ -232,11 +243,12 @@ namespace SG03
         {
             if (this.isFullDetail) return false;
             if (!this.IsCharacter()) return false;
-            // Turn visibility is authoritative. Hover remains the only deliberate
-            // exception, so inspecting a card can reveal its bar on either turn.
+            // Hover and accumulated damage deliberately override turn visibility.
+            // A damaged character must keep its HP bar visible until the resolved
+            // turn reset clears total_damage_received.
             if (this.isHover) return true;
-            if (this.ShouldHideHpBarForCurrentTurn()) return false;
             if (this.HasAccumulatedDamage()) return true;
+            if (this.ShouldHideHpBarForCurrentTurn()) return false;
             if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
             return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;
         }
@@ -250,11 +262,18 @@ namespace SG03
         private bool ShouldShowAtkUi(CardHolderCtrl holder)
         {
             if (this.isFullDetail) return false;
-            if (!this.IsCharacter()) return false;
+            if (!this.IsCharacter() && !this.HasAddedAttack()) return false;
+            if (this.GetDamagePreviewAttack() == 0) return false;
             if (this.Location == Location.in_hand || this.Location == Location.in_void) return false;
             if (this.ShouldHideAtkUiForCurrentTurn()) return false;
             if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
             return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;
+        }
+
+        private bool HasAddedAttack()
+        {
+            return this.definition != null
+                && this.definition.TryGetBaseStat("atk_added", out _);
         }
 
         private bool ShouldHideAtkUiForCurrentTurn()
@@ -297,8 +316,7 @@ namespace SG03
         {
             if (this.IsBattleResuming())
             {
-                this.DespawnHpBar();
-                this.DespawnAtkUi();
+                this.DespawnStatUis();
                 return;
             }
 
@@ -384,6 +402,7 @@ namespace SG03
         /// <summary>Previews a pending positive damage amount on this card's HP bar.</summary>
         public void SetHealthPreview(float positiveDelta)
         {
+            this.hpBarInstance?.RefreshHealthFromBattleState();
             this.hpBarInstance?.SetHealthPreview(Mathf.Max(0f, positiveDelta));
             this.RefreshHpBarDisplayMode();
         }
@@ -423,6 +442,13 @@ namespace SG03
 
             this.ReturnAtkUiToPool(this.atkUiInstance);
             this.atkUiInstance = null;
+        }
+
+        /// <summary>Returns this card's world-space HP and ATK UI to their pools.</summary>
+        public void DespawnStatUis()
+        {
+            this.DespawnHpBar();
+            this.DespawnAtkUi();
         }
 
         private void RefreshHpBarDisplayMode()
@@ -465,9 +491,8 @@ namespace SG03
         {
             if (hpBar == null) return;
 
-            this.LoadObjectPool();
-            if (this.objectPool != null) this.objectPool.Despawn(hpBar);
-            else hpBar.gameObject.SetActive(false);
+            hpBar.ClearCard();
+            hpBar.Despawn?.DoDespawn();
         }
 
         private void EnsureSingleAtkUiInstance()
@@ -490,9 +515,8 @@ namespace SG03
         {
             if (atkUi == null) return;
 
-            this.LoadObjectPool();
-            if (this.objectPool != null) this.objectPool.Despawn(atkUi);
-            else atkUi.gameObject.SetActive(false);
+            atkUi.ClearCard();
+            atkUi.Despawn?.DoDespawn();
         }
 
         private void ReturnHpBarToPool()
@@ -625,6 +649,20 @@ namespace SG03
             this.movement.MoveTo(worldPosition, destination);
         }
 
+        /// <summary>Moves to the target horizontally while retaining the card's current world-space Y position.</summary>
+        public void MoveToKeepY(Transform target, Location destination)
+        {
+            if (this.IsMovingVoidToLine) return;
+            CardHolderCtrl holder = target != null ? target.GetComponent<CardHolderCtrl>() : null;
+            if (holder == null)
+            {
+                this.movement.MoveToKeepY(target, destination, null);
+                return;
+            }
+
+            this.movement.MoveToKeepY(target, destination, () => this.SpawnHpBarAt(holder));
+        }
+
         /// <summary>Cancels the current transition and immediately starts returning this card to its hand slot.</summary>
         public void ReturnToHand(Transform handTarget)
         {
@@ -707,8 +745,7 @@ namespace SG03
         public void MoveToFullDetail(Transform point)
         {
             if (this.IsMovingVoidToLine) return;
-            this.DespawnHpBar();
-            this.DespawnAtkUi();
+            this.DespawnStatUis();
             this.movement.MoveToFullDetail(point);
         }
 
@@ -729,8 +766,7 @@ namespace SG03
             this.fullDetailManipulator?.SetInteractionActive(enabled);
             if (enabled)
             {
-                this.DespawnHpBar();
-                this.DespawnAtkUi();
+                this.DespawnStatUis();
             }
         }
 
@@ -745,6 +781,7 @@ namespace SG03
         public void Damaged()
         {
             if (this.IsMovingVoidToLine) return;
+            this.RefreshHpBarVisibility();
             this.movement.Damaged();
         }
 

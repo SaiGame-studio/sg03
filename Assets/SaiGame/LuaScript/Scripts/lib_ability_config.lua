@@ -15,11 +15,6 @@
 --       chỉ thực hiện hiệu ứng, không đi qua luồng tấn công và gây sát thương.
 function get_ability_config(ability_key)
     local configs = {
-        twin_reaper = {
-            handler_group = "character_passives",
-            event = "on_attack",
-            target_positions = { "enemy_frontline" },
-        },
         scout_strike = {
             handler_group = "character_passives",
             event = "on_attack",
@@ -81,6 +76,13 @@ function get_ability_config(ability_key)
         animate_dead = {
             handler_group = "advanced",
             target_positions = { "own_frontline", "own_backline", "own_source", "own_void" },
+            resolves_without_attack = true,
+        },
+        king_return = {
+            handler_group = "advanced",
+            target_positions = { "own_frontline" },
+            requires_target_card = true,
+            resolves_without_attack = true,
         },
         titan_fall = {
             handler_group = "mid_game",

@@ -1,7 +1,8 @@
 # Cross Guard
 
 - **Loại Thẻ**: [`ability`](../../../04_abilities.md)
-- **Số sao**: 1
+- **Code Name**: `cross_guard`
+- **Số sao**: 2
 - **Chủng Tộc Chính**: **Humans** (định danh kỹ thuật: `human`)
 - **Vị Trí Nhắm Mục Tiêu**: Hàng trước đồng minh
 - **Thẻ Nhân Vật Yêu Cầu**: [Ren](../azure_blade.md)

@@ -50,8 +50,8 @@ namespace SG03.UI
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private BattleStateCtrl battleStateCtrl;
         [SerializeField] private CardDataManager cardDataManager;
+        [SerializeField] private ModalDimLayer dimLayer;
 
-        private VisualElement overlay;
         private VisualElement content;
         private VisualElement panel;
         private Label alphaVoidCountLabel;
@@ -83,6 +83,7 @@ namespace SG03.UI
             this.LoadUIDocument();
             this.LoadBattleStateCtrl();
             this.LoadCardDataManager();
+            this.LoadDimLayer();
         }
 
         private void LoadUIDocument()
@@ -110,6 +111,14 @@ namespace SG03.UI
             Debug.LogWarning(this.transform.name + ": LoadCardDataManager", this.gameObject);
         }
 
+        private void LoadDimLayer()
+        {
+            if (this.dimLayer != null) return;
+            this.dimLayer = this.GetComponentInChildren<ModalDimLayer>(true);
+            if (this.dimLayer == null) return;
+            Debug.LogWarning(this.transform.name + ": LoadDimLayer", this.gameObject);
+        }
+
         protected override void Start()
         {
             base.Start();
@@ -126,6 +135,7 @@ namespace SG03.UI
             }
 
             this.BindElements(this.uiDocument.rootVisualElement);
+            if (!this.InitializeDimLayer(this.uiDocument.rootVisualElement)) return;
             this.ConfigureSortField();
             this.RegisterCallbacks();
             this.SubscribeToCardHoverEvents();
@@ -211,7 +221,6 @@ namespace SG03.UI
 
         private void BindElements(VisualElement root)
         {
-            this.overlay = root?.Q("VoidGridOverlay");
             this.panel = root?.Q("VoidGridPanel");
             this.content = root?.Q("VoidGridContent");
             this.alphaVoidCountLabel = root?.Q<Label>("AlphaTheVoidCountLabel");
@@ -221,6 +230,18 @@ namespace SG03.UI
             this.closeButton = root?.Q<Button>("VoidGridCloseButton");
             this.previousButton = root?.Q<Button>("VoidGridPreviousButton");
             this.nextButton = root?.Q<Button>("VoidGridNextButton");
+        }
+
+        private bool InitializeDimLayer(VisualElement root)
+        {
+            if (this.dimLayer == null)
+            {
+                Debug.LogError(this.transform.name + ": VoidManagerGrid requires a ModalDimLayer child.", this.gameObject);
+                return false;
+            }
+
+            if (!this.dimLayer.Initialize(root, this.panel)) return false;
+            return this.dimLayer.Overlay != null;
         }
 
         private void ConfigureSortField()
@@ -237,7 +258,6 @@ namespace SG03.UI
             this.previousButton?.RegisterCallback<ClickEvent>(this.OnPreviousClicked);
             this.nextButton?.RegisterCallback<ClickEvent>(this.OnNextClicked);
             this.sortField?.RegisterValueChangedCallback(this.OnSortChanged);
-            this.overlay?.RegisterCallback<ClickEvent>(this.OnOverlayClicked);
             this.panel?.RegisterCallback<ClickEvent>(this.OnPanelClicked);
         }
 
@@ -248,7 +268,6 @@ namespace SG03.UI
             this.previousButton?.UnregisterCallback<ClickEvent>(this.OnPreviousClicked);
             this.nextButton?.UnregisterCallback<ClickEvent>(this.OnNextClicked);
             this.sortField?.UnregisterValueChangedCallback(this.OnSortChanged);
-            this.overlay?.UnregisterCallback<ClickEvent>(this.OnOverlayClicked);
             this.panel?.UnregisterCallback<ClickEvent>(this.OnPanelClicked);
         }
 
@@ -318,12 +337,6 @@ namespace SG03.UI
             this.Refresh();
         }
 
-        private void OnOverlayClicked(ClickEvent evt)
-        {
-            if (evt.target != this.overlay) return;
-            this.Hide();
-        }
-
         private void OnPanelClicked(ClickEvent evt)
         {
             evt.StopPropagation();
@@ -369,17 +382,17 @@ namespace SG03.UI
 
         private void Show()
         {
-            if (this.overlay == null) return;
+            if (this.dimLayer == null) return;
             this.isVisible = true;
             this.currentPage = 0;
-            this.overlay.RemoveFromClassList("void-grid-overlay--hidden");
+            this.dimLayer.Show();
             this.Refresh();
         }
 
         private void Hide()
         {
             this.isVisible = false;
-            this.overlay?.AddToClassList("void-grid-overlay--hidden");
+            this.dimLayer?.Hide();
         }
 
         private void Refresh()
