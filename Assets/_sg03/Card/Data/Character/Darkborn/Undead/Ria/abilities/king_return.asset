@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: king_return
   m_EditorClassIdentifier: Assembly-CSharp::SG03.CardData
   frameTexture: {fileID: 0}
-  characterTexture: {fileID: 2800000, guid: 2d20686afd1fa9e489821ff55b084a2d, type: 3}
+  characterTexture: {fileID: 2800000, guid: d808faa1ea7d96541b58b65c15839638, type: 3}
   backTexture: {fileID: 0}
