@@ -141,6 +141,30 @@ function append_client_action(state, action)
     table.insert(state.client_actions, index .. ":" .. action)
 end
 
+-- Reveals a card and appends its expose action before its move-to-void action.
+-- This is the single ordering rule for every path that removes a card from a
+-- battle line, so the client never animates a hidden card directly into void.
+function append_card_sent_to_void_action(actions, side, card)
+    if card == nil or card.inventory_item_id == nil or card.inventory_item_id == "" then return end
+    card.face_up = true
+    card.expose = true
+    table.insert(actions, side .. "_card_expose:" .. card.inventory_item_id)
+    table.insert(actions, side .. "_card_sent_to_void:" .. card.inventory_item_id)
+end
+
+-- State-backed variant used by scripts which append actions directly to the
+-- session queue instead of returning an ability action list.
+function append_card_sent_to_void_client_action(state, side, card)
+    if card == nil or card.inventory_item_id == nil or card.inventory_item_id == "" then return end
+    local is_already_exposed = card.face_up == true and card.expose == true
+    card.face_up = true
+    card.expose = true
+    if not is_already_exposed then
+        append_client_action(state, side .. "_card_expose:" .. card.inventory_item_id)
+    end
+    append_client_action(state, side .. "_card_sent_to_void:" .. card.inventory_item_id)
+end
+
 -- ─── reset_turn_cards ───────────────────────────────────────────────────────
 -- Marks a Character to be unavailable for its next turn. The flag is kept
 -- separately from trigger because trigger is normally reset at every handoff.
@@ -387,7 +411,7 @@ local function send_ability_attacker_to_void(state, attacker_card, attacker_line
     remove_card_from_line(state[attacker_line_key], attacker_card.inventory_item_id)
     if state[attacker_void_key] == nil then state[attacker_void_key] = {} end
     table.insert(state[attacker_void_key], attacker_card)
-    append_client_action(state, attacker_side .. "_card_sent_to_void:" .. attacker_card.inventory_item_id)
+    append_card_sent_to_void_client_action(state, attacker_side, attacker_card)
     dlog("attacker is ability-type, sent to " .. attacker_void_key .. ": " .. attacker_card.inventory_item_id)
 end
 

@@ -104,7 +104,7 @@ function animate_dead_execute(state, source_card, event_data, helpers)
         if state[void_key] == nil then state[void_key] = {} end
         table.insert(state[void_key], source_card)
         battle.dlog("[ability] animate_dead: source card sent to void=" .. void_key .. " id=" .. source_card.inventory_item_id)
-        table.insert(ability_actions, caster_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+        battle.append_card_sent_to_void_action(ability_actions, caster_side, source_card)
     end
 
     return ability_actions, nil

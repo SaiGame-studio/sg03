@@ -39,7 +39,7 @@ function totem_pulse_execute(state, source_card, event_data, helpers)
     if state[void_key] == nil then state[void_key] = {} end
     table.insert(state[void_key], source_card)
     battle.dlog("[ability] totem_pulse: source card sent to void=" .. void_key .. " id=" .. source_card.inventory_item_id)
-    table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+    battle.append_card_sent_to_void_action(ability_actions, source_side, source_card)
 
     return ability_actions, nil
 end
@@ -234,7 +234,7 @@ function brute_call_execute(state, source_card, event_data, helpers)
         end
         table.insert(ability_actions, success_action)
         if chosen_sacrifice ~= nil then
-            table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. chosen_sacrifice.inventory_item_id)
+            battle.append_card_sent_to_void_action(ability_actions, source_side, chosen_sacrifice)
         end
         table.insert(ability_actions, source_side .. "_void_to_front_line:" ..
             brute_card.inventory_item_id .. "," .. tostring(brute_card.slot_index))
@@ -254,7 +254,7 @@ function brute_call_execute(state, source_card, event_data, helpers)
         battle.remove_card_from_line(state[line_key], source_card.inventory_item_id)
     end
     table.insert(void_zone, source_card)
-    table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+    battle.append_card_sent_to_void_action(ability_actions, source_side, source_card)
 
     return ability_actions, nil
 end

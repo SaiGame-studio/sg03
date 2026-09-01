@@ -117,7 +117,7 @@ function holy_glow_execute(state, source_card, event_data, helpers)
     table.insert(ability_actions, caster_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=holy_glow,target=" .. target_side .. ",hp_restore=" .. hp_restore .. ",actual_restored=" .. actual_restored .. "," .. hp_key .. "=" .. state[hp_key] .. ",caster=" .. lightborn_female_card.inventory_item_id .. ",selected=" .. lightborn_female_card.inventory_item_id)
     
     if not will_system_send_to_void then
-        table.insert(ability_actions, caster_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+        battle.append_card_sent_to_void_action(ability_actions, caster_side, source_card)
     end
 
     return ability_actions, nil
@@ -219,7 +219,7 @@ function static_bind_execute(state, source_card, event_data, helpers)
     local source_void_key = source_side .. "_the_void"
     if state[source_void_key] == nil then state[source_void_key] = {} end
     table.insert(state[source_void_key], source_card)
-    table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+    battle.append_card_sent_to_void_action(actions, source_side, source_card)
 
     battle.dlog("[ability] static_bind: azura=" .. azura_card.inventory_item_id .. " target=" .. target_id .. " damage=" .. tostring(damage) .. " cancelled_plan=" .. tostring(cancelled_plan))
     return actions, nil
@@ -362,7 +362,7 @@ function lightning_strike_execute(state, source_card, event_data, helpers)
     local source_void_key = source_side .. "_the_void"
     if state[source_void_key] == nil then state[source_void_key] = {} end
     table.insert(state[source_void_key], source_card)
-    table.insert(actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+    battle.append_card_sent_to_void_action(actions, source_side, source_card)
 
     battle.dlog("[ability] lightning_strike: azura=" .. azura_card.inventory_item_id ..
         " target=" .. target_card.inventory_item_id ..

@@ -132,7 +132,7 @@ function titan_fall_execute(state, source_card, event_data, helpers)
     local actions = {}
     if expose_ren ~= nil then table.insert(actions, expose_ren) end
     table.insert(actions, source_side .. "_card_ability:source=" .. source_card.inventory_item_id .. ",ability=titan_fall,target=" .. target_card.inventory_item_id .. ",selected=" .. ren_card.inventory_item_id)
-    table.insert(actions, source_side .. "_card_sent_to_void:" .. target_card.inventory_item_id)
+    battle.append_card_sent_to_void_action(actions, source_side, target_card)
     table.insert(actions, source_side .. "_void_to_front_line:" .. titan_card.inventory_item_id .. "," .. tostring(target_slot_index))
     return actions, nil
 end
@@ -253,7 +253,7 @@ function titan_spear_sweep_execute(state, source_card, event_data, helpers)
     local source_void_key = source_side .. "_the_void"
     if state[source_void_key] == nil then state[source_void_key] = {} end
     table.insert(state[source_void_key], source_card)
-    table.insert(ability_actions, source_side .. "_card_sent_to_void:" .. source_card.inventory_item_id)
+    battle.append_card_sent_to_void_action(ability_actions, source_side, source_card)
 
     return ability_actions, nil
 end

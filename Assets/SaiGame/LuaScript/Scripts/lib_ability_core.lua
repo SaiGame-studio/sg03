@@ -324,7 +324,7 @@ function deal_damage_to_character(state, attacker_card, target_card, damage, tar
             if state[void_key] == nil then state[void_key] = {} end
             table.insert(state[void_key], target_card)
         end
-        table.insert(damage_actions, target_side .. "_card_sent_to_void:" .. target_card.inventory_item_id)
+        lib_battle_common.append_card_sent_to_void_action(damage_actions, target_side, target_card)
     end
     return damage_actions, nil
 end
