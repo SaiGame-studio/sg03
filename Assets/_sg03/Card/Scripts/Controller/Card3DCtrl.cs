@@ -398,6 +398,7 @@ namespace SG03
         /// <summary>Previews a pending positive damage amount on this card's HP bar.</summary>
         public void SetHealthPreview(float positiveDelta)
         {
+            this.hpBarInstance?.RefreshHealthFromBattleState();
             this.hpBarInstance?.SetHealthPreview(Mathf.Max(0f, positiveDelta));
             this.RefreshHpBarDisplayMode();
         }

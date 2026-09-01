@@ -112,7 +112,7 @@ namespace SG03
             this.RefreshUiWhenEnabled();
             this.RefreshUiWhenDocumentIsReady();
             this.BindClientActionEvents();
-            this.RefreshMaxHealthFromBattleState();
+            this.RefreshHealthFromBattleState();
         }
 
         private void HandleDisabled()
