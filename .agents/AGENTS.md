@@ -8,4 +8,6 @@
 - **_sg03-Only Changes**: Agents assigned to _sg03-scoped UI work may only create, edit, move, or delete files under `Assets/_sg03`. They must not modify files elsewhere in the repository.
 - **Verify C# Compilation**: After writing or modifying C# code, always check and verify that the code compiles without build errors.
 - **WebGL Icon Assets**: Do not use emoji or custom USS geometry elements to build UI icons. Do not manually generate custom SVG icons; always use official `.svg` vector icons downloaded directly from FontAwesome or WebGL-compatible serialized sprite/vector image assets from valid project asset sources.
+- **Evidence-Based Explanations (No Guessing)**: Always substantiate every technical explanation, root cause analysis, or response with concrete code snippets, line numbers, or empirical log/file evidence. Never guess or speculate on code logic, architecture, or behavior without inspecting the authoritative source.
+
 
