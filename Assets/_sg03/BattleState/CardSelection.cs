@@ -203,6 +203,7 @@ namespace SG03
 
         private void CheckClick()
         {
+            if (ModalDimLayer.IsInputBlocked) return;
             if (this.IsBattleCompleted())
             {
                 if (this.IsMouseClickedThisFrame()) { if (this.debugMouseEvents) Debug.LogWarning("[CardSelection] Cannot click: Battle is completed."); }

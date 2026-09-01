@@ -1,4 +1,5 @@
 using SaiGame.Services;
+using SG03.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -33,6 +34,11 @@ namespace SG03
 
         private void DetectHover()
         {
+            if (ModalDimLayer.IsInputBlocked)
+            {
+                this.ChangeHover(null);
+                return;
+            }
             Card3DCtrl hit = this.RaycastCard();
             if (hit == this.currentHovered) return;
             this.ChangeHover(hit);

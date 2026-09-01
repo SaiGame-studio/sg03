@@ -1,4 +1,5 @@
 using SaiGame.Services;
+using SG03.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -33,6 +34,11 @@ namespace SG03
 
         private void DetectHover()
         {
+            if (ModalDimLayer.IsInputBlocked)
+            {
+                this.ChangeHover(null);
+                return;
+            }
             CardHolderCtrl hit = this.RaycastHolder();
             if (hit == this.currentHovered) return;
             this.ChangeHover(hit);
@@ -76,6 +82,9 @@ namespace SG03
             return closestHolder;
         }
 
-        public CardHolderCtrl GetHolderUnderPointer() => this.RaycastHolder();
+        public CardHolderCtrl GetHolderUnderPointer()
+        {
+            return ModalDimLayer.IsInputBlocked ? null : this.RaycastHolder();
+        }
     }
 }

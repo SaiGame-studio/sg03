@@ -67,8 +67,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <ui:VisualElement name="VoidGridOverlay" class="void-grid-overlay void-grid-overlay--hidden">
-            <ui:VisualElement name="VoidGridPanel" class="void-grid-panel">
+        <ui:VisualElement name="VoidGridPanel" class="void-grid-panel" style="display: none;">
                 <ui:VisualElement class="void-grid-header">
                     <ui:Label name="VoidGridTitle" text="Alpha - The Void" class="void-grid-title" />
                     <ui:Button name="VoidGridCloseButton" text="X" tooltip="Close" class="void-grid-close-button" />
@@ -82,7 +81,6 @@
                     <ui:Label name="VoidGridPageLabel" text="Page 1 / 1" class="void-grid-page-label" />
                     <ui:Button name="VoidGridNextButton" text="Next" class="void-grid-page-button" />
                 </ui:VisualElement>
-            </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

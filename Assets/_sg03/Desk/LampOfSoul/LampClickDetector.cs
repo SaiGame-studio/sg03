@@ -224,6 +224,7 @@ namespace SG03
 
         private void DetectClick()
         {
+            if (ModalDimLayer.IsInputBlocked) return;
             if (this.IsBattleCompleted()) return;
             if (this.isLampClickPending) return;
             if (this.lampOfSoulCtrl != null && this.lampOfSoulCtrl.IsAnimating) return;
@@ -435,6 +436,11 @@ namespace SG03
 
         private void DetectHover()
         {
+            if (ModalDimLayer.IsInputBlocked)
+            {
+                this.SetHover(false);
+                return;
+            }
             if (Mouse.current == null) return;
             bool isHit = this.IsLampHit();
             if (isHit != this.isHovered)
