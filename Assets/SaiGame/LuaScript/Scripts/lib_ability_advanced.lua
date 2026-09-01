@@ -132,6 +132,8 @@ function animate_dead_execute(state, source_card, event_data, helpers)
     local void_key = caster_side .. "_the_void"
     local void_zone = state[void_key] or {}
     state[void_key] = void_zone
+
+    -- 1. Perform all skeleton summons first
     for _ = 1, 3 do
         local skeleton_card, skeleton_idx = advanced_find_card_by_code(void_zone, "skeleton")
         if skeleton_card == nil then
@@ -165,6 +167,7 @@ function animate_dead_execute(state, source_card, event_data, helpers)
         table.insert(ability_actions, caster_side .. "_void_to_front_line:" .. skeleton_card.inventory_item_id .. "," .. skeleton_card.slot_index)
     end
 
+    -- 2. Apply damage to Ria once after summoning completes (do not deal damage prior to summoning)
     local ria_damage_err = advanced_apply_ability_damage_to_ria(
         state, source_card, ria_card, ability_atk, front_line, void_key, helpers, ability_actions)
     if ria_damage_err ~= nil then return ability_actions, ria_damage_err end
@@ -231,6 +234,7 @@ function king_return_execute(state, source_card, event_data, helpers)
         ",ability=king_return,target=" .. ria_card.inventory_item_id ..
         ",selected=" .. ria_card.inventory_item_id)
 
+    -- 1. Perform sacrifices and summon Skeleton King first
     for _, index in ipairs(sacrifice_indexes) do
         local skeleton_card = front_line[index]
         front_line[index] = {}
@@ -261,6 +265,7 @@ function king_return_execute(state, source_card, event_data, helpers)
             " slot=" .. tostring(king_card.slot_index))
     end
 
+    -- 2. Apply damage to Ria once after summoning completes (do not deal damage prior to summoning)
     local ria_damage_err = advanced_apply_ability_damage_to_ria(
         state, source_card, ria_card, ability_atk, front_line, void_key, helpers, actions)
     if ria_damage_err ~= nil then return actions, ria_damage_err end
