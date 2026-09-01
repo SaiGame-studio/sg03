@@ -195,6 +195,12 @@ namespace SG03
         /// <summary>Spawns and displays the world-space ATK UI for this card.</summary>
         public void SpawnAtkUi()
         {
+            if (this.GetBaseAttack() == 0)
+            {
+                this.DespawnAtkUi();
+                return;
+            }
+
             this.EnsureSingleAtkUiInstance();
             this.LoadObjectPool();
             if (this.objectPool == null || this.objectPool.PoolPrefabs == null)
@@ -224,8 +230,13 @@ namespace SG03
             Vector3 pos = this.cardHolder != null ? this.cardHolder.transform.position : this.transform.position;
             this.atkUiInstance.SetPosition(pos);
             this.atkUiInstance.SetParent(this.transform);
-            this.atkUiInstance.SetAttack(this.definition?.GetBaseStatInt("atk") ?? 0);
+            this.atkUiInstance.SetAttack(this.GetBaseAttack());
             this.atkUiInstance.gameObject.SetActive(true);
+        }
+
+        private int GetBaseAttack()
+        {
+            return this.definition?.GetBaseStatInt("atk") ?? 0;
         }
 
         private bool ShouldShowHpBar(CardHolderCtrl holder)
@@ -251,6 +262,7 @@ namespace SG03
         {
             if (this.isFullDetail) return false;
             if (!this.IsCharacter()) return false;
+            if (this.GetBaseAttack() == 0) return false;
             if (this.Location == Location.in_hand || this.Location == Location.in_void) return false;
             if (this.ShouldHideAtkUiForCurrentTurn()) return false;
             if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
