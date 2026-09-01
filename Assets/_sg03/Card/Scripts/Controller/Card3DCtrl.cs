@@ -239,11 +239,12 @@ namespace SG03
         {
             if (this.isFullDetail) return false;
             if (!this.IsCharacter()) return false;
-            // Turn visibility is authoritative. Hover remains the only deliberate
-            // exception, so inspecting a card can reveal its bar on either turn.
+            // Hover and accumulated damage deliberately override turn visibility.
+            // A damaged character must keep its HP bar visible until the resolved
+            // turn reset clears total_damage_received.
             if (this.isHover) return true;
-            if (this.ShouldHideHpBarForCurrentTurn()) return false;
             if (this.HasAccumulatedDamage()) return true;
+            if (this.ShouldHideHpBarForCurrentTurn()) return false;
             if (this.cardOwner == Owner.alpha) return holder != null && holder.HolderLink == Link.front;
             return this.cardOwner == Owner.omega && this.expose && this.FaceState == FaceState.FaceUp;
         }
@@ -774,6 +775,7 @@ namespace SG03
         public void Damaged()
         {
             if (this.IsMovingVoidToLine) return;
+            this.RefreshHpBarVisibility();
             this.movement.Damaged();
         }
 
