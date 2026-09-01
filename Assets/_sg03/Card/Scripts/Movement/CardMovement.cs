@@ -31,7 +31,7 @@ namespace SG03
 
         [Header("Debug")]
         [Tooltip("Logs every MoveVoidToLine step with card/holder positions and distance.")]
-        [SerializeField] private bool debugMoveVoidToLine;
+        [SerializeField] private bool debugMoveVoidToLine = false;
 
         // ─── In-Hand Hover ────────────────────────────────────────────────────────
 
