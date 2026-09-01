@@ -67,6 +67,17 @@ local function advanced_get_ability_atk(state, source_card, helpers, ability_key
     return ability_atk, nil
 end
 
+local function advanced_apply_ability_damage_to_ria(state, source_card, ria_card, ability_atk,
+    front_line, void_key, helpers, actions)
+    local damage_actions, damage_err = helpers.deal_damage_to_character(
+        state, source_card, ria_card, ability_atk, front_line, void_key)
+    if damage_err ~= nil then return damage_err end
+    for _, action in ipairs(damage_actions) do
+        table.insert(actions, action)
+    end
+    return nil
+end
+
 -- ability: animate_dead
 function animate_dead_execute(state, source_card, event_data, helpers)
     local battle = helpers.lib_battle_common
@@ -110,10 +121,9 @@ function animate_dead_execute(state, source_card, event_data, helpers)
         battle.dlog("[ability] animate_dead: error - no ria in " .. front_line_key)
         return {}, "animate_dead requires ria in front_line"
     end
-    local _, ability_atk_err = advanced_get_ability_atk(state, source_card, helpers, "animate_dead")
+    local ability_atk, ability_atk_err = advanced_get_ability_atk(state, source_card, helpers, "animate_dead")
     if ability_atk_err ~= nil then return {}, ability_atk_err end
 
-    ria_card.trigger = true
     local expose_action = helpers.expose_ability_selected_card(state, ria_card)
     local ability_actions = {}
     if expose_action ~= nil then table.insert(ability_actions, expose_action) end
@@ -155,23 +165,18 @@ function animate_dead_execute(state, source_card, event_data, helpers)
         table.insert(ability_actions, caster_side .. "_void_to_front_line:" .. skeleton_card.inventory_item_id .. "," .. skeleton_card.slot_index)
     end
 
-    local card_def = helpers.find_item_def(state.item_defs, source_card.item_definition_code_name)
-    local is_ability_card = card_def ~= nil and card_def.metadata ~= nil and card_def.metadata.type == "ability"
-    local defender_line_key = event_data ~= nil and event_data.defender_line_key or nil
-    local will_system_send_to_void = is_ability_card and (
-        defender_line_key == "alpha_front_line" or defender_line_key == "alpha_back_line" or
-        defender_line_key == "omega_front_line" or defender_line_key == "omega_back_line"
-    )
-    if not will_system_send_to_void then
-        advanced_send_source_to_void(state, caster_side, source_card, void_zone, battle, ability_actions)
-        battle.dlog("[ability] animate_dead: source card sent to void=" .. void_key .. " id=" .. source_card.inventory_item_id)
-    end
+    local ria_damage_err = advanced_apply_ability_damage_to_ria(
+        state, source_card, ria_card, ability_atk, front_line, void_key, helpers, ability_actions)
+    if ria_damage_err ~= nil then return ability_actions, ria_damage_err end
+
+    advanced_send_source_to_void(state, caster_side, source_card, void_zone, battle, ability_actions)
+    battle.dlog("[ability] animate_dead: source card sent to void=" .. void_key .. " id=" .. source_card.inventory_item_id)
 
     return ability_actions, nil
 end
 
 -- ability: king_return
--- Sacrifices the first three Skeletons in front-line slot order to summon
+-- Sacrifices the two or three nearest Skeletons to Ria to summon
 -- Skeleton King beside the selected Ria. The left adjacent slot
 -- is preferred. If neither adjacent slot is free after the sacrifices, the
 -- ability is still consumed but Skeleton King remains in the void.
@@ -200,7 +205,7 @@ function king_return_execute(state, source_card, event_data, helpers)
     if ria_card.item_definition_code_name ~= "ria" then
         return {}, "king_return target must be Ria"
     end
-    local _, ability_atk_err = advanced_get_ability_atk(state, source_card, helpers, "king_return")
+    local ability_atk, ability_atk_err = advanced_get_ability_atk(state, source_card, helpers, "king_return")
     if ability_atk_err ~= nil then return {}, ability_atk_err end
 
     local void_key = source_side .. "_the_void"
@@ -255,6 +260,10 @@ function king_return_execute(state, source_card, event_data, helpers)
             " beside ria=" .. ria_card.inventory_item_id ..
             " slot=" .. tostring(king_card.slot_index))
     end
+
+    local ria_damage_err = advanced_apply_ability_damage_to_ria(
+        state, source_card, ria_card, ability_atk, front_line, void_key, helpers, actions)
+    if ria_damage_err ~= nil then return actions, ria_damage_err end
 
     advanced_send_source_to_void(state, source_side, source_card, void_zone, battle, actions)
 

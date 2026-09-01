@@ -76,6 +76,7 @@ function get_ability_config(ability_key)
         animate_dead = {
             handler_group = "advanced",
             target_positions = { "own_frontline", "own_backline", "own_source", "own_void" },
+            resolves_without_attack = true,
         },
         king_return = {
             handler_group = "advanced",
