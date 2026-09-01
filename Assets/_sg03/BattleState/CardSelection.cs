@@ -512,7 +512,7 @@ namespace SG03
         private void RefreshHealthPreviewTarget(Card3DCtrl card)
         {
             this.ClearHealthPreviewTarget();
-            if (!this.CanPreviewAlphaAttackOn(card)) return;
+            if (!this.CanPreviewDamageOn(card)) return;
 
             int attack = this.targetingSource.GetDamagePreviewAttack();
             if (attack <= 0) return;
@@ -521,11 +521,17 @@ namespace SG03
             this.healthPreviewTarget.SetHealthPreview(attack);
         }
 
-        private bool CanPreviewAlphaAttackOn(Card3DCtrl card)
+        private bool CanPreviewDamageOn(Card3DCtrl card)
         {
             if (!this.IsTargeting || card == null || card == this.targetingSource) return false;
             if (this.targetingSource.CardOwner != Owner.alpha) return false;
-            return card.IsCharacter() && card.CardOwner == Owner.omega;
+            if (!card.IsCharacter()) return false;
+
+            if (card.CardOwner == Owner.omega) return true;
+
+            return card.CardOwner == this.targetingSource.CardOwner
+                && this.targetingSource.CardType == CardType.ability
+                && this.targetingSource.Definition?.GetBaseStatInt("atk") > 0;
         }
 
         private void ClearHealthPreviewTarget(Card3DCtrl card = null)
