@@ -12,13 +12,18 @@ function skeleton_shield_execute(state, source_card, event_data, helpers)
     local front_line_key = source_side .. "_front_line"
     local front_line = state[front_line_key] or {}
 
-    -- Requirement 1: Must select 1 untriggered ria card in front_line
-    local ria_card = helpers.find_untriggered_card(front_line, function(c)
-        return c.item_definition_code_name == "ria"
-    end)
+    -- Requirement 1: Ria must be present in front_line, even if triggered.
+    local ria_card = nil
+    for _, card in ipairs(front_line) do
+        local has_id = card.inventory_item_id ~= nil and card.inventory_item_id ~= ""
+        if has_id and card.item_definition_code_name == "ria" then
+            ria_card = card
+            break
+        end
+    end
     if ria_card == nil then
-        battle.dlog("[ability] skeleton_shield: error - no untriggered ria in " .. front_line_key)
-        return {}, "skeleton_shield requires untriggered ria in front_line"
+        battle.dlog("[ability] skeleton_shield: error - no ria in " .. front_line_key)
+        return {}, "skeleton_shield requires ria in front_line"
     end
 
     -- Requirement 2: Must have a skeleton card in front_line (different from target_card)
