@@ -177,7 +177,41 @@ end
 load_player_the_source = function(preset_instance_id)
     local slots, err = game.get_preset_slots(preset_instance_id)
     if err ~= nil then return nil, err end
+
+    local definition_ids = {}
+    local seen_definition_ids = {}
     for _, slot in ipairs(slots) do
+        local definition_id = slot.item_definition_id
+        if definition_id ~= nil and definition_id ~= "" and not seen_definition_ids[definition_id] then
+            seen_definition_ids[definition_id] = true
+            definition_ids[#definition_ids + 1] = definition_id
+        end
+    end
+
+    local definitions, definitions_err = game.get_item_defs_by_ids(definition_ids)
+    if definitions_err ~= nil then return nil, definitions_err end
+
+    local definitions_by_id = {}
+    for _, definition in ipairs(definitions or {}) do
+        if definition.id ~= nil and definition.id ~= "" then
+            definitions_by_id[definition.id] = definition
+        end
+    end
+
+    for _, slot in ipairs(slots) do
+        local definition = definitions_by_id[slot.item_definition_id]
+        if definition == nil then
+            return nil, "player deck item definition not found: " .. tostring(slot.item_definition_id)
+        end
+        if definition.item_code == nil or definition.item_code == "" then
+            return nil, "player deck item definition has no item code: " .. tostring(slot.item_definition_id)
+        end
+
+        -- Preset slots can retain a historical item_definition_code_name after
+        -- a card is renamed. Battle state must always use the current code
+        -- resolved from the definition ID.
+        slot.item_definition_code_name = definition.item_code
+        slot.item_definition_name = definition.name
         slot.container_id = nil
         slot.created_at   = nil
     end

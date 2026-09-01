@@ -68,7 +68,8 @@ It standardizes every raw error string into a unique `ErrorKey`, regex pattern, 
 | `ERR_CONFIG_PRESET_NOT_FOUND` | `preset not found` | Selected deck preset not found. | Không tìm thấy bộ thẻ đã chọn. | `battle_start.lua` |
 | `ERR_DECK_TOO_SMALL` | `player deck must have at least 25 cards (has {0})` / `enemy deck...` | Deck must contain at least 25 cards (currently has {0}). | Bộ thẻ phải có ít nhất 25 lá (hiện có {0} lá). | `battle_start.lua` |
 | `ERR_DECK_TOO_LARGE` | `player deck must have fewer than 52 cards (has {0})` / `enemy deck...` | Deck cannot contain 52 or more cards (currently has {0}). | Bộ thẻ phải ít hơn 52 lá (hiện có {0} lá). | `battle_start.lua` |
-| `ERR_DECK_MISSING_ITEM_DEF` | `player deck contains a card without an item definition` | Deck contains an invalid or undefined card. | Bộ thẻ chứa lá bài không hợp lệ. | `battle_start.lua` |
+| `ERR_DECK_MISSING_ITEM_DEF` | `player deck contains a card without an item definition` / `player deck item definition not found: {0}` | Deck contains an invalid or undefined card. | Bộ thẻ chứa lá bài không hợp lệ. | `battle_start.lua` |
+| `ERR_DECK_ITEM_DEF_CODE_MISSING` | `player deck item definition has no item code: {0}` | Deck card definition has no item code. | Định nghĩa lá bài trong bộ thẻ thiếu mã định danh. | `battle_start.lua` |
 | `ERR_DECK_COPY_LIMIT_EXCEEDED` | `player deck cannot contain more than 3 copies of card {0}` | Cannot include more than 3 copies of card {0}. | Không thể chứa quá 3 bản sao của lá {0}. | `battle_start.lua` |
 | `ERR_SOUL_DEF_NOT_FOUND` | `soul item definition not found` | Currency (Soul) definition not found. | Không tìm thấy định nghĩa Linh Hồn (Soul). | `battle_start.lua` |
 | `ERR_SOUL_INSUFFICIENT` | `not enough soul to start battle (requires 5)` | Not enough Soul energy to enter battle (Requires 5). | Không đủ Linh Hồn để đấu (Yêu cầu 5). | `battle_start.lua` |
