@@ -45,6 +45,7 @@ namespace SG03
         private bool finalDefOnlyMode;
 
         [Header("Parenting")]
+        [SerializeField] private Card3DCtrl cardCtrl;
         [SerializeField] private Transform parent;
         [Tooltip("World-space height above the card. This is unaffected by card flips.")]
         [SerializeField, Min(0f)] private float aboveCardYOffset = 0.2f;
@@ -197,8 +198,7 @@ namespace SG03
             // Use Unity's null check explicitly; ?. does not handle destroyed/unassigned Unity objects.
             if (this.parent == null) return false;
 
-            Card3DCtrl card = this.parent.GetComponent<Card3DCtrl>();
-            string inventoryItemId = card?.InventoryItemId;
+            string inventoryItemId = this.cardCtrl?.InventoryItemId;
             BattleState state = this.battleStateCtrl?.BattleState;
             if (state == null || string.IsNullOrEmpty(inventoryItemId)) return false;
 
@@ -267,14 +267,15 @@ namespace SG03
         }
 
         /// <summary>Assigns the card this bar follows without inheriting its transform.</summary>
-        public void SetParent(Transform newParent)
+        public void SetParent(Card3DCtrl newCard)
         {
-            if (newParent == null) return;
+            if (newCard == null) return;
 
-            bool isNewCard = this.parent != newParent;
+            bool isNewCard = this.cardCtrl != newCard;
             this.desiredWorldScale = this.transform.lossyScale;
             this.hasDesiredWorldScale = true;
-            this.parent = newParent;
+            this.cardCtrl = newCard;
+            this.parent = newCard.transform;
             if (isNewCard) this.ResetCurrentHealthForNewCard();
             this.transform.SetParent(null, true);
             this.UpdateWorldPositionFromParent();
@@ -282,6 +283,13 @@ namespace SG03
             this.hasBaseWorldRotation = true;
             this.BindClientActionEvents();
             this.RefreshMaxHealthFromBattleState();
+        }
+
+        /// <summary>Clears the card currently shown in this pooled bar's Inspector.</summary>
+        public void ClearCard()
+        {
+            this.cardCtrl = null;
+            this.parent = null;
         }
 
         /// <summary>Sets whether this bar displays only its fill or also its HP values.</summary>
@@ -385,11 +393,6 @@ namespace SG03
         {
             if (!this.TryGetBattleCardSlot(out _)) return;
             this.SetHealth(this.GetTotalDamageReceived(), this.GetFinalDef());
-        }
-
-        // This UI is returned explicitly through ObjectPool, so it needs no Despawn component.
-        protected override void LoadDespawn()
-        {
         }
 
         private void CacheDesiredWorldScale()

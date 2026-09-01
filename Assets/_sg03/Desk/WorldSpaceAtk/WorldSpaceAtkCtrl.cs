@@ -22,7 +22,9 @@ namespace SG03
         [Tooltip("Global Z-axis offset relative to the card's top edge.")]
         [SerializeField] private float cardZOffset = -1.5f;
 
-        private Transform parent;
+        [Header("Parenting")]
+        [SerializeField] private Card3DCtrl cardCtrl;
+        [SerializeField] private Transform parent;
         private Label attackLabel;
         private Vector3 baseWorldRotation;
         private bool hasBaseWorldRotation;
@@ -91,15 +93,23 @@ namespace SG03
         }
 
         /// <summary>Assigns the card this UI follows without inheriting its transform.</summary>
-        public void SetParent(Transform newParent)
+        public void SetParent(Card3DCtrl newCard)
         {
-            if (newParent == null) return;
+            if (newCard == null) return;
 
-            this.parent = newParent;
+            this.cardCtrl = newCard;
+            this.parent = newCard.transform;
             this.transform.SetParent(null, true);
             this.UpdateWorldPositionFromParent();
             this.baseWorldRotation = this.transform.eulerAngles;
             this.hasBaseWorldRotation = true;
+        }
+
+        /// <summary>Clears the card currently shown in this pooled UI's Inspector.</summary>
+        public void ClearCard()
+        {
+            this.cardCtrl = null;
+            this.parent = null;
         }
 
         /// <summary>Sets the ATK value currently shown by this UI.</summary>
@@ -120,12 +130,9 @@ namespace SG03
             if (this.parent == null) return;
 
             float zOffset = this.cardZOffset;
-            Card3DCtrl cardCtrl = this.parent.GetComponent<Card3DCtrl>();
-            if (cardCtrl == null) cardCtrl = this.parent.GetComponentInParent<Card3DCtrl>();
-
-            if (cardCtrl != null)
+            if (this.cardCtrl != null)
             {
-                if (cardCtrl.CardOwner == Owner.omega)
+                if (this.cardCtrl.CardOwner == Owner.omega)
                 {
                     zOffset = -this.cardZOffset;
                 }
@@ -220,9 +227,5 @@ namespace SG03
         }
 #endif
 
-        // This UI is returned explicitly through ObjectPool, so it needs no Despawn component.
-        protected override void LoadDespawn()
-        {
-        }
     }
 }

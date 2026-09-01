@@ -86,7 +86,11 @@ namespace SG03
         }
         public void NotifySelected()     => CardSelected?.Invoke(this);
         public static void NotifyDeselected() => CardSelected?.Invoke(null);
-        public void NotifyLocationChanged(Location newLocation) => LocationChanged?.Invoke(this, newLocation);
+        public void NotifyLocationChanged(Location newLocation)
+        {
+            if (newLocation == Location.in_void) this.DespawnStatUis();
+            LocationChanged?.Invoke(this, newLocation);
+        }
 
         protected override void LoadComponents()
         {
@@ -102,7 +106,7 @@ namespace SG03
         protected virtual void OnDisable()
         {
             this.SetAttacker(null);
-            this.ReturnHpBarToPool();
+            this.DespawnStatUis();
         }
 
         protected virtual void LoadCard3D()
@@ -180,7 +184,7 @@ namespace SG03
             if (this.hpBarInstance == null) return;
 
             this.hpBarInstance.SetPosition(holder.transform.position);
-            this.hpBarInstance.SetParent(this.transform);
+            this.hpBarInstance.SetParent(this);
             this.hpBarInstance.gameObject.SetActive(true);
             this.UpdateDamagePreviewFromAttacker();
             this.RefreshHpBarDisplayMode();
@@ -230,7 +234,7 @@ namespace SG03
 
             Vector3 pos = this.cardHolder != null ? this.cardHolder.transform.position : this.transform.position;
             this.atkUiInstance.SetPosition(pos);
-            this.atkUiInstance.SetParent(this.transform);
+            this.atkUiInstance.SetParent(this);
             this.atkUiInstance.SetAttack(attack);
             this.atkUiInstance.gameObject.SetActive(true);
         }
@@ -312,8 +316,7 @@ namespace SG03
         {
             if (this.IsBattleResuming())
             {
-                this.DespawnHpBar();
-                this.DespawnAtkUi();
+                this.DespawnStatUis();
                 return;
             }
 
@@ -441,6 +444,13 @@ namespace SG03
             this.atkUiInstance = null;
         }
 
+        /// <summary>Returns this card's world-space HP and ATK UI to their pools.</summary>
+        public void DespawnStatUis()
+        {
+            this.DespawnHpBar();
+            this.DespawnAtkUi();
+        }
+
         private void RefreshHpBarDisplayMode()
         {
             if (this.hpBarInstance == null) return;
@@ -481,9 +491,8 @@ namespace SG03
         {
             if (hpBar == null) return;
 
-            this.LoadObjectPool();
-            if (this.objectPool != null) this.objectPool.Despawn(hpBar);
-            else hpBar.gameObject.SetActive(false);
+            hpBar.ClearCard();
+            hpBar.Despawn?.DoDespawn();
         }
 
         private void EnsureSingleAtkUiInstance()
@@ -506,9 +515,8 @@ namespace SG03
         {
             if (atkUi == null) return;
 
-            this.LoadObjectPool();
-            if (this.objectPool != null) this.objectPool.Despawn(atkUi);
-            else atkUi.gameObject.SetActive(false);
+            atkUi.ClearCard();
+            atkUi.Despawn?.DoDespawn();
         }
 
         private void ReturnHpBarToPool()
@@ -737,8 +745,7 @@ namespace SG03
         public void MoveToFullDetail(Transform point)
         {
             if (this.IsMovingVoidToLine) return;
-            this.DespawnHpBar();
-            this.DespawnAtkUi();
+            this.DespawnStatUis();
             this.movement.MoveToFullDetail(point);
         }
 
@@ -759,8 +766,7 @@ namespace SG03
             this.fullDetailManipulator?.SetInteractionActive(enabled);
             if (enabled)
             {
-                this.DespawnHpBar();
-                this.DespawnAtkUi();
+                this.DespawnStatUis();
             }
         }
 
