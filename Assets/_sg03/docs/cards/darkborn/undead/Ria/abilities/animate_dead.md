@@ -20,7 +20,7 @@
 3. Với mỗi lá skeleton tìm thấy trong `the_void`:
    - Tìm slot trống khả dụng (1 đến 5) trên `own_frontline`.
    - Loại bỏ skeleton khỏi `the_void`.
-   - Reset chỉ số bài (`reset_card_turn_state`), gán `trigger = true`, `face_up = true`, `expose = true`.
+   - Reset chỉ số bài (`reset_card_turn_state`), gán `trigger = false`, `face_up = true`, `expose = true`.
    - Đặt skeleton vào slot trống đã chọn trên `own_frontline`.
    - Phát Client Action `[side]_void_to_front_line:[skeleton_id],[slot_index]`.
 4. Tiêu thụ lá bài kỹ năng `animate_dead` và chuyển vào `the_void`.

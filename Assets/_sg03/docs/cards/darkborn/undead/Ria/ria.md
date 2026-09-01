@@ -2,7 +2,7 @@
 
 - **Code Name**: `ria`
 - **Số sao**: 3
-- **Tấn Công (ATK)**: 250
+- **Tấn Công (ATK)**: 300
 - **Phòng Thủ (DEF)**: 370
 - **Loại Thẻ**: [`character`](../../../../03_characters.md)
 - **Chủng Tộc Chính**: **Darkborn**

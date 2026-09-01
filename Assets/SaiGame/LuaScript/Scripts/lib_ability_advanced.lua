@@ -81,7 +81,7 @@ function animate_dead_execute(state, source_card, event_data, helpers)
         table.remove(void_zone, skeleton_idx)
         skeleton_card.slot_index = chosen_slot_idx - 1
         battle.reset_card_turn_state(state.item_defs, skeleton_card)
-        skeleton_card.trigger = true
+        skeleton_card.trigger = false
         skeleton_card.face_up = true
         skeleton_card.expose = true
         front_line[chosen_slot_idx] = skeleton_card
