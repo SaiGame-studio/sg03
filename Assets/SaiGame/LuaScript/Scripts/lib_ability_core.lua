@@ -82,7 +82,7 @@ local function _find_item_def(item_defs, code)
 end
 
 -- Returns one base stat from a card's item definition, for example
--- _get_card_stat(state, card, "add_def").
+-- _get_card_stat(state, card, "def_added").
 local function _get_card_stat(state, card, stat_key)
     if state == nil or card == nil or stat_key == nil or stat_key == "" then return nil end
     local item_def = _find_item_def(state.item_defs, card.item_definition_code_name)

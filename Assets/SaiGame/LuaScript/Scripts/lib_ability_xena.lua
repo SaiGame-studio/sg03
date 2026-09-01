@@ -229,7 +229,7 @@ local function execute_xena_awakened(state, source_card, event_data, helpers, co
         return actions, nil
     end
 
-    local def_buff = tonumber(helpers.get_card_stat(state, source_card, "add_def"))
+    local def_buff = tonumber(helpers.get_card_stat(state, source_card, "def_added"))
     if def_buff == nil then def_buff = 0 end
 
     local target_line_key, target_line, target_index, line_err =
