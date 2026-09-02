@@ -4,8 +4,8 @@ Tài liệu này tổng hợp toàn bộ thẻ Character trong **SG03** theo b�
 
 > **Thống kê tổng quan thẻ bài trong game:**
 > - **Thẻ Nhân vật (Character):** 20 thẻ
-> - **Thẻ Kỹ năng (Ability):** 20 thẻ (xem chi tiết tại [Hệ Thống Kỹ Năng](04_abilities.md))
-> - **Tổng số thẻ bài toàn game:** 40 thẻ
+> - **Thẻ Kỹ năng (Ability):** 21 thẻ (xem chi tiết tại [Hệ Thống Kỹ Năng](04_abilities.md))
+> - **Tổng số thẻ bài toàn game:** 41 thẻ
 
 ---
 
