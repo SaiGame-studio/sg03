@@ -33,8 +33,9 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 
 ### Humans
 16. [Twin Reaper](cards/human/abilities/twin_reaper.md): bị động
-17. [Spinning Slash](cards/human/abilities/spinning_slash.md): 4 sao
-18. [Cross Guard](cards/human/abilities/cross_guard.md): 2 sao
-19. [Eagle Eye](cards/human/abilities/eagle_eye.md): 2 sao
-20. [Titan Fall](cards/human/abilities/titan_fall.md): 5 sao
-21. [Spear Sweep](cards/human/abilities/titan_spear_sweep.md): 1 sao
+17. [Scout Strike](cards/human/abilities/scout_strike.md): bị động
+18. [Spinning Slash](cards/human/abilities/spinning_slash.md): 4 sao
+19. [Cross Guard](cards/human/abilities/cross_guard.md): 2 sao
+20. [Eagle Eye](cards/human/abilities/eagle_eye.md): 2 sao
+21. [Titan Fall](cards/human/abilities/titan_fall.md): 5 sao
+22. [Spear Sweep](cards/human/abilities/titan_spear_sweep.md): 1 sao
