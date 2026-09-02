@@ -1,7 +1,7 @@
 # Xena Awakened II
 
 - **Mã Thẻ Bài**: `xena_awakened2`
-- **Số sao**: 2
+- **Số sao**: 3
 - **Loại Thẻ**: [`ability`](../../../../../04_abilities.md)
 - **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
 - **Tộc Nhánh**: **Demon**
@@ -31,6 +31,6 @@ Triệu hồi 1 [Xena III](../xena3.md) **chỉ từ `the_void`** của phe bạ
 
 ## Kỹ Năng Liên Kết
 
-- [Xena Awakened I](xena_awakened1.md) — 1 sao
-- [Xena Awakened III](xena_awakened3.md) — 3 sao
-- [Xena Awakened IV](xena_awakened4.md) — 4 sao
+- [Xena Awakened I](xena_awakened1.md) — 2 sao
+- [Xena Awakened III](xena_awakened3.md) — 4 sao
+- [Xena Awakened IV](xena_awakened4.md) — 5 sao

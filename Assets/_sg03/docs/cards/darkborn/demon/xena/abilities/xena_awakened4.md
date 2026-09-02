@@ -1,7 +1,7 @@
 # Xena Awakened IV
 
 - **Mã Thẻ Bài**: `xena_awakened4`
-- **Số sao**: 4
+- **Số sao**: 5
 - **Loại Thẻ**: [`ability`](../../../../../04_abilities.md)
 - **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
 - **Tộc Nhánh**: **Demon**
@@ -41,6 +41,6 @@ Nếu Demon Orbs, Demon Rite hoặc điều kiện hiến tế không thỏa mã
 
 ## Kỹ Năng Liên Kết
 
-- [Xena Awakened I](xena_awakened1.md) — 1 sao
-- [Xena Awakened II](xena_awakened2.md) — 2 sao
-- [Xena Awakened III](xena_awakened3.md) — 3 sao
+- [Xena Awakened I](xena_awakened1.md) — 2 sao
+- [Xena Awakened II](xena_awakened2.md) — 3 sao
+- [Xena Awakened III](xena_awakened3.md) — 4 sao

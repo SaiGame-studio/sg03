@@ -14,10 +14,10 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 
 #### Demon
 
-4. [Xena Awakened I](cards/darkborn/demon/xena/abilities/xena_awakened1.md): 1 sao
-5. [Xena Awakened II](cards/darkborn/demon/xena/abilities/xena_awakened2.md): 2 sao
-6. [Xena Awakened III](cards/darkborn/demon/xena/abilities/xena_awakened3.md): 3 sao
-7. [Xena Awakened IV](cards/darkborn/demon/xena/abilities/xena_awakened4.md): 4 sao
+4. [Xena Awakened I](cards/darkborn/demon/xena/abilities/xena_awakened1.md): 2 sao
+5. [Xena Awakened II](cards/darkborn/demon/xena/abilities/xena_awakened2.md): 3 sao
+6. [Xena Awakened III](cards/darkborn/demon/xena/abilities/xena_awakened3.md): 4 sao
+7. [Xena Awakened IV](cards/darkborn/demon/xena/abilities/xena_awakened4.md): 5 sao
 8. [Demon Orbs](cards/darkborn/demon/xena/abilities/demon_orbs.md): 2 sao
 9. [Demon Rite](cards/darkborn/demon/xena/abilities/demon_rite.md): 3 sao
 
