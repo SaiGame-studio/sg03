@@ -30,6 +30,7 @@ namespace SG03.UI
 
         [Header("References")]
         [SerializeField] private SaiAuth saiAuth;
+        [SerializeField] private GoogleBackendLogin googleBackendLogin;
         [SerializeField] private UIDocument uiDocument;
 
         [Header("Settings")]
@@ -41,6 +42,7 @@ namespace SG03.UI
         private TextField confirmPasswordField;
         private TextField registerEmailField;
         private Button loginButton;
+        private Button googleLoginButton;
         private Button authModeButton;
         private Button passwordVisibilityButton;
         private Button confirmPasswordVisibilityButton;
@@ -49,6 +51,7 @@ namespace SG03.UI
         private Label gameNameLabel;
         private VisualElement registerFields;
         private VisualElement confirmPasswordContainer;
+        private VisualElement googleLoginContainer;
         private VisualElement root;
         private bool authEventsSubscribed;
         private bool isRegisterMode;
@@ -57,6 +60,7 @@ namespace SG03.UI
         {
             base.LoadComponents();
             this.LoadSaiAuth();
+            this.LoadGoogleBackendLogin();
             this.LoadUIDocument();
         }
 
@@ -82,6 +86,20 @@ namespace SG03.UI
             if (this.uiDocument != null) return;
             this.uiDocument = this.GetComponent<UIDocument>();
             Debug.LogWarning(this.transform.name + ": LoadUIDocument", this.gameObject);
+        }
+
+        private void LoadGoogleBackendLogin()
+        {
+            GoogleBackendLogin activeGoogleLogin = SaiServer.Instance?.GetComponent<GoogleBackendLogin>();
+            if (activeGoogleLogin != null)
+            {
+                this.googleBackendLogin = activeGoogleLogin;
+                return;
+            }
+
+            if (this.googleBackendLogin != null) return;
+            this.googleBackendLogin = FindFirstObjectByType<GoogleBackendLogin>(FindObjectsInactive.Include);
+            Debug.LogWarning(this.transform.name + ": LoadGoogleBackendLogin", this.gameObject);
         }
 
         protected override void Start()
@@ -119,7 +137,8 @@ namespace SG03.UI
             this.passwordField = root.Q<TextField>("PasswordField");
             this.confirmPasswordField = root.Q<TextField>("ConfirmPasswordField");
             this.registerEmailField = root.Q<TextField>("RegisterEmailField");
-            this.loginButton   = root.Q<Button>("LoginButton");
+            this.loginButton = root.Q<Button>("LoginButton");
+            this.googleLoginButton = root.Q<Button>("GoogleLoginButton");
             this.authModeButton = root.Q<Button>("AuthModeButton");
             this.passwordVisibilityButton = root.Q<Button>("PasswordVisibilityButton");
             this.confirmPasswordVisibilityButton = root.Q<Button>("ConfirmPasswordVisibilityButton");
@@ -127,9 +146,13 @@ namespace SG03.UI
             this.gameNameLabel = root.Q<Label>("GameNameLabel");
             this.registerFields = root.Q<VisualElement>("RegisterFields");
             this.confirmPasswordContainer = root.Q<VisualElement>("ConfirmPasswordContainer");
+            this.googleLoginContainer = root.Q<VisualElement>("GoogleLoginContainer");
 
             if (this.loginButton != null)
                 this.loginButton.clicked += this.OnLoginButtonClicked;
+
+            if (this.googleLoginButton != null)
+                this.googleLoginButton.clicked += this.OnGoogleLoginButtonClicked;
 
             if (this.authModeButton != null)
                 this.authModeButton.clicked += this.OnAuthModeButtonClicked;
@@ -187,6 +210,10 @@ namespace SG03.UI
             this.saiAuth.OnLoginSuccess += this.HandleLoginSuccess;
             this.saiAuth.OnLoginFailure += this.HandleLoginFailure;
             this.authEventsSubscribed = true;
+
+            if (this.googleBackendLogin == null) return;
+            this.googleBackendLogin.OnLoginSuccess += this.HandleGoogleLoginSuccess;
+            this.googleBackendLogin.OnLoginFailure += this.HandleGoogleLoginFailure;
         }
 
         private void UnsubscribeFromAuthEvents()
@@ -196,6 +223,10 @@ namespace SG03.UI
             this.saiAuth.OnLoginSuccess -= this.HandleLoginSuccess;
             this.saiAuth.OnLoginFailure -= this.HandleLoginFailure;
             this.authEventsSubscribed = false;
+
+            if (this.googleBackendLogin == null) return;
+            this.googleBackendLogin.OnLoginSuccess -= this.HandleGoogleLoginSuccess;
+            this.googleBackendLogin.OnLoginFailure -= this.HandleGoogleLoginFailure;
         }
 
         private void OnLoginButtonClicked()
@@ -214,6 +245,29 @@ namespace SG03.UI
                 this.passwordField.value,
                 onSuccess: _ => this.loginButton.SetEnabled(true),
                 onError:   _ => this.loginButton.SetEnabled(true));
+        }
+
+        private void OnGoogleLoginButtonClicked()
+        {
+            this.HideFeedback();
+
+            if (this.googleBackendLogin == null)
+            {
+                this.ShowFeedback("Google login is unavailable.", isError: true);
+                return;
+            }
+
+            if (this.googleBackendLogin.IsLoggingIn)
+            {
+                this.googleBackendLogin.CancelLogin();
+                return;
+            }
+
+            this.SetLoginActionsEnabled(false);
+            this.googleLoginButton?.SetEnabled(true);
+            this.googleLoginButton.text = "Cancel Google Login";
+            this.ShowFeedback("Continue sign-in with Google in your browser.", isError: false);
+            this.googleBackendLogin.StartLogin();
         }
 
         private void Register()
@@ -293,6 +347,9 @@ namespace SG03.UI
             if (this.confirmPasswordContainer != null)
                 this.confirmPasswordContainer.style.display = this.isRegisterMode ? DisplayStyle.Flex : DisplayStyle.None;
 
+            if (this.googleLoginContainer != null)
+                this.googleLoginContainer.style.display = this.isRegisterMode ? DisplayStyle.None : DisplayStyle.Flex;
+
             if (this.titleLabel != null)
                 this.titleLabel.text = this.isRegisterMode ? "Create Account" : "Login";
 
@@ -352,6 +409,31 @@ namespace SG03.UI
             ToastMessage.ShowError(this.FormatLoginError(error), this.loginButton);
         }
 
+        private void HandleGoogleLoginSuccess(LoginResponse response)
+        {
+            this.SetLoginActionsEnabled(true);
+            this.HandleLoginSuccess(response);
+        }
+
+        private void HandleGoogleLoginFailure(string error)
+        {
+            this.SetLoginActionsEnabled(true);
+            string message = error == "cancelled"
+                ? "Google sign-in cancelled. You can try again."
+                : "Unable to sign in with Google. Please try again.";
+            this.ShowFeedback(message, isError: error != "cancelled");
+        }
+
+        private void SetLoginActionsEnabled(bool isEnabled)
+        {
+            this.loginButton?.SetEnabled(isEnabled);
+            this.googleLoginButton?.SetEnabled(isEnabled);
+            this.authModeButton?.SetEnabled(isEnabled);
+
+            if (isEnabled && this.googleLoginButton != null)
+                this.googleLoginButton.text = "Google Login";
+        }
+
         private string FormatLoginError(string error)
         {
             if (string.IsNullOrWhiteSpace(error)) return "Unable to log in. Please try again.";
@@ -394,6 +476,9 @@ namespace SG03.UI
         {
             if (this.loginButton != null)
                 this.loginButton.clicked -= this.OnLoginButtonClicked;
+
+            if (this.googleLoginButton != null)
+                this.googleLoginButton.clicked -= this.OnGoogleLoginButtonClicked;
 
             if (this.authModeButton != null)
                 this.authModeButton.clicked -= this.OnAuthModeButtonClicked;

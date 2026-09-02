@@ -64,11 +64,15 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
+            <!-- Primary action -->
+            <ui:Button name="LoginButton" text="Log In" class="btn-primary login-button" />
+
             <!-- Divider -->
             <ui:VisualElement class="divider" />
 
-            <!-- Primary action -->
-            <ui:Button name="LoginButton" text="Log In" class="btn-primary" />
+            <ui:VisualElement name="GoogleLoginContainer">
+                <ui:Button name="GoogleLoginButton" text="Google Login" class="btn-secondary google-login-button" />
+            </ui:VisualElement>
 
             <!-- Switch between login and registration -->
             <ui:Button name="AuthModeButton" text="Create an account" class="btn-secondary" />

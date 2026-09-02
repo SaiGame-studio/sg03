@@ -22,6 +22,14 @@
     display: none;
 }
 
+.google-login-button {
+    margin-top: 12px;
+}
+
+.login-button {
+    margin-top: 12px;
+}
+
 .password-row {
     position: relative;
     flex-direction: row;
