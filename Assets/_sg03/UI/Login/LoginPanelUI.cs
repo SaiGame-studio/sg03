@@ -431,7 +431,7 @@ namespace SG03.UI
             this.authModeButton?.SetEnabled(isEnabled);
 
             if (isEnabled && this.googleLoginButton != null)
-                this.googleLoginButton.text = "Google Login";
+                this.googleLoginButton.text = "Sign in with Google";
         }
 
         private string FormatLoginError(string error)

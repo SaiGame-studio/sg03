@@ -187,7 +187,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5e6f78901234567d5e6f78901234567, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SG03.UI.LoginPanelUI
-  panelAsset: {fileID: 9197481963319205126, guid: b3c4d5e6f7890123b3c4d5e6f7890123, type: 3}
+  panelAsset: {fileID: 0}
   saiAuth: {fileID: 1776946250}
   googleBackendLogin: {fileID: 1776946251}
   uiDocument: {fileID: 251390376}
@@ -599,7 +599,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ef3a5bffa3fad0a498905dcf2a23ed5a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaiGame.Services.GoogleBackendLogin
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

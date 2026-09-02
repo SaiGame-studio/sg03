@@ -71,7 +71,9 @@
             <ui:VisualElement class="divider" />
 
             <ui:VisualElement name="GoogleLoginContainer">
-                <ui:Button name="GoogleLoginButton" text="Google Login" class="btn-secondary google-login-button" />
+                <ui:Button name="GoogleLoginButton" text="Sign in with Google" class="google-login-button">
+                    <ui:VisualElement class="google-login-button__icon" picking-mode="Ignore" />
+                </ui:Button>
             </ui:VisualElement>
 
             <!-- Switch between login and registration -->
