@@ -280,7 +280,6 @@
 }
 
 .battle-source-count-label--interactive {
-    cursor: link;
     transition-duration: 0.12s;
 }
 
@@ -748,7 +747,6 @@
     border-radius: 8px;
     font-size: 14px;
     -unity-font-style: bold;
-    cursor: link;
     transition-duration: 0.15s;
     border-width: 0;
 }

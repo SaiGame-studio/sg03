@@ -33,7 +33,6 @@
     color: rgb(31, 31, 31);
     font-size: 14px;
     -unity-font-style: bold;
-    cursor: link;
 }
 
 .google-login-button:hover {
