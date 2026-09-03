@@ -46,6 +46,10 @@
                 </ui:Button>
             </ui:VisualElement>
 
+            <ui:Toggle name="AutoLoginToggle"
+                       label="Auto login with password"
+                       class="auto-login-toggle" />
+
             <!-- Registration-only password confirmation -->
             <ui:VisualElement name="ConfirmPasswordContainer">
                 <ui:Label text="Confirm Password" class="field-label" />

@@ -64,6 +64,11 @@
     margin-top: 12px;
 }
 
+.auto-login-toggle {
+    margin-top: 8px;
+    color: rgb(180, 200, 255);
+}
+
 .password-row {
     position: relative;
     flex-direction: row;

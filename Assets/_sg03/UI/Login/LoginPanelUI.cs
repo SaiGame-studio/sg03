@@ -37,6 +37,10 @@ namespace SG03.UI
         [SerializeField] private string nextScenes = "1-lobby";
         [SerializeField] private bool autoLoadCredentials = true;
 
+        private const string AutoLoginPreferenceKey = "SG03.Login.AutoLogin";
+        private const string AutoLoginUsernameKey = "SG03.Login.AutoLogin.Username";
+        private const string AutoLoginPasswordKey = "SG03.Login.AutoLogin.Password";
+
         private TextField usernameField;
         private TextField passwordField;
         private TextField confirmPasswordField;
@@ -46,6 +50,7 @@ namespace SG03.UI
         private Button authModeButton;
         private Button passwordVisibilityButton;
         private Button confirmPasswordVisibilityButton;
+        private Toggle autoLoginToggle;
         private Label feedbackLabel;
         private Label titleLabel;
         private Label gameNameLabel;
@@ -55,6 +60,8 @@ namespace SG03.UI
         private VisualElement root;
         private bool authEventsSubscribed;
         private bool isRegisterMode;
+        private string pendingAutoLoginUsername;
+        private string pendingAutoLoginPassword;
 
         protected override void LoadComponents()
         {
@@ -107,6 +114,7 @@ namespace SG03.UI
             base.Start();
             this.InitializeStandalonePanel();
             this.LoadCredentialsFromAuthIfEnabled();
+            this.TryAutoLoginFromSavedCredentials();
             this.LoadGameName();
         }
 
@@ -142,6 +150,7 @@ namespace SG03.UI
             this.authModeButton = root.Q<Button>("AuthModeButton");
             this.passwordVisibilityButton = root.Q<Button>("PasswordVisibilityButton");
             this.confirmPasswordVisibilityButton = root.Q<Button>("ConfirmPasswordVisibilityButton");
+            this.autoLoginToggle = root.Q<Toggle>("AutoLoginToggle");
             this.titleLabel = root.Q<Label>("TitleLabel");
             this.gameNameLabel = root.Q<Label>("GameNameLabel");
             this.registerFields = root.Q<VisualElement>("RegisterFields");
@@ -163,8 +172,12 @@ namespace SG03.UI
             if (this.confirmPasswordVisibilityButton != null)
                 this.confirmPasswordVisibilityButton.clicked += this.ToggleConfirmPasswordVisibility;
 
+            if (this.autoLoginToggle != null)
+                this.autoLoginToggle.RegisterValueChangedCallback(this.OnAutoLoginToggleChanged);
+
             this.RefreshAuthMode();
             this.SubscribeToAuthEvents();
+            this.RefreshAutoLoginToggle();
         }
 
         private void LoadGameName()
@@ -240,11 +253,22 @@ namespace SG03.UI
                 return;
             }
 
-            this.saiAuth?.Login(
+            this.StartPasswordLogin(
                 this.usernameField.value,
                 this.passwordField.value,
                 onSuccess: _ => this.loginButton.SetEnabled(true),
                 onError:   _ => this.loginButton.SetEnabled(true));
+        }
+
+        private void StartPasswordLogin(string username, string password,
+            System.Action<LoginResponse> onSuccess, System.Action<string> onError)
+        {
+            if (this.saiAuth == null) return;
+
+            this.pendingAutoLoginUsername = username;
+            this.pendingAutoLoginPassword = password;
+            this.saiAuth.SetAutoLogin(this.IsAutoLoginEnabled());
+            this.saiAuth.Login(username, password, onSuccess, onError);
         }
 
         private void OnGoogleLoginButtonClicked()
@@ -347,6 +371,9 @@ namespace SG03.UI
             if (this.confirmPasswordContainer != null)
                 this.confirmPasswordContainer.style.display = this.isRegisterMode ? DisplayStyle.Flex : DisplayStyle.None;
 
+            if (this.autoLoginToggle != null)
+                this.autoLoginToggle.style.display = this.isRegisterMode ? DisplayStyle.None : DisplayStyle.Flex;
+
             if (this.googleLoginContainer != null)
                 this.googleLoginContainer.style.display = this.isRegisterMode ? DisplayStyle.None : DisplayStyle.Flex;
 
@@ -370,8 +397,67 @@ namespace SG03.UI
 
         private void HandleLoginSuccess(LoginResponse response)
         {
+            this.SaveAutoLoginCredentialsIfEnabled();
             this.EnsurePlayerProfile();
             SceneManager.LoadScene(this.nextScenes);
+        }
+
+        private void RefreshAutoLoginToggle()
+        {
+            if (this.autoLoginToggle == null) return;
+
+            bool isAutoLoginEnabled = PlayerPrefs.GetInt(
+                AutoLoginPreferenceKey,
+                this.saiAuth != null && this.saiAuth.GetAutoLogin() ? 1 : 0) == 1;
+            this.autoLoginToggle.SetValueWithoutNotify(isAutoLoginEnabled);
+            this.saiAuth?.SetAutoLogin(isAutoLoginEnabled);
+        }
+
+        private void OnAutoLoginToggleChanged(ChangeEvent<bool> changeEvent)
+        {
+            this.saiAuth?.SetAutoLogin(changeEvent.newValue);
+            PlayerPrefs.SetInt(AutoLoginPreferenceKey, changeEvent.newValue ? 1 : 0);
+
+            if (!changeEvent.newValue)
+            {
+                PlayerPrefs.DeleteKey(AutoLoginUsernameKey);
+                PlayerPrefs.DeleteKey(AutoLoginPasswordKey);
+            }
+
+            PlayerPrefs.Save();
+        }
+
+        private void TryAutoLoginFromSavedCredentials()
+        {
+            if (!this.IsAutoLoginEnabled() || this.isRegisterMode) return;
+
+            string username = PlayerPrefs.GetString(AutoLoginUsernameKey, string.Empty);
+            string password = PlayerPrefs.GetString(AutoLoginPasswordKey, string.Empty);
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) return;
+
+            this.SetLoginActionsEnabled(false);
+            this.ShowFeedback("Signing in...", isError: false);
+            this.StartPasswordLogin(
+                username,
+                password,
+                onSuccess: _ => { },
+                onError: _ => this.SetLoginActionsEnabled(true));
+        }
+
+        private bool IsAutoLoginEnabled()
+        {
+            return this.autoLoginToggle != null && this.autoLoginToggle.value;
+        }
+
+        private void SaveAutoLoginCredentialsIfEnabled()
+        {
+            if (!this.IsAutoLoginEnabled()) return;
+            if (string.IsNullOrWhiteSpace(this.pendingAutoLoginUsername)
+                || string.IsNullOrWhiteSpace(this.pendingAutoLoginPassword)) return;
+
+            PlayerPrefs.SetString(AutoLoginUsernameKey, this.pendingAutoLoginUsername);
+            PlayerPrefs.SetString(AutoLoginPasswordKey, this.pendingAutoLoginPassword);
+            PlayerPrefs.Save();
         }
 
         private void EnsurePlayerProfile()
@@ -405,6 +491,8 @@ namespace SG03.UI
 
         private void HandleLoginFailure(string error)
         {
+            this.pendingAutoLoginUsername = string.Empty;
+            this.pendingAutoLoginPassword = string.Empty;
             this.HideFeedback();
             ToastMessage.ShowError(this.FormatLoginError(error), this.loginButton);
         }
@@ -488,6 +576,9 @@ namespace SG03.UI
 
             if (this.confirmPasswordVisibilityButton != null)
                 this.confirmPasswordVisibilityButton.clicked -= this.ToggleConfirmPasswordVisibility;
+
+            if (this.autoLoginToggle != null)
+                this.autoLoginToggle.UnregisterValueChangedCallback(this.OnAutoLoginToggleChanged);
         }
     }
 }
