@@ -407,6 +407,8 @@ namespace SG03.UI
             SaiAuth auth = this.GetSaiAuth();
             if (auth == null) return;
 
+            auth.SetAutoLogin(false);
+            LoginPanelUI.DisableAutoLoginAndClearCredentials();
             this.currencyWallet?.Deactivate();
             this.btnLogout?.SetEnabled(false);
             this.logoutAuth = auth;

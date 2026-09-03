@@ -419,11 +419,16 @@ namespace SG03.UI
             PlayerPrefs.SetInt(AutoLoginPreferenceKey, changeEvent.newValue ? 1 : 0);
 
             if (!changeEvent.newValue)
-            {
-                PlayerPrefs.DeleteKey(AutoLoginUsernameKey);
-                PlayerPrefs.DeleteKey(AutoLoginPasswordKey);
-            }
+                DisableAutoLoginAndClearCredentials();
+            else
+                PlayerPrefs.Save();
+        }
 
+        public static void DisableAutoLoginAndClearCredentials()
+        {
+            PlayerPrefs.SetInt(AutoLoginPreferenceKey, 0);
+            PlayerPrefs.DeleteKey(AutoLoginUsernameKey);
+            PlayerPrefs.DeleteKey(AutoLoginPasswordKey);
             PlayerPrefs.Save();
         }
 
