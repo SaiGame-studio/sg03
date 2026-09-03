@@ -361,6 +361,15 @@
     padding: 0 12px;
 }
 
+.lobby-game-name {
+    flex: 1;
+    margin: 0 6px;
+    color: rgb(200, 210, 255);
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
 .lobby-bottom-btn {
     flex: 1;
     margin: 0 6px;

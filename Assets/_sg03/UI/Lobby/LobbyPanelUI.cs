@@ -10,6 +10,21 @@ namespace SG03.UI
     // Access all SaiServer services via the Server property.
     public class LobbyPanelUI : SaiBehaviour
     {
+        [System.Serializable]
+        private class GameInfoResponse
+        {
+            public string name;
+            public string game_name;
+            public GameInfoData game;
+            public GameInfoData data;
+        }
+
+        [System.Serializable]
+        private class GameInfoData
+        {
+            public string name;
+        }
+
         public string PanelId => "Lobby";
 
         [Header("Panel")]
@@ -196,6 +211,7 @@ namespace SG03.UI
 
         // Player name label (top-right of TopMenu)
         private Label playerNameLabel;
+        private Label gameNameLabel;
         private Button btnLogout;
         private Button btnQuitGame;
         private Button btnCancelQuit;
@@ -220,6 +236,7 @@ namespace SG03.UI
             this.InitializeStandalonePanel();
             this.currencyWallet?.Refresh();
             this.OnQuestTabClicked();
+            this.LoadGameName();
         }
 
         private void LoadCurrencyWallet()
@@ -289,6 +306,7 @@ namespace SG03.UI
 
             // Player name (top-right)
             this.playerNameLabel = root.Q<Label>("PlayerNameLabel");
+            this.gameNameLabel = root.Q<Label>("GameNameLabel");
             this.btnLogout = root.Q<Button>("BtnLogout");
             this.btnQuitGame = root.Q<Button>("BtnQuitGame");
             this.btnCancelQuit = root.Q<Button>("BtnCancelQuit");
@@ -335,6 +353,36 @@ namespace SG03.UI
         {
             UserData user = this.GetSaiAuth()?.CurrentUser;
             this.SetPlayerName(user);
+        }
+
+        private void LoadGameName()
+        {
+            SaiServer server = SaiServer.Instance;
+            if (server == null || string.IsNullOrWhiteSpace(server.GameId)) return;
+
+            string endpoint = $"/api/v1/public/games/{server.GameId}/info";
+            server.StartCoroutine(server.GetRequest(
+                endpoint,
+                response => this.SetGameName(response),
+                _ => { }));
+        }
+
+        private void SetGameName(string response)
+        {
+            try
+            {
+                GameInfoResponse gameInfo = JsonUtility.FromJson<GameInfoResponse>(response);
+                string gameName = gameInfo?.game_name
+                    ?? gameInfo?.game?.name
+                    ?? gameInfo?.data?.name
+                    ?? gameInfo?.name;
+                if (this.gameNameLabel != null && !string.IsNullOrWhiteSpace(gameName))
+                    this.gameNameLabel.text = gameName;
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogWarning($"Unable to read game info: {exception.Message}", this.gameObject);
+            }
         }
 
         private SaiAuth GetSaiAuth()
