@@ -46,6 +46,10 @@
                 </ui:Button>
             </ui:VisualElement>
 
+            <ui:Toggle name="AutoLoginToggle"
+                       label="Auto login with password"
+                       class="auto-login-toggle" />
+
             <!-- Registration-only password confirmation -->
             <ui:VisualElement name="ConfirmPasswordContainer">
                 <ui:Label text="Confirm Password" class="field-label" />
@@ -64,11 +68,17 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
+            <!-- Primary action -->
+            <ui:Button name="LoginButton" text="Log In" class="btn-primary login-button" />
+
             <!-- Divider -->
             <ui:VisualElement class="divider" />
 
-            <!-- Primary action -->
-            <ui:Button name="LoginButton" text="Log In" class="btn-primary" />
+            <ui:VisualElement name="GoogleLoginContainer">
+                <ui:Button name="GoogleLoginButton" text="Sign in with Google" class="google-login-button">
+                    <ui:VisualElement class="google-login-button__icon" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
 
             <!-- Switch between login and registration -->
             <ui:Button name="AuthModeButton" text="Create an account" class="btn-secondary" />

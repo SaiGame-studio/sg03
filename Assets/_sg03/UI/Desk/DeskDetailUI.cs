@@ -546,12 +546,16 @@ namespace SG03.UI
                 stack.Add(item.id);
             }
 
+            List<CardStack> stacks = new List<CardStack>(stackMap.Values);
+            stacks.Sort((left, right) => string.Compare(
+                this.GetInventoryCardDisplayName(left),
+                this.GetInventoryCardDisplayName(right),
+                StringComparison.OrdinalIgnoreCase));
+
             int count = 0;
-            foreach (CardStack stack in stackMap.Values)
+            foreach (CardStack stack in stacks)
             {
-                string displayName = stack.Representative.definition?.name
-                    ?? stack.Representative.item_definition_id
-                    ?? string.Empty;
+                string displayName = this.GetInventoryCardDisplayName(stack);
 
                 if (!string.IsNullOrEmpty(query) && !displayName.ToLowerInvariant().Contains(query))
                     continue;
@@ -566,6 +570,13 @@ namespace SG03.UI
             Label empty = new Label(msg);
             empty.AddToClassList("desk-state__label");
             this.inventoryList.Add(empty);
+        }
+
+        private string GetInventoryCardDisplayName(CardStack stack)
+        {
+            return stack?.Representative?.definition?.name
+                ?? stack?.Representative?.item_definition_id
+                ?? string.Empty;
         }
 
         private VisualElement BuildInventoryCard(CardStack stack)

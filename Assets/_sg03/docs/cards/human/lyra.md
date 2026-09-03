@@ -14,9 +14,9 @@ Lyra là một nữ chiến binh kiên định, lớn lên bên những vách n�
 
 Thiên về hỗ trợ trinh sát, Lyra có bộ chỉ số ưu tiên khả năng cơ động và hỗ trợ đội hình hơn là đối đầu trực diện. Cô nên giữ vị trí an toàn để duy trì sự trinh sát từ đại bàng cho đồng minh.
 
-## Kỹ Năng Nội Tại
+## Kỹ Năng Bị Động
 
-- **Scout Strike**: Khi Lyra tấn công một mục tiêu, đại bàng của cô kích hoạt hiệu ứng Eagle Eye lên 1 thẻ Character đang úp nằm liền kề mục tiêu đó (bên trái hoặc bên phải, cùng hàng). Thẻ được chọn bị **Expose**. Nếu không có thẻ Character đang úp liền kề, hiệu ứng này không xảy ra.
+- [Scout Strike](abilities/scout_strike.md) — Sau khi Lyra tấn công, Expose một Character đang úp đứng liền kề mục tiêu trên cùng hàng.
 
 ## Kỹ Năng Liên Kết
 

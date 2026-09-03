@@ -175,10 +175,6 @@
     margin-bottom: 10px;
 }
 
-.inv-item-card--gacha-pack {
-    cursor: link;
-}
-
 .inv-item-card--gacha-pack:hover {
     background-color: rgba(34, 43, 70, 1);
     border-color: rgba(105, 165, 255, 0.8);

@@ -15,6 +15,11 @@
 --       chỉ thực hiện hiệu ứng, không đi qua luồng tấn công và gây sát thương.
 function get_ability_config(ability_key)
     local configs = {
+        twin_reaper = {
+            handler_group = "character_passives",
+            event = "on_attack",
+            target_positions = { "enemy_frontline" },
+        },
         scout_strike = {
             handler_group = "character_passives",
             event = "on_attack",
