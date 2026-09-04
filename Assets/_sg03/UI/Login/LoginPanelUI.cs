@@ -398,8 +398,21 @@ namespace SG03.UI
         private void HandleLoginSuccess(LoginResponse response)
         {
             this.SaveAutoLoginCredentialsIfEnabled();
-            this.EnsurePlayerProfile();
-            SceneManager.LoadScene(this.nextScenes);
+            this.SetLoginActionsEnabled(false);
+            this.ShowFeedback("Loading player profile...", isError: false);
+
+            this.EnsurePlayerProfile(
+                onSuccess: () =>
+                {
+                    this.ShowFeedback("Profile loaded. Entering game...", isError: false);
+                    SceneManager.LoadScene(this.nextScenes);
+                },
+                onError: error =>
+                {
+                    this.SetLoginActionsEnabled(true);
+                    this.HideFeedback();
+                    ToastMessage.ShowError("Failed to load player profile.", this.loginButton);
+                });
         }
 
         private void RefreshAutoLoginToggle()
@@ -465,33 +478,37 @@ namespace SG03.UI
             PlayerPrefs.Save();
         }
 
-        private void EnsurePlayerProfile()
+        private void EnsurePlayerProfile(System.Action onSuccess, System.Action<string> onError)
         {
             GamerProgress gamerProgress = SaiServer.Instance?.GamerProgress;
-            if (gamerProgress == null) return;
+            if (gamerProgress == null)
+            {
+                onError?.Invoke("GamerProgress service not found.");
+                return;
+            }
 
             gamerProgress.GetProgress(
-                onSuccess: _ => { },
-                onError: error =>
+                onSuccess: progress =>
                 {
-                    if (!IsMissingPlayerProfileError(error)) return;
+                    bool hasProfile = progress != null && !string.IsNullOrEmpty(progress.id);
+                    if (hasProfile)
+                    {
+                        onSuccess?.Invoke();
+                        return;
+                    }
 
+                    this.ShowFeedback("Creating new player profile...", isError: false);
                     gamerProgress.CreateProgress(
-                        onSuccess: _ => { },
-                        onError: _ => { });
+                        onSuccess: _ => onSuccess?.Invoke(),
+                        onError: createError => onError?.Invoke(createError));
+                },
+                onError: getError =>
+                {
+                    this.ShowFeedback("Creating new player profile...", isError: false);
+                    gamerProgress.CreateProgress(
+                        onSuccess: _ => onSuccess?.Invoke(),
+                        onError: createError => onError?.Invoke(createError));
                 });
-        }
-
-        private static bool IsMissingPlayerProfileError(string error)
-        {
-            if (string.IsNullOrEmpty(error)) return false;
-
-            string normalizedError = error.ToLowerInvariant();
-            bool isProfileError = normalizedError.Contains("profile")
-                || normalizedError.Contains("gamer progress");
-            bool isNotFound = normalizedError.Contains("response code: 404");
-
-            return isProfileError && isNotFound;
         }
 
         private void HandleLoginFailure(string error)
@@ -499,7 +516,7 @@ namespace SG03.UI
             this.pendingAutoLoginUsername = string.Empty;
             this.pendingAutoLoginPassword = string.Empty;
             this.HideFeedback();
-            ToastMessage.ShowError(this.FormatLoginError(error), this.loginButton);
+            ToastMessage.ShowError(this.FormatAuthError(error), this.loginButton);
         }
 
         private void HandleGoogleLoginSuccess(LoginResponse response)
@@ -511,10 +528,11 @@ namespace SG03.UI
         private void HandleGoogleLoginFailure(string error)
         {
             this.SetLoginActionsEnabled(true);
+            this.HideFeedback();
             string message = error == "cancelled"
-                ? "Google sign-in cancelled. You can try again."
+                ? "Google sign-in cancelled."
                 : "Unable to sign in with Google. Please try again.";
-            this.ShowFeedback(message, isError: error != "cancelled");
+            ToastMessage.ShowError(message, this.googleLoginButton);
         }
 
         private void SetLoginActionsEnabled(bool isEnabled)
@@ -527,9 +545,9 @@ namespace SG03.UI
                 this.googleLoginButton.text = "Sign in with Google";
         }
 
-        private string FormatLoginError(string error)
+        private string FormatAuthError(string error)
         {
-            if (string.IsNullOrWhiteSpace(error)) return "Unable to log in. Please try again.";
+            if (string.IsNullOrWhiteSpace(error)) return "Authentication failed. Please try again.";
 
             string normalizedError = error.ToLowerInvariant();
             if (normalizedError.Contains("invalid credential")
@@ -537,17 +555,65 @@ namespace SG03.UI
                 || normalizedError.Contains("401"))
                 return "Invalid username or password.";
 
-            return "Unable to log in. Please try again.";
+            string jsonError = ExtractErrorMessageFromJson(error);
+            if (!string.IsNullOrWhiteSpace(jsonError))
+                return jsonError;
+
+            return "Request failed. Please check your details and try again.";
+        }
+
+        private static string ExtractErrorMessageFromJson(string error)
+        {
+            if (string.IsNullOrEmpty(error)) return null;
+
+            int rawDataIndex = error.IndexOf("Raw Data:");
+            string jsonPart = rawDataIndex >= 0 ? error.Substring(rawDataIndex + 9).Trim() : error;
+
+            int messageIndex = jsonPart.IndexOf("\"message\":");
+            if (messageIndex >= 0)
+            {
+                int startQuote = jsonPart.IndexOf('"', messageIndex + 10);
+                if (startQuote >= 0)
+                {
+                    int endQuote = jsonPart.IndexOf('"', startQuote + 1);
+                    if (endQuote > startQuote)
+                    {
+                        return jsonPart.Substring(startQuote + 1, endQuote - startQuote - 1);
+                    }
+                }
+            }
+
+            int errorIndex = jsonPart.IndexOf("\"error\":");
+            if (errorIndex >= 0)
+            {
+                int startQuote = jsonPart.IndexOf('"', errorIndex + 8);
+                if (startQuote >= 0)
+                {
+                    int endQuote = jsonPart.IndexOf('"', startQuote + 1);
+                    if (endQuote > startQuote)
+                    {
+                        return jsonPart.Substring(startQuote + 1, endQuote - startQuote - 1);
+                    }
+                }
+            }
+
+            return null;
         }
 
         private void ShowFeedback(string message, bool isError)
         {
+            if (isError)
+            {
+                this.HideFeedback();
+                ToastMessage.ShowError(this.FormatAuthError(message), this.loginButton ?? this.root);
+                return;
+            }
+
             if (this.feedbackLabel == null) return;
 
             this.feedbackLabel.text = message;
             this.feedbackLabel.RemoveFromClassList("feedback--error");
-            this.feedbackLabel.RemoveFromClassList("feedback--success");
-            this.feedbackLabel.AddToClassList(isError ? "feedback--error" : "feedback--success");
+            this.feedbackLabel.AddToClassList("feedback--success");
         }
 
         private void HideFeedback()
