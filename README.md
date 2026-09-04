@@ -9,6 +9,8 @@ This game project is developed with **Unity** and focuses on card-game mechanics
 3. Clone the game to copy the complete SG03 database into your game.
 4. Open SG03 in Unity, enter the ID of the game you created, and you can play and customize its content as you wish.
 
+## Game IDS
+- sg03-ready: 019f49a1-350b-72c4-ac8f-8fe4f7d1418e
 ---
 
 ## 💬 Community & support
@@ -44,8 +46,7 @@ We hope you have an enjoyable programming experience and learn many useful thing
 4. Bật Unity sg03 lên điều game id mà bạn vừa tạo vào là có thể chơi được và tùy chỉnh content tùy ý bạn.
 
 ## Game IDS
-- sg03-dev: 2e352068-3b3a-4a31-9e47-564f4dd3af13
-- sg03-ready: 019f49a1-350b-72c4-ac8f-8fe4f7d1418e  (dùng cái này nhé)
+- sg03-ready: 019f49a1-350b-72c4-ac8f-8fe4f7d1418e
 ---
 
 ## 💬 Kênh giao lưu & Hỗ trợ
