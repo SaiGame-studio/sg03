@@ -23,6 +23,21 @@ namespace SG03
             this.RegisterLoginListener();
         }
 
+        protected override void Start()
+        {
+            base.Start();
+            this.SyncCurrentProgress();
+        }
+
+        private void SyncCurrentProgress()
+        {
+            GamerProgress progress = SaiServer.Instance?.GamerProgress;
+            if (progress != null && progress.HasProgress)
+            {
+                this.ApplyToInspector(progress.CurrentProgress);
+            }
+        }
+
         private void RegisterLoginListener()
         {
             if (SaiServer.Instance?.SaiAuth == null) return;
@@ -53,11 +68,18 @@ namespace SG03
             );
         }
 
-        // Step 2a: progress found — display it in the Inspector.
+        // Step 2a: progress found — display it in the Inspector. If response is 200 OK with {}, create progress.
         private void OnGetProgressSuccess(GamerProgressData data)
         {
-            this.ApplyToInspector(data);
-            // Debug.Log($"[ProfileManager] Progress loaded — Level {data.level}, XP {data.experience}, Gold {data.gold}");
+            bool hasProfile = data != null && !string.IsNullOrEmpty(data.id);
+            if (hasProfile)
+            {
+                this.ApplyToInspector(data);
+                return;
+            }
+
+            Debug.Log("[ProfileManager] Empty progress response (200 OK), creating new progress...");
+            this.CreateProgress();
         }
 
         // Step 2b: no progress yet — create a new one.
