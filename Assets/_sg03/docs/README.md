@@ -34,12 +34,13 @@ Assets/_sg03/docs/
 
 ### Giai đoạn 1: Hệ Thống Cốt Lõi (Core Engine)
 
-1. **[Thế Giới & Bốn Chủng Tộc](00_world_and_races.md)** — Bối cảnh thế giới, bản sắc của Darkborn, Lightborn, Natureborn và Humans, cùng quy ước phân loại card.
+1. **[Thế Giới](00_world_and_races.md)** — Điểm vào cho tài liệu bối cảnh thế giới.
 2. **[Luật Chơi & Cơ Chế Trận Đấu](01_game_rules.md)** — Khái niệm tổng quan, điều kiện Thắng/Thua, các khu vực bài, phase machine, công thức phòng thủ/máu, giới hạn thả nhân vật và tương tác Đèn Linh Hồn.
 3. **[Kiến Trúc Mã Nguồn & Hệ Thống](02_architecture.md)** — Kiến trúc C# Unity client (`BattleState`, `BattleScripts`, `CardSelection`, `ClientActions`, `CardSpawning`, `DeskPositionCtrl`, `LampOfSoulCtrl`), Lua 5.1 SS-GO server runtime, đồng bộ trạng thái và pipeline xử lý sự kiện.
 4. **[Danh Mục Thẻ Nhân Vật & Thông Số](03_characters.md)** — Danh mục đầy đủ các thẻ Character phân theo Darkborn, Lightborn, Natureborn và Humans.
 5. **[Hệ Thống Kỹ Năng & Hướng Dẫn Thực Thi](04_abilities.md)** — Chi tiết luồng thực thi, quy tắc kiểm tra vị trí nhắm mục tiêu và logic script của các thẻ Ability.
 6. **[Phân Cấp Sức Mạnh Thẻ Bài Theo Cấp Độ Sao](05_card_star_scaling.md)** — Mô tả sức mạnh và thang tăng trưởng chỉ số/hiệu ứng của thẻ bài theo cấp độ sao (1 đến 9 sao) chia làm 3 nhóm Early game, Mid game và Late game.
+7. **[Chủng Tộc Card](06_card_race.md)** — Bản sắc, tộc nhánh, quy ước phân loại và vòng quan hệ giữa Darkborn, Lightborn, Natureborn và Humans.
 
 ---
 

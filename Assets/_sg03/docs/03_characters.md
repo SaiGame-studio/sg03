@@ -1,6 +1,6 @@
 # 03. Danh Mục Thẻ Nhân Vật Theo Chủng Tộc
 
-Tài liệu này tổng hợp toàn bộ thẻ Character trong **SG03** theo bốn chủng tộc chính thức: **Darkborn**, **Lightborn**, **Natureborn** và **Humans**. Xem [Thế Giới Và Bốn Chủng Tộc](00_world_and_races.md) để biết bối cảnh và quy ước phân loại.
+Tài liệu này tổng hợp toàn bộ thẻ Character trong **SG03** theo bốn chủng tộc chính thức: **Darkborn**, **Lightborn**, **Natureborn** và **Humans**. Xem [Chủng Tộc Card](06_card_race.md) để biết bối cảnh và quy ước phân loại.
 
 > **Thống kê tổng quan thẻ bài trong game:**
 > - **Thẻ Nhân vật (Character):** 21 thẻ

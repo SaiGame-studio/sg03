@@ -2,7 +2,7 @@
 
 ## Danh Mục Kỹ Năng Theo Chủng Tộc
 
-Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability theo bốn chủng tộc chính thức. Xem [Thế Giới Và Bốn Chủng Tộc](00_world_and_races.md) để biết quy ước ánh xạ các tộc nhánh.
+Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability theo bốn chủng tộc chính thức. Xem [Chủng Tộc Card](06_card_race.md) để biết quy ước ánh xạ các tộc nhánh.
 
 ### Darkborn
 
