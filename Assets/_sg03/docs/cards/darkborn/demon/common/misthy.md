@@ -16,3 +16,7 @@
 Misthy là một nữ quỷ sinh ra dưới đáy vực, nơi quanh năm bị sương mù bao phủ. Từ khi chào đời, cô đã có thể nghe thấy những âm thanh vọng lên từ vực sâu và cảm nhận sự chuyển động của mọi sinh vật ẩn trong màn sương.
 
 Cô có khả năng tạo ra sương mù theo ý muốn. Misthy dùng màn sương để che khuất hướng tiếp cận, làm rối loạn đội hình đối phương và mở ra thời cơ cho đồng minh tấn công. Khi trận chiến kéo dài, sương mù của cô lan rộng hơn, biến chiến trường thành lãnh địa nơi chỉ Misthy biết rõ đường đi.
+
+## Kỹ Năng Bị Động
+
+- [Mist Execution](abilities/mist_execution.md) — Cơ chế đang chờ đặc tả.

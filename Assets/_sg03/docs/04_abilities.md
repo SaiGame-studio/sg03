@@ -6,8 +6,8 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 
 > **Thống kê tổng quan thẻ bài trong game:**
 > - **Thẻ Nhân vật [(Character)](03_characters.md):** 21 thẻ
-> - **Thẻ Kỹ năng (Ability):** 23 thẻ
-> - **Tổng số thẻ bài toàn game:** 44 thẻ
+> - **Thẻ Kỹ năng (Ability):** 21 thẻ
+> - **Tổng số thẻ bài toàn game:** 42 thẻ
 
 ### Darkborn
 
@@ -26,6 +26,7 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 8. [Demon Orbs](cards/darkborn/demon/xena/abilities/demon_orbs.md): 2 sao
 9. [Demon Rite](cards/darkborn/demon/xena/abilities/demon_rite.md): 3 sao
 10. [Abyssal Mist](cards/darkborn/demon/common/abilities/abyssal_mist.md): 4 sao
+- [Mist Execution](cards/darkborn/demon/common/abilities/mist_execution.md): bị động
 
 ### Lightborn
 11. [Holy Glow](cards/lightborn/abilities/holy_glow.md): 1 sao
@@ -38,10 +39,10 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 16. [Brute Call](cards/natureborn/goblin/abilities/brute_call.md): 3 sao
 
 ### Humans
-17. [Twin Reaper](cards/human/abilities/twin_reaper.md): bị động
-18. [Scout Strike](cards/human/abilities/scout_strike.md): bị động
-19. [Spinning Slash](cards/human/abilities/spinning_slash.md): 4 sao
-20. [Cross Guard](cards/human/abilities/cross_guard.md): 2 sao
-21. [Eagle Eye](cards/human/abilities/eagle_eye.md): 2 sao
-22. [Titan Fall](cards/human/abilities/titan_fall.md): 5 sao
-23. [Spear Sweep](cards/human/abilities/titan_spear_sweep.md): 4 sao
+- [Twin Reaper](cards/human/abilities/twin_reaper.md): bị động
+- [Scout Strike](cards/human/abilities/scout_strike.md): bị động
+17. [Spinning Slash](cards/human/abilities/spinning_slash.md): 4 sao
+18. [Cross Guard](cards/human/abilities/cross_guard.md): 2 sao
+19. [Eagle Eye](cards/human/abilities/eagle_eye.md): 2 sao
+20. [Titan Fall](cards/human/abilities/titan_fall.md): 5 sao
+21. [Spear Sweep](cards/human/abilities/titan_spear_sweep.md): 4 sao

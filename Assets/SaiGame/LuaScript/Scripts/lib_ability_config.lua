@@ -78,6 +78,11 @@ function get_ability_config(ability_key)
             target_positions = { "own_frontline" },
             requires_target_card = true,
         },
+        abyssal_mist = {
+            handler_group = "darkborn",
+            target_positions = { "own_frontline", "own_backline" },
+            resolves_without_attack = true,
+        },
         animate_dead = {
             handler_group = "advanced",
             target_positions = { "own_frontline", "own_backline", "own_source", "own_void" },
