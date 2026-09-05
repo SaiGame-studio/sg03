@@ -6,17 +6,21 @@
 - **Chủng Tộc Chính**: **Darkborn** (định danh kỹ thuật: `darkborn`)
 - **Tộc Nhánh**: **Demon**
 - **Thẻ Nhân Vật Yêu Cầu**: [Misthy](../misthy.md)
-- **Sự Kiện Kích Hoạt**: `WIP`
-- **Vị Trí Mục Tiêu**: `WIP`
+- **Sự Kiện Kích Hoạt**: `on_attack`
+- **Vị Trí Mục Tiêu**: Hàng sau phe sở hữu
 
 ## Mô Tả Kỹ Năng
 
-Mist Execution là kỹ năng bị động của Misthy. Cơ chế kích hoạt và hiệu quả cụ thể đang chờ được đặc tả.
+Mỗi khi Misthy hạ gục mục tiêu bằng chính đòn tấn công của mình, cô kéo Abyssal Mist từ `the_void` vào hàng sau của phe sở hữu, phủ chiến trường bằng sương mù vực sâu.
 
 ## Điều Kiện Kích Hoạt
 
-- `WIP` — Chưa xác định điều kiện kích hoạt.
+- Misthy phải tấn công một thẻ Character.
+- Mục tiêu phải bị đánh bại trong chính đòn tấn công đó của Misthy.
+- `the_void` của phe sở hữu phải có Abyssal Mist.
+- Hàng sau của phe sở hữu chưa có Abyssal Mist.
+- Hàng sau của phe sở hữu phải còn ít nhất một ô trống.
 
 ## Hiệu Quả
 
-`WIP` — Chưa xác định hiệu quả của passive.
+Mist Execution đưa Abyssal Mist từ `the_void` của phe sở hữu vào một ô trống ở hàng sau phe đó. Nếu không có Abyssal Mist trong `the_void`, hàng sau đã có Abyssal Mist, hoặc hàng sau không còn ô trống, passive không tạo thêm hành động.
