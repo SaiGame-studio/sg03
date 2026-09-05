@@ -41,7 +41,33 @@ end
 --   final_def            → base_stats.def from item_defs (0 if not found)
 --   total_damage_received → 0
 -- No-ops if card has no item_definition_code_name.
-function reset_card_turn_state(item_defs, reset_card)
+local function is_card_on_battlefield(state, inventory_item_id)
+    if state == nil or inventory_item_id == nil or inventory_item_id == "" then return false end
+    for _, line in ipairs({
+        state.alpha_front_line or {}, state.alpha_back_line or {},
+        state.omega_front_line or {}, state.omega_back_line or {},
+    }) do
+        for _, card in ipairs(line) do
+            if card.inventory_item_id == inventory_item_id then return true end
+        end
+    end
+    return false
+end
+
+local function get_active_persistent_bonus(state, bonuses)
+    local total = 0
+    if type(bonuses) ~= "table" then return total end
+    for source_id, bonus in pairs(bonuses) do
+        if is_card_on_battlefield(state, source_id) then
+            total = total + (tonumber(bonus) or 0)
+        else
+            bonuses[source_id] = nil
+        end
+    end
+    return total
+end
+
+function reset_card_turn_state(item_defs, reset_card, state)
     if reset_card == nil then return end
     if reset_card.item_definition_code_name == nil or reset_card.item_definition_code_name == "" then return end
     local base_def = 0
@@ -53,21 +79,25 @@ function reset_card_turn_state(item_defs, reset_card)
             end
         end
     end
-    reset_card.final_def             = base_def
+    reset_card.final_def             = base_def + get_active_persistent_bonus(state, reset_card.persistent_def_bonuses)
     reset_card.total_damage_received = 0
 end
 
 -- Returns an attacker's planned damage. An ability with base_stats.atk_added
 -- borrows the ATK of metadata.char_code_required only when that character is
 -- present in the same side's Front Line.
-function get_attack_damage(state, attacker_def, attacker_line_key)
+function get_attack_damage(state, attacker_def, attacker_line_key, attacker_card)
     if attacker_def == nil then return 0 end
 
     local base_stats = attacker_def.base_stats or {}
     local base_atk = tonumber(base_stats.atk)
         or tonumber(attacker_def.metadata ~= nil and attacker_def.metadata.atk or nil)
         or 0
-    if base_stats.atk_added == nil then return base_atk end
+    local persistent_atk_added = get_active_persistent_bonus(
+        state,
+        attacker_card ~= nil and attacker_card.persistent_atk_bonuses or nil
+    )
+    if base_stats.atk_added == nil then return base_atk + persistent_atk_added end
 
     local required_character_code = attacker_def.metadata ~= nil and attacker_def.metadata.char_code_required
     local added_atk = tonumber(base_stats.atk_added) or 0
@@ -96,7 +126,7 @@ function get_attack_damage(state, attacker_def, attacker_line_key)
             local character_atk = tonumber(character_stats.atk)
                 or tonumber(character_def.metadata.atk)
                 or 0
-            return character_atk + added_atk
+            return character_atk + added_atk + persistent_atk_added
         end
     end
 
@@ -191,7 +221,7 @@ function reset_turn_cards(state, next_active_side)
     for _, line_data in ipairs(lines) do
         if line_data.side == next_active_side then
             for _, reset_card in ipairs(line_data.line) do
-                reset_card_turn_state(state.item_defs, reset_card)
+                reset_card_turn_state(state.item_defs, reset_card, state)
                 if reset_card.skip_next_turn == true then
                     reset_card.trigger = true
                     reset_card.skip_next_turn = nil
