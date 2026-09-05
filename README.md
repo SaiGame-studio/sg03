@@ -1,6 +1,7 @@
 # Sai Game - SG03 (Unity Game Project)
 
 This game project is developed with **Unity** and focuses on card-game mechanics combined with strategic gameplay elements.
+Prototype Playable: https://play.unity.com/en/games/b8c87d36-f027-45d9-af5f-e8d94bae2b07/sg03
 
 ## 📌 How to clone the project
 
@@ -37,6 +38,7 @@ We hope you have an enjoyable programming experience and learn many useful thing
 # Sai Game - SG03 (Dự án Game Unity)
 
 Đây là dự án game được phát triển trên nền tảng **Unity**, tập trung vào cơ chế game thẻ bài (card game) kết hợp các yếu tố chiến thuật.
+Prototype Playable: https://play.unity.com/en/games/b8c87d36-f027-45d9-af5f-e8d94bae2b07/sg03
 
 ## 📌 Hướng dẫn cách clone dự án
 
