@@ -38,4 +38,4 @@ Danh mục bên dưới liệt kê tên và số sao của từng thẻ Ability 
 19. [Cross Guard](cards/human/abilities/cross_guard.md): 2 sao
 20. [Eagle Eye](cards/human/abilities/eagle_eye.md): 2 sao
 21. [Titan Fall](cards/human/abilities/titan_fall.md): 5 sao
-22. [Spear Sweep](cards/human/abilities/titan_spear_sweep.md): 1 sao
+22. [Spear Sweep](cards/human/abilities/titan_spear_sweep.md): 4 sao
