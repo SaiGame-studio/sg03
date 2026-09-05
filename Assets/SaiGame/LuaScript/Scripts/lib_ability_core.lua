@@ -14,8 +14,14 @@
 --      and require that library from every regular script that loads `lib_ability_core`.
 
 
+local DEFAULT_CHARACTER_PASSIVES = {
+    misthy = "mist_execution",
+    azure_blade = "twin_reaper",
+    lyra = "scout_strike",
+}
+
 -- Parses card.metadata.abilities into an array of trimmed, non-empty keys.
--- Falls back to item_def.metadata.abilities when the card instance does not carry abilities.
+-- Falls back to item_def.metadata.abilities or default character passives when the card instance does not carry abilities.
 local function _get_ability_keys(source_card, item_defs)
     if source_card == nil then return {} end
     local raw = source_card.metadata ~= nil and source_card.metadata.abilities or nil
@@ -26,6 +32,9 @@ local function _get_ability_keys(source_card, item_defs)
                 break
             end
         end
+    end
+    if (raw == nil or raw == "") and source_card.item_definition_code_name ~= nil then
+        raw = DEFAULT_CHARACTER_PASSIVES[source_card.item_definition_code_name]
     end
     if raw == nil or raw == "" then return {} end
     local keys = {}
@@ -469,11 +478,14 @@ end
 -- Stops and returns the first error encountered.
 -- Returns: extra_client_actions (table), err (string or nil)
 function trigger_card_ability(state, source_card, trigger_event, event_data)
-    lib_battle_common.dlog("-- [ability] trigger_card_ability ----------------------")
     local keys = _get_ability_keys(source_card, state.item_defs)
+    local card_code = source_card and source_card.item_definition_code_name or "unknown"
+    local card_id = source_card and source_card.inventory_item_id or "unknown"
     if #keys == 0 then
+        lib_battle_common.dlog("-- [ability] trigger_card_ability: card=" .. card_code .. " (id=" .. card_id .. ") event=" .. tostring(trigger_event) .. " (no abilities) ----------------------")
         return {}, nil
     end
+    lib_battle_common.dlog("-- [ability] trigger_card_ability: card=" .. card_code .. " (id=" .. card_id .. ") event=" .. tostring(trigger_event) .. " keys=" .. table.concat(keys, ",") .. " ----------------------")
 
     local all_actions = {}
 
